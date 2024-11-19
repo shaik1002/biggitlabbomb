@@ -41,7 +41,7 @@ class IssuePolicy < IssuablePolicy
     if group_issue?
       subject_container.has_project_with_service_desk_enabled?
     else
-      subject_container.service_desk_enabled?
+      ::Gitlab::ServiceDesk.enabled?(subject_container)
     end
   end
 

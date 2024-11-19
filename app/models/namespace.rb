@@ -745,11 +745,6 @@ class Namespace < ApplicationRecord
     Gitlab::UrlBuilder.build(self, only_path: only_path)
   end
 
-  # there is no service desk feature for group level items
-  def service_desk_alias_address
-    nil
-  end
-
   def deleted?
     !!deleted_at
   end

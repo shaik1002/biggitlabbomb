@@ -61,8 +61,9 @@ module API
       expose(:snippets_enabled, documentation: { type: 'boolean' }) { |project, options| project.feature_available?(:snippets, options[:current_user]) }
       expose(:container_registry_enabled, documentation: { type: 'boolean' }) { |project, options| project.feature_available?(:container_registry, options[:current_user]) }
       expose :service_desk_enabled, documentation: { type: 'boolean' }
-      expose :service_desk_address, documentation: { type: 'string', example: 'address@example.com' }, if: ->(project, options) do
-        Ability.allowed?(options[:current_user], :admin_issue, project)
+      expose :service_desk_address, documentation: { type: 'string', example: 'address@example.com' },
+        if: ->(project, options) { Ability.allowed?(options[:current_user], :admin_issue, project) } do |project|
+        ::ServiceDesk::Emails.new(project).address
       end
 
       expose(:can_create_merge_request_in, documentation: { type: 'boolean' }) do |project, options|

@@ -571,6 +571,12 @@ module Types
       description: 'The CI Job Tokens scope of access.',
       resolver: Resolvers::Ci::JobTokenScopeResolver
 
+    field :ci_job_token_scope_allowlist, Types::Ci::JobTokenScope::AllowlistType,
+      null: true,
+      experiment: { milestone: '17.6' },
+      description: 'List of CI job token scopes where the project is the source.',
+      resolver: Resolvers::Ci::JobTokenScopeAllowlistResolver
+
     field :ci_job_token_auth_logs, Types::Ci::JobTokenAuthLogType.connection_type,
       null: true,
       experiment: { milestone: '17.6' },
@@ -882,7 +888,7 @@ module Types
     def service_desk_address
       return unless Ability.allowed?(current_user, :admin_issue, project)
 
-      object.service_desk_address
+      ::ServiceDesk::Emails.new(object).address
     end
 
     def languages
