@@ -209,12 +209,11 @@ if (tableContentsEl) {
   });
 }
 
-const treeHistoryLinkEl = document.getElementById('js-commit-history-link');
-if (treeHistoryLinkEl) {
-  const { historyLink } = treeHistoryLinkEl.dataset;
+const initTreeHistoryLinkApp = (el) => {
+  const { historyLink } = el.dataset;
   // eslint-disable-next-line no-new
   new Vue({
-    el: treeHistoryLinkEl,
+    el,
     router,
     render(h) {
       const url = generateHistoryUrl(
@@ -228,10 +227,22 @@ if (treeHistoryLinkEl) {
           attrs: {
             href: url.href,
             category: 'tertiary',
+            class: 'gl-ml-4',
           },
         },
         [__('History')],
       );
     },
   });
+};
+
+const treeHistoryLinkEl = document.getElementById('js-commit-history-link');
+const treeHistoryLinkSmEl = document.getElementById('js-commit-history-link-sm');
+
+if (treeHistoryLinkSmEl) {
+  initTreeHistoryLinkApp(treeHistoryLinkSmEl);
+}
+
+if (treeHistoryLinkEl) {
+  initTreeHistoryLinkApp(treeHistoryLinkEl);
 }

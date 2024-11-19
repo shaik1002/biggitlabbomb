@@ -1,0 +1,41 @@
+- commit            = commit.present(current_user: current_user)
+- link              = commit_path(project, commit)
+- toggle_commit_message = _("Toggle commit description")
+- add_page_specific_style 'page_bundles/commit_description'
+
+%li{ class: "commit flex-row js-toggle-container", id: "commit-#{commit.short_id}" }
+  .gl-flex.gl-items-center.gl-justify-between
+    .gl-flex.gl-items-center.gl-gap-3
+      .gl-self-start.gl-block
+        = author_avatar(commit, size: 32, has_tooltip: false, css_class: 'gl-inline-block')
+
+      .committer.gl-text-sm
+        - commit_authored_timeago = time_ago_with_tooltip(commit.authored_date, placement: 'bottom')
+        = commit_authored_timeago.html_safe
+
+      = render Pajamas::ButtonComponent.new(category: :tertiary, variant: :link, icon: 'commit', href: link, button_options: { class: ["commit-row-message js-onboarding-commit-item"] }) do
+        = commit.short_id
+
+    .commit-actions.gl-flex.gl-items-center
+      = render Pajamas::ButtonComponent.new(icon: 'ellipsis_h', button_options: { class: 'button-ellipsis-horizontal text-expander js-toggle-button', data: { toggle: 'tooltip', container: 'body', collapse_title: toggle_commit_message, expand_title: toggle_commit_message }, title: toggle_commit_message, aria: { label: toggle_commit_message }})
+
+      #js-commit-history-link-sm{ data: { history_link: project_commits_path(@project, @ref), event_tracking: 'click_history_control_on_blob_page' } }
+
+  %div{ class: "gl-hidden gl-mt-4 js-toggle-content" }
+    = link_to_markdown_field(commit, :title, link, class: "commit-row-message item-title js-onboarding-commit-item #{'font-italic' if commit.message.empty?}")
+
+    .committer.gl-text-sm
+      - commit_author_link = commit_author_link(commit, avatar: false, size: 24)
+      - commit_authored_timeago = time_ago_with_tooltip(commit.authored_date, placement: 'bottom')
+      - if commit.different_committer? && commit.committer
+        - commit_committer_link = commit_committer_link(commit)
+        - commit_committer_timeago = time_ago_with_tooltip(commit.committed_date, placement: 'bottom')
+        - commit_committer_avatar = commit_committer_avatar(commit.committer, size: 16, has_tooltip: false)
+        - commit_text =  _('%{commit_author_link} authored %{commit_authored_timeago} and %{commit_committer_avatar} %{commit_committer_link} committed %{commit_committer_timeago}') % { commit_author_link: commit_author_link, commit_authored_timeago: commit_authored_timeago, commit_committer_avatar: commit_committer_avatar, commit_committer_link: commit_committer_link, commit_committer_timeago: commit_committer_timeago }
+      - else
+        - commit_text =  _('%{commit_author_link} authored %{commit_authored_timeago}') % { commit_author_link: commit_author_link, commit_authored_timeago: commit_authored_timeago }
+      #{ commit_text.html_safe }
+
+    - if commit.description?
+      %pre{ class: "commit-row-description gl-whitespace-pre-wrap js-toggle-content" }
+        = preserve(markdown_field(commit, :description))

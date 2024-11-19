@@ -120,7 +120,6 @@ RSpec.describe 'projects/commits/_commit.html.haml' do
       }
 
       expect(rendered).not_to have_css('#js-commit-history-link')
-      expect(rendered).not_to have_content('History')
     end
 
     it 'renders the history button when show_history_button is true' do
@@ -134,7 +133,6 @@ RSpec.describe 'projects/commits/_commit.html.haml' do
       }
 
       expect(rendered).to have_css('#js-commit-history-link')
-      expect(rendered).to have_content('History')
     end
 
     it 'does not render the history button when show_history_button is false' do
@@ -146,7 +144,6 @@ RSpec.describe 'projects/commits/_commit.html.haml' do
       }
 
       expect(rendered).not_to have_css('#js-commit-history-link')
-      expect(rendered).not_to have_content('History')
     end
   end
 end

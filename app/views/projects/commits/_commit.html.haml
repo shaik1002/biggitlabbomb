@@ -86,6 +86,4 @@
         = link_to_browse_code(project, commit)
 
       - if show_history_button
-        #js-commit-history-link{ data: { history_link: project_commits_path(@project, @ref) } }
-          = render Pajamas::ButtonComponent.new(category: :tertiary, button_options: {class: 'gl-ml-4'}) do
-            = _('History')
+        #js-commit-history-link{ data: { history_link: project_commits_path(@project, @ref) }, event_tracking: 'click_history_control_on_blob_page' }
