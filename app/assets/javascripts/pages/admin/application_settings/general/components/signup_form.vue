@@ -1,4 +1,5 @@
 <script>
+import { nextTick } from 'vue';
 import {
   GlButton,
   GlFormGroup,
@@ -86,6 +87,7 @@ export default {
         supportedSyntaxLinkUrl: this.supportedSyntaxLinkUrl,
         emailRestrictions: this.emailRestrictions,
         afterSignUpText: this.afterSignUpText,
+        shouldProceedWithAutoApproval: true,
       },
     };
   },
@@ -149,8 +151,8 @@ export default {
       return {
         id: 'signup-settings-modal',
         text: n__(
-          'ApplicationSettings|By making this change, you will automatically approve %d user who is pending approval.',
-          'ApplicationSettings|By making this change, you will automatically approve %d users who are pending approval.',
+          'ApplicationSettings|By making this change, you can automatically approve %d user who is pending approval.',
+          'ApplicationSettings|By making this change, you can automatically approve %d users who are pending approval.',
           pendingUserCount,
         ),
         actionPrimary: {
@@ -161,6 +163,12 @@ export default {
           ),
           attributes: {
             variant: 'confirm',
+          },
+        },
+        actionSecondary: {
+          text: s__('ApplicationSettings|Proceed without auto-approval'),
+          attributes: {
+            variant: 'danger',
           },
         },
         actionCancel: {
@@ -197,6 +205,11 @@ export default {
     },
     submitForm() {
       this.$refs.form.submit();
+    },
+    async submitFormWithoutAutoApproval() {
+      this.form.shouldProceedWithAutoApproval = false;
+      await nextTick();
+      this.submitForm();
     },
     modalHideHandler() {
       this.showModal = false;
@@ -313,6 +326,11 @@ export default {
       <seat-controls-section @form-value-change="setFormValue" />
 
       <gl-form-group :label="$options.i18n.userCapLabel" data-testid="user-cap-group">
+        <input
+          type="hidden"
+          name="application_setting[pending_user_auto_approval]"
+          :value="form.shouldProceedWithAutoApproval"
+        />
         <gl-form-input
           v-model="form.userCap"
           type="text"
@@ -491,8 +509,10 @@ export default {
       :modal-id="approveUsersModal.id"
       :action-cancel="approveUsersModal.actionCancel"
       :action-primary="approveUsersModal.actionPrimary"
+      :action-secondary="approveUsersModal.actionSecondary"
       :title="approveUsersModal.title"
       @primary="submitForm"
+      @secondary="submitFormWithoutAutoApproval"
       @hide="modalHideHandler"
     >
       {{ approveUsersModal.text }}

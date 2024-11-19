@@ -6847,8 +6847,8 @@ msgstr ""
 msgid "ApplicationSettings|Approve users who are pending approval?"
 msgstr ""
 
-msgid "ApplicationSettings|By making this change, you will automatically approve %d user who is pending approval."
-msgid_plural "ApplicationSettings|By making this change, you will automatically approve %d users who are pending approval."
+msgid "ApplicationSettings|By making this change, you can automatically approve %d user who is pending approval."
+msgid_plural "ApplicationSettings|By making this change, you can automatically approve %d users who are pending approval."
 msgstr[0] ""
 msgstr[1] ""
 
@@ -6898,6 +6898,9 @@ msgid "ApplicationSettings|Off"
 msgstr ""
 
 msgid "ApplicationSettings|Only users with e-mail addresses that match these domain(s) can sign up. Wildcards allowed. Enter multiple entries on separate lines. Example: domain.com, *.domain.com"
+msgstr ""
+
+msgid "ApplicationSettings|Proceed without auto-approval"
 msgstr ""
 
 msgid "ApplicationSettings|Require admin approval for new sign-ups"
@@ -7835,9 +7838,6 @@ msgid "AuditLogs|Project Events"
 msgstr ""
 
 msgid "AuditLogs|Target"
-msgstr ""
-
-msgid "AuditLogs|This month"
 msgstr ""
 
 msgid "AuditLogs|User Events"
@@ -25755,6 +25755,9 @@ msgid "GlobalSearch|What are you searching for?"
 msgstr ""
 
 msgid "GlobalSearch|Wiki"
+msgstr ""
+
+msgid "GlobalSearch|Work items"
 msgstr ""
 
 msgid "GlobalSearch|Your work"
@@ -62637,6 +62640,9 @@ msgid "Work in progress limit: %{wipLimit}"
 msgstr ""
 
 msgid "Work item not supported"
+msgstr ""
+
+msgid "Work items"
 msgstr ""
 
 msgid "WorkItems|An error occurred while fetching children"
