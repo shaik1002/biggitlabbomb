@@ -1,0 +1,9 @@
+---
+name: sync_code_owner_approval_after_reopen_update
+feature_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/463017
+introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/169975
+rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/502917
+milestone: '17.7'
+group: group::source code
+type: gitlab_com_derisk
+default_enabled: false
