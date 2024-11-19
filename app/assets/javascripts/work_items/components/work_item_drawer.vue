@@ -1,5 +1,6 @@
 <script>
 import { GlLink, GlDrawer, GlButton, GlTooltipDirective, GlOutsideDirective } from '@gitlab/ui';
+import { escapeRegExp } from 'lodash';
 import { __ } from '~/locale';
 import deleteWorkItemMutation from '~/work_items/graphql/delete_work_item.mutation.graphql';
 import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
@@ -7,7 +8,7 @@ import { TYPE_EPIC, TYPE_ISSUE } from '~/issues/constants';
 import { DETAIL_VIEW_QUERY_PARAM_NAME } from '~/work_items/constants';
 import * as Sentry from '~/sentry/sentry_browser_wrapper';
 import { visitUrl, setUrlParams, updateHistory, removeParams } from '~/lib/utils/url_utility';
-import { makeDrawerItemFullPath, makeDrawerUrlParam, canRouterNav } from '../utils';
+import { makeDrawerItemFullPath, makeDrawerUrlParam } from '../utils';
 
 export default {
   name: 'WorkItemDrawer',
@@ -117,16 +118,12 @@ export default {
         return;
       }
       e.preventDefault();
-      const shouldRouterNav =
-        !this.preventRouterNav &&
-        canRouterNav({
-          fullPath: this.fullPath,
-          webUrl: workItem.webUrl,
-          isGroup: this.isGroup,
-          issueAsWorkItem: this.issueAsWorkItem,
-        });
+      const escapedFullPath = escapeRegExp(this.fullPath);
+      // eslint-disable-next-line no-useless-escape
+      const regex = new RegExp(`groups\/${escapedFullPath}\/-\/(work_items|epics)\/\\d+`);
+      const isWorkItemPath = regex.test(workItem.webUrl);
 
-      if (shouldRouterNav) {
+      if (this.$router && (isWorkItemPath || this.issueAsWorkItem)) {
         this.$router.push({
           name: 'workItem',
           params: {

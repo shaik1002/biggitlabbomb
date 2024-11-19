@@ -384,7 +384,7 @@ RSpec.describe TodoService, feature_category: :notifications do
       end
 
       it 'calls GraphQL.issuable_todo_updated' do
-        expect(GraphqlTriggers).to receive(:issuable_todo_updated).with(issue)
+        expect(GraphqlTriggers).to receive(:issuable_todo_updated).with(issue, john_doe)
 
         service.resolve_todos_for_target(issue, john_doe)
       end
@@ -1490,7 +1490,7 @@ RSpec.describe TodoService, feature_category: :notifications do
     end
 
     it 'calls GraphQL.issuable_todo_updated' do
-      expect(GraphqlTriggers).to receive(:issuable_todo_updated).with(todo.target)
+      expect(GraphqlTriggers).to receive(:issuable_todo_updated).with(todo.target, john_doe)
 
       service.resolve_todo(todo, john_doe)
     end

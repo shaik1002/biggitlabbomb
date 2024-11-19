@@ -103,6 +103,7 @@ export default {
 
             if (todo.state === TODO_PENDING_STATE) {
               todos.push({
+                // eslint-disable-next-line @gitlab/require-i18n-strings
                 __typename: 'Todo',
                 id: todo.id,
               });

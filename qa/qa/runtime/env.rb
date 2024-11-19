@@ -9,7 +9,6 @@ module QA
     module Env
       extend self
 
-      # TODO: remove all mutation from generic environment variable accessor module
       attr_writer :personal_access_token, :admin_personal_access_token, :gitlab_url
       attr_accessor :dry_run
 
@@ -92,10 +91,6 @@ module QA
         ENV['CI_PROJECT_PATH']
       end
 
-      def ci_project_dir
-        ENV.fetch('CI_PROJECT_DIR')
-      end
-
       def coverband_enabled?
         enabled?(ENV['COVERBAND_ENABLED'], default: false)
       end
@@ -145,16 +140,12 @@ module QA
         enabled?(ENV['ACCEPT_INSECURE_CERTS'])
       end
 
-      def running_on_live_env?
-        running_on_dot_com? || running_on_release?
-      end
-
       def running_on_dot_com?
-        gitlab_host.include?('.com')
+        URI.parse(Runtime::Scenario.gitlab_address).host.include?('.com')
       end
 
       def running_on_release?
-        gitlab_host.include?('release.gitlab.net')
+        URI.parse(Runtime::Scenario.gitlab_address).host.include?('release.gitlab.net')
       end
 
       def running_on_dev?
@@ -763,22 +754,7 @@ module QA
         enabled?(ENV["QA_RUN_IN_PARALLEL"], default: false)
       end
 
-      # Environment has no support for admin operations
-      #
-      # @return [Boolean]
-      def no_admin_environment?
-        enabled?(ENV["QA_NO_ADMIN_ENV"], default: false) || gitlab_host == "gitlab.com"
-      end
-
       private
-
-      # Gitlab host tests are running against
-      #
-      # @return [String]
-      def gitlab_host
-        # gitlab address should be immutable so it's ok to memoize as global
-        @gitlab_host ||= URI.parse(Runtime::Scenario.gitlab_address).host
-      end
 
       def remote_grid_credentials
         if remote_grid_username

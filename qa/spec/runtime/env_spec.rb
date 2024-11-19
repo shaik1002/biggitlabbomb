@@ -93,7 +93,6 @@ RSpec.describe QA::Runtime::Env do
 
     with_them do
       before do
-        described_class.instance_variable_set(:@gitlab_host, nil)
         QA::Runtime::Scenario.define(:gitlab_address, url)
       end
 
@@ -113,7 +112,6 @@ RSpec.describe QA::Runtime::Env do
 
     with_them do
       before do
-        described_class.instance_variable_set(:@gitlab_host, nil)
         QA::Runtime::Scenario.define(:gitlab_address, url)
       end
 

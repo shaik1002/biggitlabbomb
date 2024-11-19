@@ -619,15 +619,13 @@ RSpec.describe 'Git HTTP requests', feature_category: :source_code_management do
               end
 
               context "when an oauth token is provided" do
-                let_it_be(:organization) { create(:organization) }
-
                 context "when oauth token has ai_workflows scope" do
                   let(:path) { "#{project.full_path}.git" }
                   let(:env) { { user: 'oauth2', password: @token.token } }
 
                   before do
                     application = Doorkeeper::Application.create!(name: "MyApp", redirect_uri: "https://app.com", owner: user)
-                    @token = Doorkeeper::AccessToken.create!(application_id: application.id, resource_owner_id: user.id, scopes: "ai_workflows", organization_id: organization.id)
+                    @token = Doorkeeper::AccessToken.create!(application_id: application.id, resource_owner_id: user.id, scopes: "ai_workflows")
                   end
 
                   it_behaves_like 'pulls are allowed'
@@ -640,7 +638,7 @@ RSpec.describe 'Git HTTP requests', feature_category: :source_code_management do
 
                   before do
                     application = Doorkeeper::Application.create!(name: "MyApp", redirect_uri: "https://app.com", owner: user)
-                    @token = Doorkeeper::AccessToken.create!(application_id: application.id, resource_owner_id: user.id, scopes: "api", organization_id: organization.id)
+                    @token = Doorkeeper::AccessToken.create!(application_id: application.id, resource_owner_id: user.id, scopes: "api")
                   end
 
                   it_behaves_like 'pulls are allowed'
@@ -653,7 +651,7 @@ RSpec.describe 'Git HTTP requests', feature_category: :source_code_management do
 
                   before do
                     application = Doorkeeper::Application.create!(name: "MyApp", redirect_uri: "https://app.com", owner: user)
-                    @token = Doorkeeper::AccessToken.create!(application_id: application.id, resource_owner_id: user.id, scopes: "write_repository", organization_id: organization.id)
+                    @token = Doorkeeper::AccessToken.create!(application_id: application.id, resource_owner_id: user.id, scopes: "write_repository")
                   end
 
                   it_behaves_like 'pulls are allowed'

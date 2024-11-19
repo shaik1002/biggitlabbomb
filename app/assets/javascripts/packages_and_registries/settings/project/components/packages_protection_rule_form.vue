@@ -81,11 +81,7 @@ export default {
         packageTypeOptions.push({ value: 'PYPI', text: s__('PackageRegistry|PyPI') });
       }
 
-      if (this.glFeatures.packagesProtectedPackagesConan) {
-        packageTypeOptions.push({ value: 'CONAN', text: s__('PackageRegistry|Conan') });
-      }
-
-      return packageTypeOptions.sort((a, b) => a.text.localeCompare(b.text));
+      return packageTypeOptions;
     },
     minimumAccessLevelForPushOptions() {
       return [
@@ -203,7 +199,6 @@ export default {
         type="submit"
         :disabled="isSubmitButtonDisabled"
         :loading="showLoadingIcon"
-        data-testid="add-rule-btn"
         >{{ s__('PackageRegistry|Add rule') }}</gl-button
       >
       <gl-button class="gl-ml-3" type="reset">{{ __('Cancel') }}</gl-button>

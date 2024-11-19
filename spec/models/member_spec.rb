@@ -297,6 +297,7 @@ RSpec.describe Member, feature_category: :groups_and_projects do
       describe '.for_self_and_descendants' do
         let(:expected_members) do
           [
+            project_member,
             subgroup_member,
             subgroup_project_member
           ]

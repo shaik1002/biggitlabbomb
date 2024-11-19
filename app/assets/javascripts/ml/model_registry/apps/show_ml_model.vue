@@ -263,7 +263,6 @@ export default {
             <actions-dropdown>
               <delete-model-disclosure-dropdown-item
                 v-if="canWriteModelRegistry"
-                :model="model"
                 @confirm-deletion="deleteModel"
               />
             </actions-dropdown>

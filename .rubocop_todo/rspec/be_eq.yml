@@ -1,6 +1,7 @@
 ---
 # Cop supports --autocorrect.
 RSpec/BeEq:
+  Details: grace period
   Exclude:
     - 'ee/spec/bin/custom_ability_spec.rb'
     - 'ee/spec/controllers/admin/application_settings_controller_spec.rb'
@@ -91,6 +92,7 @@ RSpec/BeEq:
     - 'ee/spec/lib/arkose/verify_response_spec.rb'
     - 'ee/spec/lib/bulk_imports/groups/pipelines/epics_pipeline_spec.rb'
     - 'ee/spec/lib/bulk_imports/groups/pipelines/iterations_cadences_pipeline_spec.rb'
+    - 'ee/spec/lib/code_suggestions/completions_model_details_spec.rb'
     - 'ee/spec/lib/code_suggestions/tasks/base_spec.rb'
     - 'ee/spec/lib/code_suggestions/tasks/code_completion_spec.rb'
     - 'ee/spec/lib/code_suggestions/tasks/code_generation_spec.rb'
@@ -310,6 +312,7 @@ RSpec/BeEq:
     - 'ee/spec/models/vulnerabilities/finding_signature_spec.rb'
     - 'ee/spec/models/vulnerabilities/finding_spec.rb'
     - 'ee/spec/models/vulnerabilities/read_spec.rb'
+    - 'ee/spec/models/work_items/widgets/start_and_due_date_spec.rb'
     - 'ee/spec/policies/ee/policy_actor_spec.rb'
     - 'ee/spec/policies/group_policy_spec.rb'
     - 'ee/spec/policies/project_policy_spec.rb'
@@ -501,6 +504,7 @@ RSpec/BeEq:
     - 'ee/spec/services/projects/update_service_spec.rb'
     - 'ee/spec/services/quick_actions/interpret_service_spec.rb'
     - 'ee/spec/services/search/elastic/cluster_reindexing_service_spec.rb'
+    - 'ee/spec/services/search/group_service_spec.rb'
     - 'ee/spec/services/search/project_service_spec.rb'
     - 'ee/spec/services/search/rake_task_executor_service_spec.rb'
     - 'ee/spec/services/search/zoekt/indexing_task_service_spec.rb'
@@ -1079,6 +1083,7 @@ RSpec/BeEq:
     - 'spec/models/application_setting_spec.rb'
     - 'spec/models/attr_encrypted_patches_spec.rb'
     - 'spec/models/audit_events/group_audit_event_spec.rb'
+    - 'spec/models/audit_events/project_audit_event_spec.rb'
     - 'spec/models/authentication_event_spec.rb'
     - 'spec/models/batched_git_ref_updates/deletion_spec.rb'
     - 'spec/models/blob_spec.rb'
@@ -1221,6 +1226,7 @@ RSpec/BeEq:
     - 'spec/models/work_items/widgets/assignees_spec.rb'
     - 'spec/models/work_items/widgets/hierarchy_spec.rb'
     - 'spec/models/work_items/widgets/notifications_spec.rb'
+    - 'spec/models/work_items/widgets/start_and_due_date_spec.rb'
     - 'spec/presenters/blob_presenter_spec.rb'
     - 'spec/presenters/blobs/unfold_presenter_spec.rb'
     - 'spec/presenters/commit_presenter_spec.rb'

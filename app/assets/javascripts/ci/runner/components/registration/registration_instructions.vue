@@ -229,9 +229,7 @@ export default {
           "
         >
           <template #link="{ content }">
-            <gl-link data-testid="how-to-install-btn" @click="onToggleDrawer()">{{
-              content
-            }}</gl-link>
+            <gl-link @click="onToggleDrawer()">{{ content }}</gl-link>
           </template>
         </gl-sprintf>
       </p>
@@ -249,7 +247,7 @@ export default {
         <template v-else>
           <cli-command :prompt="commandPrompt" :command="registerCommand" />
           <p>
-            <gl-icon name="information-o" variant="info" />
+            <gl-icon name="information-o" class="!gl-text-blue-600" />
             <gl-sprintf :message="tokenMessage">
               <template #token>
                 <code data-testid="runner-token">{{ token }}</code>

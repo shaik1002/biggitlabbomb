@@ -5,7 +5,7 @@ import {
   GlDisclosureDropdownItem,
   GlModalDirective,
 } from '@gitlab/ui';
-import { __, s__, sprintf } from '~/locale';
+import { __, s__ } from '~/locale';
 
 export default {
   components: {
@@ -16,17 +16,11 @@ export default {
     GlTooltip: GlTooltipDirective,
     GlModalDirective,
   },
-  props: {
-    model: {
-      type: Object,
-      required: true,
-    },
-  },
   data() {
     return {
       isDeleteModalVisible: false,
       modal: {
-        id: 'ml-models-delete-modal',
+        id: 'ml-experiments-delete-modal',
         deleteConfirmation: this.deleteConfirmationText,
         actionPrimary: {
           text: this.$options.i18n.actionPrimaryText,
@@ -38,26 +32,14 @@ export default {
       },
     };
   },
-  computed: {
-    modelName() {
-      return this.model.name;
-    },
-    modalId() {
-      return `ml-models-delete-modal-${this.model.id}`;
-    },
-    modalTitle() {
-      return sprintf(s__('MlModelRegistry|Delete model %{modelName}'), {
-        modelName: this.modelName,
-      });
-    },
-  },
   methods: {
     confirmDelete() {
-      this.$emit('confirm-deletion', this.model.id);
+      this.$emit('confirm-deletion');
     },
   },
   i18n: {
     actionPrimaryText: s__('MlModelRegistry|Delete model'),
+    modalTitle: s__('MlModelRegistry|Delete model'),
     deleteConfirmationText: s__(
       'MlExperimentTracking|Are you sure you would like to delete this model?',
     ),
@@ -70,7 +52,7 @@ export default {
 
 <template>
   <gl-disclosure-dropdown-item
-    v-gl-modal-directive="modalId"
+    v-gl-modal-directive="modal.id"
     :aria-label="$options.i18n.actionPrimaryText"
     variant="danger"
   >
@@ -80,8 +62,8 @@ export default {
       </span>
 
       <gl-modal
-        :modal-id="modalId"
-        :title="modalTitle"
+        :modal-id="modal.id"
+        :title="$options.i18n.modalTitle"
         :action-primary="modal.actionPrimary"
         :action-cancel="modal.actionCancel"
         @primary="confirmDelete"

@@ -1,5 +1,5 @@
 ---
-stage: Software Supply Chain Security
+stage: Govern
 group: Authorization
 info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments"
 ---
@@ -22,12 +22,6 @@ to a base role to create a custom role.
 Some permissions require having other permissions enabled first. For example, administration of vulnerabilities (`admin_vulnerability`) can only be enabled if reading vulnerabilities (`read_vulnerability`) is also enabled.
 
 These requirements are documented in the `Required permission` column in the following table.
-
-## Admin
-
-| Name | Required permission | Description | Introduced in | Feature flag | Enabled in |
-|:-----|:------------|:------------------|:---------|:--------------|:---------|
-| [`read_admin_dashboard`](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/171581) |  | Read-only access to admin dashboard | GitLab [17.6](https://gitlab.com/gitlab-org/gitlab/-/issues/501549) |  |  |
 
 ## Code review workflow
 

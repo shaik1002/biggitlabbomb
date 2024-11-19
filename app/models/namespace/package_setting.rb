@@ -39,18 +39,24 @@ class Namespace::PackageSetting < ApplicationRecord
       raise PackageSettingNotImplemented unless PACKAGES_WITH_SETTINGS.include?(package.package_type)
 
       duplicates_allowed = package.package_settings["#{package.package_type}_duplicates_allowed"]
+      regex = ::Gitlab::UntrustedRegexp.new("\\A#{package.package_settings["#{package.package_type}_duplicate_exception_regex"]}\\z")
 
-      regex = ::Gitlab::UntrustedRegexp.new(
-        "\\A#{package.package_settings["#{package.package_type}_duplicate_exception_regex"]}\\z"
-      )
+      duplicates_allowed || regex.match?(package.name) || regex.match?(package.version)
+    end
 
-      if Feature.enabled?(:packages_allow_duplicate_exceptions, package.project.group)
-        regex_match = regex.match?(package.name) || regex.match?(package.version)
+    def duplicates_allowed_for_package?(package)
+      return true unless package
+      raise PackageSettingNotImplemented unless PACKAGES_WITH_SETTINGS.include?(package.package_type)
 
-        duplicates_allowed ? !regex_match : regex_match
-      else
-        duplicates_allowed || regex.match?(package.name) || regex.match?(package.version)
-      end
+      package.package_settings["#{package.package_type}_duplicates_allowed"]
+    end
+
+    def matches_duplicate_exception?(package)
+      return true unless package
+
+      regex = ::Gitlab::UntrustedRegexp.new("\\A#{package.package_settings["#{package.package_type}_duplicate_exception_regex"]}\\z")
+
+      regex.match?(package.name) || regex.match?(package.version)
     end
   end
 end

@@ -6,11 +6,14 @@ RSpec.describe WorkItems::DataSync::MoveService, feature_category: :team_plannin
   let_it_be(:group) { create(:group) }
   let_it_be(:project) { create(:project) }
   let_it_be(:target_project) { create(:project, group: group) }
-  let_it_be_with_reload(:original_work_item) { create(:work_item, :opened, project: project) }
+  let_it_be_with_reload(:issue_work_item) { create(:work_item, :opened, project: project) }
+  let_it_be(:task_work_item) { create(:work_item, :task, project: project) }
   let_it_be(:source_project_member) { create(:user, reporter_of: project) }
   let_it_be(:target_project_member) { create(:user, reporter_of: target_project) }
   let_it_be(:projects_member) { create(:user, reporter_of: [project, target_project]) }
-  let_it_be_with_reload(:target_namespace) { target_project.project_namespace }
+
+  let(:original_work_item) { issue_work_item }
+  let(:target_namespace) { target_project.project_namespace.reload }
 
   let(:service) do
     described_class.new(
@@ -58,7 +61,7 @@ RSpec.describe WorkItems::DataSync::MoveService, feature_category: :team_plannin
     let(:current_user) { projects_member }
 
     context 'when moving project level work item to a group' do
-      let_it_be_with_reload(:target_namespace) { group }
+      let(:target_namespace) { group }
 
       it 'does not raise error' do
         expect { service.execute }.not_to raise_error
@@ -96,7 +99,7 @@ RSpec.describe WorkItems::DataSync::MoveService, feature_category: :team_plannin
     end
 
     context 'when moving unsupported work item type' do
-      let_it_be_with_reload(:original_work_item) { create(:work_item, :task, project: project) }
+      let(:original_work_item) { task_work_item }
 
       it 'does not raise error' do
         expect { service.execute }.not_to raise_error
@@ -167,7 +170,12 @@ RSpec.describe WorkItems::DataSync::MoveService, feature_category: :team_plannin
       end
 
       it_behaves_like 'cloneable and moveable work item'
-      it_behaves_like 'cloneable and moveable widget data'
+
+      context 'with specific widgets' do
+        let!(:assignees) { [source_project_member, target_project_member, projects_member] }
+
+        it_behaves_like 'cloneable and moveable widget data'
+      end
     end
   end
 end

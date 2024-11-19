@@ -1,4 +1,0 @@
-fragment SuperSideBarCount on NamespaceSidebar {
-  openIssuesCount
-  openMergeRequestsCount
-}

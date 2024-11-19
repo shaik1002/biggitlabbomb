@@ -110,7 +110,6 @@ export default {
         data-testid="user-actions-dropdown-toggle"
         :data-qa-username="user.username"
         no-caret
-        :auto-close="false"
       >
         <template v-for="action in dropdownSafeActions">
           <component

@@ -4,7 +4,6 @@ module BulkImports
   class RelationBatchExportWorker
     include ApplicationWorker
     include Gitlab::Utils::StrongMemoize
-    include Sidekiq::InterruptionsExhausted
 
     PERFORM_DELAY = 1.minute
 
@@ -15,18 +14,6 @@ module BulkImports
     worker_resource_boundary :memory
 
     sidekiq_retries_exhausted do |job, exception|
-      perform_failure(job, exception)
-    end
-
-    sidekiq_interruptions_exhausted do |job|
-      perform_failure(job,
-        Import::Exceptions::SidekiqExhaustedInterruptionsError.new(
-          'Export process reached the maximum number of interruptions'
-        )
-      )
-    end
-
-    def self.perform_failure(job, exception)
       batch = BulkImports::ExportBatch.find(job['args'][1])
       portable = batch.export.portable
 
@@ -39,7 +26,7 @@ module BulkImports
       @user = User.find(user_id)
       @batch = BulkImports::ExportBatch.find(batch_id)
 
-      return re_enqueue_job(@user, @batch) if !@batch.started? && max_exports_already_running?
+      return re_enqueue_job(@user, @batch) if max_exports_already_running?
 
       log_extra_metadata_on_done(:relation, @batch.export.relation)
       log_extra_metadata_on_done(:batch_number, @batch.batch_number)

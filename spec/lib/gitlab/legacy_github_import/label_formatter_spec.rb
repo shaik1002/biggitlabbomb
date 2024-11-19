@@ -30,7 +30,12 @@ RSpec.describe Gitlab::LegacyGithubImport::LabelFormatter do
   end
 
   describe '#create!', :aggregate_failures, :clean_gitlab_redis_shared_state do
-    let(:store) { project.placeholder_reference_store }
+    let(:store) do
+      Import::PlaceholderReferences::Store.new(
+        import_source: ::Import::SOURCE_GITHUB,
+        import_uid: project.import_state.id
+      )
+    end
 
     it 'creates a new label when label does not exist' do
       expect { label.create! }.to change(Label, :count).by(1)

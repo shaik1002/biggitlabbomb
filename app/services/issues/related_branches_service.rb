@@ -16,8 +16,7 @@ module Issues
     def branch_data(branch)
       {
         name: branch[:name],
-        pipeline_status: pipeline_status(branch),
-        compare_path: branch_path(branch)
+        pipeline_status: pipeline_status(branch)
       }
     end
 
@@ -45,10 +44,6 @@ module Issues
           results << { name: ref.name.delete_prefix(Gitlab::Git::BRANCH_REF_PREFIX), target: ref.target }
         end
       end
-    end
-
-    def branch_path(branch)
-      Gitlab::Routing.url_helpers.project_compare_path(project, from: project.default_branch, to: branch[:name])
     end
   end
 end

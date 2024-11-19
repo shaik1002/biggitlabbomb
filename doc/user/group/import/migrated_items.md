@@ -65,14 +65,10 @@ Group items that are migrated to the destination GitLab instance include:
 
 ### Excluded items
 
-Some group items are excluded from migration because they:
+Some group items are excluded from migration because they either:
 
-- Might contain sensitive information:
-  - CI/CD variables
-  - Deploy tokens
-  - Webhooks
-- Are not supported:
-  - Push rules
+- May contain sensitive information: CI/CD variables, webhooks, and deploy tokens.
+- Are not supported: push rules.
 
 ## Migrated project items
 
@@ -199,26 +195,22 @@ Setting-related project items that are migrated to the destination GitLab instan
 
 ### Excluded items
 
-Some project items are excluded from migration because they:
+Some project items are excluded from migration because they either:
 
-- Might contain sensitive information:
+- May contain sensitive information:
   - CI/CD variables
-  - CI/CD job logs
-  - Container registry images
   - Deploy keys
   - Deploy tokens
-  - Encrypted tokens
-  - Job artifacts
   - Pipeline schedule variables
   - Pipeline triggers
   - Webhooks
 - Are not supported:
   - Agents
   - Approval rules
-  - Container registry
+  - Container Registry
   - Environments
   - Feature flags
-  - Infrastructure registry
+  - Infrastructure Registry
   - Package registry
   - Pages domains
   - Remote mirrors

@@ -617,7 +617,7 @@ class Project < ApplicationRecord
 
   validates :project_feature, presence: true
   validates :namespace, presence: true
-  validates :organization, presence: true
+  validates :organization, presence: true, if: :require_organization?
   validates :project_namespace, presence: true, on: :create, if: -> { self.namespace }
   validates :project_namespace, presence: true, on: :update, if: -> { self.project_namespace_id_changed?(to: nil) }
   validates :name, uniqueness: { scope: :namespace_id }
@@ -631,7 +631,7 @@ class Project < ApplicationRecord
   validate :visibility_level_allowed_as_fork, if: :should_validate_visibility_level?
   validate :validate_pages_https_only, if: -> { changes.has_key?(:pages_https_only) }
   validate :changing_shared_runners_enabled_is_allowed
-  validate :parent_organization_match
+  validate :parent_organization_match, if: :require_organization?
   validates :repository_storage, presence: true, inclusion: { in: ->(_) { Gitlab.config.repositories.storages.keys } }
   validates :variables, nested_attributes_duplicates: { scope: :environment_scope }
   validates :bfg_object_map, file_size: { maximum: :max_attachment_size }
@@ -2140,7 +2140,7 @@ class Project < ApplicationRecord
 
   override :after_repository_change_head
   def after_repository_change_head
-    ProjectCacheWorker.perform_async(self.id, [], %w[commit_count])
+    ProjectCacheWorker.perform_async(self.id, [], [:commit_count])
 
     super
   end
@@ -2361,7 +2361,7 @@ class Project < ApplicationRecord
     wiki.repository.expire_content_cache
 
     DetectRepositoryLanguagesWorker.perform_async(id)
-    ProjectCacheWorker.perform_async(self.id, [], %w[repository_size wiki_size])
+    ProjectCacheWorker.perform_async(self.id, [], [:repository_size, :wiki_size])
     AuthorizedProjectUpdate::ProjectRecalculateWorker.perform_async(id)
 
     enqueue_record_project_target_platforms
@@ -2573,7 +2573,7 @@ class Project < ApplicationRecord
       break unless pages_enabled?
 
       variables.append(key: 'CI_PAGES_DOMAIN', value: Gitlab.config.pages.host)
-      variables.append(key: 'CI_PAGES_URL', value: pages_url)
+      variables.append(key: 'CI_PAGES_URL', value: Gitlab::Pages::UrlBuilder.new(self).pages_url(with_unique_domain: true))
     end
   end
 
@@ -3415,20 +3415,13 @@ class Project < ApplicationRecord
     refresh_epoch_cache(lfs_file_locks_changed_epoch_cache_key)
   end
 
-  def placeholder_reference_store
-    return unless import_state
-
-    ::Import::PlaceholderReferences::Store.new(
-      import_source: import_type,
-      import_uid: import_state.id
-    )
-  end
-
-  def pages_url
-    Gitlab::Pages::UrlBuilder.new(self).pages_url
-  end
-
   private
+
+  def require_organization?
+    return false unless Feature.enabled?(:require_organization_on_project, Feature.current_request)
+
+    Gitlab::SafeRequestStore.fetch(:require_organization_on_project) { true } # rubocop:disable Style/RedundantFetchBlock -- This fetch has a different interface
+  end
 
   def with_redis(&block)
     Gitlab::Redis::Cache.with(&block)

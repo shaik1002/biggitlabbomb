@@ -1,5 +1,5 @@
 ---
-stage: Security Risk Management
+stage: Govern
 group: Security Policies
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
@@ -59,7 +59,6 @@ Note the following:
 - Pipeline execution policies remain in effect even if the project lacks a CI/CD configuration file.
 - The order of the policies matters for the applied suffix.
 - If any policy applied to a given project has `suffix: never`, the pipeline fails if another job with the same name is already present in the pipeline.
-- Pipeline execution policies are enforced on all branches and pipeline sources. You can use [workflow rules](../../../ci/yaml/workflow.md) to control when pipeline execution policies are enforced.
 
 ### Job naming best practice
 
@@ -163,11 +162,6 @@ When using this strategy, a project CI/CD configuration cannot override any beha
 For projects without a `.gitlab-ci.yml` file, this strategy will create the `.gitlab-ci.yml` file
 implicitly. That is, a pipeline containing only the jobs defined in the pipeline execution policy is
 executed.
-
-NOTE:
-When a pipeline execution policy uses workflow rules that prevent policy jobs from running, the only jobs that
-run are the project's CI/CD jobs. If the project uses workflow rules that prevent project CI/CD jobs from running,
-the only jobs that run are the pipeline execution policy jobs.
 
 ### `override_project_ci`
 
@@ -298,7 +292,7 @@ include:
   - project: $CI_PROJECT_PATH
     ref: $CI_COMMIT_SHA
     file: $CI_CONFIG_PATH
-  - template: Jobs/Secret-Detection.gitlab-ci.yml
+  - template: Security/Secret-Detection.gitlab-ci.yml
 ```
 
 In the project's `.gitlab-ci.yml`, you can define `before_script` for the scanner:

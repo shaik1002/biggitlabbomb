@@ -4,7 +4,6 @@ module BulkImports
   class RelationExportWorker
     include ApplicationWorker
     include ExceptionBacktrace
-    include Sidekiq::InterruptionsExhausted
 
     idempotent!
     deduplicate :until_executed
@@ -15,23 +14,10 @@ module BulkImports
     worker_resource_boundary :memory
 
     sidekiq_retries_exhausted do |job, exception|
-      perform_failure(job, exception)
-    end
-
-    sidekiq_interruptions_exhausted do |job|
-      perform_failure(job,
-        Import::Exceptions::SidekiqExhaustedInterruptionsError.new(
-          "Export process reached the maximum number of interruptions"
-        )
-      )
-    end
-
-    def self.perform_failure(job, exception)
-      user_id, portable_id, portable_type, relation, batched = job['args']
+      _user_id, portable_id, portable_type, relation, batched = job['args']
       portable = portable(portable_id, portable_type)
-      user = User.find(user_id)
 
-      export = portable.bulk_import_exports.for_user_and_relation(user, relation)
+      export = portable.bulk_import_exports.find_by_relation(relation)
 
       Gitlab::ErrorTracking.track_exception(exception, portable_id: portable_id, portable_type: portable.class.name)
 

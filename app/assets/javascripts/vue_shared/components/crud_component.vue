@@ -48,11 +48,6 @@ export default {
       required: false,
       default: false,
     },
-    collapsed: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
     isLoading: {
       type: Boolean,
       required: false,
@@ -86,10 +81,9 @@ export default {
   },
   data() {
     return {
-      isCollapsed:
-        this.collapsed ||
-        (this.persistCollapsedState &&
-          localStorage.getItem(this.getLocalStorageKeyName()) === 'true'),
+      collapsed:
+        this.persistCollapsedState &&
+        localStorage.getItem(this.getLocalStorageKeyName()) === 'true',
       isFormVisible: false,
     };
   },
@@ -97,16 +91,16 @@ export default {
     isContentVisible() {
       const hasContent =
         this.$scopedSlots.default || this.$scopedSlots.empty || this.$scopedSlots.pagination;
-      return !(hasContent && this.isCollapsible && this.isCollapsed);
+      return !(hasContent && this.isCollapsible && this.collapsed);
     },
     toggleIcon() {
-      return this.isCollapsed ? 'chevron-lg-down' : 'chevron-lg-up';
+      return this.collapsed ? 'chevron-lg-down' : 'chevron-lg-up';
     },
     toggleLabel() {
-      return this.isCollapsed ? __('Expand') : __('Collapse');
+      return this.collapsed ? __('Expand') : __('Collapse');
     },
     ariaExpandedAttr() {
-      return this.isCollapsed ? 'false' : 'true';
+      return this.collapsed ? 'false' : 'true';
     },
     displayedCount() {
       if (this.isLoading) {
@@ -116,26 +110,19 @@ export default {
       return this.icon && !this.count ? '0' : this.count;
     },
     isFormUsedAndVisible() {
-      return this.$scopedSlots.form && this.isFormVisible && !this.isCollapsed;
-    },
-  },
-  watch: {
-    collapsed: {
-      handler(newVal) {
-        this.isCollapsed = newVal > 0;
-      },
+      return this.$scopedSlots.form && this.isFormVisible && !this.collapsed;
     },
   },
   methods: {
     toggleCollapse() {
-      this.isCollapsed = !this.isCollapsed;
+      this.collapsed = !this.collapsed;
       if (this.persistCollapsedState) {
-        localStorage.setItem(this.getLocalStorageKeyName(), this.isCollapsed);
+        localStorage.setItem(this.getLocalStorageKeyName(), this.collapsed);
       }
     },
     showForm() {
       this.isFormVisible = true;
-      this.isCollapsed = false;
+      this.collapsed = false;
       this.$emit('showForm');
     },
     hideForm() {
@@ -245,7 +232,7 @@ export default {
       class="gl-border-b gl-border-section gl-bg-section gl-p-5 gl-pt-4"
       data-testid="crud-form"
     >
-      <slot name="form" :hide-form="hideForm"></slot>
+      <slot name="form"></slot>
     </div>
 
     <div

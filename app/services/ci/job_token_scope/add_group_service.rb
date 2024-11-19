@@ -14,7 +14,7 @@ module Ci
         ServiceResponse.success(payload: { group_link: link })
 
       rescue ActiveRecord::RecordNotUnique
-        ServiceResponse.error(message: 'This group is already in the job token allowlist.')
+        ServiceResponse.error(message: 'Target group is already in the job token scope')
       rescue ActiveRecord::RecordInvalid => e
         ServiceResponse.error(message: e.message)
       rescue EditScopeValidations::ValidationError => e

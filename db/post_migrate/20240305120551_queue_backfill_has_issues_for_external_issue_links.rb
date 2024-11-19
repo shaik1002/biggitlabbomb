@@ -11,7 +11,7 @@ class QueueBackfillHasIssuesForExternalIssueLinks < Gitlab::Database::Migration[
   restrict_gitlab_migration gitlab_schema: :gitlab_main
 
   def up
-    Gitlab::Database::QueryAnalyzers::Base.suppress_schema_issues_for_decomposed_tables do
+    Gitlab::Database::QueryAnalyzers::RestrictAllowedSchemas.with_suppressed do
       queue_batched_background_migration(
         MIGRATION,
         :vulnerability_reads,
@@ -24,7 +24,7 @@ class QueueBackfillHasIssuesForExternalIssueLinks < Gitlab::Database::Migration[
   end
 
   def down
-    Gitlab::Database::QueryAnalyzers::Base.suppress_schema_issues_for_decomposed_tables do
+    Gitlab::Database::QueryAnalyzers::RestrictAllowedSchemas.with_suppressed do
       delete_batched_background_migration(MIGRATION, :vulnerability_reads, :vulnerability_id, [])
     end
   end

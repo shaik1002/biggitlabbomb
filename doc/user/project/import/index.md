@@ -247,7 +247,8 @@ they stay associated with placeholder users.
 
 #### Security considerations
 
-Contribution and membership reassignment cannot be undone, so check everything carefully before you start.
+Once this contribution and membership reassignment is complete, it cannot be undone so check all everything before
+starting.
 
 Reassigning contributions and membership to an incorrect user poses a security threat, because the user becomes a member
 of your group. They can, therefore, view information they should not be able to see.
@@ -274,7 +275,7 @@ This results in their membership for the imported group or project being higher 
 
 Prerequisites:
 
-- You must have the Owner role for the group.
+- You must have the Owner role of the group.
 
 To request a user accept reassignment of contributions and memberships:
 
@@ -323,7 +324,8 @@ To keep placeholder users in bulk:
 1. On the left sidebar, select **Search or go to** and find your group.
 1. Select **Manage > Members**.
 1. Select the **Placeholders** tab.
-1. Above the list, select the vertical ellipsis (**{ellipsis_v}**) > **Keep all as placeholder**.
+1. Select **More options icon** next to **Reassign with CSV**.
+1. Choose the **Keep all as placeholder** option.
 1. On the confirmation dialog, select **Confirm**.
 
 #### Cancel reassignment request

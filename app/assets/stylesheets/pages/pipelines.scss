@@ -36,14 +36,14 @@
       vertical-align: middle;
 
       &:not(.text-warning) {
-        @apply gl-fill-icon-subtle;
+        fill: $gl-text-color-secondary;
       }
     }
 
     .sprite {
       width: 12px;
       height: 12px;
-      @apply gl-fill-icon-default;
+      fill: $gl-text-color;
     }
 
     .commit-sha {
@@ -65,12 +65,12 @@
 
   .duration,
   .finished-at {
-    @apply gl-text-subtle;
+    color: $gl-text-color-secondary;
     margin: 0;
     white-space: nowrap;
   }
 
   .build-link a {
-    @apply gl-text-default;
+    color: $gl-text-color;
   }
 }

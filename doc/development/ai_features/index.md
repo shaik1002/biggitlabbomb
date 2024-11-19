@@ -268,19 +268,10 @@ If you clean up the flag in GitLab-Rails repository at first, the feature flag i
 
 **IMPORTANT:** Cleaning up the feature flag in AI Gateway will immediately distribute the change to all GitLab instances, including GitLab.com, Self-managed GitLab, and Dedicated.
 
-**Technical details:**
+Technical details: When `push_feature_flag` runs on an enabled feature flag, the name of flag is cached in the current context,
+which is later attached to `x-gitlab-enabled-feature-flags` HTTP header when GitLab-Sidekiq/Rails requests to AI Gateway.
 
-- When `push_feature_flag` runs on an enabled feature flag, the name of the flag is cached in the current context,
-  which is later attached to the `x-gitlab-enabled-feature-flags` HTTP header when `GitLab-Sidekiq/Rails` sends requests to AI Gateway.
-- When frontend clients (for example, VS Code Extension or LSP) request a [User JWT](../cloud_connector/architecture.md#ai-gateway) (UJWT)
-  for direct AI Gateway communication, GitLab returns:
-
-  - Public headers (including `x-gitlab-enabled-feature-flags`).
-  - The generated UJWT (1-hour expiration).
-
-Frontend clients must regenerate UJWT upon expiration. Backend changes such as feature flag updates through [ChatOps](../feature_flags/controls.md) render the header values to become stale. These header values are refreshed at the next UJWT generation.
-
-Similarly, we also have [`push_frontend_feature_flag`](../feature_flags/index.md) to push feature flags to frontend.
+As a simialr concept, we also have [`push_frontend_feature_flag`](../feature_flags/index.md) to push feature flags to frontend.
 
 ### GraphQL API
 
@@ -429,15 +420,15 @@ services:
 
 For more information, see [Cloud Connector: Configuration](../cloud_connector/configuration.md).
 
-### 2. Create a prompt definition in the AI Gateway
+### 2. Create an Agent definition in the AI Gateway
 
 In [the AI Gateway project](https://gitlab.com/gitlab-org/modelops/applied-ml/code-suggestions/ai-assist), create a
-new prompt definition under `ai_gateway/prompts/definitions`. Create a new subfolder corresponding to the name of your
-AI action, and a new YAML file for your prompt. Specify the model and provider you wish to use, and the prompts that
+new agent definition under `ai_gateway/agents/definitions`. Create a new subfolder corresponding to the name of your
+AI action, and a new YAML file for your agent. Specify the model and provider you wish to use, and the prompts that
 will be fed to the model. You can specify inputs to be plugged into the prompt by using `{}`.
 
 ```yaml
-# ai_gateway/prompts/definitions/rewrite_description/base.yml
+# ai_gateway/agents/definitions/rewrite_description/base.yml
 
 name: Description rewriter
 model:
@@ -456,7 +447,7 @@ prompt_template:
 If your AI action is part of a broader feature, the definitions can be organized in a tree structure:
 
 ```yaml
-# ai_gateway/prompts/definitions/code_suggestions/generations/base.yml
+# ai_gateway/agents/definitions/code_suggestions/generations/base.yml
 
 name: Code generations
 model:
@@ -469,7 +460,7 @@ model:
 To specify prompts for multiple models, use the name of the model as the filename for the definition:
 
 ```yaml
-# ai_gateway/prompts/definitions/code_suggestions/generations/mistral.yml
+# ai_gateway/agents/definitions/code_suggestions/generations/mistral.yml
 
 name: Code generations
 model:
@@ -492,6 +483,10 @@ module Gitlab
     module AiGateway
       module Completions
         class RewriteDescription < Base
+          def agent_name
+            'base' # Must match the name of the agent you defined on the AI Gateway
+          end
+
           def inputs
             { description: resource.description, prompt: prompt_message.content }
           end
@@ -550,19 +545,6 @@ class AiFeaturesCatalogue
     }
   }.freeze
 ```
-
-## Reuse the existing AI components for multiple models
-
-We thrive optimizing AI components, such as prompt, input/output parser, tools/function-calling, for each LLM,
-however, diverging the components for each model could increase the maintenance overhead.
-Hence, it's generally advised to reuse the existing components for multiple models as long as it doesn't degrade a feature quality.
-Here are the rules of thumbs:
-
-1. Iterate on the existing prompt template for multiple models. Do _NOT_ introduce a new one unless it causes a quality degredation for a particular model.
-1. Iterate on the existing input/output parsers and tools/functions-calling for multiple models. Do _NOT_ introduce a new one unless it causes a quality degredation for a particular model.
-1. If a quality degredation is detected for a particular model, the shared component should be diverged for the particular model.
-
-An [example](https://gitlab.com/gitlab-org/modelops/applied-ml/code-suggestions/ai-assist/-/issues/713) of this case is that we can apply Claude specific CoT optimization to the other models such as Mixtral as long as it doesn't cause a quality degredation.
 
 ## How to migrate an existing action to the AI Gateway
 
@@ -915,7 +897,7 @@ Documentation of model changes is crucial for tracking the impact of migrations 
 - **Optional** - Investigate if the new model is supported within our current AI-Gateway API specification. This step can usually be skipped. However, sometimes to support a newer model, we may need to accommodate a new API format.
 - Add the new model to our [available models list](https://gitlab.com/gitlab-org/gitlab/-/blob/32fa9eaa3c8589ee7f448ae683710ec7bd82f36c/ee/lib/gitlab/llm/concerns/available_models.rb#L5-10).
 - Change the default model in our [AI-Gateway client](https://gitlab.com/gitlab-org/gitlab/-/blob/41361629b302f2c55e35701d2c0a73cff32f9013/ee/lib/gitlab/llm/chain/requests/ai_gateway.rb#L63-67). Please place the change around a feature flag. We may need to quickly rollback the change.
-- Update the model definitions in AI Gateway following the [prompt definition guidelines](#2-create-a-prompt-definition-in-the-ai-gateway)
+- Update the model definitions in AI Gateway following the [agent definition guidelines](#2-create-an-agent-definition-in-the-ai-gateway)
 Note: While we're moving toward AI Gateway holding the prompts, feature flag implementation still requires a GitLab release.
 
 #### Migration Tasks for Vertex Models

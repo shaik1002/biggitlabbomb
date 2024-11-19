@@ -63,15 +63,13 @@ export default {
           :query="list.query"
           :variables="list.variables"
           :hide-count="list.hideCount"
-          :class="{ '!gl-mt-3': i === 0 }"
+          :class="{ 'gl-mb-4': i !== tab.lists.length - 1 }"
         >
           <template #default="{ mergeRequests, count, hasNextPage, loadMore, loading, error }">
             <collapsible-section
               :count="count"
-              :has-merge-requests="mergeRequests.length > 0"
               :title="list.title"
               :help-content="list.helpContent"
-              :loading="loading"
             >
               <div>
                 <div class="gl-overflow-x-auto">
@@ -84,7 +82,7 @@ export default {
                       <col style="width: 120px" />
                       <col style="min-width: 200px" />
                     </colgroup>
-                    <thead class="gl-border-b gl-bg-subtle">
+                    <thead class="gl-border-b gl-bg-gray-10">
                       <tr>
                         <th class="gl-pb-3 gl-pl-5 gl-pr-3" :aria-label="__('Pipeline status')">
                           <gl-icon name="pipeline" />
@@ -139,7 +137,7 @@ export default {
                 </div>
               </div>
               <template #pagination>
-                <div v-if="hasNextPage" class="crud-pagination-container gl-flex gl-justify-center">
+                <div v-if="hasNextPage" class="gl-mt-4 gl-flex gl-justify-center">
                   <gl-button :loading="loading" data-testid="load-more" @click="loadMore">{{
                     __('Show more')
                   }}</gl-button>

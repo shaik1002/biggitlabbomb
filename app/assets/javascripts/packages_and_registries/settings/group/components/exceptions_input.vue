@@ -1,5 +1,6 @@
 <script>
 import { GlFormGroup, GlFormInput } from '@gitlab/ui';
+
 import {
   DUPLICATES_SETTING_EXCEPTION_TITLE,
   DUPLICATES_SETTINGS_EXCEPTION_LEGEND,

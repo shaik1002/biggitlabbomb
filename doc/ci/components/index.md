@@ -55,7 +55,7 @@ To create a component project, you must:
 
 1. [Create a new project](../../user/project/index.md#create-a-blank-project) with a `README.md` file:
    - Ensure the description gives a clear introduction to the component.
-   - Optional. After the project is created, you can [add a project avatar](../../user/project/working_with_projects.md#add-a-project-avatar).
+   - Optional. After the project is created, you can [add a project avatar](../../user/project/working_with_projects.md#edit-project-name-description-and-avatar).
 
    Components published to the [CI/CD catalog](#cicd-catalog) use both the description and avatar when displaying the component project's summary.
 
@@ -152,16 +152,8 @@ In this example:
   or as a directory `templates/secret-detection/` containing a `template.yml`.
 - `1.0.0` is the [version](#component-versions) of the component.
 
-Pipeline configuration and component configuration are not processed independently.
-When a pipeline starts, any included component configuration [merges](../yaml/includes.md#merge-method-for-include)
-into the pipeline's configuration. If your pipeline and the component both contain configuration with the same name,
-they can interact in unexpected ways.
-
-For example, two jobs with the same name would merge together into a single job.
-Similarly, a component using `extends` for configuration with the same name as a job in your pipeline
-could extend the wrong configuration. Make sure your pipeline and the component do not share
-any configuration with the same name, unless you intend to [override](../yaml/includes.md#override-included-configuration-values)
-the component's configuration.
+When GitLab creates a new pipeline, the component's configuration is fetched and added to
+the pipeline's configuration.
 
 To use GitLab.com components in a self-managed instance, you must
 [mirror the component project](#use-a-gitlabcom-component-in-a-self-managed-instance).
@@ -614,7 +606,7 @@ Prerequisites:
 - You must have at least the Maintainer role for the project.
 - The project must:
   - Be set as a [catalog project](#set-a-component-project-as-a-catalog-project).
-  - Have a [project description](../../user/project/working_with_projects.md#edit-project-name-and-description) defined.
+  - Have a [project description](../../user/project/working_with_projects.md#edit-project-name-description-and-avatar) defined.
   - Have a `README.md` file in the root directory for the commit SHA of the tag being released.
   - Have at least one [CI/CD component in the `templates/` directory](#directory-structure)
     for the commit SHA of the tag being released.
@@ -683,7 +675,7 @@ and is maintained by users verified by GitLab:
   creates an internal request issue on behalf of the verified partner:
   `https://gitlab.com/gitlab-com/support/internal-requests/-/issues/new?issuable_template=CI%20Catalog%20Badge%20Request`.
 
-  WARNING:
+  DISCLAIMER:
   GitLab Partner-created components are provided **as-is**, without warranty of any kind.
   An end user's use of a GitLab Partner-created component is at their own risk and
   GitLab shall have no indemnification obligations nor any liability of any type
@@ -725,7 +717,7 @@ To mirror a GitLab.com component in your self-managed instance:
 1. Make sure that [network outbound requests](../../security/webhooks.md) are allowed for `gitlab.com`.
 1. [Create a group](../../user/group/index.md#create-a-group) to host the component projects (recommended group: `components`).
 1. [Create a mirror of the component project](../../user/project/repository/mirror/pull.md) in the new group.
-1. Write a [project description](../../user/project/working_with_projects.md#edit-project-name-and-description)
+1. Write a [project description](../../user/project/working_with_projects.md#edit-project-name-description-and-avatar)
    for the component project mirror because mirroring repositories does not copy the description.
 1. [Set the self-hosted component project as a catalog resource](#set-a-component-project-as-a-catalog-project).
 1. Publish [a new release](../../user/project/releases/index.md) in the self-hosted component project by
@@ -804,19 +796,3 @@ This GitLab CI configuration is invalid: Component 'gitlab.com/my-namespace/my-p
 
 The `~latest` behavior [was updated](https://gitlab.com/gitlab-org/gitlab/-/issues/442238)
 in GitLab 16.10. It now refers to the latest semantic version of the catalog resource. To resolve this issue, [create a new release](#publish-a-new-release).
-
-### Error: `Build component error: Spec must be a valid json schema`
-
-If a component has invalid formatting, you might not be able to create a release
-and could receive an error like `Build component error: Spec must be a valid json schema`.
-
-This error can be caused by an empty `spec:inputs` section. If your configuration
-does not use any inputs, you can make the `spec` section empty instead. For example:
-
-```yaml
-spec:
----
-
-my-component:
-  script: echo
-```

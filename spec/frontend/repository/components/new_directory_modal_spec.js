@@ -15,7 +15,7 @@ jest.mock('~/lib/utils/url_utility', () => ({
 }));
 
 const initialProps = {
-  modalTitle: 'Create new directory',
+  modalTitle: 'Create New Directory',
   modalId: 'modal-new-directory',
   commitMessage: 'Add new directory',
   targetBranch: 'some-target-branch',

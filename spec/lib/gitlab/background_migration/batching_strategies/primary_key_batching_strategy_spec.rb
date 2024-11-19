@@ -5,7 +5,6 @@ require 'spec_helper'
 RSpec.describe Gitlab::BackgroundMigration::BatchingStrategies::PrimaryKeyBatchingStrategy,
   '#next_batch', feature_category: :database do
   let(:batching_strategy) { described_class.new(connection: ActiveRecord::Base.connection) }
-  let(:job_class) { Class.new(Gitlab::BackgroundMigration::BatchedMigrationJob) }
   let(:namespaces) { table(:namespaces) }
 
   let!(:namespace1) { namespaces.create!(name: 'batchtest999', path: 'batch-test1') }
@@ -17,7 +16,7 @@ RSpec.describe Gitlab::BackgroundMigration::BatchingStrategies::PrimaryKeyBatchi
 
   context 'when starting on the first batch' do
     it 'returns the bounds of the next batch' do
-      batch_bounds = batching_strategy.next_batch(:namespaces, :id, batch_min_value: namespace1.id, batch_size: 3, job_arguments: [], job_class: job_class)
+      batch_bounds = batching_strategy.next_batch(:namespaces, :id, batch_min_value: namespace1.id, batch_size: 3, job_arguments: [])
 
       expect(batch_bounds).to eq([namespace1.id, namespace3.id])
     end
@@ -25,7 +24,7 @@ RSpec.describe Gitlab::BackgroundMigration::BatchingStrategies::PrimaryKeyBatchi
 
   context 'when additional batches remain' do
     it 'returns the bounds of the next batch' do
-      batch_bounds = batching_strategy.next_batch(:namespaces, :id, batch_min_value: namespace2.id, batch_size: 3, job_arguments: [], job_class: job_class)
+      batch_bounds = batching_strategy.next_batch(:namespaces, :id, batch_min_value: namespace2.id, batch_size: 3, job_arguments: [])
 
       expect(batch_bounds).to eq([namespace2.id, namespace4.id])
     end
@@ -33,7 +32,7 @@ RSpec.describe Gitlab::BackgroundMigration::BatchingStrategies::PrimaryKeyBatchi
 
   context 'when on the final batch' do
     it 'returns the bounds of the next batch' do
-      batch_bounds = batching_strategy.next_batch(:namespaces, :id, batch_min_value: namespace4.id, batch_size: 3, job_arguments: [], job_class: job_class)
+      batch_bounds = batching_strategy.next_batch(:namespaces, :id, batch_min_value: namespace4.id, batch_size: 3, job_arguments: [])
 
       expect(batch_bounds).to eq([namespace4.id, namespace4.id])
     end
@@ -41,7 +40,7 @@ RSpec.describe Gitlab::BackgroundMigration::BatchingStrategies::PrimaryKeyBatchi
 
   context 'when no additional batches remain' do
     it 'returns nil' do
-      batch_bounds = batching_strategy.next_batch(:namespaces, :id, batch_min_value: namespace4.id + 1, batch_size: 1, job_arguments: [], job_class: job_class)
+      batch_bounds = batching_strategy.next_batch(:namespaces, :id, batch_min_value: namespace4.id + 1, batch_size: 1, job_arguments: [])
 
       expect(batch_bounds).to be_nil
     end

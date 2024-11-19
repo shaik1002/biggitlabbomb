@@ -32,9 +32,6 @@ $type-scale: (
  */
  $size-scale: (
   's': #{20 * $grid-size},
-  'l': #{40 * $grid-size},
-  'm': #{30 * $grid-size},
-  'xl': #{70 * $grid-size}
 );
 
 @each $index, $size in $size-scale {
@@ -43,9 +40,13 @@ $type-scale: (
   }
 }
 
-// This CSS Class definition will be removed in
-// https://gitlab.com/gitlab-org/gitlab/-/issues/479423.
-// More context: https://gitlab.com/gitlab-org/gitlab/-/issues/482689#note_2200591361
+// stylelint-disable-next-line gitlab/no-gl-class
+.gl-top-app-header {
+  top: $calc-application-header-height;
+}
+
+// Migrate this to Gitlab UI when FF is removed
+// https://gitlab.com/groups/gitlab-org/-/epics/2882
 // stylelint-disable-next-line gitlab/no-gl-class
 .gl-h-200\! { height: px-to-rem($grid-size * 25) !important; }
 

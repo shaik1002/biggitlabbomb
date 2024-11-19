@@ -134,9 +134,7 @@ export default {
             {{ s__('MemberRole|Description') }}
           </dt>
           <dd data-testid="description-value">
-            <template v-if="member.accessLevel.description">{{
-              member.accessLevel.description
-            }}</template>
+            <template v-if="selectedRole.description">{{ selectedRole.description }}</template>
             <span v-else class="gl-text-subtle">{{ s__('MemberRole|No description') }}</span>
           </dd>
 

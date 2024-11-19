@@ -1,5 +1,5 @@
 ---
-stage: Application Security Testing
+stage: Secure
 group: Secret Detection
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
@@ -843,7 +843,7 @@ Prerequisites:
    [local Docker container registry](../../../packages/container_registry/index.md):
 
    ```plaintext
-   registry.gitlab.com/security-products/secrets:6
+   registry.gitlab.com/security-products/secrets:4
    ```
 
    The pipeline secret detection analyzer's image is [periodically updated](../../index.md#vulnerability-scanner-maintenance)

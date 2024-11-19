@@ -20,7 +20,6 @@ namespace :gitlab do
     desc 'Seed groups with sub-groups/projects/epics/milestones for Group Import testing'
     task :group_seed, [:subgroups_depth, :username] => :gitlab_environment do |_t, args|
       require 'sidekiq/testing'
-      require_relative '../../../gitlab/faker/internet'
 
       GroupSeeder.new(
         subgroups_depth: args.subgroups_depth,
@@ -125,7 +124,7 @@ class GroupSeeder
 
   def create_user
     User.create!(
-      username: Gitlab::Faker::Internet.unique_username,
+      username: FFaker::Internet.unique.user_name,
       name: FFaker::Name.name,
       email: FFaker::Internet.unique.email,
       confirmed_at: DateTime.now,

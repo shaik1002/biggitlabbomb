@@ -5,8 +5,6 @@ module WorkItems
     class EmailParticipants < Base
       delegate :issue_email_participants, to: :work_item
 
-      alias_method :email_participants, :issue_email_participants
-
       def self.quick_action_commands
         [:add_email, :remove_email]
       end

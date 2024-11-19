@@ -22,17 +22,10 @@ module API
         route_setting :api, write: true
         route_setting :model_registry, write: true
         params do
-          optional :path, type: String,
-            desc: 'Path to the artifact, model version id, optionally followed by path. E.g. 15/MLmodel'
+          optional :path, type: String, desc: 'Path to the artifact, MLflow usually send the version'
         end
         get 'artifacts', urgency: :low do
-          model_version, path = params[:path].split('/', 2)
-
-          # MLflow handles directories differently than GitLab does so when MLflow checks if a path is a directory
-          # we return an empty array as 404s would cause issues for MLflow
-          files = path.present? ? [] : list_model_artifacts(user_project, model_version).all
-
-          package_files = { files: files }
+          package_files = { files: list_model_artifacts(user_project, params[:path]).all }
           present package_files, with: Entities::Ml::MlflowArtifacts::ArtifactsList
         end
 

@@ -49,9 +49,7 @@ class MemberPresenter < Gitlab::View::Presenter::Delegated
     raise NotImplementedError
   end
 
-  def member_role_description
-    member.role_description
-  end
+  def member_role_description; end
 
   private
 

@@ -39,8 +39,7 @@ module CascadingNamespaceSettingAttribute
     # - `toggle_security_policy_custom_ci_locked_by_ancestor?`
     # - `toggle_security_policy_custom_ci_locked_by_application_setting?`
     # - `toggle_security_policy_custom_ci?` (only defined for boolean attributes)
-    # - `toggle_security_policy_custom_ci_locked_ancestor` - Returns locked namespace settings object
-    #                                                        (only namespace_id)
+    # - `toggle_security_policy_custom_ci_locked_ancestor` - Returns locked namespace settings object (only namespace_id)
     #
     # Defined validators ensure attribute value cannot be updated if locked by
     # an ancestor or application settings.
@@ -65,9 +64,7 @@ module CascadingNamespaceSettingAttribute
         validate :"lock_#{attribute}_changeable?"
 
         before_save :"before_save_#{attribute}", if: -> { will_save_change_to_attribute?(attribute) }
-        after_update :"clear_descendant_#{attribute}_locks", if: -> {
-          saved_change_to_attribute?("lock_#{attribute}", to: true)
-        }
+        after_update :"clear_descendant_#{attribute}_locks", if: -> { saved_change_to_attribute?("lock_#{attribute}", to: true) }
       end
     end
 
@@ -165,10 +162,7 @@ module CascadingNamespaceSettingAttribute
         return unless cascading_attribute_changed?("lock_#{attribute}")
 
         if cascading_attribute_locked?(attribute, include_self: false)
-          return errors.add(
-            :"lock_#{attribute}",
-            s_('CascadingSettings|cannot be changed because it is locked by an ancestor')
-          )
+          return errors.add(:"lock_#{attribute}", s_('CascadingSettings|cannot be changed because it is locked by an ancestor'))
         end
 
         # Don't allow locking a `nil` attribute.
@@ -237,9 +231,8 @@ module CascadingNamespaceSettingAttribute
 
     self.class
   .select(attribute)
-  .joins(
-    "join unnest(ARRAY[#{namespace_ancestor_ids.join(',')}]) with ordinality t(namespace_id, ord) USING (namespace_id)"
-  ).where("#{attribute} IS NOT NULL")
+  .joins("join unnest(ARRAY[#{namespace_ancestor_ids.join(',')}]) with ordinality t(namespace_id, ord) USING (namespace_id)")
+  .where("#{attribute} IS NOT NULL")
   .order('t.ord')
   .limit(1).first&.read_attribute(attribute)
   end

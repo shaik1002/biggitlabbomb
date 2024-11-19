@@ -1,12 +1,9 @@
 import { queryToObject } from '~/lib/utils/url_utility';
 import getSoloOwnedOrganizationsQuery from '~/admin/users/graphql/queries/get_solo_owned_organizations.query.graphql';
+import { SOLO_OWNED_ORGANIZATIONS_REQUESTED_COUNT } from '~/organizations/shared/constants';
 import { convertToGraphQLId } from '~/graphql_shared/utils';
 import { TYPENAME_USER } from '~/graphql_shared/constants';
-import {
-  TOKENS,
-  SOLO_OWNED_ORGANIZATIONS_EMPTY,
-  SOLO_OWNED_ORGANIZATIONS_REQUESTED_COUNT,
-} from './constants';
+import { TOKENS, SOLO_OWNED_ORGANIZATIONS_EMPTY } from './constants';
 
 export const generateUserPaths = (paths, id) => {
   return Object.fromEntries(

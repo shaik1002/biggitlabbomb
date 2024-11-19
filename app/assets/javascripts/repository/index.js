@@ -45,7 +45,6 @@ export default function setupVueRepositoryList() {
     resourceId,
     userId,
     explainCodeAvailable,
-    targetBranch,
   } = dataset;
   const router = createRouter(projectPath, escapedRef);
 
@@ -116,24 +115,16 @@ export default function setupVueRepositoryList() {
     });
   };
 
-  const lastCommitEl = document.getElementById('js-last-commit');
-
   const initLastCommitApp = () =>
     new Vue({
-      el: lastCommitEl,
+      el: document.getElementById('js-last-commit'),
       router,
       apolloProvider,
       render(h) {
-        const historyUrl = generateHistoryUrl(
-          lastCommitEl.dataset.historyLink,
-          this.$route.params.path,
-          this.$route.meta.refType || this.$route.query.ref_type,
-        );
         return h(LastCommit, {
           props: {
             currentPath: this.$route.params.path,
             refType: this.$route.meta.refType || this.$route.query.ref_type,
-            historyUrl: historyUrl.href,
           },
         });
       },
@@ -309,7 +300,6 @@ export default function setupVueRepositoryList() {
     provide: {
       resourceId,
       userId,
-      targetBranch,
       explainCodeAvailable: parseBoolean(explainCodeAvailable),
       highlightWorker: new HighlightWorker(),
     },

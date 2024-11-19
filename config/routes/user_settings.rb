@@ -16,7 +16,6 @@ namespace :user_settings do
   resources :personal_access_tokens, only: [:index, :create] do
     member do
       put :revoke
-      put :rotate
     end
   end
   resources :gpg_keys, only: [:index, :create, :destroy] do

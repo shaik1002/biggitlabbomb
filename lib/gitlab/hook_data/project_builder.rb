@@ -21,40 +21,32 @@ module Gitlab
       #   old_path_with_namespace: "old-path-with-namespace"
       # }
 
-      def build(event, include_deprecated_owner: false)
+      def build(event)
         [
           event_data(event),
           timestamps_data,
-          project_data(include_deprecated_owner: include_deprecated_owner),
+          project_data,
           event_specific_project_data(event)
         ].reduce(:merge)
       end
 
       private
 
-      def project_data(include_deprecated_owner:)
-        payload = {
+      def project_data
+        # When this is removed, also remove the `deprecated_owner` method
+        # See https://gitlab.com/gitlab-org/gitlab/-/issues/350603
+        owner = project.deprecated_owner
+
+        {
           name: project.name,
           path: project.path,
           path_with_namespace: project.full_path,
           project_id: project.id,
-          project_namespace_id: project.namespace_id,
+          owner_name: owner.try(:name),
+          owner_email: user_email(owner),
           owners: owners_data,
           project_visibility: project.visibility.downcase
         }
-
-        if include_deprecated_owner
-          # When this is removed, also remove the `deprecated_owner` method
-          # See https://gitlab.com/gitlab-org/gitlab/-/issues/350603
-          owner = project.deprecated_owner
-
-          payload.merge!(
-            owner_name: owner.try(:name),
-            owner_email: user_email(owner)
-          )
-        end
-
-        payload
       end
 
       def owners_data

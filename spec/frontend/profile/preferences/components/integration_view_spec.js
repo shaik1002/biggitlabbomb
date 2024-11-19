@@ -41,12 +41,6 @@ describe('IntegrationView component', () => {
     expect(wrapper.findByText(defaultProps.config.title).exists()).toBe(true);
   });
 
-  it('allows title to be specified via props', () => {
-    wrapper = createComponent({ title: 'Custom title' });
-
-    expect(wrapper.findByText('Custom title').exists()).toBe(true);
-  });
-
   it('should render the form correctly', () => {
     wrapper = createComponent();
 

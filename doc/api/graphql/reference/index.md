@@ -579,7 +579,6 @@ four standard [pagination arguments](#pagination-arguments):
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
-| <a id="querygroupsids"></a>`ids` | [`[ID!]`](#id) | Filter groups by IDs. |
 | <a id="querygroupsmarkedfordeletionon"></a>`markedForDeletionOn` | [`Date`](#date) | Date when the group was marked for deletion. |
 | <a id="querygroupssearch"></a>`search` | [`String`](#string) | Search query for group name or group full path. |
 | <a id="querygroupssort"></a>`sort` | [`String`](#string) | Sort order of results. Format: `<field_name>_<sort_direction>`, for example: `id_desc` or `name_asc`. |
@@ -1327,9 +1326,8 @@ four standard [pagination arguments](#pagination-arguments):
 | <a id="queryvulnerabilitieshasmergerequest"></a>`hasMergeRequest` | [`Boolean`](#boolean) | Returns only the vulnerabilities which have linked merge requests. |
 | <a id="queryvulnerabilitieshasremediations"></a>`hasRemediations` | [`Boolean`](#boolean) | Returns only the vulnerabilities which have remediations. |
 | <a id="queryvulnerabilitieshasresolution"></a>`hasResolution` | [`Boolean`](#boolean) | Returns only the vulnerabilities which have been resolved on default branch. |
-| <a id="queryvulnerabilitiesidentifiername"></a>`identifierName` **{warning-solid}** | [`String`](#string) | **Introduced** in GitLab 17.6. **Status**: Experiment. Filter vulnerabilities by identifier name. Applicable only on project level when feature flag `vulnerability_filtering_by_identifier` is enabled. Ignored when applied on group level or instance securitydashboard queries. |
 | <a id="queryvulnerabilitiesimage"></a>`image` | [`[String!]`](#string) | Filter vulnerabilities by location image. When this filter is present, the response only matches entries for a `reportType` that includes `container_scanning`, `cluster_image_scanning`. |
-| <a id="queryvulnerabilitiesowasptopten"></a>`owaspTopTen` | [`[VulnerabilityOwaspTop10!]`](#vulnerabilityowasptop10) | Filter vulnerabilities by OWASP Top 10 category. Wildcard value "NONE" also supported and it cannot be combined with other OWASP top 10 values. |
+| <a id="queryvulnerabilitiesowasptopten"></a>`owaspTopTen` | [`[VulnerabilityOwaspTop10!]`](#vulnerabilityowasptop10) | Filter vulnerabilities by OWASP Top 10 category. Wildcard value "NONE" also supported when feature flag `owasp_top_10_null_filtering` is enabled. "NONE" wildcard cannot be combined with other OWASP top 10 values. |
 | <a id="queryvulnerabilitiesprojectid"></a>`projectId` | [`[ID!]`](#id) | Filter vulnerabilities by project. |
 | <a id="queryvulnerabilitiesreporttype"></a>`reportType` | [`[VulnerabilityReportType!]`](#vulnerabilityreporttype) | Filter vulnerabilities by report type. |
 | <a id="queryvulnerabilitiesscanner"></a>`scanner` | [`[String!]`](#string) | Filter vulnerabilities by VulnerabilityScanner.externalId. |
@@ -3067,7 +3065,6 @@ Input type: `CiJobTokenScopeAddGroupOrProjectInput`
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | <a id="mutationcijobtokenscopeaddgrouporprojectcijobtokenscope"></a>`ciJobTokenScope` | [`CiJobTokenScopeType`](#cijobtokenscopetype) | CI job token's access scope. |
-| <a id="mutationcijobtokenscopeaddgrouporprojectcijobtokenscopeallowlistentry"></a>`ciJobTokenScopeAllowlistEntry` **{warning-solid}** | [`CiJobTokenScopeAllowlistEntry`](#cijobtokenscopeallowlistentry) | **Deprecated:** **Status**: Experiment. Introduced in GitLab 17.6. |
 | <a id="mutationcijobtokenscopeaddgrouporprojectclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | <a id="mutationcijobtokenscopeaddgrouporprojecterrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
@@ -3089,7 +3086,6 @@ Input type: `CiJobTokenScopeAddProjectInput`
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | <a id="mutationcijobtokenscopeaddprojectcijobtokenscope"></a>`ciJobTokenScope` | [`CiJobTokenScopeType`](#cijobtokenscopetype) | CI job token's access scope. |
-| <a id="mutationcijobtokenscopeaddprojectcijobtokenscopeallowlistentry"></a>`ciJobTokenScopeAllowlistEntry` **{warning-solid}** | [`CiJobTokenScopeAllowlistEntry`](#cijobtokenscopeallowlistentry) | **Deprecated:** **Status**: Experiment. Introduced in GitLab 17.6. |
 | <a id="mutationcijobtokenscopeaddprojectclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | <a id="mutationcijobtokenscopeaddprojecterrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
@@ -3110,7 +3106,6 @@ Input type: `CiJobTokenScopeRemoveGroupInput`
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | <a id="mutationcijobtokenscoperemovegroupcijobtokenscope"></a>`ciJobTokenScope` | [`CiJobTokenScopeType`](#cijobtokenscopetype) | CI job token's access scope. |
-| <a id="mutationcijobtokenscoperemovegroupcijobtokenscopeallowlistentry"></a>`ciJobTokenScopeAllowlistEntry` **{warning-solid}** | [`CiJobTokenScopeAllowlistEntry`](#cijobtokenscopeallowlistentry) | **Deprecated:** **Status**: Experiment. Introduced in GitLab 17.6. |
 | <a id="mutationcijobtokenscoperemovegroupclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | <a id="mutationcijobtokenscoperemovegrouperrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
@@ -3131,8 +3126,7 @@ Input type: `CiJobTokenScopeRemoveProjectInput`
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
-| <a id="mutationcijobtokenscoperemoveprojectcijobtokenscope"></a>`ciJobTokenScope` | [`CiJobTokenScopeType`](#cijobtokenscopetype) | CI job token's access scope. |
-| <a id="mutationcijobtokenscoperemoveprojectcijobtokenscopeallowlistentry"></a>`ciJobTokenScopeAllowlistEntry` **{warning-solid}** | [`CiJobTokenScopeAllowlistEntry`](#cijobtokenscopeallowlistentry) | **Deprecated:** **Status**: Experiment. Introduced in GitLab 17.6. |
+| <a id="mutationcijobtokenscoperemoveprojectcijobtokenscope"></a>`ciJobTokenScope` | [`CiJobTokenScopeType`](#cijobtokenscopetype) | CI job token's scope of access. |
 | <a id="mutationcijobtokenscoperemoveprojectclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | <a id="mutationcijobtokenscoperemoveprojecterrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
@@ -3157,7 +3151,7 @@ Input type: `CiJobTokenScopeUpdatePoliciesInput`
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
-| <a id="mutationcijobtokenscopeupdatepoliciescijobtokenscopeallowlistentry"></a>`ciJobTokenScopeAllowlistEntry` **{warning-solid}** | [`CiJobTokenScopeAllowlistEntry`](#cijobtokenscopeallowlistentry) | **Deprecated:** **Status**: Experiment. Introduced in GitLab 17.6. |
+| <a id="mutationcijobtokenscopeupdatepoliciescijobtokenscope"></a>`ciJobTokenScope` | [`CiJobTokenScopeType`](#cijobtokenscopetype) | Updated CI job token access scope. |
 | <a id="mutationcijobtokenscopeupdatepoliciesclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | <a id="mutationcijobtokenscopeupdatepolicieserrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
@@ -3686,7 +3680,6 @@ Input type: `CreateDiffNoteInput`
 | <a id="mutationcreatediffnoteclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | <a id="mutationcreatediffnoteerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | <a id="mutationcreatediffnotenote"></a>`note` | [`Note`](#note) | Note after mutation. |
-| <a id="mutationcreatediffnotequickactionsstatus"></a>`quickActionsStatus` | [`QuickActionsStatus`](#quickactionsstatus) | Status of quick actions after mutation. |
 
 ### `Mutation.createDiscussion`
 
@@ -3708,7 +3701,6 @@ Input type: `CreateDiscussionInput`
 | <a id="mutationcreatediscussionclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | <a id="mutationcreatediscussionerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | <a id="mutationcreatediscussionnote"></a>`note` | [`Note`](#note) | Note after mutation. |
-| <a id="mutationcreatediscussionquickactionsstatus"></a>`quickActionsStatus` | [`QuickActionsStatus`](#quickactionsstatus) | Status of quick actions after mutation. |
 
 ### `Mutation.createEpic`
 
@@ -3725,7 +3717,7 @@ Input type: `CreateEpicInput`
 | <a id="mutationcreateepicaddlabelids"></a>`addLabelIds` | [`[ID!]`](#id) | IDs of labels to be added to the epic. |
 | <a id="mutationcreateepicaddlabels"></a>`addLabels` | [`[String!]`](#string) | Array of labels to be added to the epic. |
 | <a id="mutationcreateepicclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
-| <a id="mutationcreateepiccolor"></a>`color` | [`Color`](#color) | Color of the epic. |
+| <a id="mutationcreateepiccolor"></a>`color` | [`Color`](#color) | Color of the epic. Available only when feature flag `epic_color_highlight` is enabled. This flag is disabled by default, because the feature is experimental and is subject to change without notice. |
 | <a id="mutationcreateepicconfidential"></a>`confidential` | [`Boolean`](#boolean) | Indicates if the epic is confidential. |
 | <a id="mutationcreateepicdescription"></a>`description` | [`String`](#string) | Description of the epic. |
 | <a id="mutationcreateepicduedatefixed"></a>`dueDateFixed` | [`String`](#string) | End date of the epic. |
@@ -3765,7 +3757,6 @@ Input type: `CreateImageDiffNoteInput`
 | <a id="mutationcreateimagediffnoteclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | <a id="mutationcreateimagediffnoteerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | <a id="mutationcreateimagediffnotenote"></a>`note` | [`Note`](#note) | Note after mutation. |
-| <a id="mutationcreateimagediffnotequickactionsstatus"></a>`quickActionsStatus` | [`QuickActionsStatus`](#quickactionsstatus) | Status of quick actions after mutation. |
 
 ### `Mutation.createIssue`
 
@@ -3864,7 +3855,6 @@ Input type: `CreateNoteInput`
 | <a id="mutationcreatenoteclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | <a id="mutationcreatenoteerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | <a id="mutationcreatenotenote"></a>`note` | [`Note`](#note) | Note after mutation. |
-| <a id="mutationcreatenotequickactionsstatus"></a>`quickActionsStatus` | [`QuickActionsStatus`](#quickactionsstatus) | Status of quick actions after mutation. |
 
 ### `Mutation.createPackagesProtectionRule`
 
@@ -4775,7 +4765,6 @@ Input type: `DestroyNoteInput`
 | <a id="mutationdestroynoteclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | <a id="mutationdestroynoteerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | <a id="mutationdestroynotenote"></a>`note` | [`Note`](#note) | Note after mutation. |
-| <a id="mutationdestroynotequickactionsstatus"></a>`quickActionsStatus` | [`QuickActionsStatus`](#quickactionsstatus) | Status of quick actions after mutation. |
 
 ### `Mutation.destroyPackage`
 
@@ -5140,7 +5129,7 @@ Input type: `EpicBoardCreateInput`
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | <a id="mutationepicboardcreateclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
-| <a id="mutationepicboardcreatedisplaycolors"></a>`displayColors` | [`Boolean`](#boolean) | Whether or not display epic colors. |
+| <a id="mutationepicboardcreatedisplaycolors"></a>`displayColors` | [`Boolean`](#boolean) | Whether or not display epic colors. Ignored unless `epic_color_highlight` flag is enabled. |
 | <a id="mutationepicboardcreategrouppath"></a>`groupPath` | [`ID`](#id) | Full path of the group with which the resource is associated. |
 | <a id="mutationepicboardcreatehidebackloglist"></a>`hideBacklogList` | [`Boolean`](#boolean) | Whether or not backlog list is hidden. |
 | <a id="mutationepicboardcreatehideclosedlist"></a>`hideClosedList` | [`Boolean`](#boolean) | Whether or not closed list is hidden. |
@@ -5219,7 +5208,7 @@ Input type: `EpicBoardUpdateInput`
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | <a id="mutationepicboardupdateclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
-| <a id="mutationepicboardupdatedisplaycolors"></a>`displayColors` | [`Boolean`](#boolean) | Whether or not display epic colors. |
+| <a id="mutationepicboardupdatedisplaycolors"></a>`displayColors` | [`Boolean`](#boolean) | Whether or not display epic colors. Ignored unless `epic_color_highlight` flag is enabled. |
 | <a id="mutationepicboardupdatehidebackloglist"></a>`hideBacklogList` | [`Boolean`](#boolean) | Whether or not backlog list is hidden. |
 | <a id="mutationepicboardupdatehideclosedlist"></a>`hideClosedList` | [`Boolean`](#boolean) | Whether or not closed list is hidden. |
 | <a id="mutationepicboardupdateid"></a>`id` | [`BoardsEpicBoardID!`](#boardsepicboardid) | Epic board global ID. |
@@ -7640,7 +7629,6 @@ Input type: `NoteConvertToThreadInput`
 | <a id="mutationnoteconverttothreadclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | <a id="mutationnoteconverttothreaderrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | <a id="mutationnoteconverttothreadnote"></a>`note` | [`Note`](#note) | Note after mutation. |
-| <a id="mutationnoteconverttothreadquickactionsstatus"></a>`quickActionsStatus` | [`QuickActionsStatus`](#quickactionsstatus) | Status of quick actions after mutation. |
 
 ### `Mutation.oncallRotationCreate`
 
@@ -8950,7 +8938,6 @@ Input type: `RepositionImageDiffNoteInput`
 | <a id="mutationrepositionimagediffnoteclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | <a id="mutationrepositionimagediffnoteerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | <a id="mutationrepositionimagediffnotenote"></a>`note` | [`Note`](#note) | Note after mutation. |
-| <a id="mutationrepositionimagediffnotequickactionsstatus"></a>`quickActionsStatus` | [`QuickActionsStatus`](#quickactionsstatus) | Status of quick actions after mutation. |
 
 ### `Mutation.restorePagesDeployment`
 
@@ -10121,7 +10108,7 @@ Input type: `UpdateEpicInput`
 | <a id="mutationupdateepicaddlabelids"></a>`addLabelIds` | [`[ID!]`](#id) | IDs of labels to be added to the epic. |
 | <a id="mutationupdateepicaddlabels"></a>`addLabels` | [`[String!]`](#string) | Array of labels to be added to the epic. |
 | <a id="mutationupdateepicclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
-| <a id="mutationupdateepiccolor"></a>`color` | [`Color`](#color) | Color of the epic. |
+| <a id="mutationupdateepiccolor"></a>`color` | [`Color`](#color) | Color of the epic. Available only when feature flag `epic_color_highlight` is enabled. This flag is disabled by default, because the feature is experimental and is subject to change without notice. |
 | <a id="mutationupdateepicconfidential"></a>`confidential` | [`Boolean`](#boolean) | Indicates if the epic is confidential. |
 | <a id="mutationupdateepicdescription"></a>`description` | [`String`](#string) | Description of the epic. |
 | <a id="mutationupdateepicduedatefixed"></a>`dueDateFixed` | [`String`](#string) | End date of the epic. |
@@ -10193,7 +10180,6 @@ Input type: `UpdateImageDiffNoteInput`
 | <a id="mutationupdateimagediffnoteclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | <a id="mutationupdateimagediffnoteerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | <a id="mutationupdateimagediffnotenote"></a>`note` | [`Note`](#note) | Note after mutation. |
-| <a id="mutationupdateimagediffnotequickactionsstatus"></a>`quickActionsStatus` | [`QuickActionsStatus`](#quickactionsstatus) | Status of quick actions after mutation. |
 
 ### `Mutation.updateIssue`
 
@@ -10315,7 +10301,6 @@ Input type: `UpdateNoteInput`
 | <a id="mutationupdatenoteclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | <a id="mutationupdatenoteerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | <a id="mutationupdatenotenote"></a>`note` | [`Note`](#note) | Note after mutation. |
-| <a id="mutationupdatenotequickactionsstatus"></a>`quickActionsStatus` | [`QuickActionsStatus`](#quickactionsstatus) | Status of quick actions after mutation. |
 
 ### `Mutation.updatePackagesCleanupPolicy`
 
@@ -12885,29 +12870,6 @@ The edge type for [`ComplianceFramework`](#complianceframework).
 | ---- | ---- | ----------- |
 | <a id="complianceframeworkedgecursor"></a>`cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | <a id="complianceframeworkedgenode"></a>`node` | [`ComplianceFramework`](#complianceframework) | The item at the end of the edge. |
-
-#### `ComplianceRequirementConnection`
-
-The connection type for [`ComplianceRequirement`](#compliancerequirement).
-
-##### Fields
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="compliancerequirementconnectionedges"></a>`edges` | [`[ComplianceRequirementEdge]`](#compliancerequirementedge) | A list of edges. |
-| <a id="compliancerequirementconnectionnodes"></a>`nodes` | [`[ComplianceRequirement]`](#compliancerequirement) | A list of nodes. |
-| <a id="compliancerequirementconnectionpageinfo"></a>`pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
-
-#### `ComplianceRequirementEdge`
-
-The edge type for [`ComplianceRequirement`](#compliancerequirement).
-
-##### Fields
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="compliancerequirementedgecursor"></a>`cursor` | [`String!`](#string) | A cursor for use in pagination. |
-| <a id="compliancerequirementedgenode"></a>`node` | [`ComplianceRequirement`](#compliancerequirement) | The item at the end of the edge. |
 
 #### `ComplianceStandardsAdherenceConnection`
 
@@ -17560,29 +17522,6 @@ The connection type for [`WorkItem`](#workitem).
 | <a id="workitemconnectionnodes"></a>`nodes` | [`[WorkItem]`](#workitem) | A list of nodes. |
 | <a id="workitemconnectionpageinfo"></a>`pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-#### `WorkItemDescriptionTemplateConnection`
-
-The connection type for [`WorkItemDescriptionTemplate`](#workitemdescriptiontemplate).
-
-##### Fields
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="workitemdescriptiontemplateconnectionedges"></a>`edges` | [`[WorkItemDescriptionTemplateEdge]`](#workitemdescriptiontemplateedge) | A list of edges. |
-| <a id="workitemdescriptiontemplateconnectionnodes"></a>`nodes` | [`[WorkItemDescriptionTemplate]`](#workitemdescriptiontemplate) | A list of nodes. |
-| <a id="workitemdescriptiontemplateconnectionpageinfo"></a>`pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
-
-#### `WorkItemDescriptionTemplateEdge`
-
-The edge type for [`WorkItemDescriptionTemplate`](#workitemdescriptiontemplate).
-
-##### Fields
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="workitemdescriptiontemplateedgecursor"></a>`cursor` | [`String!`](#string) | A cursor for use in pagination. |
-| <a id="workitemdescriptiontemplateedgenode"></a>`node` | [`WorkItemDescriptionTemplate`](#workitemdescriptiontemplate) | The item at the end of the edge. |
-
 #### `WorkItemEdge`
 
 The edge type for [`WorkItem`](#workitem).
@@ -17593,29 +17532,6 @@ The edge type for [`WorkItem`](#workitem).
 | ---- | ---- | ----------- |
 | <a id="workitemedgecursor"></a>`cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | <a id="workitemedgenode"></a>`node` | [`WorkItem`](#workitem) | The item at the end of the edge. |
-
-#### `WorkItemRelatedBranchConnection`
-
-The connection type for [`WorkItemRelatedBranch`](#workitemrelatedbranch).
-
-##### Fields
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="workitemrelatedbranchconnectionedges"></a>`edges` | [`[WorkItemRelatedBranchEdge]`](#workitemrelatedbranchedge) | A list of edges. |
-| <a id="workitemrelatedbranchconnectionnodes"></a>`nodes` | [`[WorkItemRelatedBranch]`](#workitemrelatedbranch) | A list of nodes. |
-| <a id="workitemrelatedbranchconnectionpageinfo"></a>`pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
-
-#### `WorkItemRelatedBranchEdge`
-
-The edge type for [`WorkItemRelatedBranch`](#workitemrelatedbranch).
-
-##### Fields
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="workitemrelatedbranchedgecursor"></a>`cursor` | [`String!`](#string) | A cursor for use in pagination. |
-| <a id="workitemrelatedbranchedgenode"></a>`node` | [`WorkItemRelatedBranch`](#workitemrelatedbranch) | The item at the end of the edge. |
 
 #### `WorkItemTimelogConnection`
 
@@ -19374,7 +19290,7 @@ Represents an epic on an issue board.
 | <a id="boardepicblockedbyepics"></a>`blockedByEpics` | [`EpicConnection`](#epicconnection) | Epics blocking this epic. (see [Connections](#connections)) |
 | <a id="boardepicblockingcount"></a>`blockingCount` | [`Int`](#int) | Count of epics that this epic is blocking. |
 | <a id="boardepicclosedat"></a>`closedAt` | [`Time`](#time) | Timestamp of when the epic was closed. |
-| <a id="boardepiccolor"></a>`color` | [`String`](#string) | Color of the epic. |
+| <a id="boardepiccolor"></a>`color` | [`String`](#string) | Color of the epic. Returns `null` if `epic_color_highlight` feature flag is disabled. |
 | <a id="boardepiccommenters"></a>`commenters` | [`UserCoreConnection!`](#usercoreconnection) | All commenters on this noteable. (see [Connections](#connections)) |
 | <a id="boardepicconfidential"></a>`confidential` | [`Boolean`](#boolean) | Indicates if the epic is confidential. |
 | <a id="boardepiccreatedat"></a>`createdAt` | [`Time`](#time) | Timestamp of when the epic was created. |
@@ -19413,7 +19329,7 @@ Represents an epic on an issue board.
 | <a id="boardepicstartdateisfixed"></a>`startDateIsFixed` | [`Boolean`](#boolean) | Indicates if the start date has been manually set. |
 | <a id="boardepicstate"></a>`state` | [`EpicState!`](#epicstate) | State of the epic. |
 | <a id="boardepicsubscribed"></a>`subscribed` | [`Boolean!`](#boolean) | Indicates the currently logged in user is subscribed to the epic. |
-| <a id="boardepictextcolor"></a>`textColor` | [`String`](#string) | Text color generated for the epic. |
+| <a id="boardepictextcolor"></a>`textColor` | [`String`](#string) | Text color generated for the epic. Returns `null` if `epic_color_highlight` feature flag is disabled. |
 | <a id="boardepictitle"></a>`title` | [`String`](#string) | Title of the epic. |
 | <a id="boardepictitlehtml"></a>`titleHtml` | [`String`](#string) | GitLab Flavored Markdown rendering of `title`. |
 | <a id="boardepicupdatedat"></a>`updatedAt` | [`Time`](#time) | Timestamp of when the epic was updated. |
@@ -20020,21 +19936,6 @@ CI/CD variables for a GitLab instance.
 | ---- | ---- | ----------- |
 | <a id="cijobtokenauthloglastauthorizedat"></a>`lastAuthorizedAt` **{warning-solid}** | [`Time!`](#time) | **Introduced** in GitLab 17.6. **Status**: Experiment. Last authorization date time. |
 | <a id="cijobtokenauthlogoriginproject"></a>`originProject` **{warning-solid}** | [`Project!`](#project) | **Introduced** in GitLab 17.6. **Status**: Experiment. Origin project. |
-
-### `CiJobTokenScopeAllowlistEntry`
-
-Represents an allowlist entry for the CI_JOB_TOKEN.
-
-#### Fields
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="cijobtokenscopeallowlistentryaddedby"></a>`addedBy` | [`UserCore`](#usercore) | User that added the entry. |
-| <a id="cijobtokenscopeallowlistentrycreatedat"></a>`createdAt` | [`Time!`](#time) | When the entry was created. |
-| <a id="cijobtokenscopeallowlistentrydirection"></a>`direction` | [`String`](#string) | Direction of access. Defaults to INBOUND. |
-| <a id="cijobtokenscopeallowlistentryjobtokenpolicies"></a>`jobTokenPolicies` **{warning-solid}** | [`[CiJobTokenScopePolicies!]`](#cijobtokenscopepolicies) | **Introduced** in GitLab 17.5. **Status**: Experiment. List of policies for the entry. |
-| <a id="cijobtokenscopeallowlistentrysourceproject"></a>`sourceProject` | [`Project!`](#project) | Project that owns the allowlist entry. |
-| <a id="cijobtokenscopeallowlistentrytarget"></a>`target` | [`CiJobTokenScopeTarget`](#cijobtokenscopetarget) | Group or project allowed by the entry. |
 
 ### `CiJobTokenScopeType`
 
@@ -20891,7 +20792,6 @@ Represents a ComplianceFramework associated with a Project.
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | <a id="complianceframeworkcolor"></a>`color` | [`String!`](#string) | Hexadecimal representation of compliance framework's label color. |
-| <a id="complianceframeworkcompliancerequirements"></a>`complianceRequirements` | [`ComplianceRequirementConnection`](#compliancerequirementconnection) | Compliance requirements of the compliance framework. (see [Connections](#connections)) |
 | <a id="complianceframeworkdefault"></a>`default` | [`Boolean`](#boolean) | Default compliance framework for the group. |
 | <a id="complianceframeworkdescription"></a>`description` | [`String!`](#string) | Description of the compliance framework. |
 | <a id="complianceframeworkid"></a>`id` | [`ID!`](#id) | Compliance framework ID. |
@@ -20910,11 +20810,9 @@ Represents a ComplianceRequirement associated with a ComplianceFramework.
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
-| <a id="compliancerequirementcontrolexpression"></a>`controlExpression` | [`String!`](#string) | Control expression of the compliance requirement. |
 | <a id="compliancerequirementdescription"></a>`description` | [`String!`](#string) | Description of the compliance requirement. |
 | <a id="compliancerequirementid"></a>`id` | [`ID!`](#id) | Compliance requirement ID. |
 | <a id="compliancerequirementname"></a>`name` | [`String!`](#string) | Name of the compliance requirement. |
-| <a id="compliancerequirementrequirementtype"></a>`requirementType` | [`String!`](#string) | Type of the compliance requirement. |
 
 ### `ComplianceStandardsAdherence`
 
@@ -22987,7 +22885,7 @@ Represents an epic.
 | <a id="epicblockedbyepics"></a>`blockedByEpics` | [`EpicConnection`](#epicconnection) | Epics blocking this epic. (see [Connections](#connections)) |
 | <a id="epicblockingcount"></a>`blockingCount` | [`Int`](#int) | Count of epics that this epic is blocking. |
 | <a id="epicclosedat"></a>`closedAt` | [`Time`](#time) | Timestamp of when the epic was closed. |
-| <a id="epiccolor"></a>`color` | [`String`](#string) | Color of the epic. |
+| <a id="epiccolor"></a>`color` | [`String`](#string) | Color of the epic. Returns `null` if `epic_color_highlight` feature flag is disabled. |
 | <a id="epiccommenters"></a>`commenters` | [`UserCoreConnection!`](#usercoreconnection) | All commenters on this noteable. (see [Connections](#connections)) |
 | <a id="epicconfidential"></a>`confidential` | [`Boolean`](#boolean) | Indicates if the epic is confidential. |
 | <a id="epiccreatedat"></a>`createdAt` | [`Time`](#time) | Timestamp of when the epic was created. |
@@ -23026,7 +22924,7 @@ Represents an epic.
 | <a id="epicstartdateisfixed"></a>`startDateIsFixed` | [`Boolean`](#boolean) | Indicates if the start date has been manually set. |
 | <a id="epicstate"></a>`state` | [`EpicState!`](#epicstate) | State of the epic. |
 | <a id="epicsubscribed"></a>`subscribed` | [`Boolean!`](#boolean) | Indicates the currently logged in user is subscribed to the epic. |
-| <a id="epictextcolor"></a>`textColor` | [`String`](#string) | Text color generated for the epic. |
+| <a id="epictextcolor"></a>`textColor` | [`String`](#string) | Text color generated for the epic. Returns `null` if `epic_color_highlight` feature flag is disabled. |
 | <a id="epictitle"></a>`title` | [`String`](#string) | Title of the epic. |
 | <a id="epictitlehtml"></a>`titleHtml` | [`String`](#string) | GitLab Flavored Markdown rendering of `title`. |
 | <a id="epicupdatedat"></a>`updatedAt` | [`Time`](#time) | Timestamp of when the epic was updated. |
@@ -24554,22 +24452,6 @@ four standard [pagination arguments](#pagination-arguments):
 | ---- | ---- | ----------- |
 | <a id="groupcustomemojiincludeancestorgroups"></a>`includeAncestorGroups` | [`Boolean`](#boolean) | Includes custom emoji from parent groups. |
 
-##### `Group.customField`
-
-A custom field configured for the group. Available only when feature flag `custom_fields_feature` is enabled.
-
-DETAILS:
-**Introduced** in GitLab 17.6.
-**Status**: Experiment.
-
-Returns [`CustomField`](#customfield).
-
-###### Arguments
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="groupcustomfieldid"></a>`id` | [`IssuablesCustomFieldID!`](#issuablescustomfieldid) | Global ID of the custom field. |
-
 ##### `Group.customFields`
 
 Custom fields configured for the group. Available only when feature flag `custom_fields_feature` is enabled.
@@ -25528,9 +25410,8 @@ four standard [pagination arguments](#pagination-arguments):
 | <a id="groupvulnerabilitieshasmergerequest"></a>`hasMergeRequest` | [`Boolean`](#boolean) | Returns only the vulnerabilities which have linked merge requests. |
 | <a id="groupvulnerabilitieshasremediations"></a>`hasRemediations` | [`Boolean`](#boolean) | Returns only the vulnerabilities which have remediations. |
 | <a id="groupvulnerabilitieshasresolution"></a>`hasResolution` | [`Boolean`](#boolean) | Returns only the vulnerabilities which have been resolved on default branch. |
-| <a id="groupvulnerabilitiesidentifiername"></a>`identifierName` **{warning-solid}** | [`String`](#string) | **Introduced** in GitLab 17.6. **Status**: Experiment. Filter vulnerabilities by identifier name. Applicable only on project level when feature flag `vulnerability_filtering_by_identifier` is enabled. Ignored when applied on group level or instance securitydashboard queries. |
 | <a id="groupvulnerabilitiesimage"></a>`image` | [`[String!]`](#string) | Filter vulnerabilities by location image. When this filter is present, the response only matches entries for a `reportType` that includes `container_scanning`, `cluster_image_scanning`. |
-| <a id="groupvulnerabilitiesowasptopten"></a>`owaspTopTen` | [`[VulnerabilityOwaspTop10!]`](#vulnerabilityowasptop10) | Filter vulnerabilities by OWASP Top 10 category. Wildcard value "NONE" also supported and it cannot be combined with other OWASP top 10 values. |
+| <a id="groupvulnerabilitiesowasptopten"></a>`owaspTopTen` | [`[VulnerabilityOwaspTop10!]`](#vulnerabilityowasptop10) | Filter vulnerabilities by OWASP Top 10 category. Wildcard value "NONE" also supported when feature flag `owasp_top_10_null_filtering` is enabled. "NONE" wildcard cannot be combined with other OWASP top 10 values. |
 | <a id="groupvulnerabilitiesprojectid"></a>`projectId` | [`[ID!]`](#id) | Filter vulnerabilities by project. |
 | <a id="groupvulnerabilitiesreporttype"></a>`reportType` | [`[VulnerabilityReportType!]`](#vulnerabilityreporttype) | Filter vulnerabilities by report type. |
 | <a id="groupvulnerabilitiesscanner"></a>`scanner` | [`[String!]`](#string) | Filter vulnerabilities by VulnerabilityScanner.externalId. |
@@ -25588,7 +25469,7 @@ Returns [`VulnerabilitySeveritiesCount`](#vulnerabilityseveritiescount).
 | <a id="groupvulnerabilityseveritiescounthasremediations"></a>`hasRemediations` | [`Boolean`](#boolean) | Filter vulnerabilities that do or do not have remediations. |
 | <a id="groupvulnerabilityseveritiescounthasresolution"></a>`hasResolution` | [`Boolean`](#boolean) | Filter vulnerabilities that do or do not have a resolution. |
 | <a id="groupvulnerabilityseveritiescountimage"></a>`image` | [`[String!]`](#string) | Filter vulnerabilities by location image. When this filter is present, the response only matches entries for a `reportType` that includes `container_scanning`, `cluster_image_scanning`. |
-| <a id="groupvulnerabilityseveritiescountowasptopten"></a>`owaspTopTen` | [`[VulnerabilityOwaspTop10!]`](#vulnerabilityowasptop10) | Filter vulnerabilities by OWASP Top 10 category. Wildcard value "NONE" also supported and it cannot be combined with other OWASP top 10 values. |
+| <a id="groupvulnerabilityseveritiescountowasptopten"></a>`owaspTopTen` | [`[VulnerabilityOwaspTop10!]`](#vulnerabilityowasptop10) | Filter vulnerabilities by OWASP Top 10 category. Wildcard value "NONE" also supported when feature flag `owasp_top_10_null_filtering` is enabled. "NONE" wildcard cannot be combined with other OWASP top 10 values. |
 | <a id="groupvulnerabilityseveritiescountprojectid"></a>`projectId` | [`[ID!]`](#id) | Filter vulnerabilities by project. |
 | <a id="groupvulnerabilityseveritiescountreporttype"></a>`reportType` | [`[VulnerabilityReportType!]`](#vulnerabilityreporttype) | Filter vulnerabilities by report type. |
 | <a id="groupvulnerabilityseveritiescountscanner"></a>`scanner` | [`[String!]`](#string) | Filter vulnerabilities by scanner. |
@@ -25611,27 +25492,6 @@ Returns [`WorkItem`](#workitem).
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | <a id="groupworkitemiid"></a>`iid` | [`String!`](#string) | IID of the work item. |
-
-##### `Group.workItemDescriptionTemplates`
-
-Work item description templates available to the namespace.
-
-DETAILS:
-**Introduced** in GitLab 17.6.
-**Status**: Experiment.
-
-Returns [`WorkItemDescriptionTemplateConnection`](#workitemdescriptiontemplateconnection).
-
-This field returns a [connection](#connections). It accepts the
-four standard [pagination arguments](#pagination-arguments):
-`before: String`, `after: String`, `first: Int`, and `last: Int`.
-
-###### Arguments
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="groupworkitemdescriptiontemplatesname"></a>`name` | [`String`](#string) | Fetches the specific DescriptionTemplate. |
-| <a id="groupworkitemdescriptiontemplatessearch"></a>`search` | [`String`](#string) | Search for DescriptionTemplates by name. |
 
 ##### `Group.workItemStateCounts`
 
@@ -26304,7 +26164,7 @@ Returns [`VulnerabilitySeveritiesCount`](#vulnerabilityseveritiescount).
 | <a id="instancesecuritydashboardvulnerabilityseveritiescounthasremediations"></a>`hasRemediations` | [`Boolean`](#boolean) | Filter vulnerabilities that do or do not have remediations. |
 | <a id="instancesecuritydashboardvulnerabilityseveritiescounthasresolution"></a>`hasResolution` | [`Boolean`](#boolean) | Filter vulnerabilities that do or do not have a resolution. |
 | <a id="instancesecuritydashboardvulnerabilityseveritiescountimage"></a>`image` | [`[String!]`](#string) | Filter vulnerabilities by location image. When this filter is present, the response only matches entries for a `reportType` that includes `container_scanning`, `cluster_image_scanning`. |
-| <a id="instancesecuritydashboardvulnerabilityseveritiescountowasptopten"></a>`owaspTopTen` | [`[VulnerabilityOwaspTop10!]`](#vulnerabilityowasptop10) | Filter vulnerabilities by OWASP Top 10 category. Wildcard value "NONE" also supported and it cannot be combined with other OWASP top 10 values. |
+| <a id="instancesecuritydashboardvulnerabilityseveritiescountowasptopten"></a>`owaspTopTen` | [`[VulnerabilityOwaspTop10!]`](#vulnerabilityowasptop10) | Filter vulnerabilities by OWASP Top 10 category. Wildcard value "NONE" also supported when feature flag `owasp_top_10_null_filtering` is enabled. "NONE" wildcard cannot be combined with other OWASP top 10 values. |
 | <a id="instancesecuritydashboardvulnerabilityseveritiescountprojectid"></a>`projectId` | [`[ID!]`](#id) | Filter vulnerabilities by project. |
 | <a id="instancesecuritydashboardvulnerabilityseveritiescountreporttype"></a>`reportType` | [`[VulnerabilityReportType!]`](#vulnerabilityreporttype) | Filter vulnerabilities by report type. |
 | <a id="instancesecuritydashboardvulnerabilityseveritiescountscanner"></a>`scanner` | [`[String!]`](#string) | Filter vulnerabilities by scanner. |
@@ -26691,7 +26551,6 @@ Represents the Geo replication and verification state of a job_artifact.
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | <a id="kasenabled"></a>`enabled` | [`Boolean!`](#boolean) | Indicates whether the Kubernetes agent server is enabled. |
-| <a id="kasexternalk8sproxyurl"></a>`externalK8sProxyUrl` | [`String`](#string) | URL used by the Kubernetes tooling to communicate with the KAS Kubernetes API proxy. |
 | <a id="kasexternalurl"></a>`externalUrl` | [`String`](#string) | URL used by the agents to communicate with the server. |
 | <a id="kasversion"></a>`version` | [`String`](#string) | KAS version. |
 
@@ -29401,27 +29260,6 @@ Returns [`WorkItem`](#workitem).
 | ---- | ---- | ----------- |
 | <a id="namespaceworkitemiid"></a>`iid` | [`String!`](#string) | IID of the work item. |
 
-##### `Namespace.workItemDescriptionTemplates`
-
-Work item description templates available to the namespace.
-
-DETAILS:
-**Introduced** in GitLab 17.6.
-**Status**: Experiment.
-
-Returns [`WorkItemDescriptionTemplateConnection`](#workitemdescriptiontemplateconnection).
-
-This field returns a [connection](#connections). It accepts the
-four standard [pagination arguments](#pagination-arguments):
-`before: String`, `after: String`, `first: Int`, and `last: Int`.
-
-###### Arguments
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="namespaceworkitemdescriptiontemplatesname"></a>`name` | [`String`](#string) | Fetches the specific DescriptionTemplate. |
-| <a id="namespaceworkitemdescriptiontemplatessearch"></a>`search` | [`String`](#string) | Search for DescriptionTemplates by name. |
-
 ##### `Namespace.workItemTypes`
 
 Work item types available to the namespace.
@@ -29663,7 +29501,6 @@ four standard [pagination arguments](#pagination-arguments):
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
-| <a id="organizationgroupsids"></a>`ids` | [`[ID!]`](#id) | Filter groups by IDs. |
 | <a id="organizationgroupsmarkedfordeletionon"></a>`markedForDeletionOn` | [`Date`](#date) | Date when the group was marked for deletion. |
 | <a id="organizationgroupssearch"></a>`search` | [`String`](#string) | Search query for group name or group full path. |
 | <a id="organizationgroupssort"></a>`sort` | [`String`](#string) | Sort order of results. Format: `<field_name>_<sort_direction>`, for example: `id_desc` or `name_asc`. |
@@ -30814,7 +30651,6 @@ Project-level settings for product analytics provider.
 | <a id="projectdetailedimportstatus"></a>`detailedImportStatus` | [`DetailedImportStatus`](#detailedimportstatus) | Detailed import status of the project. |
 | <a id="projectdora"></a>`dora` | [`Dora`](#dora) | Project's DORA metrics. |
 | <a id="projectduofeaturesenabled"></a>`duoFeaturesEnabled` **{warning-solid}** | [`Boolean`](#boolean) | **Introduced** in GitLab 16.9. **Status**: Experiment. Indicates whether GitLab Duo features are enabled for the project. |
-| <a id="projectexplorecatalogpath"></a>`exploreCatalogPath` **{warning-solid}** | [`String`](#string) | **Introduced** in GitLab 17.6. **Status**: Experiment. Path to the project catalog resource. |
 | <a id="projectflowmetrics"></a>`flowMetrics` **{warning-solid}** | [`ProjectValueStreamAnalyticsFlowMetrics`](#projectvaluestreamanalyticsflowmetrics) | **Introduced** in GitLab 15.10. **Status**: Experiment. Flow metrics for value stream analytics. |
 | <a id="projectforkingaccesslevel"></a>`forkingAccessLevel` | [`ProjectFeatureAccess`](#projectfeatureaccess) | Access level required for forking access. |
 | <a id="projectforkscount"></a>`forksCount` | [`Int!`](#int) | Number of times the project has been forked. |
@@ -32709,9 +32545,8 @@ four standard [pagination arguments](#pagination-arguments):
 | <a id="projectvulnerabilitieshasmergerequest"></a>`hasMergeRequest` | [`Boolean`](#boolean) | Returns only the vulnerabilities which have linked merge requests. |
 | <a id="projectvulnerabilitieshasremediations"></a>`hasRemediations` | [`Boolean`](#boolean) | Returns only the vulnerabilities which have remediations. |
 | <a id="projectvulnerabilitieshasresolution"></a>`hasResolution` | [`Boolean`](#boolean) | Returns only the vulnerabilities which have been resolved on default branch. |
-| <a id="projectvulnerabilitiesidentifiername"></a>`identifierName` **{warning-solid}** | [`String`](#string) | **Introduced** in GitLab 17.6. **Status**: Experiment. Filter vulnerabilities by identifier name. Applicable only on project level when feature flag `vulnerability_filtering_by_identifier` is enabled. Ignored when applied on group level or instance securitydashboard queries. |
 | <a id="projectvulnerabilitiesimage"></a>`image` | [`[String!]`](#string) | Filter vulnerabilities by location image. When this filter is present, the response only matches entries for a `reportType` that includes `container_scanning`, `cluster_image_scanning`. |
-| <a id="projectvulnerabilitiesowasptopten"></a>`owaspTopTen` | [`[VulnerabilityOwaspTop10!]`](#vulnerabilityowasptop10) | Filter vulnerabilities by OWASP Top 10 category. Wildcard value "NONE" also supported and it cannot be combined with other OWASP top 10 values. |
+| <a id="projectvulnerabilitiesowasptopten"></a>`owaspTopTen` | [`[VulnerabilityOwaspTop10!]`](#vulnerabilityowasptop10) | Filter vulnerabilities by OWASP Top 10 category. Wildcard value "NONE" also supported when feature flag `owasp_top_10_null_filtering` is enabled. "NONE" wildcard cannot be combined with other OWASP top 10 values. |
 | <a id="projectvulnerabilitiesprojectid"></a>`projectId` | [`[ID!]`](#id) | Filter vulnerabilities by project. |
 | <a id="projectvulnerabilitiesreporttype"></a>`reportType` | [`[VulnerabilityReportType!]`](#vulnerabilityreporttype) | Filter vulnerabilities by report type. |
 | <a id="projectvulnerabilitiesscanner"></a>`scanner` | [`[String!]`](#string) | Filter vulnerabilities by VulnerabilityScanner.externalId. |
@@ -32777,7 +32612,7 @@ Returns [`VulnerabilitySeveritiesCount`](#vulnerabilityseveritiescount).
 | <a id="projectvulnerabilityseveritiescounthasremediations"></a>`hasRemediations` | [`Boolean`](#boolean) | Filter vulnerabilities that do or do not have remediations. |
 | <a id="projectvulnerabilityseveritiescounthasresolution"></a>`hasResolution` | [`Boolean`](#boolean) | Filter vulnerabilities that do or do not have a resolution. |
 | <a id="projectvulnerabilityseveritiescountimage"></a>`image` | [`[String!]`](#string) | Filter vulnerabilities by location image. When this filter is present, the response only matches entries for a `reportType` that includes `container_scanning`, `cluster_image_scanning`. |
-| <a id="projectvulnerabilityseveritiescountowasptopten"></a>`owaspTopTen` | [`[VulnerabilityOwaspTop10!]`](#vulnerabilityowasptop10) | Filter vulnerabilities by OWASP Top 10 category. Wildcard value "NONE" also supported and it cannot be combined with other OWASP top 10 values. |
+| <a id="projectvulnerabilityseveritiescountowasptopten"></a>`owaspTopTen` | [`[VulnerabilityOwaspTop10!]`](#vulnerabilityowasptop10) | Filter vulnerabilities by OWASP Top 10 category. Wildcard value "NONE" also supported when feature flag `owasp_top_10_null_filtering` is enabled. "NONE" wildcard cannot be combined with other OWASP top 10 values. |
 | <a id="projectvulnerabilityseveritiescountprojectid"></a>`projectId` | [`[ID!]`](#id) | Filter vulnerabilities by project. |
 | <a id="projectvulnerabilityseveritiescountreporttype"></a>`reportType` | [`[VulnerabilityReportType!]`](#vulnerabilityreporttype) | Filter vulnerabilities by report type. |
 | <a id="projectvulnerabilityseveritiescountscanner"></a>`scanner` | [`[String!]`](#string) | Filter vulnerabilities by scanner. |
@@ -33453,17 +33288,6 @@ The amount of time for a job to be picked up by a runner, in percentiles.
 | <a id="queueinghistorytimeseriesp95"></a>`p95` | [`Duration`](#duration) | 95th percentile. 95% of the durations are lower than this value. |
 | <a id="queueinghistorytimeseriesp99"></a>`p99` | [`Duration`](#duration) | 99th percentile. 99% of the durations are lower than this value. |
 | <a id="queueinghistorytimeseriestime"></a>`time` | [`Time!`](#time) | Start of the time interval. |
-
-### `QuickActionsStatus`
-
-#### Fields
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="quickactionsstatuscommandnames"></a>`commandNames` | [`[String!]`](#string) | Quick action command names. |
-| <a id="quickactionsstatuscommandsonly"></a>`commandsOnly` | [`Boolean`](#boolean) | Returns true if only quick action commands were in the note. |
-| <a id="quickactionsstatuserrormessages"></a>`errorMessages` | [`[String!]`](#string) | Error messages from quick actions that failed to apply. |
-| <a id="quickactionsstatusmessages"></a>`messages` | [`[String!]`](#string) | Response messages from quick actions. |
 
 ### `RecentFailures`
 
@@ -35819,6 +35643,7 @@ Represents a vulnerability.
 | <a id="vulnerabilityprimaryidentifier"></a>`primaryIdentifier` | [`VulnerabilityIdentifier`](#vulnerabilityidentifier) | Primary identifier of the vulnerability. |
 | <a id="vulnerabilityproject"></a>`project` | [`Project`](#project) | Project on which the vulnerability was found. |
 | <a id="vulnerabilityreporttype"></a>`reportType` | [`VulnerabilityReportType`](#vulnerabilityreporttype) | Type of the security report that found the vulnerability (SAST, DEPENDENCY_SCANNING, CONTAINER_SCANNING, DAST, SECRET_DETECTION, COVERAGE_FUZZING, API_FUZZING, CLUSTER_IMAGE_SCANNING, CONTAINER_SCANNING_FOR_REGISTRY, GENERIC). `Scan Type` in the UI. |
+| <a id="vulnerabilityrepresentationinformation"></a>`representationInformation` **{warning-solid}** | [`VulnerabilityRepresentationInformation`](#vulnerabilityrepresentationinformation) | **Introduced** in GitLab 18.0. **Status**: Experiment. Information about the representation of the vulnerability, such as resolved commit SHA. This field can only be resolved for one vulnerability in any single request. |
 | <a id="vulnerabilityresolvedat"></a>`resolvedAt` | [`Time`](#time) | Timestamp of when the vulnerability state was changed to resolved. |
 | <a id="vulnerabilityresolvedby"></a>`resolvedBy` | [`UserCore`](#usercore) | User that resolved the vulnerability. |
 | <a id="vulnerabilityresolvedondefaultbranch"></a>`resolvedOnDefaultBranch` | [`Boolean!`](#boolean) | Indicates whether the vulnerability is fixed on the default branch or not. |
@@ -36362,6 +36187,16 @@ Represents a vulnerability remediation type.
 | <a id="vulnerabilityremediationtypediff"></a>`diff` | [`String`](#string) | Diff of the remediation. |
 | <a id="vulnerabilityremediationtypesummary"></a>`summary` | [`String`](#string) | Summary of the remediation. |
 
+### `VulnerabilityRepresentationInformation`
+
+Represents vulnerability information.
+
+#### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="vulnerabilityrepresentationinformationresolvedincommitsha"></a>`resolvedInCommitSha` | [`String`](#string) | SHA of the commit where the vulnerability was resolved. |
+
 ### `VulnerabilityRequest`
 
 Represents a Vulnerability Request.
@@ -36587,15 +36422,6 @@ Returns [`String!`](#string).
 | <a id="workitemclosingmergerequestid"></a>`id` | [`MergeRequestsClosingIssuesID!`](#mergerequestsclosingissuesid) | Global ID of the closing merge request association. |
 | <a id="workitemclosingmergerequestmergerequest"></a>`mergeRequest` | [`MergeRequest`](#mergerequest) | Related merge request. |
 
-### `WorkItemDescriptionTemplate`
-
-#### Fields
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="workitemdescriptiontemplatecontent"></a>`content` | [`String!`](#string) | Content of Description Template. |
-| <a id="workitemdescriptiontemplatename"></a>`name` | [`String!`](#string) | Name of Description Template. |
-
 ### `WorkItemPermissions`
 
 Check permissions for the current user on a work item.
@@ -36613,16 +36439,6 @@ Check permissions for the current user on a work item.
 | <a id="workitempermissionsreadworkitem"></a>`readWorkItem` | [`Boolean!`](#boolean) | If `true`, the user can perform `read_work_item` on this resource. |
 | <a id="workitempermissionssetworkitemmetadata"></a>`setWorkItemMetadata` | [`Boolean!`](#boolean) | If `true`, the user can perform `set_work_item_metadata` on this resource. |
 | <a id="workitempermissionsupdateworkitem"></a>`updateWorkItem` | [`Boolean!`](#boolean) | If `true`, the user can perform `update_work_item` on this resource. |
-
-### `WorkItemRelatedBranch`
-
-#### Fields
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="workitemrelatedbranchcomparepath"></a>`comparePath` | [`String`](#string) | Path to comparison of branch to default branch. |
-| <a id="workitemrelatedbranchname"></a>`name` | [`String!`](#string) | Name of the branch. |
-| <a id="workitemrelatedbranchpipelinestatus"></a>`pipelineStatus` | [`DetailedStatus`](#detailedstatus) | Status of pipeline for the branch. |
 
 ### `WorkItemStateCountsType`
 
@@ -36854,8 +36670,6 @@ Represents a development widget.
 | ---- | ---- | ----------- |
 | <a id="workitemwidgetdevelopmentclosingmergerequests"></a>`closingMergeRequests` | [`WorkItemClosingMergeRequestConnection`](#workitemclosingmergerequestconnection) | Merge requests that will close the work item when merged. (see [Connections](#connections)) |
 | <a id="workitemwidgetdevelopmentfeatureflags"></a>`featureFlags` | [`FeatureFlagConnection`](#featureflagconnection) | Feature flags associated with the work item. (see [Connections](#connections)) |
-| <a id="workitemwidgetdevelopmentrelatedbranches"></a>`relatedBranches` | [`WorkItemRelatedBranchConnection`](#workitemrelatedbranchconnection) | Branches that have referred to the work item, but do not have an associated merge request. (see [Connections](#connections)) |
-| <a id="workitemwidgetdevelopmentrelatedmergerequests"></a>`relatedMergeRequests` **{warning-solid}** | [`MergeRequestConnection`](#mergerequestconnection) | **Introduced** in GitLab 17.6. **Status**: Experiment. Merge requests where the work item has been mentioned. Not implemented, returns empty list. |
 | <a id="workitemwidgetdevelopmenttype"></a>`type` | [`WorkItemWidgetType`](#workitemwidgettype) | Widget type. |
 | <a id="workitemwidgetdevelopmentwillautoclosebymergerequest"></a>`willAutoCloseByMergeRequest` | [`Boolean!`](#boolean) | Whether the work item will automatically be closed when a closing merge request is merged. |
 
@@ -37155,7 +36969,6 @@ Represents a remote development workspace.
 | <a id="workspaceclusteragent"></a>`clusterAgent` | [`ClusterAgent!`](#clusteragent) | Kubernetes agent associated with the workspace. |
 | <a id="workspacecreatedat"></a>`createdAt` | [`Time!`](#time) | Timestamp of when the workspace was created. |
 | <a id="workspacedeploymentresourceversion"></a>`deploymentResourceVersion` | [`Int`](#int) | Version of the deployment resource for the workspace. |
-| <a id="workspacedesiredconfiggeneratorversion"></a>`desiredConfigGeneratorVersion` **{warning-solid}** | [`Int!`](#int) | **Introduced** in GitLab 17.6. **Status**: Experiment. Version of the desired config generator for the workspace. |
 | <a id="workspacedesiredstate"></a>`desiredState` | [`String!`](#string) | Desired state of the workspace. |
 | <a id="workspacedesiredstateupdatedat"></a>`desiredStateUpdatedAt` | [`Time!`](#time) | Timestamp of the last update to the desired state. |
 | <a id="workspacedevfile"></a>`devfile` | [`String!`](#string) | Source YAML of the devfile used to configure the workspace. |
@@ -37163,7 +36976,6 @@ Represents a remote development workspace.
 | <a id="workspacedevfileref"></a>`devfileRef` | [`String!`](#string) | Git reference that contains the devfile used to configure the workspace. |
 | <a id="workspacedevfileweburl"></a>`devfileWebUrl` | [`String!`](#string) | Web URL of the devfile used to configure the workspace. |
 | <a id="workspaceeditor"></a>`editor` **{warning-solid}** | [`String!`](#string) | **Deprecated** in GitLab 17.5. Field is not used. |
-| <a id="workspaceforceincludeallresources"></a>`forceIncludeAllResources` **{warning-solid}** | [`Boolean!`](#boolean) | **Introduced** in GitLab 17.6. **Status**: Experiment. Forces all resources to be included for the workspaceduring the next reconciliation with the agent. |
 | <a id="workspaceid"></a>`id` | [`RemoteDevelopmentWorkspaceID!`](#remotedevelopmentworkspaceid) | Global ID of the workspace. |
 | <a id="workspacemaxhoursbeforetermination"></a>`maxHoursBeforeTermination` | [`Int!`](#int) | Number of hours until the workspace automatically terminates. |
 | <a id="workspacename"></a>`name` | [`String!`](#string) | Name of the workspace in Kubernetes. |
@@ -37174,7 +36986,6 @@ Represents a remote development workspace.
 | <a id="workspaceupdatedat"></a>`updatedAt` | [`Time!`](#time) | Timestamp of the last update to any mutable workspace property. |
 | <a id="workspaceurl"></a>`url` | [`String!`](#string) | URL of the workspace. |
 | <a id="workspaceuser"></a>`user` | [`UserCore!`](#usercore) | Owner of the workspace. |
-| <a id="workspaceworkspacesagentconfigversion"></a>`workspacesAgentConfigVersion` **{warning-solid}** | [`Int!`](#int) | **Introduced** in GitLab 17.6. **Status**: Experiment. Version of the associated WorkspacesAgentConfig for the workspace. |
 
 ### `WorkspacesAgentConfig`
 
@@ -39092,7 +38903,6 @@ Member role permission.
 | <a id="memberrolepermissionmanage_merge_request_settings"></a>`MANAGE_MERGE_REQUEST_SETTINGS` | Configure merge request settings at the group or project level. Group actions include managing merge checks and approval settings. Project actions include managing MR configurations, approval rules and settings, and branch targets. In order to enable Suggested reviewers, the "Manage project access tokens" custom permission needs to be enabled. |
 | <a id="memberrolepermissionmanage_project_access_tokens"></a>`MANAGE_PROJECT_ACCESS_TOKENS` | Create, read, update, and delete project access tokens. When creating a token, users with this custom permission must select a role for that token that has the same or fewer permissions as the default role used as the base for the custom role. |
 | <a id="memberrolepermissionmanage_security_policy_link"></a>`MANAGE_SECURITY_POLICY_LINK` | Allows linking security policy projects. |
-| <a id="memberrolepermissionread_admin_dashboard"></a>`READ_ADMIN_DASHBOARD` | Read-only access to admin dashboard. |
 | <a id="memberrolepermissionread_code"></a>`READ_CODE` | Allows read-only access to the source code in the user interface. Does not allow users to edit or download repository archives, clone or pull repositories, view source code in an IDE, or view merge requests for private projects. You can download individual files because read-only access inherently grants the ability to make a local copy of the file. |
 | <a id="memberrolepermissionread_crm_contact"></a>`READ_CRM_CONTACT` | Read CRM contact. |
 | <a id="memberrolepermissionread_dependency"></a>`READ_DEPENDENCY` | Allows read-only access to the dependencies and licenses. |
@@ -39499,7 +39309,6 @@ Values for package manager.
 | <a id="packagemanagerbundler"></a>`BUNDLER` | Package manager: bundler. |
 | <a id="packagemanagercomposer"></a>`COMPOSER` | Package manager: composer. |
 | <a id="packagemanagerconan"></a>`CONAN` | Package manager: conan. |
-| <a id="packagemanagerconda"></a>`CONDA` | Package manager: conda. |
 | <a id="packagemanagergo"></a>`GO` | Package manager: go. |
 | <a id="packagemanagergradle"></a>`GRADLE` | Package manager: gradle. |
 | <a id="packagemanagermaven"></a>`MAVEN` | Package manager: maven. |
@@ -39585,9 +39394,8 @@ Package type of a package protection rule resource.
 
 | Value | Description |
 | ----- | ----------- |
-| <a id="packagesprotectionrulepackagetypeconan"></a>`CONAN` **{warning-solid}** | **Introduced** in GitLab 17.6. **Status**: Experiment. Packages of the Conan format. Available only when feature flag `packages_protected_packages_conan` is enabled. |
 | <a id="packagesprotectionrulepackagetypenpm"></a>`NPM` | Packages of the npm format. |
-| <a id="packagesprotectionrulepackagetypepypi"></a>`PYPI` **{warning-solid}** | **Introduced** in GitLab 17.6. **Status**: Experiment. Packages of the PyPI format. Available only when feature flag `packages_protected_packages_pypi` is enabled. |
+| <a id="packagesprotectionrulepackagetypepypi"></a>`PYPI` **{warning-solid}** | **Introduced** in GitLab 17.6. **Status**: Experiment. Packages of the PyPI format. |
 
 ### `PipelineAnalyticsJobStatus`
 
@@ -39976,6 +39784,7 @@ Type of search.
 | Value | Description |
 | ----- | ----------- |
 | <a id="securityreporttypeenumapi_fuzzing"></a>`API_FUZZING` | API FUZZING scan report. |
+| <a id="securityreporttypeenumbreach_and_attack_simulation"></a>`BREACH_AND_ATTACK_SIMULATION` | BREACH AND ATTACK SIMULATION scan report. |
 | <a id="securityreporttypeenumcluster_image_scanning"></a>`CLUSTER_IMAGE_SCANNING` | CLUSTER IMAGE SCANNING scan report. |
 | <a id="securityreporttypeenumcontainer_scanning"></a>`CONTAINER_SCANNING` | CONTAINER SCANNING scan report. |
 | <a id="securityreporttypeenumcoverage_fuzzing"></a>`COVERAGE_FUZZING` | COVERAGE FUZZING scan report. |
@@ -39993,6 +39802,7 @@ The type of the security scanner.
 | Value | Description |
 | ----- | ----------- |
 | <a id="securityscannertypeapi_fuzzing"></a>`API_FUZZING` | API Fuzzing scanner. |
+| <a id="securityscannertypebreach_and_attack_simulation"></a>`BREACH_AND_ATTACK_SIMULATION` | Breach And Attack Simulation scanner. |
 | <a id="securityscannertypecluster_image_scanning"></a>`CLUSTER_IMAGE_SCANNING` | Cluster Image Scanning scanner. |
 | <a id="securityscannertypecontainer_scanning"></a>`CONTAINER_SCANNING` | Container Scanning scanner. |
 | <a id="securityscannertypecoverage_fuzzing"></a>`COVERAGE_FUZZING` | Coverage Fuzzing scanner. |
@@ -41876,15 +41686,6 @@ abstract types.
 
 ### Unions
 
-#### `CiJobTokenScopeTarget`
-
-Represents an object that is the target of a CI_JOB_TOKEN allowlist entry.
-
-One of:
-
-- [`Group`](#group)
-- [`Project`](#project)
-
 #### `CiRunnerCloudProvisioning`
 
 Information used in runner cloud provisioning.
@@ -43132,7 +42933,7 @@ see the associated mutation type above.
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | <a id="airesolvevulnerabilityinputresourceid"></a>`resourceId` | [`AiModelID!`](#aimodelid) | Global ID of the resource to mutate. |
-| <a id="airesolvevulnerabilityinputvulnerablemergerequestid"></a>`vulnerableMergeRequestId` | [`MergeRequestID`](#mergerequestid) | Global ID of the merge request which the merge request containing the vulnerability resolution will target. |
+| <a id="airesolvevulnerabilityinputsuggestionmergerequestid"></a>`suggestionMergeRequestId` | [`MergeRequestID`](#mergerequestid) | Global ID of the merge request where resolution will be provided as a suggestion. |
 
 ### `AiSummarizeCommentsInput`
 
@@ -43271,7 +43072,6 @@ Attributes for defining a CI/CD variable.
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
-| <a id="compliancerequirementinputcontrolexpression"></a>`controlExpression` | [`String`](#string) | Control expression for the compliance requirement. |
 | <a id="compliancerequirementinputdescription"></a>`description` | [`String`](#string) | New description for the compliance requirement. |
 | <a id="compliancerequirementinputname"></a>`name` | [`String`](#string) | New name for the compliance requirement. |
 

@@ -6,11 +6,7 @@ module Gitlab
       module Events
         class Renamed < BaseImporter
           def execute(issue_event)
-            created_note = Note.create!(note_params(issue_event))
-
-            return unless mapper.user_mapping_enabled?
-
-            push_with_record(created_note, :author_id, issue_event[:actor].id, mapper.user_mapper)
+            Note.create!(note_params(issue_event))
           end
 
           private

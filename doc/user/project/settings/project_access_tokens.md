@@ -1,5 +1,5 @@
 ---
-stage: Software Supply Chain Security
+stage: Govern
 group: Authentication
 info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments"
 ---
@@ -16,7 +16,7 @@ Actual access to a project is controlled by a combination of [roles and permissi
 
 Use a project access token to authenticate:
 
-- With the [GitLab API](../../../api/rest/authentication.md#personalprojectgroup-access-tokens).
+- With the [GitLab API](../../../api/rest/index.md#personalprojectgroup-access-tokens).
 - With Git, when using HTTP Basic Authentication, use:
   - Any non-blank value as a username.
   - The project access token as the password.

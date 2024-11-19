@@ -4275,10 +4275,18 @@ RSpec.describe MergeRequest, factory_default: :keep, feature_category: :code_rev
           let!(:creation) { Ci::PipelineCreation::Requests.start_for_merge_request(subject) }
 
           after do
-            Ci::PipelineCreation::Requests.succeeded(creation, pipeline.id)
+            Ci::PipelineCreation::Requests.succeeded(creation)
           end
 
           it { expect(subject.mergeable_ci_state?).to be_falsey }
+
+          context 'and the ci_redis_pipeline_creations flag is disabled' do
+            before do
+              stub_feature_flags(ci_redis_pipeline_creations: false)
+            end
+
+            it { expect(subject.mergeable_ci_state?).to be_truthy }
+          end
         end
       end
 

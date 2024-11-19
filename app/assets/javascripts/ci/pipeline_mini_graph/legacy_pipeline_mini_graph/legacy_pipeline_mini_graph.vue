@@ -1,23 +1,19 @@
 <script>
 import { GlIcon, GlTooltipDirective } from '@gitlab/ui';
+import { convertToGraphQLId } from '~/graphql_shared/utils';
+import { TYPENAME_CI_PIPELINE } from '~/graphql_shared/constants';
 import CiIcon from '~/vue_shared/components/ci_icon/ci_icon.vue';
-import { normalizeDownstreamPipelines, normalizeStages } from '../utils';
 import DownstreamPipelines from '../downstream_pipelines.vue';
-import PipelineStages from '../pipeline_stages.vue';
+import LegacyPipelineStages from './legacy_pipeline_stages.vue';
 /**
  * Renders the REST instance of the pipeline mini graph.
- * Reformatting stages and downstream pipelines to match GraphQL structure.
- * We do not want to change the GraphQL files since
- * the REST version will soon be changed to GraphQL,
- * so we are keeping this logic in the legacy file.
- *
  */
 export default {
   components: {
     CiIcon,
     DownstreamPipelines,
     GlIcon,
-    PipelineStages,
+    LegacyPipelineStages,
   },
   arrowStyles: ['arrow-icon gl-inline-block gl-mx-1 gl-text-gray-500 !gl-align-middle'],
   directives: {
@@ -44,19 +40,35 @@ export default {
       required: true,
       default: () => [],
     },
+    updateDropdown: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
     upstreamPipeline: {
       type: Object,
       required: false,
       default: () => {},
     },
   },
-  emits: ['miniGraphStageClick'],
   computed: {
     formattedDownstreamPipelines() {
-      return normalizeDownstreamPipelines(this.downstreamPipelines);
-    },
-    formattedStages() {
-      return normalizeStages(this.stages);
+      /** Reformatting to match GraphQL structure.
+       * We do not want to change the GraphQL files since
+       * the REST version will soon be changed to GraphQL,
+       * so we are keeping this logic in the legacy file.
+       */
+      return this.downstreamPipelines.map((p) => {
+        return {
+          detailedStatus: p.details.status,
+          id: convertToGraphQLId(TYPENAME_CI_PIPELINE, p.id),
+          path: p.path,
+          project: {
+            fullPath: p.project.full_path,
+            name: p.project.name,
+          },
+        };
+      });
     },
     hasDownstreamPipelines() {
       return Boolean(this.downstreamPipelines.length);
@@ -85,9 +97,10 @@ export default {
       name="arrow-right"
       data-testid="upstream-arrow-icon"
     />
-    <pipeline-stages
+    <legacy-pipeline-stages
       :is-merge-train="isMergeTrain"
-      :stages="formattedStages"
+      :stages="stages"
+      :update-dropdown="updateDropdown"
       @miniGraphStageClick="$emit('miniGraphStageClick')"
     />
     <gl-icon

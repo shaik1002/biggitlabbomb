@@ -12,6 +12,29 @@ RSpec.describe Gitlab::Database::LoadBalancing::SessionMap, feature_category: :d
       described_class.clear_session
     end
 
+    context 'when feature flag is disabled' do
+      before do
+        described_class.current(lb) # initialise a SessionMap
+        stub_feature_flags(use_load_balancing_session_map: false)
+      end
+
+      it 'returns sessions from Gitlab::Database::LoadBalancing::Session.current' do
+        expect(described_class.current(lb)).to eq(Gitlab::Database::LoadBalancing::Session.current)
+      end
+    end
+
+    context 'when feature flag lookup returns unexpected error' do
+      before do
+        allow(Feature).to receive(:enabled?).and_raise(StandardError)
+      end
+
+      it 'tracks exception and return false' do
+        # behaves as if feature flag is disabled
+        expect(Gitlab::ErrorTracking).to receive(:track_exception).with(StandardError)
+        expect(described_class.current(lb)).to eq(Gitlab::Database::LoadBalancing::Session.current)
+      end
+    end
+
     context 'when already initialised' do
       before do
         described_class.current(lb)
@@ -56,36 +79,42 @@ RSpec.describe Gitlab::Database::LoadBalancing::SessionMap, feature_category: :d
     end
 
     context 'when receiving invalid db type' do
+      using RSpec::Parameterized::TableSyntax
+
       let(:pri_lb) { instance_double('Gitlab::Database::LoadBalancing::LoadBalancer', name: :primary) }
       let(:invalid_lb) { instance_double('Gitlab::Database::LoadBalancing::LoadBalancer', name: :invalid) }
 
-      subject(:current) { described_class.current(lb) }
+      where(:runtime, :db, :error) do
+        :rake?  | :primary | false
+        :rake?  | :invalid | true
 
-      Gitlab::Runtime::AVAILABLE_RUNTIMES.each do |runtime|
-        context "when using #{runtime} runtime" do
-          before do
-            allow(Gitlab::Runtime).to receive(runtime).and_return(true)
-            allow(Gitlab::Runtime).to receive(:safe_identify).and_return(runtime)
-          end
+        :puma?  | :primary | true
+        :puma?  | :invalid | true
 
-          context 'when db is invalid' do
-            let(:lb) { instance_double('Gitlab::Database::LoadBalancing::LoadBalancer', name: :invalid) }
+        :sidekiq?  | :primary | true
+        :sidekiq?  | :invalid | true
 
-            it 'raises error' do
-              expect do
-                current
-              end.to raise_error(instance_of(Gitlab::Database::LoadBalancing::SessionMap::InvalidLoadBalancerNameError))
-            end
-          end
+        :test_suite?  | :primary | true
+        :test_suite?  | :invalid | true
+      end
 
-          context 'when db is primary' do
-            let(:lb) { instance_double('Gitlab::Database::LoadBalancing::LoadBalancer', name: :primary) }
+      with_them do
+        let(:lb) { instance_double('Gitlab::Database::LoadBalancing::LoadBalancer', name: db) }
 
-            it 'reports error without raising' do
-              expect(Gitlab::ErrorTracking).to receive(:track_exception)
-                .with(an_instance_of(Gitlab::Database::LoadBalancing::SessionMap::InvalidLoadBalancerNameError))
-              expect(current).to be_instance_of(Gitlab::Database::LoadBalancing::Session)
-            end
+        before do
+          allow(Gitlab::Runtime).to receive(runtime).and_return(true)
+          allow(Gitlab::Runtime).to receive(:safe_identify).and_return(runtime)
+        end
+
+        subject(:current) { described_class.current(lb) }
+
+        it 'handles invalid db' do
+          if error
+            expect do
+              current
+            end.to raise_error(instance_of(Gitlab::Database::LoadBalancing::SessionMap::InvalidLoadBalancerNameError))
+          else
+            expect(current).to be_instance_of(Gitlab::Database::LoadBalancing::Session)
           end
         end
       end
@@ -112,6 +141,21 @@ RSpec.describe Gitlab::Database::LoadBalancing::SessionMap, feature_category: :d
 
       expect(RequestStore[described_class::CACHE_KEY]).to eq(nil)
     end
+
+    context 'when feature flag is disabled' do
+      before do
+        described_class.current(lb) # initialise a SessionMap
+        stub_feature_flags(use_load_balancing_session_map: false)
+      end
+
+      it 'clears session from Gitlab::Database::LoadBalancing::Session.current' do
+        expect(Gitlab::Database::LoadBalancing::Session.current).not_to eq(nil)
+
+        described_class.clear_session
+
+        expect(RequestStore[Gitlab::Database::LoadBalancing::Session::CACHE_KEY]).to eq(nil)
+      end
+    end
   end
 
   describe '.without_sticky_writes' do
@@ -135,6 +179,20 @@ RSpec.describe Gitlab::Database::LoadBalancing::SessionMap, feature_category: :d
 
       described_class.without_sticky_writes do
         # exact logic for ignore_writes is tested in `.with_sessions` test suite
+      end
+    end
+
+    context 'when feature flag is disabled' do
+      before do
+        stub_feature_flags(use_load_balancing_session_map: false)
+      end
+
+      it 'calls Gitlab::Database::LoadBalancing::Session instead' do
+        expect(Gitlab::Database::LoadBalancing::Session).to receive(:without_sticky_writes).and_yield
+
+        described_class.without_sticky_writes do
+          # exact logic for ignore_writes is tested in `.with_sessions` test suite
+        end
       end
     end
   end
@@ -171,6 +229,17 @@ RSpec.describe Gitlab::Database::LoadBalancing::SessionMap, feature_category: :d
       expect do
         described_class.with_sessions(scoped_dbs + [invalid])
       end.to raise_error(instance_of(described_class::InvalidLoadBalancerNameError))
+    end
+
+    context 'when use_load_balancing_session_map is disabled' do
+      before do
+        stub_feature_flags(use_load_balancing_session_map: false)
+      end
+
+      it 'returns Session instead of ScopedSession' do
+        expect(with_sessions)
+          .to be_an_instance_of(Gitlab::Database::LoadBalancing::Session)
+      end
     end
 
     context 'when calling use_primary!' do

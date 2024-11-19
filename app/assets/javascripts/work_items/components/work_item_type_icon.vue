@@ -33,7 +33,7 @@ export default {
     colorClass: {
       type: String,
       required: false,
-      default: 'gl-fill-icon-default',
+      default: 'gl-text-secondary',
     },
   },
   computed: {
