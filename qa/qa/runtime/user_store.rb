@@ -42,6 +42,8 @@ module QA
         end
         alias_method :initialize_admin_api_client, :admin_api_client
 
+        # TODO: Implement unique user and user api client fabrication for every spec when running on non live envs
+
         # Global test user api client
         # This api client is used as a primary one for resource fabrication that do not require admin privileges
         #
@@ -49,12 +51,11 @@ module QA
         def user_api_client
           return @user_api_client if defined?(@user_api_client)
 
-          @user_api_client = if create_unique_test_user?
-                               test_user.api_client
-                             else
-                               info("Creating api client for test user")
-                               create_api_client(token: Env.personal_access_token, user_proc: -> { test_user })
-                             end
+          info("Creating api client for test user")
+          @user_api_client = create_api_client(token: Env.personal_access_token, user_proc: -> { test_user })
+
+          info("Test user api client set up successfully")
+          @user_api_client
         rescue StandardError => e
           # consider test user api client optional and set to nil if not setup
           warn("Failed to create test user api client: #{e.message}")
@@ -83,7 +84,6 @@ module QA
           return @test_user if defined?(@test_user)
 
           info("Creating test user")
-          return @test_user = create_new_user if create_unique_test_user?
 
           if Env.user_username.blank? || Env.user_password.blank?
             raise "Missing user_username and user_password variable values"
@@ -99,24 +99,9 @@ module QA
         end
         alias_method :initialize_test_user, :test_user
 
-        # Reset stored test user
-        #
-        # @return [void]
-        def reset_test_user!
-          remove_instance_variable(:@test_user) if instance_variable_defined?(:@test_user)
-          remove_instance_variable(:@user_api_client) if instance_variable_defined?(:@user_api_client)
-        end
-
         private
 
         delegate :debug, :info, :warn, :error, to: Logger
-
-        # Create unique test user when fetching test user instead of using predefined one
-        #
-        # @return [Boolean]
-        def create_unique_test_user?
-          !Env.running_on_live_env? && admin_api_client
-        end
 
         # Create api client with provided token with fallback to UI creation of token
         #
@@ -182,16 +167,6 @@ module QA
           end
 
           user
-        end
-
-        # Create new user with personal access token
-        #
-        # @return [QA::Resource::User]
-        def create_new_user
-          Resource::User.fabricate_via_api! do |user|
-            user.with_personal_access_token = true
-            user.api_client = admin_api_client
-          end
         end
 
         # Check if provided token is valid?

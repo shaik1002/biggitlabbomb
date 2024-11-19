@@ -13,12 +13,7 @@ export const member = {
   isDirectMember: false,
   isInheritedMember: true,
   isSharedMember: false,
-  accessLevel: {
-    integerValue: 50,
-    stringValue: 'Owner',
-    description:
-      'The Owner role is normally assigned to the individual or team responsible for managing and maintaining the group or creating the project. This role has the highest level of administrative control, and can manage all aspects of the group or project, including managing other Owners.',
-  },
+  accessLevel: { integerValue: 50, stringValue: 'Owner' },
   source: {
     id: 178,
     fullName: 'Foo Bar',
@@ -67,12 +62,7 @@ export const member = {
 };
 
 export const group = {
-  accessLevel: {
-    integerValue: 10,
-    stringValue: 'Guest',
-    description:
-      'The Guest role is for users who need visibility into a project or group but should not have the ability to make changes, such as external stakeholders.',
-  },
+  accessLevel: { integerValue: 10, stringValue: 'Guest' },
   sharedWithGroup: {
     id: 24,
     name: 'Commit451',
@@ -89,12 +79,7 @@ export const group = {
 };
 
 export const privateGroup = {
-  accessLevel: {
-    integerValue: 10,
-    stringValue: 'Guest',
-    description:
-      'The Guest role is for users who need visibility into a project or group but should not have the ability to make changes, such as external stakeholders.',
-  },
+  accessLevel: { integerValue: 10, stringValue: 'Guest' },
   isSharedWithGroupPrivate: true,
   sharedWithGroup: {
     id: 24,

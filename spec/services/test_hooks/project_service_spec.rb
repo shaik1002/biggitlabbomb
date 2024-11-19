@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe TestHooks::ProjectService, feature_category: :code_testing do
   include AfterNextHelpers
+  include StubRequests
 
   let(:current_user) { create(:user) }
 
@@ -27,6 +28,21 @@ RSpec.describe TestHooks::ProjectService, feature_category: :code_testing do
       it 'returns error message' do
         expect(hook).not_to receive(:execute)
         expect(service.execute).to have_attributes(status: :error, message: 'Testing not available for this hook')
+      end
+    end
+
+    context 'when data contains an unsafe YAML object' do
+      let(:sample_data) { { data: described_class } }
+      let(:trigger) { 'push_events' }
+      let(:trigger_key) { :push_hooks }
+
+      it 'executes hook and saves a log successfully' do
+        stub_full_request(hook.url, method: :post)
+        allow(Gitlab::DataBuilder::Push).to receive(:build_sample).and_return(sample_data)
+
+        expect(hook).to receive(:execute).with(sample_data, trigger_key, force: true).and_call_original
+        expect(service.execute).to be_success
+        expect(hook.web_hook_logs).to contain_exactly(have_attributes(request_data: { 'data' => described_class.to_s }))
       end
     end
 

@@ -59,8 +59,8 @@ class WebHookLog < ApplicationRecord
   end
 
   def request_headers
-    super unless web_hook.token?
-    super if self[:request_headers]['X-Gitlab-Token'] == _('[REDACTED]')
+    return super unless self[:request_headers]['X-Gitlab-Token']
+    return super if self[:request_headers]['X-Gitlab-Token'] == _('[REDACTED]')
 
     self[:request_headers].merge('X-Gitlab-Token' => _('[REDACTED]'))
   end
