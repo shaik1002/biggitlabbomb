@@ -23,7 +23,6 @@ module API
         tags %w[pages]
       end
       delete ':id/pages' do
-        authenticated_with_can_read_all_resources!
         authorize! :remove_pages, user_project
 
         ::Pages::DeleteService.new(user_project, current_user).execute
@@ -45,7 +44,6 @@ module API
         optional :pages_https_only, type: Boolean, desc: 'Whether to force HTTPS'
       end
       patch ':id/pages' do
-        authenticated_with_can_read_all_resources!
         authorize! :update_pages, user_project
 
         break not_found! unless user_project.pages_enabled?
