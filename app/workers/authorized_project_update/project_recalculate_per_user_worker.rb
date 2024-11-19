@@ -17,9 +17,15 @@ module AuthorizedProjectUpdate
 
       return unless project && user
 
-      in_lock(lock_key(project), ttl: 10.seconds) do
+      in_lock(lock_key(project, user), ttl: 10.seconds) do
         AuthorizedProjectUpdate::ProjectRecalculatePerUserService.new(project, user).execute
       end
+    end
+
+    private
+
+    def lock_key(project, user)
+      "authorized_project_update/project_recalculate_worker/project/#{project.id}/user/#{user.id}"
     end
   end
 end

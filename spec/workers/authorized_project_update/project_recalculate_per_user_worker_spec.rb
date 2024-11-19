@@ -45,7 +45,7 @@ RSpec.describe AuthorizedProjectUpdate::ProjectRecalculatePerUserWorker, feature
     end
 
     context 'exclusive lease' do
-      let(:lock_key) { "#{described_class.superclass.name.underscore}/projects/#{project.id}" }
+      let(:lock_key) { "#{described_class.superclass.name.underscore}/project/#{project.id}/user/#{user.id}" }
       let(:timeout) { 10.seconds }
 
       context 'when exclusive lease has not been taken' do
