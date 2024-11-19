@@ -43,7 +43,7 @@ FactoryBot.define do
       end
     end
 
-    factory :npm_package_legacy do
+    factory :npm_package do
       sequence(:name) { |n| "@#{project.root_namespace.path}/package-#{n}" }
       sequence(:version) { |n| "1.0.#{n}" }
       package_type { :npm }

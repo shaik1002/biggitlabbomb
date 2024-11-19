@@ -10,10 +10,7 @@ import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
 import { updateText } from '~/lib/utils/text_markdown';
 import { setHTMLFixture, resetHTMLFixture } from 'helpers/fixtures';
 
-jest.mock('~/lib/utils/text_markdown', () => ({
-  ...jest.requireActual('~/lib/utils/text_markdown'),
-  updateText: jest.fn(),
-}));
+jest.mock('~/lib/utils/text_markdown');
 
 describe('Markdown field header component', () => {
   let wrapper;

@@ -114,11 +114,14 @@ ee/spec/frontend/security_dashboard/components/shared/vulnerability_report/conta
 ee/spec/frontend/security_dashboard/components/shared/vulnerability_report/vulnerability_list_graphql_spec.js
 ee/spec/frontend/security_dashboard/components/shared/vulnerability_report/vulnerability_report_spec.js
 ee/spec/frontend/security_dashboard/components/shared/vulnerability_report/vulnerability_report_tabs_spec.js
+ee/spec/frontend/security_orchestration/components/policy_drawer/scan_execution/details_drawer_spec.js
+ee/spec/frontend/security_orchestration/components/policy_drawer/toggle_list_spec.js
 ee/spec/frontend/security_orchestration/components/policy_editor/pipeline_execution/action/action_section_spec.js
 ee/spec/frontend/security_orchestration/components/policy_editor/pipeline_execution/action/code_block_file_path_spec.js
 ee/spec/frontend/security_orchestration/components/policy_editor/pipeline_execution/rule/rule_section_spec.js
 ee/spec/frontend/security_orchestration/components/policy_editor/scan_result/rule/scan_filters/status_filter_spec.js
 ee/spec/frontend/security_orchestration/components/policy_editor/scan_result/rule/scan_filters/status_filters_spec.js
+ee/spec/frontend/security_orchestration/components/policy_editor/section_layout_spec.js
 ee/spec/frontend/sidebar/components/sidebar_dropdown_widget_spec.js
 ee/spec/frontend/status_checks/components/modal_create_spec.js
 ee/spec/frontend/status_checks/mount_spec.js
@@ -250,6 +253,7 @@ spec/frontend/ide/ide_router_spec.js
 spec/frontend/ide/sync_router_and_store_spec.js
 spec/frontend/import_entities/import_projects/components/import_projects_table_spec.js
 spec/frontend/integrations/beyond_identity/components/exclusions_list_spec.js
+spec/frontend/integrations/edit/components/integration_form_spec.js
 spec/frontend/integrations/edit/components/sections/connection_spec.js
 spec/frontend/invite_members/components/members_token_select_spec.js
 spec/frontend/issuable/components/issuable_by_email_spec.js

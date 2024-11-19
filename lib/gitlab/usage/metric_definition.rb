@@ -37,16 +37,13 @@ module Gitlab
             name: event[:name],
             time_framed: time_framed?,
             filter: event[:filter],
-            unique_identifier_name: event[:unique]&.split('.')&.first&.to_sym,
-            operator: event[:operator]
+            unique_identifier_name: event[:unique]&.split('.')&.first&.to_sym
           )
         end
       end
 
       def instrumentation_class
         if internal_events?
-          return "TotalSumMetric" if event_selection_rules.first&.sum?
-
           events.each_value.first.nil? ? "TotalCountMetric" : "UniqueCountMetric"
         else
           @attributes[:instrumentation_class]

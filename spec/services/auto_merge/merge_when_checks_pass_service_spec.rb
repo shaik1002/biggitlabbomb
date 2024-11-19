@@ -213,9 +213,7 @@ RSpec.describe AutoMerge::MergeWhenChecksPassService, feature_category: :code_re
       context 'when the pipeline has succeeded' do
         before do
           allow(mr_merge_if_green_enabled).to receive(:diff_head_pipeline_success?).and_return(true)
-          allow_next_instance_of(MergeRequests::Mergeability::CheckCiStatusService) do |check|
-            allow(check).to receive(:mergeable_ci_state?).and_return(true)
-          end
+          allow(mr_merge_if_green_enabled).to receive(:mergeable_ci_state?).and_return(true)
         end
 
         context 'when the merge request is mergable' do

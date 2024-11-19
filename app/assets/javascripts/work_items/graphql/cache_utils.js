@@ -34,7 +34,6 @@ import {
   NEW_WORK_ITEM_IID,
   WIDGET_TYPE_CURRENT_USER_TODOS,
   WIDGET_TYPE_LINKED_ITEMS,
-  STATE_CLOSED,
 } from '../constants';
 import workItemByIidQuery from './work_item_by_iid.query.graphql';
 import getWorkItemTreeQuery from './work_item_tree.query.graphql';
@@ -192,7 +191,7 @@ export const addHierarchyChild = ({ cache, id, workItem, atIndex = null }) => {
   });
 };
 
-export const addHierarchyChildren = ({ cache, id, workItem, childrenIds }) => {
+export const addHierarchyChildren = ({ cache, id, workItem, newItemsToAddCount }) => {
   const queryArgs = {
     query: getWorkItemTreeQuery,
     variables: {
@@ -212,14 +211,10 @@ export const addHierarchyChildren = ({ cache, id, workItem, childrenIds }) => {
 
       const existingChildren = findHierarchyWidgetChildren(draftState?.workItem);
 
-      const childrenToAdd = newChildren.filter((item) => {
-        return childrenIds.includes(item.id);
-      });
+      const childrenToAdd = newChildren.slice(0, newItemsToAddCount);
 
       for (const item of childrenToAdd) {
-        if (item.state === STATE_CLOSED) {
-          existingChildren.push(item);
-        } else {
+        if (item) {
           existingChildren.unshift(item);
         }
       }

@@ -208,8 +208,7 @@ To work with generic packages in [GitLab CI/CD](../../../ci/index.md), you can u
 For example:
 
 ```yaml
-default:
-  image: curlimages/curl:latest
+image: curlimages/curl:latest
 
 stages:
   - upload
