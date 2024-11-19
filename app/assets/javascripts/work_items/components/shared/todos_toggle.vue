@@ -146,13 +146,10 @@ export default {
     :title="buttonLabel"
     :category="todosButtonType"
     class="btn-icon"
+    :class="{ 'todo-button-active': pendingTodo }"
     :aria-label="buttonLabel"
     @click="onToggle"
   >
-    <gl-animated-todo-icon
-      :is-on="pendingTodo"
-      :class="{ '!gl-text-blue-500': pendingTodo }"
-      :name="buttonIcon"
-    />
+    <gl-animated-todo-icon :is-on="pendingTodo" :name="buttonIcon" />
   </gl-button>
 </template>

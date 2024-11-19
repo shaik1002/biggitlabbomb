@@ -210,9 +210,10 @@ export default {
       :disabled="isLoading"
       :is-icon-button="true"
       class="hide-collapsed"
+      :class="{ 'todo-button-active': hasTodo }"
       @click.stop.prevent="toggleTodo"
     >
-      <gl-animated-todo-icon :class="{ '!gl-text-blue-500': hasTodo }" :is-on="hasTodo" />
+      <gl-animated-todo-icon :is-on="hasTodo" />
     </todo-button>
     <todo-button
       v-else

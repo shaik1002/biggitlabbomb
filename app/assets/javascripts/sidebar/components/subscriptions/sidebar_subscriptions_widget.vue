@@ -227,13 +227,14 @@ export default {
       data-testid="subscribe-button"
       class="hide-collapsed"
       :title="notificationTooltip"
-      :class="{ 'gl-ml-2': isIssuable, 'btn-icon': isNotificationsTodosButtons }"
+      :class="{
+        'gl-ml-2': isIssuable,
+        'btn-icon': isNotificationsTodosButtons,
+        'subscribe-button-active': subscribed,
+      }"
       @click="toggleSubscribed"
     >
-      <gl-animated-notification-icon
-        :class="{ '!gl-text-blue-500': subscribed }"
-        :is-on="!subscribed"
-      />
+      <gl-animated-notification-icon :is-on="!subscribed" />
     </gl-button>
     <gl-button
       v-if="!isMergeRequest"
@@ -243,12 +244,10 @@ export default {
       data-testid="subscribe-button"
       :title="notificationTooltip"
       class="sidebar-collapsed-icon sidebar-collapsed-container !gl-rounded-none !gl-shadow-none"
+      :class="{ 'subscribe-button-active': subscribed }"
       @click="toggleSubscribed"
     >
-      <gl-animated-notification-icon
-        :class="{ '!gl-text-blue-500': subscribed }"
-        :is-on="!subscribed"
-      />
+      <gl-animated-notification-icon :is-on="!subscribed" />
     </gl-button>
   </div>
   <sidebar-editable-item

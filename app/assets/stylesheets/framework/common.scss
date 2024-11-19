@@ -464,3 +464,22 @@ copy-code {
     opacity: 1;
   }
 }
+
+.todo-button-active,
+.subscribe-button-active {
+  --todo-subscribe-action-active-icon-color: var(--gl-action-confirm-foreground-color-default);
+
+  &:hover {
+    --todo-subscribe-action-active-icon-color: var(--gl-action-confirm-foreground-color-hover);
+  }
+
+  &:focus {
+    --todo-subscribe-action-active-icon-color: var(--gl-action-confirm-foreground-color-focus);
+  }
+
+  &:active {
+    --todo-subscribe-action-active-icon-color: var(--gl-action-confirm-foreground-color-active);
+  }
+
+  color: var(--todo-subscribe-action-active-icon-color) !important;
+}
