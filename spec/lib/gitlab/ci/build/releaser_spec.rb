@@ -49,8 +49,14 @@ RSpec.describe Gitlab::Ci::Build::Releaser, feature_category: :continuous_integr
 
         let(:job) { build(:ci_build, pipeline: pipeline, options: { release: config[:release] }) }
 
-        it 'generates the script with --catalog-publish' do
-          expect(script).to eq(["#{result_script} --catalog-publish"])
+        it 'generates glab scripts' do
+          expect(script).to eq([
+            'glab auth login --job-token $CI_JOB_TOKEN --hostname $CI_SERVER_FQDN --api-protocol $CI_SERVER_PROTOCOL',
+            'GITLAB_HOST=$CI_SERVER_URL glab -R $CI_PROJECT_PATH release create "release-$CI_COMMIT_SHA" ' \
+              '--assets-links "[{\"name\":\"asset1\",\"url\":\"https://example.com/assets/1\",\"link_type\":\"other\",\"filepath\":\"/pretty/asset/1\"},{\"name\":\"asset2\",\"url\":\"https://example.com/assets/2\"}]" ' \
+              '--milesone "m1,m2,m3" --name "Release $CI_COMMIT_SHA" --notes "Created using the release-cli $EXTRA_DESCRIPTION" ' \
+              '--ref "$CI_COMMIT_SHA" --tag-message "Annotated tag message" --released-at "2020-07-15T08:00:00Z" --publish-to-catalog'
+          ])
         end
 
         context 'when the FF ci_release_cli_catalog_publish_option is disabled' do
@@ -58,7 +64,7 @@ RSpec.describe Gitlab::Ci::Build::Releaser, feature_category: :continuous_integr
             stub_feature_flags(ci_release_cli_catalog_publish_option: false)
           end
 
-          it 'generates the script without --catalog-publish' do
+          it 'generates the release-cli script' do
             expect(script).to eq([result_script])
           end
         end
