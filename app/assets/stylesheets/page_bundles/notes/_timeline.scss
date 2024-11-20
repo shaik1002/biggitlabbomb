@@ -50,7 +50,12 @@
   &:target,
   &.target {
     .timeline-content {
+      position: relative;
+      z-index: 1;
       background-color: var(--timeline-entry-target-background-color) !important;
+      box-shadow: 0 0 0 1px var(--gl-focus-ring-outer-color);
+      border-radius: $border-radius !important;
+      border-color: transparent !important;
     }
 
     + .discussion-reply-holder {
@@ -59,6 +64,11 @@
 
     &.system-note .note-body .note-text.system-note-commit-list::after {
       background: linear-gradient(rgba(var(--timeline-entry-target-background-color), 0.1) -100px, var(--timeline-entry-target-background-color) 100%);
+    }
+
+    .timeline-avatar {
+      position: relative;
+      z-index: 2;
     }
   }
 
