@@ -12,7 +12,7 @@ RSpec.shared_examples 'label note created from events' do
   def label_refs(events)
     labels = events.map(&:label).compact
 
-    labels.map { |l| l.to_reference }.join(' ')
+    labels.map { |l| l.to_reference }.sort.join(' ')
   end
 
   let(:time) { Time.now }
@@ -68,24 +68,6 @@ RSpec.shared_examples 'label note created from events' do
       expect(note.note).to eq "added #{label_refs(events)} + 1 deleted label"
     end
 
-    it 'orders label events by label name' do
-      foo_label = label.dup.tap do |l|
-        l.update_attribute(:title, 'foo')
-      end
-      bar_label = label2.dup.tap do |l|
-        l.update_attribute(:title, 'bar')
-      end
-
-      events = [
-        create_event(created_at: time, label: foo_label),
-        create_event(created_at: time, label: bar_label)
-      ]
-
-      note = described_class.from_events(events)
-
-      expect(note.note).to eq "added #{label_refs(events.reverse)} labels"
-    end
-
     it 'returns text note for removed labels' do
       events = [create_event(action: :remove, created_at: time),
         create_event(action: :remove, created_at: time, label: label2),
@@ -123,7 +105,7 @@ RSpec.shared_examples 'label note created from events' do
 
       note = described_class.from_events([event])
 
-      expect(note.note).to eq "added #{other_label.to_reference(other_label.group, target_container: project, full: true)} label"
+      expect(note.note).to eq "added #{other_label.to_reference(other_label.group, target_project: project, full: true)} label"
     end
   end
 end

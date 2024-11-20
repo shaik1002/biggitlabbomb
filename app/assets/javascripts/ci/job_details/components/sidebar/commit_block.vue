@@ -39,12 +39,12 @@ export default {
 
       <span v-if="mergeRequest">
         {{ __('in') }}
-        <gl-link :href="mergeRequest.path" class="!gl-text-link" data-testid="link-commit"
+        <gl-link :href="mergeRequest.path" class="!gl-text-blue-500" data-testid="link-commit"
           >!{{ mergeRequest.iid }}</gl-link
         >
       </span>
     </p>
 
-    <p class="gl-mb-0 gl-break-all gl-text-subtle">{{ commit.title }}</p>
+    <p class="gl-mb-0 gl-break-all">{{ commit.title }}</p>
   </div>
 </template>

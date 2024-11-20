@@ -117,6 +117,7 @@ RSpec.describe AddressableUrlValidator do
     end
 
     it 'allows urls that cannot be resolved' do
+      stub_env('RSPEC_ALLOW_INVALID_URLS', 'false')
       badge.link_url = 'http://foobar.x'
 
       subject
@@ -482,6 +483,7 @@ RSpec.describe AddressableUrlValidator do
     let(:validator) { described_class.new(attributes: [:link_url], dns_rebind_protection: dns_value) }
 
     before do
+      stub_env('RSPEC_ALLOW_INVALID_URLS', 'false')
       badge.link_url = not_resolvable_url
 
       subject

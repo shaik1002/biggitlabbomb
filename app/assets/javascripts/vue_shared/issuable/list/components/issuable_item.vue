@@ -8,24 +8,18 @@ import {
   GlSprintf,
   GlTooltipDirective,
 } from '@gitlab/ui';
+import { escapeRegExp } from 'lodash';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { STATUS_OPEN, STATUS_CLOSED } from '~/issues/constants';
 import { isScopedLabel } from '~/lib/utils/common_utils';
 import { isExternal, setUrlFragment, visitUrl } from '~/lib/utils/url_utility';
 import { __, n__, sprintf } from '~/locale';
 import IssuableAssignees from '~/issuable/components/issue_assignees.vue';
-
 import timeagoMixin from '~/vue_shared/mixins/timeago';
-import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import WorkItemTypeIcon from '~/work_items/components/work_item_type_icon.vue';
 import WorkItemPrefetch from '~/work_items/components/work_item_prefetch.vue';
-import { STATE_OPEN, STATE_CLOSED, LINKED_CATEGORIES_MAP } from '~/work_items/constants';
-import {
-  isAssigneesWidget,
-  isLabelsWidget,
-  findLinkedItemsWidget,
-  canRouterNav,
-} from '~/work_items/utils';
+import { STATE_OPEN, STATE_CLOSED } from '~/work_items/constants';
+import { isAssigneesWidget, isLabelsWidget } from '~/work_items/utils';
 
 export default {
   components: {
@@ -38,18 +32,11 @@ export default {
     IssuableAssignees,
     WorkItemTypeIcon,
     WorkItemPrefetch,
-    WorkItemRelationshipIcons: () =>
-      import('~/work_items/components/shared/work_item_relationship_icons.vue'),
   },
   directives: {
     GlTooltip: GlTooltipDirective,
   },
-  mixins: [timeagoMixin, glFeatureFlagMixin()],
-  inject: {
-    isGroup: {
-      default: false,
-    },
-  },
+  mixins: [timeagoMixin],
   props: {
     hasScopedLabelsFeature: {
       type: Boolean,
@@ -107,9 +94,7 @@ export default {
       return this.issuable.iid;
     },
     workItemFullPath() {
-      return (
-        this.issuable.namespace?.fullPath || this.issuable.reference?.split(this.issuableSymbol)[0]
-      );
+      return this.issuable.namespace?.fullPath;
     },
     author() {
       return this.issuable.author || {};
@@ -151,17 +136,11 @@ export default {
         []
       );
     },
-    filteredLinkedItems() {
-      const linkedItems = findLinkedItemsWidget(this.issuable)?.linkedItems?.nodes || [];
-      return linkedItems.filter((item) => {
-        return item.linkType !== LINKED_CATEGORIES_MAP.RELATES_TO;
-      });
-    },
     createdAt() {
       return this.timeFormatted(this.issuable.createdAt);
     },
-    isOpen() {
-      return [STATUS_OPEN, STATE_OPEN].includes(this.issuable.state);
+    isNotOpen() {
+      return ![STATUS_OPEN, STATE_OPEN].includes(this.issuable.state);
     },
     isClosed() {
       return [STATUS_CLOSED, STATE_CLOSED].includes(this.issuable.state);
@@ -235,20 +214,6 @@ export default {
       // eslint-disable-next-line no-underscore-dangle
       return this.issuable.__typename === 'MergeRequest';
     },
-    issueAsWorkItem() {
-      return (
-        !this.isGroup &&
-        this.glFeatures.workItemsViewPreference &&
-        gon.current_user_use_work_items_view
-      );
-    },
-    hiddenIssuableTitle() {
-      if (this.isMergeRequest) {
-        return __('This merge request is hidden because its author has been banned.');
-      }
-
-      return __('This issue is hidden because its author has been banned.');
-    },
   },
   methods: {
     hasSlotContents(slotName) {
@@ -280,16 +245,11 @@ export default {
       return '';
     },
     handleIssuableItemClick(e) {
-      if (e.metaKey || e.ctrlKey || this.showCheckbox || e.button === 1) {
+      if (e.metaKey || e.ctrlKey || !this.preventRedirect || this.showCheckbox) {
         return;
       }
       e.preventDefault();
-      if (!this.preventRedirect) {
-        this.navigateToIssuable();
-        return;
-      }
       this.$emit('select-issuable', {
-        id: this.issuable.id,
         iid: this.issuableIid,
         webUrl: this.issuable.webUrl,
         fullPath: this.workItemFullPath,
@@ -300,14 +260,12 @@ export default {
       if (!this.fullPath) {
         visitUrl(this.issuableLinkHref);
       }
-      const shouldRouterNav = canRouterNav({
-        fullPath: this.fullPath,
-        webUrl: this.issuableLinkHref,
-        isGroup: this.isGroup,
-        issueAsWorkItem: this.issueAsWorkItem,
-      });
+      const escapedFullPath = escapeRegExp(this.fullPath);
+      // eslint-disable-next-line no-useless-escape
+      const regex = new RegExp(`groups\/${escapedFullPath}\/-\/(work_items|epics)\/\\d+`);
+      const isWorkItemPath = regex.test(this.issuableLinkHref);
 
-      if (shouldRouterNav) {
+      if (isWorkItemPath) {
         this.$router.push({
           name: 'workItem',
           params: {
@@ -316,11 +274,6 @@ export default {
         });
       } else {
         visitUrl(this.issuableLinkHref);
-      }
-    },
-    handleRowClick(e) {
-      if (this.preventRedirect) {
-        this.handleIssuableItemClick(e);
       }
     },
   },
@@ -334,13 +287,13 @@ export default {
     :class="{
       closed: issuable.closedAt,
       'gl-bg-blue-50': isActive,
-      'gl-cursor-pointer': preventRedirect && !showCheckbox,
-      'hover:gl-bg-subtle': preventRedirect && !isActive && !showCheckbox,
+      'gl-cursor-pointer': preventRedirect,
+      'hover:gl-bg-subtle': preventRedirect && !isActive,
     }"
     :data-labels="labelIdsString"
     :data-qa-issue-id="issuableId"
     data-testid="issuable-item-wrapper"
-    @click="handleRowClick"
+    @click="handleIssuableItemClick"
   >
     <gl-form-checkbox
       v-if="showCheckbox"
@@ -372,7 +325,7 @@ export default {
           v-if="issuable.hidden"
           v-gl-tooltip
           name="spam"
-          :title="hiddenIssuableTitle"
+          :title="__('This issue is hidden because its author has been banned.')"
           :aria-label="__('Hidden')"
         />
         <work-item-prefetch
@@ -449,7 +402,7 @@ export default {
                   :data-avatar-url="author.avatarUrl"
                   :href="author.webPath"
                   data-testid="issuable-author"
-                  class="author-link js-user-link gl-text-sm !gl-text-subtle"
+                  class="author-link js-user-link gl-text-sm !gl-text-gray-500"
                   @click.stop
                 >
                   <span class="author">{{ author.name }}</span>
@@ -469,7 +422,6 @@ export default {
             </gl-sprintf>
           </span>
           <slot name="timeframe"></slot>
-          <slot name="target-branch"></slot>
         </span>
         <p
           v-if="labels.length"
@@ -494,7 +446,7 @@ export default {
       <ul v-if="showIssuableMeta" class="controls gl-gap-3">
         <!-- eslint-disable-next-line @gitlab/vue-prefer-dollar-scopedslots -->
         <li v-if="$slots.status" data-testid="issuable-status" class="!gl-mr-0">
-          <gl-badge v-if="!isOpen" :variant="statusBadgeVariant">
+          <gl-badge v-if="isNotOpen" :variant="statusBadgeVariant">
             <slot name="status"></slot>
           </gl-badge>
           <slot v-else name="status"></slot>
@@ -509,7 +461,6 @@ export default {
             class="gl-flex gl-items-center"
           />
         </li>
-        <slot name="reviewers"></slot>
         <li
           v-if="showDiscussions && notesCount"
           class="!gl-mr-0 gl-hidden sm:gl-block"
@@ -525,18 +476,10 @@ export default {
           </div>
         </li>
         <slot name="statistics"></slot>
-        <work-item-relationship-icons
-          v-if="isOpen && filteredLinkedItems.length > 0"
-          :work-item-type="type"
-          :linked-work-items="filteredLinkedItems"
-          :work-item-full-path="workItemFullPath"
-          :work-item-iid="issuableIid"
-          :work-item-web-url="issuableLinkHref"
-        />
       </ul>
       <div
         v-gl-tooltip.bottom
-        class="gl-hidden gl-text-subtle sm:gl-inline-block"
+        class="gl-hidden gl-text-gray-500 sm:gl-inline-block"
         :title="tooltipTitle(timestamp)"
         data-testid="issuable-timestamp"
       >

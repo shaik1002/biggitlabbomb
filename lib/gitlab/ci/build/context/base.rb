@@ -23,12 +23,6 @@ module Gitlab
             end
           end
 
-          def variables_hash_expanded
-            strong_memoize(:variables_hash_expanded) do
-              variables.sort_and_expand_all.to_hash
-            end
-          end
-
           def project
             pipeline.project
           end
@@ -37,7 +31,21 @@ module Gitlab
             pipeline.sha
           end
 
-          delegate :top_level_worktree_paths, :all_worktree_paths, to: :pipeline
+          def top_level_worktree_paths
+            return pipeline.top_level_worktree_paths if reduce_gitaly_calls?
+
+            strong_memoize(:top_level_worktree_paths) do
+              project.repository.tree(sha).blobs.map(&:path)
+            end
+          end
+
+          def all_worktree_paths
+            return pipeline.all_worktree_paths if reduce_gitaly_calls?
+
+            strong_memoize(:all_worktree_paths) do
+              project.repository.ls_files(sha)
+            end
+          end
 
           protected
 
@@ -51,6 +59,10 @@ module Gitlab
               trigger_request: pipeline.legacy_trigger,
               protected: pipeline.protected_ref?
             }
+          end
+
+          def reduce_gitaly_calls?
+            Feature.enabled?(:ci_conditionals_reduce_gitaly_calls, project)
           end
         end
       end

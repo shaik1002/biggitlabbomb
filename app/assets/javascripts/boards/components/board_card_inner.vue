@@ -3,7 +3,6 @@ import { GlLabel, GlTooltipDirective, GlIcon, GlLoadingIcon } from '@gitlab/ui';
 import { sortBy } from 'lodash';
 import boardCardInner from 'ee_else_ce/boards/mixins/board_card_inner';
 import { isScopedLabel, convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { updateHistory, queryToObject } from '~/lib/utils/url_utility';
 import { sprintf, __, n__ } from '~/locale';
 import isShowingLabelsQuery from '~/graphql_shared/client/is_showing_labels.query.graphql';
@@ -37,7 +36,7 @@ export default {
   directives: {
     GlTooltip: GlTooltipDirective,
   },
-  mixins: [boardCardInner, glFeatureFlagsMixin()],
+  mixins: [boardCardInner],
   inject: [
     'allowSubEpics',
     'rootPath',
@@ -181,9 +180,6 @@ export default {
     hasActions() {
       return !this.disabled && this.list.listType !== ListType.closed;
     },
-    workItemDrawerEnabled() {
-      return this.isEpicBoard ? this.glFeatures.epicsListDrawer : this.glFeatures.issuesListDrawer;
-    },
   },
   methods: {
     setError,
@@ -264,13 +260,8 @@ export default {
         <a
           :href="item.path || item.webUrl || ''"
           :title="item.title"
-          :class="{
-            '!gl-text-gray-400': isLoading,
-            'js-no-trigger': !workItemDrawerEnabled,
-            'js-no-trigger-title': workItemDrawerEnabled,
-          }"
-          class="gl-text-primary hover:gl-text-gray-900"
-          data-testid="board-card-title-link"
+          :class="{ '!gl-text-gray-400': isLoading }"
+          class="js-no-trigger gl-text-primary hover:gl-text-gray-900"
           @mousemove.stop
           >{{ item.title }}</a
         >

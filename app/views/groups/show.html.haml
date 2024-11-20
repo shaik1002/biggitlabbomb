@@ -19,6 +19,8 @@
 
 = render partial: 'flash_messages'
 
+= render_if_exists 'subscriptions/trials/alert', namespace: @group
+
 = render 'groups/home_panel'
 
 = render_if_exists 'groups/group_activity_analytics', group: @group

@@ -68,7 +68,7 @@ rollout 10%:
 
 After the jobs are built, select **Run** (**{play}**) next to the job's name
 to release each stage of pods. You can also rollback by running a lower percentage job. Once 100%
-is reached, you cannot roll back using this method. To roll back a deployment, see [retry or roll back a deployment](../../ci/environments/deployments.md#retry-or-roll-back-a-deployment).
+is reached, you cannot roll back using this method. To roll back a deployment, see [retry or roll back a deployment](../../ci/environments/index.md#retry-or-roll-back-a-deployment).
 
 A [deployable application](https://gitlab.com/gl-release/incremental-rollout-example) is
 available, demonstrating manually triggered incremental rollouts.
@@ -124,7 +124,7 @@ minimize the impact of a deployment causing an issue.
 With this technique there are two deployments ("blue" and "green", but any naming can be used).
 Only one of these deployments is live at any given time, except during an incremental rollout.
 
-For example, your blue deployment can be active on production, while the
+For example, your blue deployment can be currently active on production, while the
 green deployment is "live" for testing, but not deployed to production. If issues
 are found, the green deployment can be updated without affecting the production
 deployment (currently blue). If testing finds no issues, you switch production to the green

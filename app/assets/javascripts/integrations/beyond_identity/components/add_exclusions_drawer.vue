@@ -4,12 +4,9 @@ import { DRAWER_Z_INDEX } from '~/lib/utils/constants';
 import { getContentWrapperHeight } from '~/lib/utils/dom_utils';
 import { __ } from '~/locale';
 import ListSelector from '~/vue_shared/components/list_selector/index.vue';
-import { GROUPS_TYPE, PROJECTS_TYPE } from '~/vue_shared/components/list_selector/constants';
 
 export default {
   DRAWER_Z_INDEX,
-  GROUPS_TYPE,
-  PROJECTS_TYPE,
   components: {
     GlDrawer,
     GlButton,
@@ -72,7 +69,7 @@ export default {
 
     <template #default>
       <list-selector
-        :type="$options.GROUPS_TYPE"
+        type="groups"
         class="gl-m-5 !gl-p-0"
         autofocus
         disable-namespace-dropdown
@@ -82,7 +79,7 @@ export default {
       />
 
       <list-selector
-        :type="$options.PROJECTS_TYPE"
+        type="projects"
         class="gl-m-5 !gl-p-0"
         :selected-items="projectExclusions"
         @select="handleSelectExclusion"

@@ -12,6 +12,7 @@ resource :profile, only: [] do
     put :reset_feed_token
     put :reset_static_object_token
     put :update_username
+    post :join_early_access_program
   end
 
   scope module: :profiles do
@@ -63,10 +64,10 @@ resource :profile, only: [] do
         post :codes
         patch :skip
         post :create_webauthn
-        delete :destroy_otp
-        delete :destroy_webauthn, path: 'destroy_webauthn/:id'
       end
     end
+
+    resources :webauthn_registrations, only: [:destroy]
 
     resources :usage_quotas, only: [:index]
   end

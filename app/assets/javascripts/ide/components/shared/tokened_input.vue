@@ -74,7 +74,7 @@ export default {
       <div class="tokens-container list-unstyled">
         <div v-for="token in tokens" :key="token.label" class="filtered-search-token">
           <button
-            class="selectable gl-rounded-none gl-border-none !gl-bg-transparent gl-p-0 !gl-shadow-none !gl-outline-none"
+            class="selectable btn-blank"
             type="button"
             @click.stop="removeToken(token)"
             @keyup.delete="removeToken(token)"

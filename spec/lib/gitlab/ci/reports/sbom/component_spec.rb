@@ -6,19 +6,7 @@ RSpec.describe Gitlab::Ci::Reports::Sbom::Component, feature_category: :dependen
   let(:component_type) { 'library' }
   let(:name) { 'component-name' }
   let(:purl_type) { 'npm' }
-  let(:purl) do
-    Sbom::PackageUrl.new(
-      type: purl_type,
-      namespace: 'gitlab.com/component',
-      name: name,
-      version: version,
-      qualifiers: {
-        "channel" => "stable"
-      }
-    )
-  end
-
-  let(:namespaced_name) { 'gitlab.com/component/component-name' }
+  let(:purl) { Sbom::PackageUrl.new(type: purl_type, name: name, version: version) }
   let(:version) { 'v0.0.1' }
   let(:source_package_name) { 'source-component' }
   let(:ref) { 'ref' }
@@ -37,7 +25,7 @@ RSpec.describe Gitlab::Ci::Reports::Sbom::Component, feature_category: :dependen
   it 'has correct attributes' do
     expect(component).to have_attributes(
       component_type: component_type,
-      name: namespaced_name,
+      name: name,
       purl: an_object_having_attributes(type: purl_type),
       version: version,
       source_package_name: source_package_name
@@ -47,14 +35,14 @@ RSpec.describe Gitlab::Ci::Reports::Sbom::Component, feature_category: :dependen
   describe '#name' do
     subject { component.name }
 
-    it { is_expected.to eq(namespaced_name) }
+    it { is_expected.to eq(name) }
 
-    context 'without namespace' do
+    context 'with namespace' do
       let(:purl) do
-        Sbom::PackageUrl.new(type: 'deb', name: 'ignored-name')
+        Sbom::PackageUrl.new(type: 'maven', namespace: 'org.NameSpace', name: 'Name', version: 'v0.0.1')
       end
 
-      it { is_expected.to eq(name) }
+      it { is_expected.to eq('org.NameSpace/Name') }
     end
   end
 
@@ -237,56 +225,6 @@ RSpec.describe Gitlab::Ci::Reports::Sbom::Component, feature_category: :dependen
       let(:purl) { nil }
 
       it { is_expected.to be(true) }
-    end
-  end
-
-  describe '#reachability' do
-    subject { component.reachability }
-
-    context 'when properties are nil' do
-      before do
-        component.properties = nil
-      end
-
-      it { is_expected.to eq('unknown') }
-    end
-
-    context 'when reachability is missing from properties' do
-      before do
-        component.properties = Gitlab::Ci::Parsers::Sbom::CyclonedxProperties.parse_component_source([])
-      end
-
-      it { is_expected.to eq('unknown') }
-    end
-
-    context 'when reachability value is invalid' do
-      before do
-        component.properties = Gitlab::Ci::Parsers::Sbom::CyclonedxProperties.parse_component_source([
-          { 'name' => 'gitlab:dependency_scanning_component:reachability', 'value' => 'bad_reachability_value' }
-        ])
-      end
-
-      it { is_expected.to eq('unknown') }
-    end
-
-    context 'when reachability value is unknown' do
-      before do
-        component.properties = Gitlab::Ci::Parsers::Sbom::CyclonedxProperties.parse_component_source([
-          { 'name' => 'gitlab:dependency_scanning_component:reachability', 'value' => 'unknown' }
-        ])
-      end
-
-      it { is_expected.to eq('unknown') }
-    end
-
-    context 'when reachability value is in_use' do
-      before do
-        component.properties = Gitlab::Ci::Parsers::Sbom::CyclonedxProperties.parse_component_source([
-          { 'name' => 'gitlab:dependency_scanning_component:reachability', 'value' => 'in_use' }
-        ])
-      end
-
-      it { is_expected.to eq('in_use') }
     end
   end
 end

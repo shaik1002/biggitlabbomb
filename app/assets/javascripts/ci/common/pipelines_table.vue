@@ -72,6 +72,11 @@ export default {
         return value === PIPELINE_IID_KEY || value === PIPELINE_ID_KEY;
       },
     },
+    updateGraphDropdown: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   computed: {
     isMobile() {
@@ -116,7 +121,7 @@ export default {
       ];
     },
     tdClasses() {
-      return '!gl-border-none';
+      return this.useFailedJobsWidget ? '!gl-pb-0 !gl-border-none' : 'pl-p-5!';
     },
     pipelinesWithDetails() {
       let { pipelines } = this;
@@ -127,7 +132,7 @@ export default {
 
       if (this.useFailedJobsWidget) {
         pipelines = pipelines.map((p) => {
-          return p.failed_builds_count > 0 ? { ...p, _showDetails: true } : p;
+          return { ...p, _showDetails: true };
         });
       }
 
@@ -135,18 +140,12 @@ export default {
     },
   },
   methods: {
-    cellWidth(ref) {
-      return this.$refs[ref]?.offsetWidth;
-    },
-    displayFailedJobsWidget(item) {
-      return !item.isLoading && this.useFailedJobsWidget;
-    },
-    failedJobsCount(pipeline) {
-      return pipeline?.failed_builds_count || 0;
-    },
     getDownstreamPipelines(pipeline) {
       const downstream = pipeline.triggered;
       return keepLatestDownstreamPipelines(downstream);
+    },
+    cellWidth(ref) {
+      return this.$refs[ref]?.offsetWidth;
     },
     getProjectPath(item) {
       return cleanLeadingSeparator(item.project.full_path);
@@ -154,8 +153,8 @@ export default {
     getStages(item) {
       return item?.details?.stages || [];
     },
-    onCancelPipeline(pipeline) {
-      this.$emit('cancel-pipeline', pipeline);
+    failedJobsCount(pipeline) {
+      return pipeline?.failed_builds_count || 0;
     },
     onRefreshPipelinesTable() {
       this.$emit('refresh-pipelines-table');
@@ -163,10 +162,8 @@ export default {
     onRetryPipeline(pipeline) {
       this.$emit('retry-pipeline', pipeline);
     },
-    rowClass(item) {
-      return this.displayFailedJobsWidget(item) && this.failedJobsCount(item) > 0
-        ? ''
-        : '!gl-border-b';
+    onCancelPipeline(pipeline) {
+      this.$emit('cancel-pipeline', pipeline);
     },
     setLoaderPosition(ref) {
       if (this.isMobile) {
@@ -190,8 +187,6 @@ export default {
       :fields="tableFields"
       :items="pipelinesWithDetails"
       :tbody-tr-attr="$options.TBODY_TR_ATTR"
-      :tbody-tr-class="rowClass"
-      details-td-class="!gl-pt-2"
       stacked="lg"
       fixed
     >
@@ -255,19 +250,15 @@ export default {
           :downstream-pipelines="getDownstreamPipelines(item)"
           :pipeline-path="item.path"
           :stages="getStages(item)"
+          :update-dropdown="updateGraphDropdown"
           :upstream-pipeline="item.triggered_by"
           @miniGraphStageClick="trackPipelineMiniGraph"
         />
       </template>
 
       <template #cell(actions)="{ item }">
-        <div v-if="item.isLoading" ref="actions">
-          <gl-skeleton-loader :height="$options.cellHeight" :width="cellWidth('actions')">
-            <rect height="20" rx="4" ry="4" :width="cellWidth('actions')" />
-          </gl-skeleton-loader>
-        </div>
         <pipeline-operations
-          v-else
+          v-if="!item.isLoading"
           :pipeline="item"
           @cancel-pipeline="onCancelPipeline"
           @refresh-pipelines-table="onRefreshPipelinesTable"
@@ -277,7 +268,8 @@ export default {
 
       <template #row-details="{ item }">
         <pipeline-failed-jobs-widget
-          v-if="displayFailedJobsWidget(item)"
+          v-if="useFailedJobsWidget && !item.isLoading"
+          :failed-jobs-count="failedJobsCount(item)"
           :is-pipeline-active="item.active"
           :pipeline-iid="item.iid"
           :pipeline-path="item.path"

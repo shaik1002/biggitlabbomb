@@ -63,7 +63,7 @@ RSpec.describe Gitlab::Ci::Config::External::File::Template, feature_category: :
 
       it 'returns false' do
         expect(valid?).to be_falsy
-        expect(template_file.error_message).to include('`[MASKED]xxxxxx.yml` is not a valid location!')
+        expect(template_file.error_message).to include('`xxxxxxxxxxxxxx.yml` is not a valid location!')
       end
     end
 

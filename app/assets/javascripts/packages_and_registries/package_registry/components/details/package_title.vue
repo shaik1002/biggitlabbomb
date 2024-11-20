@@ -1,7 +1,6 @@
 <script>
-import { GlSprintf, GlBadge, GlResizeObserverDirective } from '@gitlab/ui';
+import { GlSprintf, GlBadge, GlResizeObserverDirective, GlTooltipDirective } from '@gitlab/ui';
 import { GlBreakpointInstance } from '@gitlab/ui/dist/utils';
-import ProtectedBadge from '~/vue_shared/components/badges/protected_badge.vue';
 import { __, s__, sprintf } from '~/locale';
 import { formatDate } from '~/lib/utils/datetime_utility';
 import PackageTags from '~/packages_and_registries/shared/components/package_tags.vue';
@@ -10,6 +9,7 @@ import { getPackageTypeLabel } from '~/packages_and_registries/package_registry/
 import MetadataItem from '~/vue_shared/components/registry/metadata_item.vue';
 import TitleArea from '~/vue_shared/components/registry/title_area.vue';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
 export default {
   name: 'PackageTitle',
@@ -20,11 +20,12 @@ export default {
     MetadataItem,
     GlBadge,
     TimeAgoTooltip,
-    ProtectedBadge,
   },
   directives: {
     GlResizeObserver: GlResizeObserverDirective,
+    GlTooltip: GlTooltipDirective,
   },
+  mixins: [glFeatureFlagsMixin()],
   inject: ['isGroupPage'],
   i18n: {
     lastDownloadedAt: s__('PackageRegistry|Last downloaded %{dateTime}'),
@@ -64,7 +65,10 @@ export default {
       return Boolean(this.packageEntity.tags?.nodes && this.packageEntity.tags?.nodes.length);
     },
     showBadgeProtected() {
-      return Boolean(this.packageEntity?.protectionRuleExists);
+      return (
+        Boolean(this.glFeatures.packagesProtectedPackages) &&
+        Boolean(this.packageEntity?.protectionRuleExists)
+      );
     },
   },
   mounted() {
@@ -114,10 +118,14 @@ export default {
           </gl-badge>
         </template>
 
-        <protected-badge
+        <gl-badge
           v-if="showBadgeProtected"
-          :tooltip-text="$options.i18n.badgeProtectedTooltipText"
-        />
+          v-gl-tooltip="{ title: $options.i18n.badgeProtectedTooltipText }"
+          icon-size="sm"
+          variant="neutral"
+        >
+          {{ __('protected') }}
+        </gl-badge>
       </div>
     </template>
 

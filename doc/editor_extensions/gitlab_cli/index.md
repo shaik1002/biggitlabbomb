@@ -73,10 +73,8 @@ glab mr merge
 ## GitLab Duo for the CLI
 
 DETAILS:
-**Tier:** Ultimate with GitLab Duo Enterprise - [Start a trial](https://about.gitlab.com/solutions/gitlab-duo-pro/sales/?type=free-trial)
+**Tier: GitLab.com and Self-managed:** For a limited time, Ultimate. In the future, Ultimate with [GitLab Duo Enterprise](../../subscriptions/subscription-add-ons.md). **GitLab Dedicated:** GitLab Duo Enterprise.
 **Offering:** GitLab.com, Self-managed, GitLab Dedicated
-
-> - Changed to require GitLab Duo add-on in GitLab 17.6 and later.
 
 The GitLab CLI includes features powered by [GitLab Duo](../../user/ai_features.md). These include:
 

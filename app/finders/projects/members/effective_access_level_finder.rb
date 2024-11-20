@@ -74,12 +74,10 @@ module Projects
           members_per_batch = []
 
           relation.includes(:group).each do |link| # rubocop: disable CodeReuse/ActiveRecord
-            members_per_batch << link.group
-                                     .authorizable_members_with_parents
-                                     .select(*user_id_and_access_level_for_project_group_shares(link))
+            members_per_batch << link.group.authorizable_members_with_parents.select(*user_id_and_access_level_for_project_group_shares(link))
           end
 
-          members << Member.from_union(members_per_batch).select(:user_id, :access_level)
+          members << Member.from_union(members_per_batch)
         end
 
         Member.from_union(members)
@@ -93,7 +91,6 @@ module Projects
 
         Member
           .from(generate_from_statement([[user_id, access_level]])) # rubocop: disable CodeReuse/ActiveRecord
-          .select(:user_id, :access_level)
           .limit(1)
       end
 

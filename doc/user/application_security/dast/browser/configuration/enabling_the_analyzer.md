@@ -1,5 +1,5 @@
 ---
-stage: Application Security Testing
+stage: Secure
 group: Dynamic Analysis
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 type: reference, howto
@@ -60,7 +60,7 @@ stages:
   - dast
 
 include:
-  - template: Security/DAST.gitlab-ci.yml
+  - template: DAST.gitlab-ci.yml
 
 dast:
   variables:

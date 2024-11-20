@@ -17,7 +17,7 @@ describe('Merge Conflict Resolver App', () => {
   let wrapper;
   let store;
 
-  const decoratedMockFiles = decorateFiles(conflictsMock);
+  const decoratedMockFiles = decorateFiles(conflictsMock.files);
 
   const mountComponent = () => {
     wrapper = shallowMountExtended(component, {

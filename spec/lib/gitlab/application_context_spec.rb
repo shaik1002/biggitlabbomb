@@ -190,7 +190,7 @@ RSpec.describe Gitlab::ApplicationContext, feature_category: :shared do
     end
 
     context 'when using a runner project' do
-      let_it_be_with_reload(:runner) { create(:ci_runner, :project, projects: [project]) }
+      let_it_be_with_reload(:runner) { create(:ci_runner, :project) }
 
       it 'sets project path from runner project' do
         context = described_class.new(runner: runner)
@@ -236,16 +236,6 @@ RSpec.describe Gitlab::ApplicationContext, feature_category: :shared do
         context = described_class.new(bulk_import_entity_id: 1)
 
         expect(result(context)).to include(bulk_import_entity_id: 1)
-      end
-    end
-
-    context 'when using organization context' do
-      let_it_be(:organization) { create(:organization) }
-
-      it 'sets the organization_id value' do
-        context = described_class.new(organization: organization)
-
-        expect(result(context)).to include(organization_id: organization.id)
       end
     end
   end

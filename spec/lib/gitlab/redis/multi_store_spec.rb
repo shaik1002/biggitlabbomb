@@ -132,6 +132,7 @@ RSpec.describe Gitlab::Redis::MultiStore, feature_category: :redis do
     end
   end
 
+  # rubocop:disable RSpec/MultipleMemoizedHelpers
   context 'with READ redis commands' do
     let(:args) { 'args' }
     let(:kwargs) { { match: '*:set:key2*' } }
@@ -269,6 +270,7 @@ RSpec.describe Gitlab::Redis::MultiStore, feature_category: :redis do
       end
     end
   end
+  # rubocop:enable RSpec/MultipleMemoizedHelpers
 
   context 'with nested command in block' do
     let(:skey) { "test_set" }

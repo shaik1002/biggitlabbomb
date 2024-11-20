@@ -50,11 +50,6 @@ export default {
       required: false,
       default: null,
     },
-    initialCustomizeJiraIssueEnabled: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
     isValidated: {
       type: Boolean,
       required: false,
@@ -131,7 +126,6 @@ export default {
         :initial-is-enabled="initialEnableJiraVulnerabilities"
         :initial-project-key="initialProjectKey"
         :initial-issue-type-id="initialVulnerabilitiesIssuetype"
-        :initial-customize-jira-issue-enabled="initialCustomizeJiraIssueEnabled"
         :is-validated="isValidated"
         :show-full-feature="showJiraVulnerabilitiesIntegration"
         class="gl-mt-6"

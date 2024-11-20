@@ -34,7 +34,7 @@ This endpoint rate-limits each user to 60 requests per 1-minute window.
 Use the AI abstraction layer to generate code completions.
 
 Requests to this endpoint are proxied to the
-[AI gateway](https://gitlab.com/gitlab-org/modelops/applied-ml/code-suggestions/ai-assist/-/blob/main/docs/api.md).
+[AI Gateway](https://gitlab.com/gitlab-org/modelops/applied-ml/code-suggestions/ai-assist/-/blob/main/docs/api.md).
 
 Parameters:
 
@@ -122,10 +122,10 @@ Supported attributes:
 
 If successful, returns:
 
-- [`200`](rest/troubleshooting.md#status-codes) if the feature is enabled.
-- [`403`](rest/troubleshooting.md#status-codes) if the feature is disabled.
+- [`200`](rest/index.md#status-codes) if the feature is enabled.
+- [`403`](rest/index.md#status-codes) if the feature is disabled.
 
-Additionally, returns a [`404`](rest/troubleshooting.md#status-codes) if the path is empty or the project does not exist.
+Additionally, returns a [`404`](rest/index.md#status-codes) if the path is empty or the project does not exist.
 
 Example request:
 
@@ -152,7 +152,7 @@ POST /code_suggestions/direct_access
 NOTE:
 This endpoint rate-limits each user to 10 requests per 5-minute window.
 
-Returns user-specific connection details which can be used by IDEs/clients to send completion requests directly to AI gateway.
+Returns user-specific connection details which can be used by IDEs/clients to send completion requests directly to AI Gateway.
 
 Example request:
 

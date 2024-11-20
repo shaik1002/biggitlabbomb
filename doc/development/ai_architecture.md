@@ -6,7 +6,7 @@ info: Any user with at least the Maintainer role can merge updates to this conte
 
 # AI Architecture
 
-This document describes architecture shared by the GitLab Duo AI features. For historical motivation and goals of this architecture, see the [AI gateway Architecture design document](https://handbook.gitlab.com/handbook/engineering/architecture/design-documents/ai_gateway/).
+This document describes architecture shared by the GitLab Duo AI features. For historical motivation and goals of this architecture, see the [AI Gateway Architecture design document](https://handbook.gitlab.com/handbook/engineering/architecture/design-documents/ai_gateway/).
 
 ## Introduction
 
@@ -25,7 +25,7 @@ package Clients {
 [GitLab.com] as GLCOM
 [Self-Managed/Dedicated] as SMI
 [CustomersDot API] as CD
-[AI gateway] as AIGW
+[AI Gateway] as AIGW
 
 package Models {
   [3rd party models (Anthropic,VertexAI)] as THIRD
@@ -51,7 +51,7 @@ AIGW -down-> Models : prompts
 
 - [GitLab instances](https://gitlab.com/gitlab-org/gitlab) - GitLab monolith that powers all types of GitLab instances
 - [CustomersDot](https://gitlab.com/gitlab-org/customers-gitlab-com) - Allows customers to buy and upgrade subscriptions by adding more seats and add/edit payment records. It also manages self-managed licenses.
-- [AI gateway](https://gitlab.com/gitlab-org/modelops/applied-ml/code-suggestions/ai-assist) - System that provides unified interface for invoking models. Deployed in Google Cloud Run (using [Runway](https://gitlab.com/gitlab-com/gl-infra/platform/runway)).
+- [AI Gateway](https://gitlab.com/gitlab-org/modelops/applied-ml/code-suggestions/ai-assist) - System that provides unified interface for invoking models. Deployed in Google Cloud Run (using [Runway](https://gitlab.com/gitlab-com/gl-infra/platform/runway)).
 - Extensions
   - [Language Server](https://gitlab.com/gitlab-org/editor-extensions/gitlab-lsp) (powers Code Suggestions in VS Code, Visual Studio 2022 for Windows, and Neovim)
   - [VS Code](https://gitlab.com/gitlab-org/gitlab-vscode-extension)
@@ -69,7 +69,7 @@ AIGW -down-> Models : prompts
 
 ## SaaS-based AI abstraction layer
 
-GitLab operates a cloud-hosted AI architecture. We will allow access to it for licensed self managed instances using the AI-gateway. See [the design document](https://handbook.gitlab.com/handbook/engineering/architecture/design-documents/ai_gateway/) for details.
+GitLab currently operates a cloud-hosted AI architecture. We will allow access to it for licensed self managed instances using the AI-gateway. See [the design document](https://handbook.gitlab.com/handbook/engineering/architecture/design-documents/ai_gateway/) for details.
 
 There are two primary reasons for this: the best AI models are cloud-based as they often depend on specialized hardware designed for this purpose, and operating self-managed infrastructure capable of AI at-scale and with appropriate performance is a significant undertaking. We are actively [tracking self-managed customers interested in AI](https://gitlab.com/gitlab-org/gitlab/-/issues/409183).
 

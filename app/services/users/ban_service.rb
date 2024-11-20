@@ -7,12 +7,7 @@ module Users
     private
 
     def update_user(user)
-      if user.ban
-        ban_duplicate_users(user)
-        true
-      else
-        false
-      end
+      user.ban
     end
 
     def valid_state?(user)
@@ -21,10 +16,6 @@ module Users
 
     def action
       :ban
-    end
-
-    def ban_duplicate_users(user)
-      AntiAbuse::BanDuplicateUsersWorker.perform_async(user.id)
     end
   end
 end

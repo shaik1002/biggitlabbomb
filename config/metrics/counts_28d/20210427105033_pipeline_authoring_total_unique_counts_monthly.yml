@@ -11,14 +11,14 @@ time_frame: 28d
 data_source: redis_hll
 instrumentation_class: RedisHLLMetric
 events:
-- name: commit_change_to_ciconfigfile
+- name: o_pipeline_authoring_unique_users_committing_ciconfigfile
   unique: user.id
 - name: o_pipeline_authoring_unique_users_pushing_mr_ciconfigfile
   unique: user.id
 distribution:
 - ce
 - ee
-tiers:
+tier:
 - free
 - premium
 - ultimate

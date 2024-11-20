@@ -15,8 +15,8 @@ module Types
           field :count,
             ::Types::Analytics::CycleAnalytics::MetricType,
             description: 'Limited item count. The backend counts maximum 1000 items, ' \
-              'for free projects, and maximum 10,000 items for licensed ' \
-              'projects or licensed groups.'
+                         'for free projects, and maximum 10,000 items for licensed ' \
+                         'projects or licensed groups.'
 
           field :median,
             ::Types::Analytics::CycleAnalytics::MetricType,
@@ -25,7 +25,7 @@ module Types
           field :items,
             description: 'Items in the stage.',
             resolver: Resolvers::Analytics::CycleAnalytics::ValueStreams::StageItemsResolver,
-            experiment: { milestone: '17.4' }
+            alpha: { milestone: '17.4' }
 
           def count
             {

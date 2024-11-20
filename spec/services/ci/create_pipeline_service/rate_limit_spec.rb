@@ -3,6 +3,7 @@ require 'spec_helper'
 
 RSpec.describe Ci::CreatePipelineService, :freeze_time,
   :clean_gitlab_redis_rate_limiting,
+  :ci_config_feature_flag_correctness,
   feature_category: :continuous_integration do
   describe 'rate limiting' do
     let_it_be(:project) { create(:project, :repository) }

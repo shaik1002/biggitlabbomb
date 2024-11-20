@@ -110,11 +110,17 @@ module FormHelper
       }
     }
 
-    dropdown_data[:data][:iid] = iid if iid
+    if iid
+      dropdown_data[:data][:iid] = iid
+    end
 
-    dropdown_data[:data][:target_branch] = target_branch if target_branch
+    if target_branch
+      dropdown_data[:data][:target_branch] = target_branch
+    end
 
-    dropdown_data = multiple_reviewers_dropdown_options(dropdown_data) if merge_request_supports_multiple_reviewers?
+    if merge_request_supports_multiple_reviewers?
+      dropdown_data = multiple_reviewers_dropdown_options(dropdown_data)
+    end
 
     dropdown_data[:data].merge!(reviewers_dropdown_options_for_suggested_reviewers)
     dropdown_data

@@ -72,7 +72,7 @@ module Gitlab
         available_queues = queues_from_routing_rules.empty? ? DEFAULT_QUEUES : [*queues_from_routing_rules, 'mailers'].freeze
 
         queue_groups = argv.map do |queues|
-          if /[\r\n]/.match?(queues)
+          if queues =~ /[\r\n]/
             raise CommandError,
               'The queue arguments cannot contain newlines'
           end
@@ -89,7 +89,7 @@ module Gitlab
         end
 
         if @list_queues
-          puts queue_groups.map(&:sort)
+          puts queue_groups.map(&:sort) # rubocop:disable Rails/Output
 
           return
         end

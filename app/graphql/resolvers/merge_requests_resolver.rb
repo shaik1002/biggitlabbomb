@@ -86,12 +86,6 @@ module Resolvers
                Available only when the feature flag `mr_approved_filter` is enabled.
       DESC
 
-    argument :subscribed, Types::Issuables::SubscriptionStatusEnum,
-      description: 'Merge requests the current user is subscribed to. Is ignored if ' \
-        '`filter_subscriptions` feature flag is disabled.',
-      experiment: { milestone: '17.5' },
-      required: false
-
     argument :created_after, Types::TimeType,
       required: false,
       description: 'Merge requests created after the timestamp.'
@@ -107,10 +101,6 @@ module Resolvers
     argument :deployment_id, GraphQL::Types::String,
       required: false,
       description: 'ID of the deployment.'
-    argument :environment_name, GraphQL::Types::String,
-      as: :environment,
-      required: false,
-      description: 'Environment merge requests have been deployed to.'
     argument :updated_after, Types::TimeType,
       required: false,
       description: 'Merge requests updated after the timestamp.'
@@ -141,11 +131,11 @@ module Resolvers
     argument :review_state, ::Types::MergeRequestReviewStateEnum,
       required: false,
       description: 'Reviewer state of the merge request.',
-      experiment: { milestone: '17.0' }
+      alpha: { milestone: '17.0' }
     argument :review_states, [::Types::MergeRequestReviewStateEnum],
       required: false,
       description: 'Reviewer states of the merge request.',
-      experiment: { milestone: '17.0' }
+      alpha: { milestone: '17.0' }
     argument :sort, Types::MergeRequestSortEnum,
       description: 'Sort merge requests by the criteria.',
       required: false,
@@ -155,38 +145,27 @@ module Resolvers
       argument :approved_by, [GraphQL::Types::String],
         required: false,
         as: :approved_by_usernames,
-        description: 'Filters merge requests to exclude any that are approved by usernames in the given array.'
+        description: 'Usernames of approvers to exclude.'
       argument :assignee_usernames, [GraphQL::Types::String],
         as: :assignee_username,
         required: false,
-        description: 'Filters merge requests to exclude any that are assigned to the usernames in the given array.'
-      argument :author_username, GraphQL::Types::String,
-        required: false,
-        description: 'Filters merge requests to exclude any that are authored by the given user.'
+        description: 'Usernames of the assignee to exclude.'
       argument :labels, [GraphQL::Types::String],
         required: false,
         as: :label_name,
-        description: 'Filters merge requests to exclude any that have the labels provided in the given array.'
+        description: 'Array of label names. All resolved merge requests will not have these labels.'
       argument :milestone_title, GraphQL::Types::String,
         required: false,
-        description: 'Filters merge requests to those not in the given milestone.'
+        description: 'Title of the milestone to exclude.'
       argument :my_reaction_emoji, GraphQL::Types::String,
         required: false,
-        description: 'Filters merge requests to those without the given reaction from the authenticated user.'
+        description: 'Filter by reaction emoji to exclude.'
       argument :release_tag, GraphQL::Types::String,
         required: false,
-        description: 'Filters merge requests to those without the given release tag.'
+        description: 'Filter by release tag to exclude.'
       argument :reviewer_username, GraphQL::Types::String,
         required: false,
-        description: 'Filters merge requests to those not reviewed by the given user.'
-      argument :source_branches, [GraphQL::Types::String],
-        required: false,
-        as: :source_branch,
-        description: 'Filters merge requests to exclude the source branch names provided in the given array.'
-      argument :target_branches, [GraphQL::Types::String],
-        required: false,
-        as: :target_branch,
-        description: 'Filters merge requests to exclude the target branch names provided in the given array.'
+        description: 'Username of the reviewer to exclude.'
     end
 
     validates mutually_exclusive: [:assignee_username, :assignee_wildcard_id]

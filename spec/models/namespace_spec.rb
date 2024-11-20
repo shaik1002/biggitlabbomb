@@ -29,6 +29,7 @@ RSpec.describe Namespace, feature_category: :groups_and_projects do
     it { is_expected.to have_one(:catalog_verified_namespace) }
     it { is_expected.to have_many :custom_emoji }
     it { is_expected.to have_one :package_setting_relation }
+    it { is_expected.to have_one :onboarding_progress }
     it { is_expected.to have_one :admin_note }
     it { is_expected.to have_many :pending_builds }
     it { is_expected.to have_one :namespace_route }
@@ -41,14 +42,6 @@ RSpec.describe Namespace, feature_category: :groups_and_projects do
     it { is_expected.to have_many(:cycle_analytics_stages) }
     it { is_expected.to have_many(:value_streams) }
     it { is_expected.to have_many(:non_archived_projects).class_name('Project') }
-    it { is_expected.to have_many(:bot_users).through(:bot_user_details).source(:user) }
-
-    it do
-      is_expected.to have_many(:bot_user_details)
-                       .class_name('UserDetail')
-                       .with_foreign_key(:bot_namespace_id)
-                       .inverse_of(:bot_namespace)
-    end
 
     it do
       is_expected.to have_one(:ci_cd_settings).class_name('NamespaceCiCdSetting').inverse_of(:namespace).autosave(true)
@@ -283,72 +276,6 @@ RSpec.describe Namespace, feature_category: :groups_and_projects do
     end
   end
 
-  describe 'default values' do
-    context 'organzation_id' do
-      context 'when feature flag namespace_model_default_org is enabled' do
-        context 'and database has a default value' do
-          before do
-            described_class.connection.execute("ALTER TABLE namespaces ALTER COLUMN organization_id SET DEFAULT 100")
-            described_class.reset_column_information
-          end
-
-          after do
-            described_class.connection.execute("ALTER TABLE namespaces ALTER COLUMN organization_id SET DEFAULT 1")
-            described_class.reset_column_information
-          end
-
-          it 'uses value from model' do
-            expect(described_class.new.organization_id).to eq(1)
-          end
-        end
-
-        context 'and database has no default value' do
-          before do
-            described_class.connection.execute("ALTER TABLE namespaces ALTER COLUMN organization_id DROP DEFAULT")
-            described_class.reset_column_information
-          end
-
-          after do
-            described_class.connection.execute("ALTER TABLE namespaces ALTER COLUMN organization_id SET DEFAULT 1")
-            described_class.reset_column_information
-          end
-
-          it 'uses value from model' do
-            expect(described_class.new.organization_id).to eq(1)
-          end
-        end
-      end
-
-      context 'when feature flag namespace_model_default_org is disabled' do
-        before do
-          stub_feature_flags(namespace_model_default_org: false)
-        end
-
-        context 'and database has a default value' do
-          before do
-            described_class.connection.execute("ALTER TABLE namespaces ALTER COLUMN organization_id SET DEFAULT 100")
-            described_class.reset_column_information
-          end
-
-          it 'uses database value' do
-            expect(described_class.new.organization_id).to eq(100)
-          end
-        end
-
-        context 'and database has no default value' do
-          before do
-            described_class.connection.execute("ALTER TABLE namespaces ALTER COLUMN organization_id DROP DEFAULT")
-            described_class.reset_column_information
-          end
-
-          it 'is nil' do
-            expect(described_class.new.organization_id).to be_nil
-          end
-        end
-      end
-    end
-  end
-
   describe "ReferencePatternValidation" do
     subject { described_class.reference_pattern }
 
@@ -532,7 +459,7 @@ RSpec.describe Namespace, feature_category: :groups_and_projects do
 
     describe '.without_deleted' do
       before do
-        namespace1.namespace_details.update!(deleted_at: Time.current)
+        namespace1.namespace_details.update!(pending_delete: true)
       end
 
       it 'does not include namespace marked as deleted' do
@@ -545,12 +472,6 @@ RSpec.describe Namespace, feature_category: :groups_and_projects do
         expect(described_class.by_parent(namespace1.id)).to match_array([namespace1sub])
         expect(described_class.by_parent(namespace2.id)).to match_array([namespace2sub])
         expect(described_class.by_parent(nil)).to match_array([namespace, namespace1, namespace2])
-      end
-    end
-
-    describe '.top_level' do
-      it 'includes correct namespaces' do
-        expect(described_class.top_level).to match_array([namespace, namespace1, namespace2])
       end
     end
 
@@ -652,6 +573,28 @@ RSpec.describe Namespace, feature_category: :groups_and_projects do
         end
       end
     end
+
+    describe '#by_contains_all_traversal_ids' do
+      let_it_be(:namespace_1) { create(:group) }
+      let_it_be(:namespace_2) { create(:group, parent: namespace_1) }
+      let_it_be(:namespace_3) { create(:namespace) }
+
+      it 'returns groups that contain all provided traversal_ids' do
+        expect(described_class.by_contains_all_traversal_ids(namespace_1.traversal_ids))
+          .to contain_exactly(namespace_1, namespace_2)
+        expect(described_class.by_contains_all_traversal_ids(namespace_2.traversal_ids)).to contain_exactly(namespace_2)
+        expect(described_class.by_contains_all_traversal_ids(namespace_3.traversal_ids)).to contain_exactly(namespace_3)
+      end
+    end
+
+    describe '#by_traversal_ids' do
+      let_it_be(:namespace_1) { create(:namespace) }
+
+      it 'returns groups for the provided traversal_ids' do
+        expect(described_class.by_traversal_ids(namespace.traversal_ids)).to contain_exactly(namespace)
+        expect(described_class.by_traversal_ids(namespace_1.traversal_ids)).to contain_exactly(namespace_1)
+      end
+    end
   end
 
   describe 'delegate' do
@@ -668,11 +611,9 @@ RSpec.describe Namespace, feature_category: :groups_and_projects do
     it { is_expected.to delegate_method(:math_rendering_limits_enabled).to(:namespace_settings) }
     it { is_expected.to delegate_method(:math_rendering_limits_enabled?).to(:namespace_settings) }
     it { is_expected.to delegate_method(:lock_math_rendering_limits_enabled?).to(:namespace_settings) }
-    it { is_expected.to delegate_method(:token_expiry_notify_inherited).to(:namespace_settings) }
-    it { is_expected.to delegate_method(:token_expiry_notify_inherited=).to(:namespace_settings).with_arguments(:args) }
     it { is_expected.to delegate_method(:add_creator).to(:namespace_details) }
-    it { is_expected.to delegate_method(:deleted_at).to(:namespace_details) }
-    it { is_expected.to delegate_method(:deleted_at=).to(:namespace_details).with_arguments(:args) }
+    it { is_expected.to delegate_method(:pending_delete).to(:namespace_details) }
+    it { is_expected.to delegate_method(:pending_delete=).to(:namespace_details).with_arguments(:args) }
 
     it do
       is_expected.to delegate_method(:prevent_sharing_groups_outside_hierarchy=).to(:namespace_settings)
@@ -815,6 +756,32 @@ RSpec.describe Namespace, feature_category: :groups_and_projects do
 
       expect(namespace.valid?).to eq(true)
     end
+
+    describe '.with_disabled_organization_validation' do
+      it 'does not require organization' do
+        namespace.organization = nil
+
+        Namespace.with_disabled_organization_validation do
+          expect(namespace.valid?).to eq(true)
+        end
+      end
+
+      context 'with nested calls' do
+        it 'validation will not be re-enabled' do
+          result = []
+          Namespace.with_disabled_organization_validation do
+            result << described_class.new.require_organization?
+            Namespace.with_disabled_organization_validation do
+              result << described_class.new.require_organization?
+            end
+            result << described_class.new.require_organization?
+          end
+
+          expect(result.any?(true)).to be false
+          expect(described_class.new.require_organization?).to be false
+        end
+      end
+    end
   end
 
   context 'when feature flag require_organization is enabled', :request_store do
@@ -822,6 +789,32 @@ RSpec.describe Namespace, feature_category: :groups_and_projects do
       namespace.organization = nil
 
       expect(namespace.valid?).to eq(false)
+    end
+
+    describe '.with_disabled_organization_validation' do
+      it 'does not require organization' do
+        namespace.organization = nil
+
+        Namespace.with_disabled_organization_validation do
+          expect(namespace.valid?).to eq(true)
+        end
+      end
+
+      context 'with nested calls' do
+        it 'only last call will re-enable the validation' do
+          result = []
+          Namespace.with_disabled_organization_validation do
+            result << described_class.new.require_organization?
+            Namespace.with_disabled_organization_validation do
+              result << described_class.new.require_organization?
+            end
+            result << described_class.new.require_organization?
+          end
+
+          expect(result.any?(true)).to be false
+          expect(described_class.new.require_organization?).to be true
+        end
+      end
     end
   end
 
@@ -1472,33 +1465,26 @@ RSpec.describe Namespace, feature_category: :groups_and_projects do
     end
   end
 
-  describe '.find_by_path_or_name' do
-    let_it_be(:namespace) { create(:namespace, name: 'WoW', path: 'woW') }
+  describe '.top_most' do
+    let_it_be(:namespace) { create(:namespace) }
+    let_it_be(:group) { create(:group) }
+    let_it_be(:subgroup) { create(:group, parent: group) }
 
-    it { expect(described_class.find_by_path_or_name('wow')).to eq(namespace) }
-    it { expect(described_class.find_by_path_or_name('WOW')).to eq(namespace) }
-    it { expect(described_class.find_by_path_or_name('unknown')).to be_nil }
+    subject { described_class.top_most.ids }
+
+    it 'only contains root namespaces' do
+      is_expected.to contain_exactly(group.id, namespace.id)
+    end
   end
 
-  describe '.find_top_level' do
-    # Due to the top level scope of this spec having a create of namespace, we'll avoid possible future flakiness here.
-    let(:namespace) { nil }
-
-    subject { described_class.find_top_level }
-
-    context 'when there are top level namespaces' do
-      # Order of creation matters here as we are only taking the first result and the single
-      # threaded FIFO order of creation in specs.
-      let_it_be(:sub_group) { create(:group, :nested) }
-      let_it_be(:another_parent_namespace) { create(:group) }
-      let(:parent_namespace) { sub_group.parent }
-
-      it { is_expected.to eq(parent_namespace) }
+  describe '.find_by_path_or_name' do
+    before do
+      @namespace = create(:namespace, name: 'WoW', path: 'woW')
     end
 
-    context 'when there are no top level namespaces' do
-      it { is_expected.to be_nil }
-    end
+    it { expect(described_class.find_by_path_or_name('wow')).to eq(@namespace) }
+    it { expect(described_class.find_by_path_or_name('WOW')).to eq(@namespace) }
+    it { expect(described_class.find_by_path_or_name('unknown')).to eq(nil) }
   end
 
   describe ".clean_path" do
@@ -1952,7 +1938,7 @@ RSpec.describe Namespace, feature_category: :groups_and_projects do
 
   describe '#root_ancestor' do
     context 'with persisted root group' do
-      let_it_be(:root_group) { create(:group) }
+      let!(:root_group) { create(:group) }
 
       it 'returns root_ancestor for root group without a query' do
         expect { root_group.root_ancestor }.not_to exceed_query_limit(0)
@@ -1974,19 +1960,6 @@ RSpec.describe Namespace, feature_category: :groups_and_projects do
         expect(nested_group.root_ancestor).to eq(root_group)
         expect(deep_nested_group.root_ancestor).to eq(root_group)
         expect(very_deep_nested_group.root_ancestor).to eq(root_group)
-      end
-
-      context 'when nested group references parent by id' do
-        let_it_be(:nested_group) { create(:group, parent: root_group) }
-        let_it_be(:deep_nested_group) { Group.new(attributes_for(:group, parent_id: nested_group.id)) }
-
-        it 'performs a single query' do
-          expect { deep_nested_group.root_ancestor }.not_to exceed_query_limit(1)
-        end
-
-        it 'returns the root ancestor' do
-          expect(deep_nested_group.root_ancestor).to eq root_group
-        end
       end
     end
 
@@ -2241,74 +2214,6 @@ RSpec.describe Namespace, feature_category: :groups_and_projects do
       group.emails_enabled = false
 
       expect(group.emails_disabled?).to be_truthy
-    end
-  end
-
-  context 'with token_expiry_notify_inherited settings' do
-    let_it_be_with_reload(:grandparent_namespace) { create(:group) }
-    let_it_be_with_reload(:parent_namespace) { create(:group, parent: grandparent_namespace) }
-    let_it_be_with_reload(:child_namespace) { create(:group, parent: parent_namespace) }
-
-    describe '.token_expiry_notify_inherited?' do
-      subject { child_namespace.token_expiry_notify_inherited? }
-
-      # setting defaults to true for all namespace settings
-      it { is_expected.to eq(true) }
-
-      context 'when parent namespace has setting disabled' do
-        before do
-          parent_namespace.namespace_settings.update!(token_expiry_notify_inherited: false)
-        end
-
-        it { is_expected.to eq(false) }
-      end
-
-      context 'when grandparent namespace has setting disabled' do
-        before do
-          grandparent_namespace.namespace_settings.update!(token_expiry_notify_inherited: false)
-        end
-
-        it { is_expected.to eq(false) }
-      end
-
-      context 'when current token_expiry_notify_inherited is set to false' do
-        before do
-          child_namespace.namespace_settings.update!(token_expiry_notify_inherited: false)
-        end
-
-        it { is_expected.to eq(false) }
-      end
-    end
-
-    describe '.can_modify_token_expiry_notify_inherited?' do
-      subject { child_namespace.can_modify_token_expiry_notify_inherited? }
-
-      # setting defaults to true for all namespace settings
-      it { is_expected.to eq(true) }
-
-      context 'when parent namespace has setting disabled' do
-        before do
-          parent_namespace.namespace_settings.update!(token_expiry_notify_inherited: false)
-        end
-
-        it { is_expected.to eq(false) }
-      end
-
-      context 'when grandparent namespace has setting disabled' do
-        before do
-          grandparent_namespace.namespace_settings.update!(token_expiry_notify_inherited: false)
-        end
-
-        it { is_expected.to eq(false) }
-      end
-
-      context 'when current token_expiry_notify_inherited is set to false' do
-        before do
-          child_namespace.namespace_settings.update!(token_expiry_notify_inherited: false)
-        end
-
-        it { is_expected.to eq(true) }
-      end
     end
   end
 

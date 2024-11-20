@@ -4,24 +4,17 @@ RSpec.shared_context 'conan api setup' do
   include PackagesManagerApiSpecHelpers
   include HttpBasicAuthHelpers
 
-  let_it_be_with_reload(:project) { create(:project) }
-  let_it_be(:user) { create(:user, developer_of: [project]) }
-  let_it_be(:personal_access_token) { create(:personal_access_token, user: user) }
+  let(:package) { create(:conan_package) }
+  let_it_be(:personal_access_token) { create(:personal_access_token) }
+  let_it_be(:user) { personal_access_token.user }
   let_it_be(:base_secret) { SecureRandom.base64(64) }
-  let_it_be(:deploy_token) do
-    create(:deploy_token, read_package_registry: true, write_package_registry: true)
-  end
+  let_it_be(:deploy_token) { create(:deploy_token, read_package_registry: true, write_package_registry: true) }
 
-  let_it_be(:project_deploy_token, freeze: true) do
-    create(:project_deploy_token, deploy_token: deploy_token, project: project)
-  end
-
-  let_it_be(:job, freeze: true) { create(:ci_build, :running, user: user, project: project) }
-
-  let_it_be_with_reload(:package) { create(:conan_package, project: project) }
-
+  let(:project) { package.project }
+  let(:job) { create(:ci_build, :running, user: user, project: project) }
   let(:job_token) { job.token }
   let(:auth_token) { personal_access_token.token }
+  let(:project_deploy_token) { create(:project_deploy_token, deploy_token: deploy_token, project: project) }
 
   let(:headers) do
     { 'HTTP_AUTHORIZATION' => ActionController::HttpAuthentication::Basic.encode_credentials('foo', auth_token) }
@@ -40,6 +33,7 @@ RSpec.shared_context 'conan api setup' do
   end
 
   before do
+    project.add_developer(user)
     allow(Settings).to receive(:attr_encrypted_db_key_base).and_return(base_secret)
   end
 end
@@ -74,9 +68,5 @@ RSpec.shared_context 'conan file upload endpoints' do
 
   let(:jwt) { build_jwt(personal_access_token) }
   let(:headers_with_token) { build_token_auth_header(jwt.encoded).merge(workhorse_headers) }
-  let(:recipe_path) { "#{recipe_path_name}/#{recipe_path_version}/#{recipe_path_username}/#{recipe_path_channel}" }
-  let(:recipe_path_name) { "#{package.name}_new" }
-  let(:recipe_path_version) { package.version }
-  let(:recipe_path_username) { project.full_path.tr('/', '+') }
-  let(:recipe_path_channel) { "stable" }
+  let(:recipe_path) { "foo/bar/#{project.full_path.tr('/', '+')}/baz" }
 end

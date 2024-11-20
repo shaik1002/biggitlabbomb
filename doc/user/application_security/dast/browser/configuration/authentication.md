@@ -1,5 +1,5 @@
 ---
-stage: Application Security Testing
+stage: Secure
 group: Dynamic Analysis
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 type: reference, howto
@@ -240,6 +240,7 @@ Selectors have the format `type`:`search string`. DAST searches for the selector
 | `id`          | `id:element`                       | Searches for an HTML element with the provided element ID.                                                                                                                                            |
 | `name`        | `name:element`                     | Searches for an HTML element with the provided element name.                                                                                                                                          |
 | `xpath`       | `xpath://input[@id="my-button"]/a` | Searches for a HTML element with the provided XPath. XPath searches are expected to be less performant than other searches.                                                                           |
+| None provided | `a.click-me`                       | Defaults to searching using a CSS selector. **{warning}** **[Deprecated](https://gitlab.com/gitlab-org/gitlab/-/issues/383348)** in GitLab 15.8. Replaced by explicitly declaring the selector type.  |
 
 #### Find selectors with Google Chrome
 
@@ -248,10 +249,10 @@ Chrome DevTools element selector tool is an effective way to find a selector.
 1. Open Chrome and go to the page where you would like to find a selector, for example, the login page for your site.
 1. Open the `Elements` tab in Chrome DevTools with the keyboard shortcut `Command + Shift + c` in macOS or `Ctrl + Shift + c` in Windows or Linux.
 1. Select the `Select an element in the page to select it` tool.
-   ![search-elements](../img/dast_auth_browser_scan_search_elements_v16_9.png)
+   ![search-elements](../img/dast_auth_browser_scan_search_elements.png)
 1. Select the field on your page that you would like to know the selector for.
 1. After the tool is active, highlight a field you wish to view the details of.
-   ![highlight](../img/dast_auth_browser_scan_highlight_v16_9.png)
+   ![highlight](../img/dast_auth_browser_scan_highlight.png)
 1. Once highlighted, you can see the element's details, including attributes that would make a good candidate for a selector.
 
 In this example, the `id="user_login"` appears to be a good candidate. You can use this as a selector as the DAST username field by setting
@@ -419,7 +420,7 @@ An authentication report can be saved as a CI/CD job artifact to assist with und
 
 The report contains steps performed during the login process, HTTP requests and responses, the Document Object Model (DOM) and screenshots.
 
-![dast-auth-report](../img/dast_auth_report_v16_9.jpg)
+![dast-auth-report](../img/dast_auth_report.jpg)
 
 An example configuration where the authentication debug report is exported may look like the following:
 

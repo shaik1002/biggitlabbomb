@@ -3,7 +3,6 @@
 require 'spec_helper'
 
 RSpec.describe Gitlab::BackgroundMigration::BackfillOrDropCiPipelineOnProjectId,
-  :suppress_partitioning_routing_analyzer,
   feature_category: :continuous_integration,
   migration: :gitlab_ci do
   let(:project_id_with_build) { 137 }
@@ -75,21 +74,6 @@ RSpec.describe Gitlab::BackgroundMigration::BackfillOrDropCiPipelineOnProjectId,
         migration.perform
 
         expect(pipeline_with_merge_request.reload.project_id).to eq(project_id_for_merge_request)
-      end
-    end
-
-    context 'when backfill will create an invalid record' do
-      before do
-        table(:ci_pipelines, primary_key: :id, database: :ci)
-          .create!(id: 100, iid: 100, partition_id: 100, project_id: 137)
-
-        pipeline_with_builds.update!(iid: 100)
-      end
-
-      it 'deletes the pipeline instead' do
-        migration.perform
-
-        expect { pipeline_with_builds.reload }.to raise_error(ActiveRecord::RecordNotFound)
       end
     end
 

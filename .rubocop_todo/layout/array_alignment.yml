@@ -2,6 +2,9 @@
 # Cop supports --autocorrect.
 Layout/ArrayAlignment:
   Exclude:
+    - 'config/initializers/0_marginalia.rb'
+    - 'config/initializers/direct_upload_support.rb'
+    - 'ee/app/controllers/admin/push_rules_controller.rb'
     - 'ee/app/controllers/ee/admin/application_settings_controller.rb'
     - 'ee/app/controllers/ee/projects/merge_requests_controller.rb'
     - 'ee/app/controllers/groups/protected_branches_controller.rb'
@@ -55,6 +58,7 @@ Layout/ArrayAlignment:
     - 'ee/spec/requests/api/graphql/group/epics_spec.rb'
     - 'ee/spec/requests/api/graphql/mutations/compliance_management/frameworks/create_spec.rb'
     - 'ee/spec/requests/api/graphql/mutations/releases/update_spec.rb'
+    - 'ee/spec/requests/api/ldap_group_links_spec.rb'
     - 'ee/spec/requests/api/license_spec.rb'
     - 'ee/spec/requests/api/members_spec.rb'
     - 'ee/spec/requests/api/saml_group_links_spec.rb'
@@ -90,6 +94,7 @@ Layout/ArrayAlignment:
     - 'lib/gitlab/cleanup/project_upload_file_finder.rb'
     - 'lib/gitlab/conflict/file_collection.rb'
     - 'lib/gitlab/database/background_migration/batched_job.rb'
+    - 'lib/gitlab/email/receiver.rb'
     - 'lib/gitlab/etag_caching/router/rails.rb'
     - 'lib/gitlab/git/diff.rb'
     - 'lib/gitlab/import_export/importer.rb'

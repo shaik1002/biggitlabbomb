@@ -97,7 +97,7 @@ export default {
     },
     {
       key: 'actions',
-      thAlignRight: true,
+      thClass: 'gl-text-right',
       tdClass: 'gl-text-right !gl-align-middle',
       label: __('Actions'),
     },

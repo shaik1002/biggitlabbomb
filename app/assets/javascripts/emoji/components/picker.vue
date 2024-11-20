@@ -101,10 +101,8 @@ export default {
       }
     },
     onSearchInput() {
-      if (this.$refs.virtualScoller) {
-        this.$refs.virtualScoller.setScrollTop(0);
-        this.$refs.virtualScoller.forceRender();
-      }
+      this.$refs.virtualScoller.setScrollTop(0);
+      this.$refs.virtualScoller.forceRender();
     },
     async onScroll(event, { offset }) {
       const categories = await getEmojiCategories();
@@ -113,6 +111,8 @@ export default {
     },
     onShow() {
       this.isVisible = true;
+      this.$refs.searchValue.focusInput();
+
       this.$emit('shown');
     },
     onHide() {
@@ -166,11 +166,11 @@ export default {
         </gl-button>
       </template>
 
-      <template v-if="isVisible" #header>
+      <template #header>
         <gl-search-box-by-type
           ref="searchValue"
           v-model="searchValue"
-          class="add-reaction-search gl-border-b-1 gl-border-b-dropdown gl-border-b-solid"
+          class="add-reaction-search gl-border-b-1 gl-border-b-gray-200 gl-border-b-solid"
           borderless
           autofocus
           debounce="500"
@@ -180,7 +180,6 @@ export default {
       </template>
 
       <div
-        v-if="isVisible"
         v-show="!searchValue"
         class="award-list gl-flex gl-border-b-1 gl-border-gray-100 gl-border-b-solid"
       >
@@ -219,7 +218,7 @@ export default {
 
       <template v-if="newCustomEmojiPath" #footer>
         <div
-          class="gl-flex gl-flex-col gl-border-t-1 gl-border-t-dropdown !gl-p-2 !gl-pt-0 gl-border-t-solid"
+          class="gl-flex gl-flex-col gl-border-t-1 gl-border-t-gray-200 !gl-p-2 !gl-pt-0 gl-border-t-solid"
         >
           <gl-button
             :href="newCustomEmojiPath"

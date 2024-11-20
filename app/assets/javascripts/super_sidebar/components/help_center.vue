@@ -53,6 +53,7 @@ export default {
           items: [
             {
               text: this.$options.i18n.help,
+              // eslint-disable-next-line local-rules/require-valid-help-page-path
               href: helpPagePath(),
               extraAttrs: {
                 ...this.trackingAttrs('help'),
@@ -151,7 +152,7 @@ export default {
           items: [
             {
               text: this.$options.i18n.version,
-              href: helpPagePath('update/index.md'),
+              href: helpPagePath('update/index'),
               version: `${this.sidebarData.gitlab_version.major}.${this.sidebarData.gitlab_version.minor}`,
               extraAttrs: {
                 ...this.trackingAttrs('version_help_dropdown'),

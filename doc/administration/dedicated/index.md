@@ -25,7 +25,7 @@ This page collects a set of architectural documents and diagrams for GitLab Dedi
 The following diagram shows a high-level overview of the architecture for GitLab Dedicated,
 where various AWS accounts managed by GitLab and customers are controlled by a Switchboard application.
 
-![Diagram of a high-level overview of the GitLab Dedicated architecture.](img/high_level_architecture_diagram_v18_0.png)
+![Diagram of a high-level overview of the GitLab Dedicated architecture.](img/high_level_architecture_diagram_v17_0.png)
 
 When managing GitLab Dedicated tenant instances:
 
@@ -53,7 +53,7 @@ GitLab Dedicated deploys Gitaly [in a sharded setup](../../administration/gitaly
 
 #### Geo setup
 
-GitLab Dedicated leverages GitLab Geo for [disaster recovery](../../subscriptions/gitlab_dedicated/data_residency_and_high_availability.md#disaster-recovery).
+GitLab Dedicated leverages GitLab Geo for [disaster recovery](../../subscriptions/gitlab_dedicated/index.md#disaster-recovery).
 
 Geo does not use an active-active failover configuration. For more information, see [Geo](../../administration/geo/index.md).
 

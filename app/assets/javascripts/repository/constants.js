@@ -9,13 +9,15 @@ export const COMMIT_BATCH_SIZE = 25; // we request commit data in batches of 25
 export const SECONDARY_OPTIONS_TEXT = __('Cancel');
 export const COMMIT_LABEL = __('Commit message');
 export const TARGET_BRANCH_LABEL = __('Target branch');
-export const TOGGLE_CREATE_MR_LABEL = __('Create a merge request for this change');
+export const TOGGLE_CREATE_MR_LABEL = __('Start a new merge request with these changes');
 export const NEW_BRANCH_IN_FORK = __(
   'GitLab will create a branch in your fork and start a merge request.',
 );
 
 export const COMMIT_MESSAGE_SUBJECT_MAX_LENGTH = 52;
 export const COMMIT_MESSAGE_BODY_MAX_LENGTH = 72;
+
+export const LIMITED_CONTAINER_WIDTH_CLASS = 'limit-container-width';
 
 export const I18N_COMMIT_DATA_FETCH_ERROR = __('An error occurred while fetching commit data.');
 

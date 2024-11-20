@@ -34,9 +34,7 @@ class CustomEmoji < ApplicationRecord
       ),
       Gitlab::Pagination::Keyset::ColumnOrderDefinition.new(
         attribute_name: 'current_namespace',
-        order_expression: Arel::Nodes::Case.new.when(
-          CustomEmoji.arel_table[:namespace_id].eq(namespace_ids.first)
-        ).then(0).else(1).asc,
+        order_expression: Arel.sql("CASE WHEN namespace_id = #{namespace_ids.first} THEN 0 ELSE 1 END").asc,
         nullable: :not_nullable,
         add_to_projections: true
       )

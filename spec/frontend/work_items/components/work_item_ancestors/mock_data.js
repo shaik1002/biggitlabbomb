@@ -71,16 +71,7 @@ export const workItemAncestorsQueryResponse = {
           type: 'HIERARCHY',
           hasParent: true,
           parent: {
-            id: 'gid://gitlab/WorkItem/5',
-            iid: '5',
-            title: 'Test parent',
-            confidential: false,
-            webUrl: '/gitlab-org/gitlab-test/-/work_items/5',
-            workItemType: {
-              id: 'gid://gitlab/WorkItems::Type/2',
-              name: 'Issue',
-              iconName: 'issue-type-issue',
-            },
+            id: 'gid://gitlab/Issue/1',
           },
           ancestors: {
             nodes: [
@@ -149,16 +140,7 @@ export const workItemMultipleInaccessibleAncestorsQueryResponse = {
           type: 'HIERARCHY',
           hasParent: true,
           parent: {
-            id: 'gid://gitlab/WorkItem/5',
-            iid: '5',
-            title: 'Test parent',
-            confidential: false,
-            webUrl: '/gitlab-org/gitlab-test/-/work_items/5',
-            workItemType: {
-              id: 'gid://gitlab/WorkItems::Type/2',
-              name: 'Issue',
-              iconName: 'issue-type-issue',
-            },
+            id: 'gid://gitlab/WorkItem/444',
           },
           ancestors: {
             nodes: [
@@ -238,16 +220,7 @@ export const workItemThreeAncestorsQueryResponse = {
           type: 'HIERARCHY',
           hasParent: true,
           parent: {
-            id: 'gid://gitlab/WorkItem/5',
-            iid: '5',
-            title: 'Test parent',
-            confidential: false,
-            webUrl: '/gitlab-org/gitlab-test/-/work_items/5',
-            workItemType: {
-              id: 'gid://gitlab/WorkItems::Type/2',
-              name: 'Issue',
-              iconName: 'issue-type-issue',
-            },
+            id: 'gid://gitlab/Issue/1',
           },
           ancestors: {
             nodes: [
@@ -348,7 +321,9 @@ export const workItemEmptyAncestorsQueryResponse = {
           __typename: 'WorkItemWidgetHierarchy',
           type: 'HIERARCHY',
           hasParent: false,
-          parent: null,
+          parent: {
+            id: null,
+          },
           ancestors: {
             nodes: [],
           },

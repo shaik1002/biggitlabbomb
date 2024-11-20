@@ -54,8 +54,7 @@ $comparison-empty-state-height: 62px;
   }
 }
 
-.mr-list,
-.issuable-list {
+.mr-list {
   .merge-request {
     padding: 10px $gl-padding;
     display: flex;
@@ -152,7 +151,7 @@ $comparison-empty-state-height: 62px;
   .ci-table {
     th {
       background-color: var(--white, $white);
-      @apply gl-text-strong;
+      color: var(--gl-gray-700, $gl-text-color-secondary);
     }
   }
 }
@@ -183,6 +182,20 @@ $comparison-empty-state-height: 62px;
 
   .nav-links {
     border: 0;
+  }
+}
+
+.limit-container-width {
+  .merge-request-tabs-container {
+    max-width: $limited-layout-width;
+    margin-left: auto;
+    margin-right: auto;
+
+    .inner-page-scroll-tabs {
+      background-color: var(--white, $white);
+      margin-left: -$gl-padding;
+      padding-left: $gl-padding;
+    }
   }
 }
 
@@ -235,6 +248,12 @@ $comparison-empty-state-height: 62px;
   }
 }
 
+.limit-container-width:not(.container-limited) {
+  .merge-request-tabs-holder .merge-request-tabs-container {
+    max-width: $limited-layout-width - ($gl-padding * 2);
+  }
+}
+
 .fork-sprite {
   margin-right: -5px;
 }
@@ -275,8 +294,6 @@ $comparison-empty-state-height: 62px;
   }
 }
 
-// These are composite classes for use with Vue Transition
-// https://vuejs.org/guide/built-ins/transition
 .survey-slide-up-enter {
   transform: translateY(10px);
   opacity: 0;
@@ -294,10 +311,4 @@ $comparison-empty-state-height: 62px;
   .gl-button-text {
     width: 100%;
   }
-}
-
-// stylelint-disable-next-line gitlab/no-gl-class --- We need a slightly smaller spinner to fit the design
-.mr-widget-check-checking .gl-spinner {
-  width: 12px;
-  height: 12px;
 }

@@ -404,14 +404,12 @@ RSpec.describe NotificationService, :mailer, feature_category: :team_planning do
               owner1,
               project_bot.resource_bot_resource,
               expiring_token,
-              {},
               mail: "bot_resource_access_token_about_to_expire_email"
             ).and(
               have_enqueued_email(
                 owner2,
                 project_bot.resource_bot_resource,
                 expiring_token,
-                {},
                 mail: "bot_resource_access_token_about_to_expire_email"
               )
             )
@@ -468,7 +466,6 @@ RSpec.describe NotificationService, :mailer, feature_category: :team_planning do
                 owner1,
                 project_bot.resource_bot_resource,
                 [expiring_token_1, expiring_token_2],
-                {},
                 mail: "bot_resource_access_token_about_to_expire_email"
               )
             )
@@ -478,7 +475,6 @@ RSpec.describe NotificationService, :mailer, feature_category: :team_planning do
                 owner2,
                 project_bot.resource_bot_resource,
                 [expiring_token_1, expiring_token_2],
-                {},
                 mail: "bot_resource_access_token_about_to_expire_email"
               )
             )
@@ -500,14 +496,12 @@ RSpec.describe NotificationService, :mailer, feature_category: :team_planning do
               maintainer,
               project_bot.resource_bot_resource,
               expiring_token,
-              {},
               mail: "bot_resource_access_token_about_to_expire_email"
             ).and(
               have_enqueued_email(
                 project.owner,
                 project_bot.resource_bot_resource,
                 expiring_token,
-                {},
                 mail: "bot_resource_access_token_about_to_expire_email"
               )
             )
@@ -526,7 +520,6 @@ RSpec.describe NotificationService, :mailer, feature_category: :team_planning do
                 maintainer,
                 project_bot.resource_bot_resource,
                 expiring_token,
-                {},
                 mail: "bot_resource_access_token_about_to_expire_email"
               )
             )
@@ -536,7 +529,6 @@ RSpec.describe NotificationService, :mailer, feature_category: :team_planning do
                 project.owner,
                 project_bot.resource_bot_resource,
                 expiring_token,
-                {},
                 mail: "bot_resource_access_token_about_to_expire_email"
               )
             )
@@ -552,7 +544,7 @@ RSpec.describe NotificationService, :mailer, feature_category: :team_planning do
       subject(:notification_service) { notification.access_token_about_to_expire(user, [pat.name]) }
 
       it 'sends email to the token owner' do
-        expect { notification_service }.to have_enqueued_email(user, [pat.name], {}, mail: "access_token_about_to_expire_email")
+        expect { notification_service }.to have_enqueued_email(user, [pat.name], mail: "access_token_about_to_expire_email")
       end
 
       it "logs notication sent message" do
@@ -660,17 +652,14 @@ RSpec.describe NotificationService, :mailer, feature_category: :team_planning do
   end
 
   describe '#unknown_sign_in' do
-    let(:user) { create(:user) }
-    let(:ip) { '127.0.0.1' }
-    let(:country) { 'Germany' }
-    let(:city) { 'Frankfurt' }
-    let(:request_info) { Struct.new(:country, :city).new(country, city) }
-    let(:time) { Time.current }
+    let_it_be(:user) { create(:user) }
+    let_it_be(:ip) { '127.0.0.1' }
+    let_it_be(:time) { Time.current }
 
-    subject { notification.unknown_sign_in(user, ip, time, request_info) }
+    subject { notification.unknown_sign_in(user, ip, time) }
 
     it 'sends email to the user' do
-      expect { subject }.to have_enqueued_email(user, ip, time, { country: country, city: city }, mail: 'unknown_sign_in_email')
+      expect { subject }.to have_enqueued_email(user, ip, time, mail: 'unknown_sign_in_email')
     end
   end
 
@@ -4112,36 +4101,6 @@ RSpec.describe NotificationService, :mailer, feature_category: :team_planning do
       it_behaves_like 'project emails are disabled' do
         let(:notification_target)  { project }
         let(:notification_trigger) { notification.autodevops_disabled(pipeline, [owner.email, pipeline_user.email]) }
-      end
-    end
-  end
-
-  describe 'Repository rewrite history', :deliver_mails_inline do
-    let(:user) { create(:user) }
-
-    describe '#repository_rewrite_history_success' do
-      it 'emails the specified user only' do
-        notification.repository_rewrite_history_success(project, user)
-
-        should_email(user)
-      end
-
-      it_behaves_like 'project emails are disabled' do
-        let(:notification_target)  { project }
-        let(:notification_trigger) { notification.repository_rewrite_history_success(project, user) }
-      end
-    end
-
-    describe '#repository_rewrite_history_failure' do
-      it 'emails the specified user only' do
-        notification.repository_rewrite_history_failure(project, user, 'Some error')
-
-        should_email(user)
-      end
-
-      it_behaves_like 'project emails are disabled' do
-        let(:notification_target)  { project }
-        let(:notification_trigger) { notification.repository_rewrite_history_failure(project, user, 'Some error') }
       end
     end
   end

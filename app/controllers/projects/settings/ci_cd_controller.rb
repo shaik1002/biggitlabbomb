@@ -8,15 +8,15 @@ module Projects
       NUMBER_OF_RUNNERS_PER_PAGE = 20
 
       layout 'project_settings'
-      before_action :authorize_admin_pipeline!, except: [:reset_cache, :show]
+      before_action :authorize_admin_pipeline!, except: :show
       before_action :authorize_show_cicd_settings!, only: :show
-      before_action :authorize_reset_cache!, only: :reset_cache
       before_action :check_builds_available!
       before_action :define_variables
 
       before_action do
         push_frontend_feature_flag(:ci_variables_pages, current_user)
         push_frontend_feature_flag(:allow_push_repository_for_job_token, @project)
+        push_frontend_feature_flag(:ci_hidden_variables, @project.root_ancestor)
 
         push_frontend_ability(ability: :admin_project, resource: @project, user: current_user)
       end
@@ -77,36 +77,7 @@ module Projects
         private_runner_setup_scripts
       end
 
-      def export_job_token_authorizations
-        response = ::Ci::JobToken::ExportAuthorizationsService
-          .new(current_user: current_user, accessed_project: @project)
-          .execute
-
-        respond_to do |format|
-          format.csv do
-            if response.success?
-              send_data(response.payload.fetch(:data),
-                type: 'text/csv; charset=utf-8',
-                filename: response.payload.fetch(:filename))
-            else
-              flash[:alert] = _('Failed to generate export')
-
-              redirect_to project_settings_ci_cd_path(@project)
-            end
-          end
-        end
-      end
-
       private
-
-      def authorize_reset_cache!
-        return if can_any?(current_user, [
-          :admin_pipeline,
-          :admin_runner
-        ], project)
-
-        access_denied!
-      end
 
       def authorize_show_cicd_settings!
         return if can_any?(current_user, [

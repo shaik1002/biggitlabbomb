@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Ci::CreatePipelineService,
+RSpec.describe Ci::CreatePipelineService, :ci_config_feature_flag_correctness,
   feature_category: :pipeline_composition do
   let_it_be(:project) { create(:project, :repository) }
   let_it_be(:user)    { project.first_owner }
@@ -46,6 +46,16 @@ RSpec.describe Ci::CreatePipelineService,
           'inputs' => { 'input1' => 'value1' }
         }
       ])
+    end
+
+    context 'when feature flag is disabled' do
+      before do
+        stub_feature_flags(pipeline_run_keyword: false)
+      end
+
+      it 'does not create a pipeline' do
+        expect(pipeline).not_to be_created_successfully
+      end
     end
   end
 
@@ -127,7 +137,7 @@ RSpec.describe Ci::CreatePipelineService,
     it 'returns errors for invalid configuration' do
       expect(pipeline).not_to be_created_successfully
       expect(pipeline.errors.full_messages).to include(
-        "jobs:job run object property at `/0/script` is a disallowed additional property"
+        "jobs:job run object at `/0` is missing required properties: name"
       )
     end
   end

@@ -8,22 +8,19 @@ import * as Sentry from '~/sentry/sentry_browser_wrapper';
 import WorkItemParent from '~/work_items/components/work_item_parent.vue';
 import WorkItemSidebarDropdownWidget from '~/work_items/components/shared/work_item_sidebar_dropdown_widget.vue';
 import { updateParent } from '~/work_items/graphql/cache_utils';
-import updateWorkItemMutation from '~/work_items/graphql/update_parent.mutation.graphql';
+import updateWorkItemMutation from '~/work_items/graphql/update_work_item.mutation.graphql';
 import groupWorkItemsQuery from '~/work_items/graphql/group_work_items.query.graphql';
 import projectWorkItemsQuery from '~/work_items/graphql/project_work_items.query.graphql';
 import workItemsByReferencesQuery from '~/work_items/graphql/work_items_by_references.query.graphql';
-import getAllowedWorkItemParentTypes from '~/work_items/graphql/work_item_allowed_parent_types.query.graphql';
 import { WORK_ITEM_TYPE_ENUM_OBJECTIVE } from '~/work_items/constants';
 
 import {
   availableObjectivesResponse,
   mockParentWidgetResponse,
-  mockAncestorWidgetResponse,
-  mockEmptyAncestorWidgetResponse,
+  updateWorkItemMutationResponseFactory,
   searchedObjectiveResponse,
   updateWorkItemMutationErrorResponse,
   mockworkItemReferenceQueryResponse,
-  allowedParentTypesResponse,
 } from '../mock_data';
 
 jest.mock('~/sentry/sentry_browser_wrapper');
@@ -42,8 +39,7 @@ describe('WorkItemParent component', () => {
 
   const groupWorkItemsSuccessHandler = jest.fn().mockResolvedValue(availableObjectivesResponse);
   const availableWorkItemsSuccessHandler = jest.fn().mockResolvedValue(availableObjectivesResponse);
-  const failedQueryHandler = jest.fn().mockRejectedValue(new Error());
-  const allowedParentTypesHandler = jest.fn().mockResolvedValue(allowedParentTypesResponse);
+  const availableWorkItemsFailureHandler = jest.fn().mockRejectedValue(new Error());
 
   const workItemReferencesSuccessHandler = jest
     .fn()
@@ -55,7 +51,7 @@ describe('WorkItemParent component', () => {
 
   const successUpdateWorkItemMutationHandler = jest
     .fn()
-    .mockResolvedValue(mockAncestorWidgetResponse);
+    .mockResolvedValue(updateWorkItemMutationResponseFactory({ parent: mockParentWidgetResponse }));
 
   const showDropdown = () => {
     findSidebarDropdownWidget().vm.$emit('dropdownShown');
@@ -74,7 +70,6 @@ describe('WorkItemParent component', () => {
         [groupWorkItemsQuery, groupWorkItemsSuccessHandler],
         [updateWorkItemMutation, mutationHandler],
         [workItemsByReferencesQuery, workItemReferencesSuccessHandler],
-        [getAllowedWorkItemParentTypes, allowedParentTypesHandler],
       ]),
       provide: {
         fullPath: mockFullPath,
@@ -91,15 +86,6 @@ describe('WorkItemParent component', () => {
 
   beforeEach(() => {
     createComponent();
-  });
-
-  describe('when loaded', () => {
-    it('fetches allowed parent types for the current work item', async () => {
-      createComponent();
-      await waitForPromises();
-
-      expect(allowedParentTypesHandler).toHaveBeenCalled();
-    });
   });
 
   describe('label', () => {
@@ -158,7 +144,7 @@ describe('WorkItemParent component', () => {
     });
 
     it('shows loading icon when unassign is clicked', async () => {
-      createComponent({ parent: mockEmptyAncestorWidgetResponse });
+      createComponent({ parent: mockParentWidgetResponse });
       showDropdown();
 
       await waitForPromises();
@@ -246,7 +232,7 @@ describe('WorkItemParent component', () => {
 
     it('emits error when the query fails', async () => {
       createComponent({
-        searchQueryHandler: failedQueryHandler,
+        searchQueryHandler: availableWorkItemsFailureHandler,
       });
 
       showDropdown();
@@ -256,15 +242,6 @@ describe('WorkItemParent component', () => {
       expect(wrapper.emitted('error')).toEqual([
         ['Something went wrong while fetching items. Please try again.'],
       ]);
-    });
-
-    it('skips the work item query when the getAllowedWorkItemParentTypes query fails', async () => {
-      createComponent({
-        allowedParentTypesHandler: failedQueryHandler,
-      });
-      await waitForPromises();
-
-      expect(availableWorkItemsSuccessHandler).not.toHaveBeenCalled();
     });
 
     it('searches item when input data is entered', async () => {
@@ -388,7 +365,7 @@ describe('WorkItemParent component', () => {
     it('calls mutation when item is unassigned', async () => {
       const unAssignParentWorkItemMutationHandler = jest
         .fn()
-        .mockResolvedValue(mockEmptyAncestorWidgetResponse);
+        .mockResolvedValue(updateWorkItemMutationResponseFactory({ parent: null }));
       createComponent({
         parent: {
           iid: '1',

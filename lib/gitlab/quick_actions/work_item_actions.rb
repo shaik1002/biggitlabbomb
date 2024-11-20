@@ -103,14 +103,17 @@ module Gitlab
         nil
       end
 
+      # rubocop: disable CodeReuse/ActiveRecord
       def extract_work_items(params)
         return if params.nil?
 
-        issues = extract_references(params, :issue)
-        work_items = extract_references(params, :work_item)
+        issuable_type = params.include?('work_items') ? :work_item : :issue
+        issuables = extract_references(params, issuable_type)
+        return unless issuables
 
-        ::WorkItem.id_in(issues) + work_items
+        WorkItem.find(issuables.pluck(:id))
       end
+      # rubocop: enable CodeReuse/ActiveRecord
 
       def validate_promote_to(type)
         return error_msg(:not_found, action: 'promote') unless type && supports_promote_to?(type.name)

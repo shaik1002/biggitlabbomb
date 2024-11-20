@@ -16,15 +16,19 @@ module Gitlab
           end
 
           def variables
-            pipeline
-              .variables_builder
-              .scoped_variables_for_pipeline_seed(
-                attributes,
-                user: pipeline.user,
-                trigger_request: pipeline.legacy_trigger,
-                environment: seed_environment,
-                kubernetes_namespace: seed_kubernetes_namespace
-              )
+            if Feature.enabled?(:ci_variables_optimization_for_yaml_and_node, project)
+              pipeline
+                .variables_builder
+                .scoped_variables_for_pipeline_seed(
+                  attributes,
+                  user: pipeline.user,
+                  trigger_request: pipeline.legacy_trigger,
+                  environment: seed_environment,
+                  kubernetes_namespace: seed_kubernetes_namespace
+                )
+            else
+              stub_build.scoped_variables
+            end
           end
           strong_memoize_attr :variables
 
@@ -39,7 +43,7 @@ module Gitlab
             # The `expanded_environment_name` method uses `metadata&.expanded_environment_name` first to check
             # but we don't need it here because `metadata.expanded_environment_name` is only set in
             # `app/services/environments/create_for_job_service.rb` which is after the pipeline creation.
-            ExpandVariables.expand(attributes[:environment], -> { simple_variables.sort_and_expand_all })
+            ExpandVariables.expand(attributes[:environment], -> { simple_variables })
           end
 
           # Copied from `app/models/concerns/ci/deployable.rb#expanded_kubernetes_namespace`
@@ -61,6 +65,33 @@ module Gitlab
             )
           end
           strong_memoize_attr :simple_variables
+
+          def stub_build
+            # This is a temporary piece of technical debt to allow us access
+            # to the CI variables to evaluate rules before we persist a Build
+            # with the result. We should refactor away the extra Build.new,
+            # but be able to get CI Variables directly from the Seed::Build.
+            ::Ci::Build.new(build_attributes)
+          end
+
+          # Assigning tags and needs is slow and they are not needed for rules
+          # evaluation since we don't use them to compute the variables at this point.
+          def build_attributes
+            attributes
+              .except(:tag_list, :needs_attributes)
+              .merge!(pipeline_attributes, ci_stage_attributes)
+          end
+
+          def ci_stage_attributes
+            {
+              ci_stage: ::Ci::Stage.new(
+                name: attributes[:stage],
+                position: attributes[:stage_idx],
+                pipeline: pipeline_attributes[:pipeline],
+                project: pipeline_attributes[:project]
+              )
+            }
+          end
         end
       end
     end

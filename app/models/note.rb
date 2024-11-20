@@ -56,8 +56,8 @@ class Note < ApplicationRecord
   # Attribute used to store the attributes that have been changed by quick actions.
   attr_writer :commands_changes
 
-  # Attribute used to store the status of quick actions.
-  attr_accessor :quick_actions_status
+  # Attribute used to store the quick action command names.
+  attr_accessor :command_names
 
   # Attribute used to determine whether keep_around_commits will be skipped for diff notes.
   attr_accessor :skip_keep_around_commits
@@ -83,10 +83,6 @@ class Note < ApplicationRecord
   has_one :note_metadata, inverse_of: :note, class_name: 'Notes::NoteMetadata'
   has_one :note_diff_file, inverse_of: :diff_note, foreign_key: :diff_note_id
   has_many :diff_note_positions
-
-  # rubocop:disable Cop/ActiveRecordDependent -- polymorphic association
-  has_many :events, as: :target, dependent: :delete_all
-  # rubocop:enable Cop/ActiveRecordDependent
 
   delegate :gfm_reference, :local_reference, to: :noteable
   delegate :name, to: :project, prefix: true
@@ -361,10 +357,6 @@ class Note < ApplicationRecord
     noteable.is_a?(PersonalSnippet)
   end
 
-  def for_wiki_page?
-    noteable_type == "WikiPage::Meta"
-  end
-
   def for_project_noteable?
     !(for_personal_snippet? || for_abuse_report? || group_level_issue?)
   end
@@ -484,8 +476,6 @@ class Note < ApplicationRecord
       'alert_management_alert'
     elsif for_vulnerability?
       'security_resource'
-    elsif for_wiki_page?
-      'wiki_page'
     else
       noteable_type.demodulize.underscore
     end
@@ -545,8 +535,7 @@ class Note < ApplicationRecord
   # touch the data so we can SELECT only the columns we need.
   def touch_noteable
     # Commits are not stored in the DB so we can't touch them.
-    # Vulnerabilities should not be touched as they are tracked in the same manner as other issuable types
-    return if for_vulnerability? || for_commit?
+    return if for_commit?
 
     assoc = association(:noteable)
 
@@ -746,7 +735,7 @@ class Note < ApplicationRecord
   end
 
   def keep_around_commit
-    project.repository.keep_around(self.commit_id, source: "#{noteable_type}/#{self.class.name}")
+    project.repository.keep_around(self.commit_id, source: self.class.name)
   end
 
   def ensure_namespace_id

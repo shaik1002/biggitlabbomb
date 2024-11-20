@@ -280,75 +280,6 @@ RSpec.describe API::UsageData, feature_category: :service_ping do
           end
         end
       end
-
-      describe 'send_to_snowplow param' do
-        it 'does not send the event to snowplow when send_to_snowplow is false' do
-          expect(Gitlab::InternalEvents).to receive(:track_event)
-            .with(
-              known_event,
-              send_snowplow_event: false,
-              user: user,
-              namespace: namespace,
-              project: project,
-              additional_properties: additional_properties
-            )
-
-          post api(endpoint, user), params: {
-            event: known_event,
-            namespace_id: namespace.id,
-            project_id: project.id,
-            additional_properties: additional_properties,
-            send_to_snowplow: false
-          }
-
-          expect(response).to have_gitlab_http_status(:ok)
-        end
-
-        it 'sends event to Snowplow when send_to_snowplow is true' do
-          expect(Gitlab::InternalEvents).to receive(:track_event)
-            .with(
-              known_event,
-              send_snowplow_event: true,
-              user: user,
-              namespace: namespace,
-              project: project,
-              additional_properties: additional_properties
-            )
-
-          post api(endpoint, user), params:
-            {
-              event: known_event,
-              namespace_id: namespace.id,
-              project_id: project.id,
-              additional_properties: additional_properties,
-              send_to_snowplow: true
-            }
-
-          expect(response).to have_gitlab_http_status(:ok)
-        end
-
-        it 'does not send event to Snowplow by default' do
-          expect(Gitlab::InternalEvents).to receive(:track_event)
-            .with(
-              known_event,
-              send_snowplow_event: false,
-              user: user,
-              namespace: namespace,
-              project: project,
-              additional_properties: additional_properties
-            )
-
-          post api(endpoint, user), params:
-            {
-              event: known_event,
-              namespace_id: namespace.id,
-              project_id: project.id,
-              additional_properties: additional_properties
-            }
-
-          expect(response).to have_gitlab_http_status(:ok)
-        end
-      end
     end
   end
 
@@ -374,12 +305,16 @@ RSpec.describe API::UsageData, feature_category: :service_ping do
     end
 
     context 'with the amount events greater than the limit' do
-      let(:params) { { events: Array.new(API::UsageData::MAXIMUM_TRACKED_EVENTS * 2) { { event: event } } } }
+      let(:params) do
+        {
+          events: Array.new(API::UsageData::MAXIMUM_TRACKED_EVENTS * 2) { { event: event } }
+        }
+      end
 
       it 'returns bad request' do
         expect(Gitlab::InternalEvents).not_to receive(:track_event)
 
-        post api(endpoint, user), params: params
+        post(api(endpoint, user), params: params)
 
         expect(response).to have_gitlab_http_status(:bad_request)
       end
@@ -414,8 +349,6 @@ RSpec.describe API::UsageData, feature_category: :service_ping do
       end
 
       it 'triggers internal events and returns status ok' do
-        allow(Gitlab::InternalEvents).to receive(:track_event)
-
         post api(endpoint, user), params: params
 
         expect(response).to have_gitlab_http_status(:ok)
@@ -442,85 +375,19 @@ RSpec.describe API::UsageData, feature_category: :service_ping do
 
   describe 'GET /usage_data/metric_definitions' do
     let(:endpoint) { '/usage_data/metric_definitions' }
-    let(:include_paths) { false }
-    let(:metrics) do
-      {
-        'counter.category.event' => metric1,
-        'counter.category.event2' => metric2
-      }
-    end
-
-    let(:metric1_attributes) do
-      { 'key_path' => 'counter.category.event', 'description' => 'Metric description', 'tier' => ['free'] }
-    end
-
-    let(:metric2_attributes) do
-      { 'key_path' => 'counter.category.event2', 'description' => 'Metric description2', 'tier' => ['free'] }
-    end
-
-    let(:metric1) do
-      Gitlab::Usage::MetricDefinition.new('/metrics/test_metric1.yml', metric1_attributes.dup.symbolize_keys)
-    end
-
-    let(:metric2) do
-      Gitlab::Usage::MetricDefinition.new('/metrics/test_metric2.yml', metric2_attributes.dup.symbolize_keys)
-    end
-
     let(:metric_yaml) do
-      [metric1_attributes.merge('tiers' => ['free']), metric2_attributes.merge('tiers' => ['free'])].to_yaml
-    end
-
-    before do
-      allow(Gitlab::Usage::MetricDefinition).to receive(:definitions).and_return(metrics)
-    end
-
-    around do |example|
-      Gitlab::Usage::MetricDefinition.instance_variable_set(:@metrics_yaml, nil)
-      example.run
-      Gitlab::Usage::MetricDefinition.instance_variable_set(:@metrics_yaml, nil)
+      { 'key_path' => 'counter.category.event', 'description' => 'Metric description' }.to_yaml
     end
 
     context 'without authentication' do
       it 'returns a YAML file', :aggregate_failures do
-        get(api(endpoint), params: { include_paths: include_paths })
+        allow(Gitlab::Usage::MetricDefinition).to receive(:dump_metrics_yaml).and_return(metric_yaml)
+
+        get api(endpoint)
 
         expect(response).to have_gitlab_http_status(:ok)
         expect(response.media_type).to eq('application/yaml')
         expect(response.body).to eq(metric_yaml)
-      end
-    end
-
-    context "without include_paths passed" do
-      it 'uses false include_paths by default', :aggregate_failures do
-        get(api(endpoint))
-
-        expect(response.body).to eq(metric_yaml)
-      end
-    end
-
-    it 'returns tiers in the metric attributes', :aggregate_failures do
-      get(api(endpoint))
-
-      payload = YAML.safe_load(response.body)
-      expect(payload.length).to be 2
-      expect(payload[0]).to include(metric1_attributes)
-      expect(payload[0]['tiers']).to eq(payload[0]['tier'])
-      expect(payload[1]).to include(metric2_attributes)
-      expect(payload[1]['tiers']).to eq(payload[1]['tier'])
-    end
-
-    context "with include_paths being true" do
-      let(:include_paths) { true }
-
-      it 'passes include_paths value', :aggregate_failures do
-        get(api(endpoint), params: { include_paths: include_paths })
-
-        payload = YAML.safe_load(response.body)
-        expect(payload.length).to be 2
-        expect(payload[0]).to include(metric1_attributes)
-        expect(payload[0]['file_path']).to end_with('metrics/test_metric1.yml')
-        expect(payload[1]).to include(metric2_attributes)
-        expect(payload[1]['file_path']).to end_with('metrics/test_metric2.yml')
       end
     end
   end

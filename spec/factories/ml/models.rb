@@ -5,7 +5,6 @@ FactoryBot.define do
     sequence(:name) { |n| "model#{n}" }
 
     project
-    user
     default_experiment { association :ml_experiments, project_id: project.id, name: "[model]#{name}", model: instance }
 
     trait :with_versions do

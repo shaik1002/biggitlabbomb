@@ -1,6 +1,6 @@
 ---
 stage: Monitor
-group: Platform Insights
+group: Observability
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
 
@@ -41,7 +41,6 @@ To enable the Sentry integration:
    1. For **Sentry API URL**, enter your Sentry hostname. For example,
       enter `https://sentry.example.com`.
       For the SaaS version of Sentry, the hostname is `https://sentry.io`.
-      For the SaaS version of Sentry hosted in the EU, the hostname is `https://de.sentry.io`.
    1. For **Auth Token**, enter the token you generated previously.
    1. To test the connection to Sentry and populate the **Project** dropdown list,
       select **Connect**.

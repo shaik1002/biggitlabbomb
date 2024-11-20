@@ -114,7 +114,7 @@ be embedded into incidents making problem resolving easier. Additionally, it can
 
 If you use the GitLab CI Pipelines Exporter, you should start with the [example configuration](https://github.com/mvisonneau/gitlab-ci-pipelines-exporter/blob/main/docs/configuration_syntax.md).
 
-![Grafana Dashboard for GitLab CI Pipelines Prometheus Exporter](img/ci_efficiency_pipeline_health_grafana_dashboard_v13_7.png)
+![Grafana Dashboard for GitLab CI Pipelines Prometheus Exporter](img/ci_efficiency_pipeline_health_grafana_dashboard.png)
 
 Alternatively, you can use a monitoring tool that can execute scripts, like
 [`check_gitlab`](https://gitlab.com/6uellerBpanda/check_gitlab) for example.
@@ -188,7 +188,7 @@ shouldn't run, saving pipeline resources.
 
 In a basic configuration, jobs always wait for all other jobs in earlier stages to complete
 before running. This is the simplest configuration, but it's also the slowest in most
-cases. [Pipelines with the `needs` keyword](../yaml/needs.md) and
+cases. [Pipelines with the `needs` keyword](../directed_acyclic_graph/index.md) and
 [parent/child pipelines](downstream_pipelines.md#parent-child-pipelines) are more flexible and can
 be more efficient, but can also make pipelines harder to understand and analyze.
 

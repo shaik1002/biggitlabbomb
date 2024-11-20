@@ -11,9 +11,17 @@ RSpec.describe Gitlab::Ci::Config::FeatureFlags, feature_category: :pipeline_com
 
     it 'checks the feature flag using the given actor' do
       described_class.with_actor(actor) do
-        expect(Feature).to receive(:enabled?).with(feature_flag, actor)
+        expect(Feature).to receive(:enabled?).with(feature_flag, actor, type: :development)
 
         described_class.enabled?(feature_flag)
+      end
+    end
+
+    it 'checks the feature flag using the given type' do
+      described_class.with_actor(actor) do
+        expect(Feature).to receive(:enabled?).with(feature_flag, actor, type: :beta)
+
+        described_class.enabled?(feature_flag, type: :beta)
       end
     end
 
@@ -28,12 +36,12 @@ RSpec.describe Gitlab::Ci::Config::FeatureFlags, feature_category: :pipeline_com
     it 'restores the existing actor if any' do
       described_class.with_actor(actor) do
         described_class.with_actor(another_actor) do
-          expect(Feature).to receive(:enabled?).with(feature_flag, another_actor)
+          expect(Feature).to receive(:enabled?).with(feature_flag, another_actor, type: anything)
 
           described_class.enabled?(feature_flag)
         end
 
-        expect(Feature).to receive(:enabled?).with(feature_flag, actor)
+        expect(Feature).to receive(:enabled?).with(feature_flag, actor, type: anything)
         described_class.enabled?(feature_flag)
       end
     end
@@ -48,7 +56,7 @@ RSpec.describe Gitlab::Ci::Config::FeatureFlags, feature_category: :pipeline_com
   end
 
   context 'when feature flag is checked outside the "with_actor" block' do
-    context 'when ci_config_feature_flag_correctness is used' do
+    context 'when ci_config_feature_flag_correctness is used', :ci_config_feature_flag_correctness do
       it 'raises an error on dev/test environment' do
         expect { described_class.enabled?(feature_flag) }.to raise_error(described_class::NoActorError)
       end
@@ -59,7 +67,7 @@ RSpec.describe Gitlab::Ci::Config::FeatureFlags, feature_category: :pipeline_com
         end
 
         it 'checks the feature flag without actor' do
-          expect(Feature).to receive(:enabled?).with(feature_flag, nil)
+          expect(Feature).to receive(:enabled?).with(feature_flag, nil, type: anything)
           expect(Gitlab::ErrorTracking)
             .to receive(:track_and_raise_for_dev_exception)
             .and_call_original
@@ -68,12 +76,22 @@ RSpec.describe Gitlab::Ci::Config::FeatureFlags, feature_category: :pipeline_com
         end
       end
     end
+
+    context 'when ci_config_feature_flag_correctness is not used' do
+      it 'checks the feature flag without actor' do
+        expect(Feature).to receive(:enabled?).with(feature_flag, nil, type: anything)
+        expect(Gitlab::ErrorTracking)
+          .to receive(:track_exception)
+
+        described_class.enabled?(feature_flag)
+      end
+    end
   end
 
   context 'when actor is explicitly nil' do
     it 'checks the feature flag without actor' do
       described_class.with_actor(nil) do
-        expect(Feature).to receive(:enabled?).with(feature_flag, nil)
+        expect(Feature).to receive(:enabled?).with(feature_flag, nil, type: anything)
 
         described_class.enabled?(feature_flag)
       end

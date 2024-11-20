@@ -30,11 +30,11 @@ RSpec.describe 'Editing file blob', :js, feature_category: :source_code_manageme
         edit_in_single_file_editor
       end
 
-      # Append object_id so that the content varies between specs. If we don't do this then depending on test order
-      # there may be no diff and nothing to render.
-      fill_editor(content: "class NextFeature#{object_id}\\nend\\n")
+      fill_editor(content: 'class NextFeature\\nend\\n')
 
-      click_button 'Commit changes' if commit_changes
+      if commit_changes
+        click_button 'Commit changes'
+      end
     end
 
     def fill_editor(content: 'class NextFeature\\nend\\n')
@@ -124,12 +124,14 @@ RSpec.describe 'Editing file blob', :js, feature_category: :source_code_manageme
         expect(page).to have_content 'NextFeature'
       end
 
-      it 'previews content' do
+      it 'previews content', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/448293' do
         edit_and_commit(commit_changes: false)
         click_link 'Preview changes'
         wait_for_requests
 
-        expect(page).to have_css('.line_holder.new')
+        new_line_count = page.all('.line_holder.new').size
+
+        expect(new_line_count).to be > 0
       end
     end
 

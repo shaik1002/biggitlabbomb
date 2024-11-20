@@ -43,7 +43,7 @@ GitLab is a [DevSecOps platform](../devsecops.md) that
 integrates security throughout the development lifecycle.
 At its core, you can use GitLab to address a wide range of controls within the SA control family.
 
-#### System development lifecycle
+#### System development life cycle
 
 You can use GitLab to meet the core of this requirement. GitLab provides
 a platform where work can be
@@ -136,7 +136,7 @@ GitLab also supports the following user types for unique use cases:
   to projects by default and assisting administrators in identifying
   which users are not employed by the organization.
 
-- [Service Accounts](../user/profile/service_accounts.md#administrators-in-gitlab-self-managed) -
+- [Service Accounts](../user/profile/service_accounts.md#self-managed-gitlab) -
   Service accounts may be added to accommodate automated tasks.
   Service accounts do not use a seat under the license.
 
@@ -214,9 +214,9 @@ requirements:
 
 **Two-factor authentication** - [GitLab supports the following second factors](../user/profile/account/two_factor_authentication.md):
 
-- One-time password authenticators
+- Time-based one-time passwords
 
-- WebAuthn devices
+- WebAuthN devices
 
 [Instructions for enabling two-factor authentication](../user/profile/account/two_factor_authentication.md#enable-two-factor-authentication)
 are provided in the documentation. Customers pursuing FedRAMP must consider
@@ -224,7 +224,7 @@ two-factor providers that are FedRAMP authorized and support FIPS
 requirements. FedRAMP authorized providers can be found on the [FedRAMP Marketplace](https://marketplace.fedramp.gov/products).
 When selecting a second factor, it is important to note that NIST and
 FedRAMP are now indicating that phishing resistant authentication, such
-as WebAuthn, must be used (IA-2).
+as WebAuthN, must be used (IA-2).
 
 **SSH keys**
 
@@ -615,7 +615,7 @@ GitLab documents its [Release and Maintenance Policy](../policy/maintenance.md)
 in the documentation. Prior to upgrading a GitLab instance, please review the
 available guidance, which can assist with [planning an upgrade](../update/plan_your_upgrade.md),
 [upgrading without downtime](../update/zero_downtime.md),
-and other [upgrade paths](../update/upgrade_paths.md).
+and other [upgrade paths](../update/index.md#upgrade-paths).
 
 [Security dashboards](../user/application_security/security_dashboard/index.md)
 can be configured to track vulnerability data over time, which you can use to identify

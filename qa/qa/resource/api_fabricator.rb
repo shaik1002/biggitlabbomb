@@ -12,10 +12,12 @@ module QA
 
       attr_reader :api_fabrication_http_method
       attr_writer :api_client
-      attr_accessor :api_resource, :api_response
+      attr_accessor :api_user, :api_resource, :api_response
 
       def api_support?
-        (defines_get? && defines_post?) || defines_put?
+        (respond_to?(:api_get_path) &&
+          (respond_to?(:api_post_path) && respond_to?(:api_post_body))) ||
+          (respond_to?(:api_put_path) && respond_to?(:api_put_body))
       end
 
       # @return [String] the resource web url
@@ -41,9 +43,14 @@ module QA
       end
 
       def eager_load_api_client!
-        # Eager-load the API client so that if personal token creation is required
-        # it isn't taken in account in the actual resource creation timing.
-        api_client
+        return unless api_client.nil?
+
+        api_client.tap do |client|
+          # Eager-load the API client so that the personal token creation isn't
+          # taken in account in the actual resource creation timing.
+          client.user = user
+          client.personal_access_token
+        end
       end
 
       # Checks if a resource already exists
@@ -65,19 +72,7 @@ module QA
 
       private
 
-      def defines_get?
-        respond_to?(:api_get_path)
-      end
-
-      def defines_post?
-        respond_to?(:api_post_path) && respond_to?(:api_post_body)
-      end
-
-      def defines_put?
-        respond_to?(:api_put_path) && respond_to?(:api_put_body)
-      end
-
-      # rubocop:disable Gitlab/ModuleWithInstanceVariables -- QA::Resource::Base specific implementation
+      # rubocop:disable Gitlab/ModuleWithInstanceVariables
       def api_get
         process_api_response(parse_body(api_get_from(api_get_path))).tap do
           # Record method that was used to create certain resource
@@ -88,21 +83,19 @@ module QA
         end
       end
 
-      # TODO: remove global query_parameters so this helper method does not depend on global variable
-      # It assumes that all resource related might have a common query which often is not the case
-      def api_get_from(get_path, q_params: query_parameters)
-        path = "#{get_path}#{query_parameters_to_string(q_params)}"
+      def api_get_from(get_path)
+        path = "#{get_path}#{query_parameters_to_string}"
         request = Runtime::API::Request.new(api_client, path)
         response = get(request.url)
 
-        if response.code == HTTP_STATUS_NOT_FOUND
-          raise(ResourceNotFoundError, <<~MSG.strip)
-            Resource at #{request.mask_url} could not be found (#{response.code}): `#{response}`.
-            #{QA::Support::Loglinking.failure_metadata(response.headers[:x_request_id])}
-          MSG
-        elsif !success?(response.code)
+        if response.code == HTTP_STATUS_SERVER_ERROR
           raise(InternalServerError, <<~MSG.strip)
             Failed to GET #{request.mask_url} - (#{response.code}): `#{response}`.
+            #{QA::Support::Loglinking.failure_metadata(response.headers[:x_request_id])}
+          MSG
+        elsif response.code != HTTP_STATUS_OK
+          raise(ResourceNotFoundError, <<~MSG.strip)
+            Resource at #{request.mask_url} could not be found (#{response.code}): `#{response}`.
             #{QA::Support::Loglinking.failure_metadata(response.headers[:x_request_id])}
           MSG
         end
@@ -124,7 +117,7 @@ module QA
           body = extract_graphql_body(graphql_response)
 
           unless graphql_response.code == HTTP_STATUS_OK && (body[:errors].nil? || body[:errors].empty?)
-            action = /mutation {\s+destroy/.match?(post_body) ? 'Deletion' : 'Fabrication'
+            action = post_body =~ /mutation {\s+destroy/ ? 'Deletion' : 'Fabrication'
             raise(ResourceFabricationFailedError, <<~MSG.strip)
               #{action} of #{self.class.name} using the API failed (#{graphql_response.code}) with `#{graphql_response}`.
               #{QA::Support::Loglinking.failure_metadata(graphql_response.headers[:x_request_id])}
@@ -192,11 +185,12 @@ module QA
         end
       end
 
-      # Api client to use for fabrications by default
-      #
-      # @return [QA::Runtime::API::Client]
       def api_client
-        @api_client ||= Runtime::UserStore.default_api_client
+        @api_client ||= Runtime::API::Client.new(
+          :gitlab,
+          is_new_session: !current_url.start_with?('http'),
+          user: api_user
+        )
       end
       # rubocop:enable Gitlab/ModuleWithInstanceVariables
 
@@ -219,10 +213,9 @@ module QA
 
       # Query parameters formatted as `?key1=value1&key2=value2...`
       #
-      # @param parameters [Hash<String, String>]
       # @return [String]
-      def query_parameters_to_string(parameters)
-        parameters.each_with_object([]) do |(k, v), arr|
+      def query_parameters_to_string
+        query_parameters.each_with_object([]) do |(k, v), arr|
           arr << "#{k}=#{v}"
         end.join('&').prepend('?').chomp('?') # prepend `?` unless the string is blank
       end

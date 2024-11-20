@@ -20,8 +20,6 @@ module API
           documentation: { example: 1234 }
         optional :additional_properties, type: Hash, desc: 'Additional properties to be tracked',
           documentation: { example: { label: 'login_button', value: 1 } }
-        optional :send_to_snowplow, type: Boolean, desc: 'Send the tracked event to Snowplow',
-          documentation: { example: true, default: false }
       end
 
       def process_event(params)
@@ -29,13 +27,12 @@ module API
         namespace_id = params[:namespace_id]
         project_id = params[:project_id]
         additional_properties = params.fetch(:additional_properties, {}).symbolize_keys
-        send_snowplow_event = !!params[:send_to_snowplow]
 
         Gitlab::Tracking::AiTracking.track_event(event_name, additional_properties.merge(user: current_user))
 
         track_event(
           event_name,
-          send_snowplow_event: send_snowplow_event,
+          send_snowplow_event: false,
           user: current_user,
           namespace_id: namespace_id,
           project_id: project_id,
@@ -176,15 +173,11 @@ module API
         produces ['application/yaml']
         tags %w[usage_data metrics]
       end
-      params do
-        optional :include_paths, type: Boolean, desc: 'Include file paths in the metric definitions',
-          documentation: { example: true, default: false }
-      end
       get 'metric_definitions', urgency: :low do
         content_type 'application/yaml'
         env['api.format'] = :binary
 
-        Gitlab::Usage::MetricDefinition.dump_metrics_yaml(include_paths: !!params[:include_paths])
+        Gitlab::Usage::MetricDefinition.dump_metrics_yaml
       end
     end
   end

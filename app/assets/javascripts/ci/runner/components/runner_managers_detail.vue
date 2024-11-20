@@ -90,11 +90,10 @@ export default {
 
 <template>
   <div>
-    <gl-icon name="container-image" variant="subtle" />
+    <gl-icon name="container-image" class="gl-text-secondary" />
     {{ runnerManagersCountFormatted }}
     <gl-button
       v-if="runnerManagersCount"
-      data-testid="runner-button"
       variant="link"
       @mouseover.once="fetchManagers"
       @focus.once="fetchManagers"

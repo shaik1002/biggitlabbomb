@@ -112,9 +112,7 @@ module Ci
       def connection
         return unless available?
 
-        ::Gitlab::SafeRequestStore.fetch(object_store_raw_config) do
-          ::Fog::Storage.new(object_store.connection.to_hash.deep_symbolize_keys)
-        end
+        @connection ||= ::Fog::Storage.new(object_store.connection.to_hash.deep_symbolize_keys)
       end
 
       def fog_directory

@@ -2,8 +2,6 @@
 key_path: counts.count_users_with_ml_candidates
 description: Count of unique users that have created at least one Ml Candidate
 product_group: mlops
-product_categories:
-- mlops
 value_type: number
 status: active
 milestone: "15.9"
@@ -16,7 +14,7 @@ performance_indicator_type: []
 distribution:
 - ce
 - ee
-tiers:
+tier:
 - free
 - premium
 - ultimate

@@ -166,10 +166,9 @@ describe('Remove blobs', () => {
             await waitForPromises();
 
             expect(createAlert).toHaveBeenCalledWith({
-              message:
-                'You will receive an email notification when the process is complete. Run housekeeping to remove old versions from repository.',
+              message: 'Run housekeeping to remove old versions from repository.',
               primaryButton: { clickHandler: expect.any(Function), text: 'Go to housekeeping' },
-              title: 'Blobs removal is scheduled.',
+              title: 'Blobs removed',
               variant: VARIANT_WARNING,
             });
           });

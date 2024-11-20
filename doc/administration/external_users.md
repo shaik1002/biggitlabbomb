@@ -1,5 +1,5 @@
 ---
-stage: Software Supply Chain Security
+stage: Govern
 group: Authentication
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
@@ -38,7 +38,7 @@ External users still count towards a license seat, unless the user has the [Gues
 
 An administrator can flag a user as external by either of the following methods:
 
-- [Through the API](../api/users.md#modify-a-user).
+- [Through the API](../api/users.md#user-modification).
 - Using the GitLab UI:
   1. On the left sidebar, at the bottom, select **Admin**.
   1. On the left sidebar, select **Overview > Users** to create a new user or edit an existing one.

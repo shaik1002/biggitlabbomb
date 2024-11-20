@@ -8,10 +8,8 @@ description: "Code Suggestions supports multiple editors and languages."
 # Supported extensions and languages
 
 DETAILS:
-**Tier:** Premium with GitLab Duo Pro, Ultimate with GitLab Duo Pro or Enterprise - [Start a trial](https://about.gitlab.com/solutions/gitlab-duo-pro/sales/?type=free-trial)
+**Tier:** Premium with GitLab Duo Pro or Ultimate with [GitLab Duo Pro or Enterprise](../../../../subscriptions/subscription-add-ons.md)
 **Offering:** GitLab.com, Self-managed, GitLab Dedicated
-
-> - Changed to require GitLab Duo add-on in GitLab 17.6 and later.
 
 Code Suggestions is available in the following editor extensions and
 for the following languages.
@@ -34,29 +32,11 @@ You can express interest in other IDE extension support [in this issue](https://
 
 ## Supported languages
 
-Code Suggestions supports a range of programming languages and familiar development concepts. It also works with infrastructure-as-code (IaC) interfaces, including Kubernetes Resource Model (KRM), Google Cloud CLI, and Terraform.
+Code Suggestions is aware of common popular programming languages, concepts, and
+infrastructure-as-code interfaces, like Kubernetes Resource Model (KRM),
+Google Cloud CLI, and Terraform.
 
-Code Suggestions provides enhanced support for the following core languages:
-
-- C#
-- C++
-- C
-- Go
-- Java
-- JavaScript
-- Kotlin
-- Python
-- Ruby
-- Rust
-- PHP
-- TypeScript
- 
-When working with these languages, Code Suggestions leverages [Advanced Context](index.md#open-tabs-as-context) and [Repository X-Ray](repository_xray.md) to deliver more accurate, context-aware code suggestions.
-
-The following table provides more information on the languages Code Suggestions supports by default, and the IDEs.
-
-NOTE:
-Code Suggestions works with other languages that are not in this table, but you must manually [add support for that language](#add-support-for-more-languages).
+Code Suggestions supports these languages:
 
 | Language                     | Web IDE                    | VS Code                                                                                    | JetBrains IDEs         | Visual Studio 2022 for Windows | Neovim                                                                                                |
 |-------------------------------|----------------------------|---------------------------------------------------------------------------------------------|-----------------------|--------------------------------|--------------------------------------------------------------------------------------------------------|
@@ -164,6 +144,57 @@ To do this:
 1. Select **OK**.
 
 ::EndTabs
+
+## Use open tabs as context
+
+> - [Introduced](https://gitlab.com/gitlab-org/editor-extensions/gitlab-lsp/-/issues/206) in GitLab 17.2.
+
+To enhance the accuracy and relevance of GitLab Duo Code Suggestions, enable the use of
+open tabs as context in your IDE settings. This feature uses the contents of files most recently
+opened or changed in your IDE to provide more tailored code suggestions, within certain truncation limits.
+This extra context gives you:
+
+- More accurate and relevant code suggestions
+- Better alignment with your project's standards and practices
+- Improved context for new file creation
+
+Open tabs as context supports these languages:
+
+- Code Completion: All configured languages.
+- Code Generation: Go, Java, JavaScript, Kotlin, Python, Ruby, Rust, TypeScript (`.ts` and `.tsx` files),
+  Vue, and YAML.
+
+## Enable open tabs as context
+
+Prerequisites:
+
+- Requires GitLab 17.1 or later.
+- For GitLab self-managed instances, enable the `code_suggestions_context`and the
+  `advanced_context_resolver` [feature flags](../../../feature_flags.md).
+- GitLab Duo Code Suggestions enabled for your project
+- For Visual Studio Code, requires the GitLab Workflow extension, version 4.14.2 or later.
+
+::Tabs
+
+:::TabTitle Visual Studio Code
+
+1. Install the [GitLab Workflow extension](https://marketplace.visualstudio.com/items?itemName=GitLab.gitlab-workflow)
+   from the Visual Studio Marketplace.
+1. Configure the extension following the
+   [setup instructions](https://gitlab.com/gitlab-org/gitlab-vscode-extension#extension-settings).
+1. Enable the feature by toggling the `gitlab.duoCodeSuggestions.enabledSupportedLanguages` setting.
+
+:::TabTitle JetBrains IDEs
+
+For installation instructions for JetBrains IDEs, see the
+[GitLab JetBrains Plugin documentation](https://gitlab.com/gitlab-org/editor-extensions/gitlab-jetbrains-plugin#toggle-sending-open-tabs-as-context).
+
+::EndTabs
+
+When you're ready to start coding:
+
+1. Open relevant files, including configuration files, to provide better context.
+1. Close any files you don't want to be used as context.
 
 ## View multiple code suggestions
 

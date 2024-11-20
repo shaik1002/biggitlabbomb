@@ -106,7 +106,6 @@ For a project that was created by `Group 1`:
 
 > - [Changed](https://gitlab.com/gitlab-org/gitlab/-/issues/219230) to display invited group members on the Members tab of the Members page in GitLab 16.10 [with a flag](../../../administration/feature_flags.md) named `webui_members_inherited_users`. Disabled by default.
 > - Feature flag `webui_members_inherited_users` [enabled on GitLab.com and self-managed](https://gitlab.com/gitlab-org/gitlab/-/issues/219230) in GitLab 17.0.
-> - Access expiration date for direct members of subgroups and projects [removed](https://gitlab.com/gitlab-org/gitlab/-/issues/471051) in GitLab 17.4.
 
 FLAG:
 On self-managed GitLab, by default this feature is available. To hide the feature per user, an administrator can [disable the feature flag](../../../administration/feature_flags.md) named `webui_members_inherited_users`.
@@ -124,7 +123,7 @@ To invite a group to a project:
 1. Select **Manage > Members**.
 1. Select **Invite a group**.
 1. In the **Select a group to invite** list, select the group you want to invite.
-1. Select the highest [role](../../permissions.md) for users in the group.
+1. Select the highest [role](../../permissions.md) or [custom role](../../custom_roles.md#assign-a-custom-role-to-an-invited-group) for users in the group.
 1. Optional. Select an **Access expiration date**.
    From that date onward, the invited group can no longer access the project.
 1. Select **Invite**.
@@ -154,7 +153,7 @@ To view a group's shared projects:
 1. On the group page, select the **Shared projects** tab.
 
 A list of shared projects is displayed.
-You can also use the REST API to [list a group's shared projects](../../../api/groups.md#list-shared-projects).
+You can also use the REST API to [list a group's shared projects](../../../api/groups.md#list-a-groups-shared-projects).
 
 ### Prevent a project from being shared with groups
 
@@ -217,8 +216,6 @@ This behavior is intended to help group Owners to better manage the memberships 
 
 ### Invite a group to a group
 
-> - Access expiration date for direct members of subgroups and projects [removed](https://gitlab.com/gitlab-org/gitlab/-/issues/471051) in GitLab 17.4.
-
 Similar to how you invite a group to a project, you can invite a group to another group.
 
 Prerequisites:
@@ -231,7 +228,7 @@ To invite a group to your group:
 1. Select **Manage > Members**.
 1. Select **Invite a group**.
 1. In the **Select a group to invite** list, select the group you want to invite.
-1. Select the highest [role](../../permissions.md) or [custom role](../../custom_roles.md#assign-a-custom-role-to-an-invited-group) for users in the group.
+1. Select the highest [role](../../permissions.md) for users in the group.
 1. Optional. Select an **Access expiration date**.
    From that date onward, the invited group can no longer access the group.
 1. Select **Invite**.

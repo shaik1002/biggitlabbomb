@@ -22,19 +22,12 @@ module UsersHelper
   def user_email_help_text(user)
     return _('We also use email for avatar detection if no avatar is uploaded.') unless user.unconfirmed_email.present?
 
-    confirmation_link = link_to _('Resend confirmation e-mail'),
-      user_confirmation_path(user: { email: user.unconfirmed_email }),
-      method: :post
-    (
-      h(
-        _('Please click the link in the confirmation email before continuing. It was sent to ' \
-          '%{html_tag_strong_start}%{email}%{html_tag_strong_end}.')
-      ) % {
-        html_tag_strong_start: '<strong>'.html_safe,
-        html_tag_strong_end: '</strong>'.html_safe,
-        email: user.unconfirmed_email
-      }
-    ) + content_tag(:p) { confirmation_link }
+    confirmation_link = link_to _('Resend confirmation e-mail'), user_confirmation_path(user: { email: user.unconfirmed_email }), method: :post
+    (h(_('Please click the link in the confirmation email before continuing. It was sent to %{html_tag_strong_start}%{email}%{html_tag_strong_end}.')) % {
+      html_tag_strong_start: '<strong>'.html_safe,
+      html_tag_strong_end: '</strong>'.html_safe,
+      email: user.unconfirmed_email
+    }) + content_tag(:p) { confirmation_link }
   end
 
   def profile_actions(user)
@@ -109,10 +102,6 @@ module UsersHelper
     Gitlab.config.gitlab.impersonation_enabled
   end
 
-  def impersonation_tokens_enabled?
-    impersonation_enabled?
-  end
-
   def can_impersonate_user(user, impersonation_in_progress)
     can?(user, :log_in) && !user.password_expired? && !impersonation_in_progress
   end
@@ -164,10 +153,7 @@ module UsersHelper
 
   def confirm_user_data(user)
     message = if user.unconfirmed_email.present?
-                safe_format(
-                  _('This user has an unconfirmed email address (%{email}). You may force a confirmation.'),
-                  email: user.unconfirmed_email
-                )
+                safe_format(_('This user has an unconfirmed email address (%{email}). You may force a confirmation.'), email: user.unconfirmed_email)
               else
                 _('This user has an unconfirmed email address. You may force a confirmation.')
               end
@@ -219,7 +205,7 @@ module UsersHelper
     user.public_email.present?
   end
 
-  def user_profile_app_data(user)
+  def user_profile_tabs_app_data(user)
     {
       followees_count: user.followees.count,
       followers_count: user.followers.count,
@@ -344,9 +330,7 @@ module UsersHelper
       job_title = '<span itemprop="jobTitle">'.html_safe + job_title + "</span>".html_safe
       organization = '<span itemprop="worksFor">'.html_safe + organization + "</span>".html_safe
 
-      ERB::Util.html_escape(
-        s_('Profile|%{job_title} at %{organization}')
-      ) % { job_title: job_title, organization: organization }
+      ERB::Util.html_escape(s_('Profile|%{job_title} at %{organization}')) % { job_title: job_title, organization: organization }
     else
       s_('Profile|%{job_title} at %{organization}') % { job_title: job_title, organization: organization }
     end

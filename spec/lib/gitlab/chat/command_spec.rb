@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::Chat::Command, feature_category: :integrations do
+RSpec.describe Gitlab::Chat::Command do
   let(:chat_name) { create(:chat_name) }
 
   let(:command) do
@@ -51,8 +51,6 @@ RSpec.describe Gitlab::Chat::Command, feature_category: :integrations do
 
     it 'creates the pipeline' do
       expect(pipeline).to be_persisted
-
-      expect(pipeline.chat_data).to be_persisted
     end
 
     it 'creates the chat data for the pipeline' do

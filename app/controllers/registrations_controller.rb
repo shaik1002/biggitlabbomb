@@ -28,7 +28,7 @@ class RegistrationsController < Devise::RegistrationsController
 
   feature_category :instance_resiliency
 
-  helper_method :arkose_labs_enabled?, :preregistration_tracking_label, :onboarding_status
+  helper_method :arkose_labs_enabled?, :registration_path_params, :preregistration_tracking_label
 
   def new
     @resource = build_resource
@@ -100,13 +100,8 @@ class RegistrationsController < Devise::RegistrationsController
   def after_successful_create_hook(user)
     accept_pending_invitations
     persist_accepted_terms_if_required(user)
-    execute_system_hooks(user)
     notify_new_instance_access_request(user)
     track_successful_user_creation(user)
-  end
-
-  def execute_system_hooks(user)
-    SystemHooksService.new.execute_hooks_for(user, :create)
   end
 
   def notify_new_instance_access_request(user)
@@ -147,20 +142,23 @@ class RegistrationsController < Devise::RegistrationsController
   private
 
   def onboarding_status
-    Onboarding::Status.new(onboarding_status_params, session['user_return_to'], resource)
+    Onboarding::Status.new(onboarding_status_params, session, resource)
   end
   strong_memoize_attr :onboarding_status
 
-  # rubocop:disable Gitlab/NoCodeCoverageComment -- Fully tested in EE and tested in Foss through feature specs in spec/features/invites_spec.rb
-  # :nocov:
   def onboarding_status_params
-    # Onboarding::Status does not use any params in CE, we'll override in EE
-    {}
+    # We'll override this in the trial registrations controller so we can add on trial param
+    # and make it so we can figure out the registration_type with the same code.
+    params.to_unsafe_h.deep_symbolize_keys
   end
-  # rubocop:enable Gitlab/NoCodeCoverageComment
 
   def allow_flash_content?(user)
     user.blocked_pending_approval? || onboarding_status.single_invite?
+  end
+
+  # overridden in EE
+  def registration_path_params
+    {}
   end
 
   def track_successful_user_creation(user)
@@ -190,7 +188,6 @@ class RegistrationsController < Devise::RegistrationsController
   end
 
   def check_captcha
-    set_current_organization
     return unless show_recaptcha_sign_up?
     return unless Gitlab::Recaptcha.load_configurations!
 
@@ -314,7 +311,7 @@ class RegistrationsController < Devise::RegistrationsController
     # overridden by EE module
   end
 
-  def arkose_labs_enabled?(user:) # rubocop:disable Lint/UnusedMethodArgument -- Param is unused here but used in EE override
+  def arkose_labs_enabled?(user: nil) # rubocop:disable Lint/UnusedMethodArgument -- Param is unused here but used in EE override
     false
   end
 

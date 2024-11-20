@@ -45,7 +45,6 @@ RSpec.shared_context 'with FOSS query type fields' do
       :usage_trends_measurements,
       :user,
       :users,
-      :wiki_page,
       :work_item,
       :work_items_by_reference,
       :audit_event_definitions,

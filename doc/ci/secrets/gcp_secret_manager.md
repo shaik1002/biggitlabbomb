@@ -1,5 +1,5 @@
 ---
-stage: Software Supply Chain Security
+stage: Verify
 group: Pipeline Security
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
@@ -44,7 +44,7 @@ The principal is used to authorize access to the Secret Manager resources:
    1. Select **Default audience**, or select **Allowed audiences** for a custom audience, which is used in the `aud` for the GitLab CI/CD ID token.
 1. Under **Attribute Mapping**, create the following mappings, where:
 
-   - `attribute.X` is the name of the attribute to include as a claim in the Google token.
+   - `attribute.X` is the name of the attribute you want to be present on Google's claims.
    - `assertion.X` is the value to extract from the [GitLab claim](../cloud_services/index.md#how-it-works).
 
    | Attribute (on Google)         | Assertion (from GitLab) |
@@ -149,20 +149,6 @@ This limit is imposed by Google Cloud IAM, tracked in [Google issue #264362370](
 
 The only fix for this issue is to use shorter names
 [for your branch and repository](https://github.com/google-github-actions/auth/blob/main/docs/TROUBLESHOOTING.md#subject-exceeds-the-127-byte-limit).
-
-## `The secrets provider can not be found. Check your CI/CD variables and try again.` message
-
-You might receive this error when attempting to start a job configured to access GCP Secret Manager:
-
-```plaintext
-The secrets provider can not be found. Check your CI/CD variables and try again.
-```
-
-The job can't be created because one or more of the required variables are not defined:
-
-- `GCP_PROJECT_NUMBER`
-- `GCP_WORKLOAD_IDENTITY_FEDERATION_POOL_ID`
-- `GCP_WORKLOAD_IDENTITY_FEDERATION_PROVIDER_ID`
 
 ### `WARNING: Not resolved: no resolver that can handle the secret` warning
 

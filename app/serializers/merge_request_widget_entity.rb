@@ -48,15 +48,15 @@ class MergeRequestWidgetEntity < Grape::Entity
   end
 
   expose :conflicts_docs_path do |merge_request|
-    help_page_path('user/project/merge_requests/conflicts.md')
+    help_page_path('user/project/merge_requests/conflicts')
   end
 
   expose :reviewing_and_managing_merge_requests_docs_path do |merge_request|
-    help_page_path('user/project/merge_requests/merge_request_troubleshooting.md', anchor: "check-out-merge-requests-locally-through-the-head-ref")
+    help_page_path('user/project/merge_requests/merge_request_troubleshooting', anchor: "check-out-merge-requests-locally-through-the-head-ref")
   end
 
   expose :merge_request_pipelines_docs_path do |merge_request|
-    help_page_path('ci/pipelines/merge_request_pipelines.md')
+    help_page_path('ci/pipelines/merge_request_pipelines')
   end
 
   expose :ci_environments_status_path do |merge_request|
@@ -129,7 +129,7 @@ class MergeRequestWidgetEntity < Grape::Entity
   end
 
   expose :security_reports_docs_path do |merge_request|
-    help_page_path('user/application_security/index.md', anchor: 'merge-request')
+    help_page_path('user/application_security/index', anchor: 'view-security-scan-information-in-merge-requests')
   end
 
   expose :enabled_reports do |merge_request|

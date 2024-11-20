@@ -95,23 +95,15 @@ describe('k8s_integration_helper', () => {
   });
 
   describe('updateFluxRequested', () => {
-    const defaultPath = '/metadata/annotations/reconcile.fluxcd.io~1requestedAt';
-    const defaultValue = new Date().toISOString();
-    const customPath = '/custom/path';
-    const customValue = true;
+    it('provides JSON with the current date for updating the `requestedAt` field', () => {
+      const now = new Date();
 
-    it.each([
-      ['with default values', undefined, undefined],
-      ['with custom path', customPath, undefined],
-      ['with custom value', undefined, customValue],
-      ['with custom path and value', customPath, customValue],
-    ])('%s', (description, path, value) => {
-      expect(updateFluxRequested({ path, value })).toEqual(
+      expect(updateFluxRequested()).toEqual(
         JSON.stringify([
           {
             op: 'replace',
-            path: path || defaultPath,
-            value: value || defaultValue,
+            path: '/metadata/annotations/reconcile.fluxcd.io~1requestedAt',
+            value: now,
           },
         ]),
       );

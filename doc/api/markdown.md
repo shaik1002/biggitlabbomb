@@ -1,6 +1,6 @@
 ---
 stage: Plan
-group: Knowledge
+group: Project Management
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
 
@@ -24,7 +24,7 @@ To remove the requirement to authenticate, an administrator can
 [disable the feature flag](../administration/feature_flags.md) named `authenticate_markdown_api`.
 On GitLab.com, this feature is available. On GitLab Dedicated, this feature is available.
 
-All API calls to the Markdown API must be [authenticated](rest/authentication.md).
+All API calls to the Markdown API must be [authenticated](rest/index.md#authentication).
 
 ## Render an arbitrary Markdown document
 

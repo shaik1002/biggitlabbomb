@@ -19,14 +19,6 @@ Default.args = {
   plainZero: false,
 };
 
-export const WithAdditionalFractionDigits = Template.bind({});
-WithAdditionalFractionDigits.args = {
-  value: 42.55 * 1024 * 1024 * 1024,
-  fractionDigits: 3,
-  labelClass: '',
-  plainZero: false,
-};
-
 export const PlainZero = Template.bind({});
 PlainZero.args = {
   ...Default.args,
@@ -37,5 +29,6 @@ PlainZero.args = {
 export const CustomStyles = Template.bind({});
 CustomStyles.args = {
   ...Default.args,
+  class: 'gl-font-bold',
   labelClass: 'gl-text-sm gl-text-gray-500',
 };

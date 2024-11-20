@@ -17,11 +17,7 @@ import { userCounts } from '~/super_sidebar/user_counts_manager';
 import { isLoggedIn } from '~/lib/utils/common_utils';
 import { stubComponent } from 'helpers/stub_component';
 import { sidebarData as mockSidebarData, loggedOutSidebarData } from '../mock_data';
-import {
-  MOCK_DEFAULT_SEARCH_OPTIONS,
-  MOCK_SEARCH_QUERY,
-  MOCK_SCOPED_SEARCH_OPTIONS,
-} from './global_search/mock_data';
+import { MOCK_DEFAULT_SEARCH_OPTIONS, MOCK_SEARCH_QUERY } from './global_search/mock_data';
 
 jest.mock('~/lib/utils/common_utils');
 
@@ -54,7 +50,6 @@ describe('UserBar component', () => {
       searchOptions: () => MOCK_DEFAULT_SEARCH_OPTIONS,
       isCommandMode: () => true,
       searchQuery: () => MOCK_SEARCH_QUERY,
-      scopedSearchOptions: () => MOCK_SCOPED_SEARCH_OPTIONS,
     },
   });
   const createWrapper = ({
@@ -219,7 +214,7 @@ describe('UserBar component', () => {
 
     it('search button should have tracking', async () => {
       const { trackEventSpy } = bindInternalEventDocument(findSearchButton().element);
-      await findSearchButton().vm.$emit('click');
+      await findSearchButton().trigger('click');
 
       expect(trackEventSpy).toHaveBeenCalledWith(
         'click_search_button_to_activate_command_palette',
@@ -245,20 +240,6 @@ describe('UserBar component', () => {
         await nextTick();
         const tooltip = getBinding(findSearchButton().element, 'gl-tooltip');
         expect(tooltip.value).toBe(`Type <kbd>/</kbd> to search`);
-      });
-    });
-
-    describe('when feature flag is on', () => {
-      beforeEach(() => {
-        createWrapper({ provideOverrides: { glFeatures: { searchButtonTopRight: true } } });
-      });
-
-      it('should not render search button', () => {
-        expect(findSearchButton().exists()).toBe(false);
-      });
-
-      it('should not render search modal', () => {
-        expect(findSearchModal().exists()).toBe(false);
       });
     });
   });

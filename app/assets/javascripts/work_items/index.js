@@ -56,23 +56,19 @@ export const initWorkItemsRoot = ({ workItemType, workspaceType } = {}) => {
     canBulkEditEpics,
     groupIssuesPath,
     labelsFetchPath,
-    hasLinkedItemsEpicsFeature,
   } = el.dataset;
 
   const isGroup = workspaceType === WORKSPACE_GROUP;
   const router = createRouter({ fullPath, workItemType, workspaceType, defaultBranch, isGroup });
   let listPath = issuesListPath;
 
-  const breadcrumbParams = { workItemType: listWorkItemType, isGroup };
-
   if (isGroup) {
     listPath = epicsListPath;
-    breadcrumbParams.listPath = epicsListPath;
-  } else {
-    breadcrumbParams.listPath = issuesListPath;
+    injectVueAppBreadcrumbs(router, WorkItemBreadcrumb, apolloProvider, {
+      workItemType: listWorkItemType,
+      epicsListPath,
+    });
   }
-
-  injectVueAppBreadcrumbs(router, WorkItemBreadcrumb, apolloProvider, breadcrumbParams);
 
   apolloProvider.clients.defaultClient.cache.writeQuery({
     query: activeDiscussionQuery,
@@ -84,14 +80,6 @@ export const initWorkItemsRoot = ({ workItemType, workspaceType } = {}) => {
       },
     },
   });
-
-  if (workItemType === 'issue' && gon.features.workItemsViewPreference && !isGroup) {
-    import(/* webpackChunkName: 'work_items_feedback' */ '~/work_items_feedback')
-      .then(({ initWorkItemsFeedback }) => {
-        initWorkItemsFeedback();
-      })
-      .catch({});
-  }
 
   return new Vue({
     el,
@@ -126,7 +114,6 @@ export const initWorkItemsRoot = ({ workItemType, workspaceType } = {}) => {
       canBulkEditEpics: parseBoolean(canBulkEditEpics),
       groupIssuesPath,
       labelsFetchPath,
-      hasLinkedItemsEpicsFeature: parseBoolean(hasLinkedItemsEpicsFeature),
     },
     mounted() {
       performanceMarkAndMeasure({

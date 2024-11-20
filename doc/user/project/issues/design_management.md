@@ -192,7 +192,7 @@ To archive multiple designs at once:
 
 ### Replicate design management data
 
-Design Management data [can be replicated](../../../administration/geo/replication/datatypes.md#replicated-data-types)
+Design Management data [can be replicated](../../../administration/geo/replication/datatypes.md#limitations-on-replicationverification)
 and in GitLab 16.1 and later it can be [verified by Geo as well](https://gitlab.com/gitlab-org/gitlab/-/issues/355660).
 
 ## Markdown and rich text editors for descriptions
@@ -260,7 +260,7 @@ To revisit a resolved discussion, expand **Resolved Comments** below the visible
 
 ## Add a to-do item for a design
 
-To add a [to-do item](../../todos.md) for a design, select **Add a to-do item** on the design sidebar.
+To add a [to-do item](../../todos.md) for a design, select **Add a to do** on the design sidebar.
 
 ## Refer to a design in Markdown
 

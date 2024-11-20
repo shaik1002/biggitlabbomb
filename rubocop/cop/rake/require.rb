@@ -107,7 +107,7 @@ module RuboCop
 
         def inside_block(node, skip:)
           node.each_ancestor(:block).any? do |block|
-            !skip.include?(block.method_name)
+            !skip.include?(block.method_name) # rubocop:disable Rails/NegateInclude -- This is not Rails
           end
         end
 

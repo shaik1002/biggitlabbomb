@@ -173,7 +173,7 @@ class DiffNote < Note
   end
 
   def set_line_code
-    self.line_code = self.line_code.presence || self.position.line_code(repository)
+    self.line_code = self.position.line_code(repository)
   end
 
   def verify_supported
@@ -189,7 +189,7 @@ class DiffNote < Note
   end
 
   def keep_around_commits
-    repository.keep_around(*shas, source: "#{noteable_type}/#{self.class.name}")
+    repository.keep_around(*shas, source: self.class.name)
   end
 
   def repository

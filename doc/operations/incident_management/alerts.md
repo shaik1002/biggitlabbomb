@@ -1,6 +1,6 @@
 ---
 stage: Monitor
-group: Platform Insights
+group: Respond
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
 
@@ -180,7 +180,7 @@ After completing their portion of investigating or fixing the alert, users can u
 
 You can manually create a [to-do item](../../user/todos.md) for yourself from an alert, and view it later on your **To-Do List**.
 
-To add a to-do item, on the right sidebar, select **Add a to-do item**.
+To add a to-do item, on the right sidebar, select **Add a to do**.
 
 ### Trigger actions from alerts
 

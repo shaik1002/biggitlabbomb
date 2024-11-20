@@ -73,8 +73,7 @@ module ApplicationSettingImplementation
         disable_feed_token: false,
         disabled_direct_code_suggestions: false,
         disabled_oauth_sign_in_sources: [],
-        disable_password_authentication_for_users_with_sso_identities: false,
-        dns_rebinding_protection_enabled: Settings.gitlab['dns_rebinding_protection_enabled'],
+        dns_rebinding_protection_enabled: true,
         domain_allowlist: Settings.gitlab['domain_allowlist'],
         dsa_key_restriction: default_min_key_size(:dsa),
         ecdsa_key_restriction: default_min_key_size(:ecdsa),
@@ -168,7 +167,6 @@ module ApplicationSettingImplementation
         repository_storages_weighted: { 'default' => 100 },
         require_admin_approval_after_user_signup: true,
         require_two_factor_authentication: false,
-        resource_token_expiry_inherited_members: true,
         restricted_visibility_levels: Settings.gitlab['restricted_visibility_levels'],
         rsa_key_restriction: default_min_key_size(:rsa),
         session_expire_delay: Settings.gitlab['session_expire_delay'],
@@ -266,7 +264,6 @@ module ApplicationSettingImplementation
         bulk_import_enabled: false,
         bulk_import_max_download_file_size: 5120,
         silent_admin_exports_enabled: false,
-        allow_contribution_mapping_to_admins: false,
         allow_runner_registration_token: true,
         user_defaults_to_private_profile: false,
         projects_api_rate_limit_unauthenticated: 400,
@@ -288,7 +285,6 @@ module ApplicationSettingImplementation
         group_projects_api_limit: 600,
         group_shared_groups_api_limit: 60,
         groups_api_limit: 200,
-        create_organization_api_limit: 10,
         project_api_limit: 400,
         project_invited_groups_api_limit: 60,
         projects_api_limit: 2000,
@@ -300,8 +296,7 @@ module ApplicationSettingImplementation
         code_suggestions_api_rate_limit: 60,
         require_personal_access_token_expiry: true,
         pages_extra_deployments_default_expiry_seconds: 86400,
-        scan_execution_policies_action_limit: 10,
-        seat_control: 0
+        scan_execution_policies_action_limit: 10
       }.tap do |hsh|
         hsh.merge!(non_production_defaults) unless Rails.env.production?
       end
@@ -538,9 +533,7 @@ module ApplicationSettingImplementation
   def usage_ping_features_enabled
     return false unless usage_ping_enabled? && super
 
-    if Gitlab.ee? && respond_to?(:include_optional_metrics_in_service_ping)
-      return include_optional_metrics_in_service_ping
-    end
+    return include_optional_metrics_in_service_ping if Gitlab.ee? && respond_to?(:include_optional_metrics_in_service_ping)
 
     true
   end
@@ -702,20 +695,14 @@ module ApplicationSettingImplementation
     repository_storages_weighted.each do |key, val|
       next unless val.present?
 
-      unless val.is_a?(Integer)
-        errors.add(:repository_storages_weighted, _("value for '%{storage}' must be an integer") % { storage: key })
-      end
-
-      unless val.between?(0, 100)
-        errors.add(:repository_storages_weighted, _("value for '%{storage}' must be between 0 and 100") % { storage: key })
-      end
+      errors.add(:repository_storages_weighted, _("value for '%{storage}' must be an integer") % { storage: key }) unless val.is_a?(Integer)
+      errors.add(:repository_storages_weighted, _("value for '%{storage}' must be between 0 and 100") % { storage: key }) unless val.between?(0, 100)
     end
   end
 
   def check_valid_runner_registrars
-    return if valid_runner_registrar_combinations.include?(valid_runner_registrars)
-
-    errors.add(:valid_runner_registrars, _("%{value} is not included in the list") % { value: valid_runner_registrars })
+    valid = valid_runner_registrar_combinations.include?(valid_runner_registrars)
+    errors.add(:valid_runner_registrars, _("%{value} is not included in the list") % { value: valid_runner_registrars }) unless valid
   end
 
   def valid_runner_registrar_combinations

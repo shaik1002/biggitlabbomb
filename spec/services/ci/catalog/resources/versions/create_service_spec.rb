@@ -4,8 +4,8 @@ require 'spec_helper'
 
 RSpec.describe Ci::Catalog::Resources::Versions::CreateService, feature_category: :pipeline_composition do
   describe '#execute from passed data' do
-    let_it_be_with_refind(:project) { create(:project, :small_repo) }
-    let_it_be_with_refind(:catalog_resource) { create(:ci_catalog_resource, project: project) }
+    let!(:project) { create(:project, :small_repo) }
+    let!(:catalog_resource) { create(:ci_catalog_resource, project: project) }
 
     let(:release) do
       create(:release,
@@ -16,27 +16,25 @@ RSpec.describe Ci::Catalog::Resources::Versions::CreateService, feature_category
 
     let(:user) { project.first_owner }
 
-    let(:metadata) do
-      {
-        components: [
-          { name: 'secret-detection', spec: { 'inputs' => { 'website' => nil } }, component_type: 'template' },
-          { name: 'dast',             spec: {}, component_type: 'template' },
-          { name: 'blank-yaml',       spec: {}, component_type: 'template' },
-          { name: 'template',         spec: { 'inputs' => { 'environment' => nil } }, component_type: 'template' }
-        ]
-      }
+    let(:components_data) do
+      [
+        { name: 'secret-detection', spec: { 'inputs' => { 'website' => nil } } },
+        { name: 'dast',             spec: {} },
+        { name: 'blank-yaml',       spec: {} },
+        { name: 'template',         spec: { 'inputs' => { 'environment' => nil } } }
+      ]
     end
 
-    subject(:execute) { described_class.new(release, user, metadata).execute }
+    subject(:execute) { described_class.new(release, user, components_data).execute }
 
     context 'when the catalog resource has different types of components and a release' do
       it 'creates a version for the release and marks the catalog resource as published' do
         response = execute
 
+        expect(response).to be_success
+
         version = Ci::Catalog::Resources::Version.last
 
-        expect(response).to be_success
-        expect(response.payload[:version]).to eq(version)
         expect(version.release).to eq(release)
         expect(version.semver.to_s).to eq(release.tag)
         expect(version.catalog_resource).to eq(catalog_resource)
@@ -85,11 +83,9 @@ RSpec.describe Ci::Catalog::Resources::Versions::CreateService, feature_category
     end
 
     context 'when there are at max 30 components' do
-      let(:metadata) do
+      let(:components_data) do
         num_components = 30
-        {
-          components: (0...num_components).map { |i| { name: "component_#{i}", spec: {}, component_type: 'template' } }
-        }
+        (0...num_components).map { |i| { name: "component_#{i}", spec: {} } }
       end
 
       it 'creates the components' do
@@ -101,11 +97,9 @@ RSpec.describe Ci::Catalog::Resources::Versions::CreateService, feature_category
     end
 
     context 'when there are more than 30 components' do
-      let(:metadata) do
+      let(:components_data) do
         num_components = 31
-        {
-          components: (0..num_components).map { |i| { name: "component_#{i}", spec: {}, component_type: 'template' } }
-        }
+        (0...num_components).map { |i| { name: "component_#{i}", spec: {} } }
       end
 
       it 'raises an error' do
@@ -129,12 +123,10 @@ RSpec.describe Ci::Catalog::Resources::Versions::CreateService, feature_category
     end
 
     context 'with invalid data' do
-      let(:metadata) do
-        {
-          components: [
-            { invalid: 'data' }
-          ]
-        }
+      let(:components_data) do
+        [
+          { invalid: 'data' }
+        ]
       end
 
       it 'returns an error' do
@@ -146,9 +138,9 @@ RSpec.describe Ci::Catalog::Resources::Versions::CreateService, feature_category
     end
 
     context 'when the user is not the author of the release' do
-      let_it_be(:user) { create(:user) }
+      let(:user) { create(:user) }
 
-      before_all do
+      before do
         project.add_maintainer(user)
       end
 
@@ -162,7 +154,7 @@ RSpec.describe Ci::Catalog::Resources::Versions::CreateService, feature_category
     end
 
     context 'with no data' do
-      let(:metadata) { {} }
+      let(:components_data) { [] }
 
       it 'saves the version with no component' do
         response = execute
@@ -230,10 +222,10 @@ RSpec.describe Ci::Catalog::Resources::Versions::CreateService, feature_category
       it 'creates a version for the release and marks the catalog resource as published' do
         response = execute
 
+        expect(response).to be_success
+
         version = Ci::Catalog::Resources::Version.last
 
-        expect(response).to be_success
-        expect(response.payload[:version]).to eq(version)
         expect(version.release).to eq(release)
         expect(version.semver.to_s).to eq(release.tag)
         expect(version.catalog_resource).to eq(catalog_resource)

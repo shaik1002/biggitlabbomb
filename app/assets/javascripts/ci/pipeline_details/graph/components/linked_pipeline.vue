@@ -241,10 +241,7 @@ export default {
     <gl-tooltip v-if="showCardTooltip" :target="() => $refs.linkedPipeline">
       {{ cardTooltipText }}
     </gl-tooltip>
-    <div
-      class="gl-border gl-w-full gl-rounded-lg gl-border-l-section gl-bg-section gl-p-3"
-      :class="cardClasses"
-    >
+    <div class="gl-border gl-w-full gl-rounded-lg gl-bg-white gl-p-3" :class="cardClasses">
       <div class="gl-flex gl-gap-x-3">
         <ci-icon
           v-if="!pipelineIsLoading"
@@ -258,7 +255,10 @@ export default {
             {{ downstreamTitle }}
           </span>
           <div class="-gl-m-2 gl-truncate gl-p-2">
-            <gl-link class="gl-text-sm" :href="pipeline.path" data-testid="pipelineLink"
+            <gl-link
+              class="gl-text-sm !gl-text-blue-500"
+              :href="pipeline.path"
+              data-testid="pipelineLink"
               >#{{ pipeline.id }}</gl-link
             >
           </div>
@@ -289,7 +289,7 @@ export default {
         :id="buttonId"
         v-gl-tooltip
         :title="expandBtnText"
-        class="!gl-border !gl-rounded-lg !gl-bg-section"
+        class="!gl-border !gl-rounded-lg"
         :class="[`js-pipeline-expand-${pipeline.id}`, buttonBorderClasses, buttonShadowClass]"
         :icon="expandedIcon"
         :aria-label="expandBtnText"

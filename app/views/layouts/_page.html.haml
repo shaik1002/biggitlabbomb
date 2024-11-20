@@ -11,6 +11,8 @@
   = render_if_exists "layouts/tanuki_bot_chat"
 
   .content-wrapper{ class: "#{@content_wrapper_class}" }
+    = dispensable_render_if_exists 'layouts/header/verification_reminder'
+
     -# Broadcast messages
     .broadcast-wrapper
       = dispensable_render_if_exists "shared/token_expiration_banner"
@@ -18,10 +20,9 @@
       = yield :group_invite_members_banner
 
     -# Alerts
-    .alert-wrapper.alert-wrapper-top-space.gl-flex.gl-flex-col.gl-gap-3.container-fluid{ class: alert_class }
+    .alert-wrapper.gl-flex.gl-flex-col.gl-gap-3.container-fluid{ class: alert_class }
       = dispensable_render 'shared/outdated_browser'
       = dispensable_render_if_exists "layouts/header/licensed_user_count_threshold"
-      = dispensable_render_if_exists "layouts/header/licensed_user_count_threshold_block_seat_overages"
       = dispensable_render_if_exists "layouts/header/token_expiry_notification"
       -# This is needed by [GitLab JH](https://gitlab.com/gitlab-jh/jh-team/gitlab/-/issues/13)
       = dispensable_render_if_exists "layouts/header/account_notification"
@@ -42,6 +43,8 @@
       = dispensable_render_if_exists "shared/new_user_signups_cap_reached_alert"
       = dispensable_render_if_exists "shared/silent_mode_banner"
       = yield :page_level_alert
+      = render "layouts/flash"
+      = yield :after_flash_content
 
     -# Top bar
     - unless @hide_top_bar
@@ -49,8 +52,6 @@
 
     %div{ class: "#{container_class unless @no_container} #{@content_class}" }
       %main.content{ id: "content-body", **page_itemtype }
-        = render "layouts/flash"
-        = yield :after_flash_content
         = yield :before_content
         = yield
     = yield :after_content

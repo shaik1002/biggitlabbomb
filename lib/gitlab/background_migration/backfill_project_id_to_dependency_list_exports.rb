@@ -15,10 +15,7 @@ module Gitlab
       end
 
       class Pipeline < ::Ci::ApplicationRecord
-        include PartitionedTable
-
         self.table_name = 'p_ci_pipelines'
-        self.primary_key = :id
       end
 
       def perform

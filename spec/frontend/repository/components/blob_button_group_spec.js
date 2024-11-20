@@ -2,7 +2,7 @@ import { GlButton } from '@gitlab/ui';
 import { mountExtended } from 'helpers/vue_test_utils_helper';
 import { stubComponent } from 'helpers/stub_component';
 import BlobButtonGroup from '~/repository/components/blob_button_group.vue';
-import CommitChangesModal from '~/repository/components/commit_changes_modal.vue';
+import DeleteBlobModal from '~/repository/components/delete_blob_modal.vue';
 import UploadBlobModal from '~/repository/components/upload_blob_modal.vue';
 
 const DEFAULT_PROPS = {
@@ -40,7 +40,7 @@ describe('BlobButtonGroup component', () => {
         show: showUploadBlobModalMock,
       },
     });
-    const DeleteBlobModalStub = stubComponent(CommitChangesModal, {
+    const DeleteBlobModalStub = stubComponent(DeleteBlobModal, {
       methods: {
         show: showDeleteBlobModalMock,
       },
@@ -56,12 +56,12 @@ describe('BlobButtonGroup component', () => {
       },
       stubs: {
         UploadBlobModal: UploadBlobModalStub,
-        CommitChangesModal: DeleteBlobModalStub,
+        DeleteBlobModal: DeleteBlobModalStub,
       },
     });
   };
 
-  const findDeleteBlobModal = () => wrapper.findComponent(CommitChangesModal);
+  const findDeleteBlobModal = () => wrapper.findComponent(DeleteBlobModal);
   const findUploadBlobModal = () => wrapper.findComponent(UploadBlobModal);
   const findDeleteButton = () => wrapper.findByTestId('delete');
   const findReplaceButton = () => wrapper.findByTestId('replace');
@@ -92,13 +92,13 @@ describe('BlobButtonGroup component', () => {
     });
 
     it('triggers the UploadBlobModal from the replace button', () => {
-      findReplaceButton().vm.$emit('click');
+      findReplaceButton().trigger('click');
 
       expect(showUploadBlobModalMock).toHaveBeenCalled();
     });
 
-    it('triggers the CommitChangesModal from the delete button', () => {
-      findDeleteButton().vm.$emit('click');
+    it('triggers the DeleteBlobModal from the delete button', () => {
+      findDeleteButton().trigger('click');
 
       expect(showDeleteBlobModalMock).toHaveBeenCalled();
     });
@@ -109,14 +109,14 @@ describe('BlobButtonGroup component', () => {
       });
 
       it('does not trigger the UploadBlobModal from the replace button', () => {
-        findReplaceButton().vm.$emit('click');
+        findReplaceButton().trigger('click');
 
         expect(showUploadBlobModalMock).not.toHaveBeenCalled();
         expect(wrapper.emitted().fork).toHaveLength(1);
       });
 
       it('does not trigger the DeleteBlobModal from the delete button', () => {
-        findDeleteButton().vm.$emit('click');
+        findDeleteButton().trigger('click');
 
         expect(showDeleteBlobModalMock).not.toHaveBeenCalled();
         expect(wrapper.emitted().fork).toHaveLength(1);
@@ -143,7 +143,7 @@ describe('BlobButtonGroup component', () => {
     });
   });
 
-  it('renders CommitChangesModal for delete', () => {
+  it('renders DeleteBlobModel', () => {
     createComponent();
 
     const { targetBranch, originalBranch } = DEFAULT_INJECT;
@@ -151,6 +151,7 @@ describe('BlobButtonGroup component', () => {
     const title = `Delete ${name}`;
 
     expect(findDeleteBlobModal().props()).toMatchObject({
+      modalTitle: title,
       commitMessage: title,
       targetBranch,
       originalBranch,

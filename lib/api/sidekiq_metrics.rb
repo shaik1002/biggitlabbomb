@@ -11,8 +11,8 @@ module API
     helpers do
       def queue_metrics
         hash = {}
-        Gitlab::SidekiqSharding::Router.with_routed_client do
-          queue_metrics_from_shard.each do |queue_name, queue_details|
+        Gitlab::Redis::Queues.instances.each_value do |v| # rubocop:disable Cop/RedisQueueUsage -- allow iteration over shard instances
+          queue_metrics_from_shard(v.sidekiq_redis).each do |queue_name, queue_details|
             if hash[queue_name].nil?
               hash[queue_name] = queue_details
             else
@@ -24,36 +24,38 @@ module API
         hash
       end
 
-      def queue_metrics_from_shard
-        ::Gitlab::SidekiqConfig.routing_queues.each_with_object({}) do |queue_name, hash|
-          queue = Sidekiq::Queue.new(queue_name)
-          hash[queue.name] = {
-            backlog: queue.size,
-            latency: queue.latency.to_i
-          }
+      def queue_metrics_from_shard(pool)
+        Sidekiq::Client.via(pool) do
+          ::Gitlab::SidekiqConfig.routing_queues.each_with_object({}) do |queue_name, hash|
+            queue = Sidekiq::Queue.new(queue_name)
+            hash[queue.name] = {
+              backlog: queue.size,
+              latency: queue.latency.to_i
+            }
+          end
         end
       end
 
       def process_metrics
-        metrics = []
-        Gitlab::SidekiqSharding::Router.with_routed_client do
-          metrics << process_metrics_from_shard
+        Gitlab::Redis::Queues.instances.values.flat_map do |v| # rubocop:disable Cop/RedisQueueUsage -- allow iteration over shard instances
+          process_metrics_from_shard(v.sidekiq_redis)
         end
-        metrics.flatten
       end
 
-      def process_metrics_from_shard
-        Sidekiq::ProcessSet.new(false).map do |process|
-          {
-            hostname: process['hostname'],
-            pid: process['pid'],
-            tag: process['tag'],
-            started_at: Time.at(process['started_at']),
-            queues: process['queues'],
-            labels: process['labels'],
-            concurrency: process['concurrency'],
-            busy: process['busy']
-          }
+      def process_metrics_from_shard(pool)
+        Sidekiq::Client.via(pool) do
+          Sidekiq::ProcessSet.new(false).map do |process|
+            {
+              hostname: process['hostname'],
+              pid: process['pid'],
+              tag: process['tag'],
+              started_at: Time.at(process['started_at']),
+              queues: process['queues'],
+              labels: process['labels'],
+              concurrency: process['concurrency'],
+              busy: process['busy']
+            }
+          end
         end
       end
 
@@ -65,21 +67,23 @@ module API
           dead: 0
         }
 
-        Gitlab::SidekiqSharding::Router.with_routed_client do
-          job_stats_from_shard.each { |k, v| stats[k] += v }
+        Gitlab::Redis::Queues.instances.each_value do |shard| # rubocop:disable Cop/RedisQueueUsage -- allow iteration over shard instances
+          job_stats_from_shard(shard.sidekiq_redis).each { |k, v| stats[k] += v }
         end
 
         stats
       end
 
-      def job_stats_from_shard
-        stats = Sidekiq::Stats.new
-        {
-          processed: stats.processed,
-          failed: stats.failed,
-          enqueued: stats.enqueued,
-          dead: stats.dead_size
-        }
+      def job_stats_from_shard(pool)
+        Sidekiq::Client.via(pool) do
+          stats = Sidekiq::Stats.new
+          {
+            processed: stats.processed,
+            failed: stats.failed,
+            enqueued: stats.enqueued,
+            dead: stats.dead_size
+          }
+        end
       end
     end
 

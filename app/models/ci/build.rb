@@ -103,11 +103,6 @@ module Ci
       partition_foreign_key: :partition_id,
       inverse_of: :build
 
-    has_many :simple_tags,
-      class_name: 'Ci::Tag',
-      through: :tag_links,
-      source: :tag
-
     Ci::JobArtifact.file_types.each_key do |key|
       has_one :"job_artifacts_#{key}", ->(build) { in_partition(build).with_file_types([key]) },
         class_name: 'Ci::JobArtifact',
@@ -391,15 +386,13 @@ module Ci
       after_transition any => [:failed] do |build|
         next unless build.project
 
-        build.run_after_commit do
-          if build.auto_retry_allowed?
-            begin
-              # rubocop: disable CodeReuse/ServiceClass -- https://gitlab.com/gitlab-org/gitlab/-/issues/494865
-              Ci::RetryJobService.new(build.project, build.user).execute(build)
-              # rubocop: enable CodeReuse/ServiceClass
-            rescue Gitlab::Access::AccessDeniedError => e
-              Gitlab::AppLogger.error "Unable to auto-retry job #{build.id}: #{e}"
-            end
+        if build.auto_retry_allowed?
+          begin
+            # rubocop: disable CodeReuse/ServiceClass
+            Ci::RetryJobService.new(build.project, build.user).execute(build)
+            # rubocop: enable CodeReuse/ServiceClass
+          rescue Gitlab::Access::AccessDeniedError => e
+            Gitlab::AppLogger.error "Unable to auto-retry job #{build.id}: #{e}"
           end
         end
       end
@@ -425,18 +418,6 @@ module Ci
       in_merge_request(merge_request_id).pluck(:id)
     end
 
-    def self.arel_tag_names_array
-      ::Ci::BuildTag
-        .joins(:tag)
-        .where(::Ci::BuildTag.arel_table[:build_id].eq(arel_table[:id]))
-        .where(::Ci::BuildTag.arel_table[:partition_id].eq(arel_table[:partition_id]))
-        .select('COALESCE(array_agg(tags.name ORDER BY name), ARRAY[]::text[])')
-    end
-
-    def tags_ids_relation
-      simple_tags
-    end
-
     # A Ci::Bridge may transition to `canceling` as a result of strategy: :depend
     # but only a Ci::Build will transition to `canceling`` via `.cancel`
     def supports_canceling?
@@ -459,9 +440,7 @@ module Ci
     end
 
     def exit_code=(value)
-      return unless value
-
-      ensure_metadata.exit_code = value.to_i.clamp(0, Gitlab::Database::MAX_SMALLINT_VALUE)
+      ensure_metadata.exit_code = value
     end
 
     def auto_retry_expected?
@@ -479,10 +458,8 @@ module Ci
     end
 
     def pages_generator?
-      return false unless Gitlab.config.pages.enabled
-      return true if options[:pages].is_a?(Hash) || options[:pages] == true
-
-      options[:pages] != false && name == 'pages' # Legacy behaviour
+      Gitlab.config.pages.enabled &&
+        name == 'pages'
     end
 
     # Overriden on EE
@@ -822,9 +799,7 @@ module Ci
       artifacts_public = options.dig(:artifacts, :public)
       artifacts_access = options.dig(:artifacts, :access)
 
-      if !artifacts_public.nil? && !artifacts_access.nil?
-        raise ArgumentError, 'artifacts:public and artifacts:access are mutually exclusive'
-      end
+      raise ArgumentError, 'artifacts:public and artifacts:access are mutually exclusive' if !artifacts_public.nil? && !artifacts_access.nil?
 
       return :public if artifacts_public == true || artifacts_access == 'all'
       return :private if artifacts_public == false || artifacts_access == 'developer'
@@ -863,7 +838,9 @@ module Ci
 
     def artifacts_expire_in=(value)
       self.artifacts_expire_at =
-        (ChronicDuration.parse(value)&.seconds&.from_now if value)
+        if value
+          ChronicDuration.parse(value)&.seconds&.from_now
+        end
     end
 
     def has_expired_locked_archive_artifacts?
@@ -981,7 +958,7 @@ module Ci
     end
 
     def multi_build_steps?
-      options[:release]&.any?
+      options.dig(:release)&.any?
     end
 
     def hide_secrets(data, metrics = ::Gitlab::Ci::Trace::Metrics.new)
@@ -991,7 +968,9 @@ module Ci
         Gitlab::Ci::MaskSecret.mask!(trace, project.runners_token) if project
         Gitlab::Ci::MaskSecret.mask!(trace, token) if token
 
-        metrics.increment_trace_operation(operation: :mutated) if trace != data
+        if trace != data
+          metrics.increment_trace_operation(operation: :mutated)
+        end
       end
     end
 

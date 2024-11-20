@@ -1,5 +1,5 @@
 ---
-stage: Software Supply Chain Security
+stage: Govern
 group: Authorization
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
@@ -25,20 +25,21 @@ For a demo of the custom roles feature, see [[Demo] Ultimate Guest can view code
 You can discuss individual custom role and permission requests in [issue 391760](https://gitlab.com/gitlab-org/gitlab/-/issues/391760).
 
 NOTE:
-Most custom roles are considered [billable users that use a seat](#billing-and-seat-usage). When you add a user to your group with a custom role and you are about to incur additional charges for having more seats than are included in your subscription, a warning is displayed.
+Most custom roles are considered [billable users that use a seat](#billing-and-seat-usage). When you add a user to your group with a custom role, a warning is displayed if you are about to incur additional charges for having more seats than are included in your subscription.
 
 ## Available permissions
 
 For more information on available permissions, see [custom permissions](custom_roles/abilities.md).
 
 WARNING:
-Depending on the permissions added to a lower base role such as Guest, a user with a custom role might be able to perform actions that are usually restricted to the Maintainer role or higher. For example, if a custom role is Guest plus a permissions to manage CI/CD variables, a user with this role can manage CI/CD variables added by other Maintainers or Owners for that group or project.
+Depending on the permissions added to a lower base role such as Guest, a user with a custom role might be able to perform actions that are usually restricted to the Maintainer role or higher. For example, if a custom role is Guest plus managing CI/CD variables, a user with this role can manage CI/CD variables added by other Maintainers or Owners for that group or project.
 
 ## Create a custom role
 
 You create a custom role by adding [permissions](#available-permissions) to a base role.
-You can add multiple permissions to that custom role. For example, you can create a custom role
-with the permission to do all of the following:
+
+You can select any number of permissions. For example, you can create a custom role
+with the permission to:
 
 - View vulnerability reports.
 - Change the status of vulnerabilities.
@@ -51,7 +52,7 @@ Prerequisites:
 - You must have the Owner role for the group.
 
 1. On the left sidebar, select **Search or go to** and find your group.
-1. Select **Settings > Roles and permissions**.
+1. Select **Settings > Roles and Permissions**.
 1. Select **New role**.
 1. In **Base role to use as template**, select an existing default role.
 1. In **Role name**, enter the custom role's title.
@@ -59,7 +60,7 @@ Prerequisites:
 1. Select the **Permissions** for the new custom role.
 1. Select **Create role**.
 
-In **Settings > Roles and permissions**, the list of all custom roles displays the:
+In **Settings > Roles and Permissions**, the list of all custom roles displays the:
 
 - Custom role name.
 - Role ID.
@@ -75,7 +76,7 @@ Prerequisites:
 After you create a custom role for your self-managed instance, you can assign that custom role to a user in any group or subgroup in that instance.
 
 1. On the left sidebar, at the bottom, select **Admin**.
-1. Select **Settings > Roles and permissions**.
+1. Select **Settings > Roles and Permissions**.
 1. Select **New role**.
 1. In **Base role to use as template**, select an existing default role.
 1. In **Role name**, enter the custom role's title.
@@ -83,7 +84,7 @@ After you create a custom role for your self-managed instance, you can assign th
 1. Select the **Permissions** for the new custom role.
 1. Select **Create role**.
 
-In **Settings > Roles and permissions**, the list of all custom roles displays the:
+In **Settings > Roles and Permissions**, the list of all custom roles displays the:
 
 - Custom role name.
 - Role ID.
@@ -107,7 +108,7 @@ Prerequisites:
 - You must have the Owner role for the group.
 
 1. On the left sidebar, select **Search or go to** and find your group.
-1. Select **Settings > Roles and permissions**.
+1. Select **Settings > Roles and Permissions**.
 1. Select the vertical ellipsis (**{ellipsis_v}**) for the custom role, then
    select **Edit role**.
 1. Modify the role as needed.
@@ -120,7 +121,7 @@ Prerequisites:
 - You must be an administrator for the self-managed instance.
 
 1. On the left sidebar, at the bottom, select **Admin**.
-1. Select **Settings > Roles and permissions**.
+1. Select **Settings > Roles and Permissions**.
 1. Select the vertical ellipsis (**{ellipsis_v}**) for the custom role, then
    select **Edit role**.
 1. Modify the role as needed.
@@ -128,22 +129,22 @@ Prerequisites:
 
 To edit a custom role, you can also [use the API](../api/graphql/reference/index.md#mutationmemberroleupdate).
 
-## Delete a custom role
+## Delete the custom role
 
 Prerequisites:
 
 - You must be an administrator or have the Owner role for the group.
 
-You can't remove a custom role from a group if there are members assigned that role. See [unassign a custom role from a group or project member](#unassign-a-custom-role-from-a-group-or-project-member).
+You can remove a custom role from a group only if no members have that role. See [unassign a custom role from a group or project member](#unassign-a-custom-role-from-a-group-or-project-member).
 
 1. On the left sidebar:
    - For self-managed, at the bottom, select **Admin**.
    - For SaaS, select **Search or go to** and find your group.
-1. Select **Settings > Roles and permissions**.
+1. Select **Settings > Roles and Permissions**.
 1. Select **Custom Roles**.
 1. In the **Actions** column, select **Delete role** (**{remove}**) and confirm.
 
-You can also [use the API](../api/graphql/reference/index.md#mutationmemberroledelete) to delete a custom role. To use the API, you must provide the `id` of the custom role. If you do not know this `id`, you can find it by making an [API request on the group](../api/graphql/reference/index.md#groupmemberroles) or an [API request on the instance](../api/graphql/reference/index.md#querymemberroles).
+You can also [use the API](../api/graphql/reference/index.md#mutationmemberroledelete) to delete a custom role. To use the API, you must know the `id` of the custom role. If you do not know this `id`, find it by making an [API request on the group](../api/graphql/reference/index.md#groupmemberroles) or an [API request on the instance](../api/graphql/reference/index.md#querymemberroles).
 
 ## Add a user with a custom role to your group or project
 
@@ -159,7 +160,7 @@ To add a user with a custom role:
 - To a group, see [add users to a group](group/index.md#add-users-to-a-group).
 - To a project, see [add users to a project](project/members/index.md#add-users-to-a-project).
 
-If a group or project member has a custom role, the [group or project members list](group/index.md#view-group-members) displays **Custom Role** in the **Max role** column of the table.
+If a group or project member has a custom role, the [group or project members list](group/index.md#view-group-members) displays "Custom Role" in the **Max role** column of the table.
 
 ## Assign a custom role to an existing group or project member
 
@@ -180,8 +181,8 @@ If you are assigning a custom role to an existing:
 
 ### Use the API to assign a custom role
 
-1. Invite a user as a direct member to the top-level group or any subgroup or project in the
-   top-level group's hierarchy as a Guest. At this point, this Guest user cannot see any
+1. Invite a user as a direct member to the root group or any subgroup or project in the root
+   group's hierarchy as a Guest. At this point, this Guest user cannot see any
    code on the projects in the group or subgroup.
 1. Optional. If you do not know the `id` of the Guest user receiving a custom
    role, find that `id` by making an [API request](../api/member_roles.md).
@@ -198,7 +199,7 @@ If you are assigning a custom role to an existing:
 
    Where:
 
-   - `<project_id` and `<group_id>`: The `id` or [URL-encoded path of the project or group](../api/rest/index.md#namespaced-paths) associated with the membership receiving the custom role.
+   - `<project_id` and `<group_id>`: The `id` or [URL-encoded path of the project or group](../api/rest/index.md#namespaced-path-encoding) associated with the membership receiving the custom role.
    - `<member_role_id>`: The `id` of the member role created in the previous section.
    - `<user_id>`: The `id` of the user receiving a custom role.
 
@@ -243,7 +244,7 @@ curl --request PUT --header "Content-Type: application/json" --header "Authoriza
 
 ## Inheritance
 
-If a user belongs to a group, they are a direct member of the group
+If a user belongs to a group, they are a _direct member_ of the group
 and an [inherited member](project/members/index.md#membership-types)
 of any subgroups or projects. If a user is assigned a custom role
 by the top-level group, the permissions of the role are also inherited by subgroups
@@ -255,12 +256,12 @@ For example, assume the following structure exists:
   - Subgroup B
     - Project 1
 
-If a custom role with the Developer role plus the `Manage CI/CD variables` permission is assigned to Group A,
-the user also has `Manage CI/CD variables` permission in Subgroup B and Project 1.
+If a custom role with Developer + `Manage CI/CD variables` permission is assigned to Group A,
+the user also has `Manage CI/CD variables` permission for Subgroup B and Project 1.
 
 ## Billing and seat usage
 
-When you assign a custom role to a user with the Guest role, that user has
+When you enable a custom role for a user with the Guest role, that user has
 access to elevated permissions over the base role, and therefore:
 
 - Is considered a [billable user](../subscriptions/self_managed/index.md#billable-users) on self-managed GitLab.
@@ -292,16 +293,15 @@ For example, let's say we have 5 users in Group A, and they are assigned the fol
 
 Group B invites Group A. The following table shows the maximum role that each the users in Group A will have in Group B:
 
-| Scenario                                                       | User A | User B              | User C                       | User D                       | User E                            |
-|----------------------------------------------------------------|--------|---------------------|------------------------------|------------------------------|-----------------------------------|
-| Group B invites Group A with Guest                             | Guest  | Guest               | Guest                        | Guest                        | Guest                             |
-| Group B invites Group A with Guest + `read_code`               | Guest  | Guest + `read_code` | Guest + `read_vulnerability` | Guest + `read_code`          | Guest + `read_code`               |
-| Group B invites Group A with Guest + `read_vulnerability`      | Guest  | Guest + `read_code` | Guest + `read_vulnerability` | Guest + `read_vulnerability` | Guest + `read_vulnerability`      |
-| Group B invites Group A with Developer                         | Guest  | Guest + `read_code` | Guest + `read_vulnerability` | Developer                    | Developer                         |
-| Group B invites Group A with Developer + `admin_vulnerability` | Guest  | Guest + `read_code` | Guest + `read_vulnerability` | Developer                    | Developer + `admin_vulnerability` |
+| Scenario                                                       | User A | User B              | User C                       | User D    | User E                            |
+|----------------------------------------------------------------|--------|---------------------|------------------------------|-----------|-----------------------------------|
+| Group B invites Group A with Guest                             | Guest  | Guest               | Guest                        | Guest     | Guest                             |
+| Group B invites Group A with Guest + `read_code`               | Guest  | Guest + `read_code` | Guest + `read_vulnerability` | Guest     | Guest                             |
+| Group B invites Group A with Guest + `read_vulnerability`      | Guest  | Guest + `read_code` | Guest + `read_vulnerability` | Guest     | Guest                             |
+| Group B invites Group A with Developer                         | Guest  | Guest + `read_code` | Guest + `read_vulnerability` | Developer | Developer                         |
+| Group B invites Group A with Developer + `admin_vulnerability` | Guest  | Guest + `read_code` | Guest + `read_vulnerability` | Developer | Developer + `admin_vulnerability` |
 
 When User C is invited to Group B with the same default role (Guest), but different custom permissions with the same base access level (`read_code` and `read_vulnerability`), User C retains the custom permission from Group A (`read_vulnerability`).
-The ability to assign a custom role when sharing a group to a project can be tracked in [issue 468329](https://gitlab.com/gitlab-org/gitlab/-/issues/468329).
 
 ## Supported objects
 
@@ -318,7 +318,7 @@ You can assign custom roles and permissions to the following:
 You can sync users to custom roles with following authentication providers:
 
 - See [Configure SAML Group Links](group/saml_sso/group_sync.md#configure-saml-group-links).
-- See [Manage group memberships via LDAP](group/access_and_permissions.md#manage-group-memberships-with-ldap).
+- See [Manage group memberships via LDAP](group/access_and_permissions.md#manage-group-memberships-via-ldap).
 
 ## Known issues
 

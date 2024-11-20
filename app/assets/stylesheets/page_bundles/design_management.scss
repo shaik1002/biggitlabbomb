@@ -4,6 +4,10 @@ $design-pin-diameter: 28px;
 $design-pin-diameter-sm: 24px;
 $t-gray-a-16-design-pin: rgba($black, 0.16);
 
+.design-card-header {
+  background: transparent;
+}
+
 .layout-page.design-detail-layout {
   max-height: 100vh;
 
@@ -37,8 +41,6 @@ $t-gray-a-16-design-pin: rgba($black, 0.16);
   }
 }
 
-// These are composite classes for use with Vue Transition
-// https://vuejs.org/guide/built-ins/transition
 .design-disclosure-enter-to {
   transform: translateX(0);
 }
@@ -57,6 +59,12 @@ $t-gray-a-16-design-pin: rgba($black, 0.16);
   height: 160px;
   text-decoration: none;
 
+  .icon-version-status {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+  }
+
   &:hover {
     border-color: var(--gray-400, $gray-400);
   }
@@ -67,7 +75,7 @@ $t-gray-a-16-design-pin: rgba($black, 0.16);
   height: $design-pin-diameter;
   width: $design-pin-diameter;
   box-sizing: content-box;
-  @apply gl-bg-purple-500 dark:gl-bg-purple-700;
+  background-color: var(--purple-500, $purple-500);
   color: var(--white, $white);
   font-weight: $gl-font-weight-bold;
   border-radius: 50%;
@@ -178,7 +186,7 @@ $t-gray-a-16-design-pin: rgba($black, 0.16);
     .design-note {
       padding: $gl-padding-8;
       list-style: none;
-      border-top-left-radius: $gl-border-radius-base;
+      border-top-left-radius: $gl-border-radius-base; // same border radius used by .bordered-box
       border-top-right-radius: $gl-border-radius-base;
       @apply gl-transition-background;
 

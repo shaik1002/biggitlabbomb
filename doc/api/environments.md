@@ -22,7 +22,7 @@ GET /projects/:id/environments
 
 | Attribute | Type           | Required | Description                                                                                                                                                   |
 |-----------|----------------|----------|---------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `id`      | integer/string | yes      | The ID or [URL-encoded](rest/index.md#namespaced-paths) path of the project.                                                                          |
+| `id`      | integer/string | yes      | The ID or [URL-encoded](rest/index.md#namespaced-path-encoding) path of the project.                                                                          |
 | `name`    | string         | no       | Return the environment with this name. Mutually exclusive with `search`.                                                                                      |
 | `search`  | string         | no       | Return list of environments matching the search criteria. Mutually exclusive with `name`. Must be at least 3 characters long.                                 |
 | `states`  | string         | no       | List all environments that match a specific state. Accepted values: `available`, `stopping`, or `stopped`. If no state value given, returns all environments. |
@@ -39,7 +39,6 @@ Example response:
     "id": 1,
     "name": "review/fix-foo",
     "slug": "review-fix-foo-dfjre3",
-    "description": "This is review environment",
     "external_url": "https://review-fix-foo-dfjre3.gitlab.example.com",
     "state": "available",
     "tier": "development",
@@ -62,7 +61,7 @@ GET /projects/:id/environments/:environment_id
 
 | Attribute        | Type           | Required | Description                                                                          |
 |------------------|----------------|----------|--------------------------------------------------------------------------------------|
-| `id`             | integer/string | yes      | The ID or [URL-encoded path](rest/index.md#namespaced-paths) of the project. |
+| `id`             | integer/string | yes      | The ID or [URL-encoded path](rest/index.md#namespaced-path-encoding) of the project. |
 | `environment_id` | integer        | yes      | The ID of the environment.                                                           |
 
 ```shell
@@ -76,7 +75,6 @@ Example of response
   "id": 1,
   "name": "review/fix-foo",
   "slug": "review-fix-foo-dfjre3",
-  "description": "This is review environment",
   "external_url": "https://review-fix-foo-dfjre3.gitlab.example.com",
   "state": "available",
   "tier": "development",
@@ -200,14 +198,13 @@ POST /projects/:id/environments
 
 | Attribute              | Type           | Required | Description                                                                                                         |
 |------------------------|----------------|----------|---------------------------------------------------------------------------------------------------------------------|
-| `id`                   | integer/string | yes      | The ID or [URL-encoded path](rest/index.md#namespaced-paths) of the project.                                |
+| `id`                   | integer/string | yes      | The ID or [URL-encoded path](rest/index.md#namespaced-path-encoding) of the project.                                |
 | `name`                 | string         | yes      | The name of the environment.                                                                                        |
-| `description`          | string         | no       | The description of the environment.                                                                                        |
 | `external_url`         | string         | no       | Place to link to for this environment.                                                                              |
 | `tier`                 | string         | no       | The tier of the new environment. Allowed values are `production`, `staging`, `testing`, `development`, and `other`. |
 | `cluster_agent_id`     | integer        | no       | The cluster agent to associate with this environment.                                                               |
 | `kubernetes_namespace` | string         | no       | The Kubernetes namespace to associate with this environment.                                                        |
-| `flux_resource_path`   | string         | no       | The Flux resource path to associate with this environment. This must be the full resource path. For example, `helm.toolkit.fluxcd.io/v2/namespaces/gitlab-agent/helmreleases/gitlab-agent`.  |
+| `flux_resource_path`   | string         | no       | The Flux resource path to associate with this environment.                                                          |
 
 ```shell
 curl --data "name=deploy&external_url=https://deploy.gitlab.example.com" \
@@ -221,7 +218,6 @@ Example response:
   "id": 1,
   "name": "deploy",
   "slug": "deploy",
-  "description": null,
   "external_url": "https://deploy.gitlab.example.com",
   "state": "available",
   "tier": "production",
@@ -246,9 +242,8 @@ PUT /projects/:id/environments/:environments_id
 
 | Attribute              | Type            | Required | Description                                                                                                         |
 |------------------------|-----------------|----------|---------------------------------------------------------------------------------------------------------------------|
-| `id`                   | integer/string  | yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths).                                |
+| `id`                   | integer/string  | yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding).                                |
 | `environment_id`       | integer         | yes      | The ID of the environment.                                                                                          |
-| `description`          | string          | no       | The description of the environment.                                                                                        |
 | `external_url`         | string          | no       | The new `external_url`.                                                                                             |
 | `tier`                 | string          | no       | The tier of the new environment. Allowed values are `production`, `staging`, `testing`, `development`, and `other`. |
 | `cluster_agent_id`     | integer or null | no       | The cluster agent to associate with this environment or `null` to remove it.                                        |
@@ -267,7 +262,6 @@ Example response:
   "id": 1,
   "name": "staging",
   "slug": "staging",
-  "description": null,
   "external_url": "https://staging.gitlab.example.com",
   "state": "available",
   "tier": "staging",
@@ -288,7 +282,7 @@ DELETE /projects/:id/environments/:environment_id
 
 | Attribute        | Type           | Required | Description                                                                          |
 |------------------|----------------|----------|--------------------------------------------------------------------------------------|
-| `id`             | integer/string | yes      | The ID or [URL-encoded path](rest/index.md#namespaced-paths) of the project. |
+| `id`             | integer/string | yes      | The ID or [URL-encoded path](rest/index.md#namespaced-path-encoding) of the project. |
 | `environment_id` | integer        | yes      | The ID of the environment.                                                           |
 
 ```shell
@@ -309,7 +303,7 @@ DELETE /projects/:id/environments/review_apps
 
 | Attribute | Type           | Required | Description                                                                                                                                            |
 |-----------|----------------|----------|--------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `id`      | integer/string | yes      | The ID or [URL-encoded path](rest/index.md#namespaced-paths) of the project.                                                                   |
+| `id`      | integer/string | yes      | The ID or [URL-encoded path](rest/index.md#namespaced-path-encoding) of the project.                                                                   |
 | `before`  | datetime       | no       | The date before which environments can be deleted. Defaults to 30 days ago. Expected in ISO 8601 format (`YYYY-MM-DDTHH:MM:SSZ`).                      |
 | `limit`   | integer        | no       | Maximum number of environments to delete. Defaults to 100.                                                                                             |
 | `dry_run` | boolean        | no       | Defaults to `true` for safety reasons. It performs a dry run where no actual deletion is performed. Set to `false` to actually delete the environment. |
@@ -350,7 +344,7 @@ POST /projects/:id/environments/:environment_id/stop
 
 | Attribute        | Type           | Required | Description                                                                          |
 |------------------|----------------|----------|--------------------------------------------------------------------------------------|
-| `id`             | integer/string | yes      | The ID or [URL-encoded path](rest/index.md#namespaced-paths) of the project. |
+| `id`             | integer/string | yes      | The ID or [URL-encoded path](rest/index.md#namespaced-path-encoding) of the project. |
 | `environment_id` | integer        | yes      | The ID of the environment.                                                           |
 | `force`          | boolean        | no       | Force environment to stop without executing `on_stop` actions.                       |
 
@@ -384,7 +378,7 @@ POST /projects/:id/environments/stop_stale
 
 | Attribute | Type           | Required | Description                                                                                                                                                                                    |
 |-----------|----------------|----------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `id`      | integer/string | yes      | The ID or [URL-encoded path](rest/index.md#namespaced-paths) of the project.                                                                                                           |
+| `id`      | integer/string | yes      | The ID or [URL-encoded path](rest/index.md#namespaced-path-encoding) of the project.                                                                                                           |
 | `before`  | date           | yes      | Stop environments that have been modified or deployed to before the specified date. Expected in ISO 8601 format (`2019-03-15T08:00:00Z`). Valid inputs are between 10 years ago and 1 week ago |
 
 ```shell

@@ -13,6 +13,6 @@ instrumentation_class: GitlabEnvironmentToolkitMetric
 performance_indicator_type: []
 distribution:
 - ee
-tiers:
+tier:
 - premium
 - ultimate

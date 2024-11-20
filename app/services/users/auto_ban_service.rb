@@ -10,7 +10,6 @@ module Users
     def execute
       if user.ban
         record_custom_attribute
-        ban_duplicate_users
         success
       else
         messages = user.errors.full_messages
@@ -21,7 +20,6 @@ module Users
     def execute!
       user.ban!
       record_custom_attribute
-      ban_duplicate_users
       success
     end
 
@@ -29,12 +27,13 @@ module Users
 
     attr_reader :user, :reason
 
-    def ban_duplicate_users
-      AntiAbuse::BanDuplicateUsersWorker.perform_async(user.id)
-    end
-
     def record_custom_attribute
-      UserCustomAttribute.set_auto_banned_by(user: user, reason: reason)
+      custom_attribute = {
+        user_id: user.id,
+        key: UserCustomAttribute::AUTO_BANNED_BY,
+        value: reason
+      }
+      UserCustomAttribute.upsert_custom_attributes([custom_attribute])
     end
   end
 end

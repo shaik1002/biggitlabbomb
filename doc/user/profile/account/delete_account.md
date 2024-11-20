@@ -1,5 +1,5 @@
 ---
-stage: Software Supply Chain Security
+stage: Govern
 group: Authentication
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
@@ -29,10 +29,6 @@ On GitLab.com, it takes seven days from when you delete your own account to when
 
 - That user is [blocked](../../../administration/moderate_users.md#block-a-user).
 - You cannot create a new account with the same username.
-
-  NOTE:
-  After the seven day time period is finished, any user can create a user account with that previously used username. Therefore, you should not assume that you will be able to create a new account with that username after the seven days, because it might be taken.
-
   You can [create a new account with the same email address](#create-a-new-account-with-the-same-email-address)
   if you remove that email address from your account first.
 
@@ -62,7 +58,7 @@ To create a new account with the same email address, before you delete your acco
    to your account.
 1. [Change your primary email](../index.md#change-your-primary-email) to this
    new secondary email address.
-1. [Remove the now-secondary email address](../index.md#delete-email-addresses-from-your-user-profile)
+1. [Remove the now-secondary email address](../index.md#delete-emails-from-your-user-profile)
    from your account.
 1. [Delete your own account](#delete-your-own-account).
 
@@ -121,7 +117,7 @@ An alternative to deleting is [blocking a user](../../../administration/moderate
 When a user is deleted from an [abuse report](../../../administration/review_abuse_reports.md) or spam log, these associated
 records are always removed.
 
-The deleting associated records option can be requested in the [API](../../../api/users.md#delete-a-user) as well as
+The deleting associated records option can be requested in the [API](../../../api/users.md#user-deletion) as well as
 the **Admin** area.
 
 WARNING:

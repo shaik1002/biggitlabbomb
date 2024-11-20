@@ -429,12 +429,12 @@ export default class Notes {
     }
 
     if (!noteEntity.valid) {
-      if (noteEntity?.quick_actions_status?.messages) {
+      if (noteEntity.errors && noteEntity.errors.commands_only) {
         if (noteEntity.commands_changes && Object.keys(noteEntity.commands_changes).length > 0) {
           $notesList.find('.system-note.being-posted').remove();
         }
         this.addAlert({
-          message: noteEntity.quick_actions_status.messages,
+          message: noteEntity.errors.commands_only,
           variant: VARIANT_INFO,
           parent: this.parentTimeline.get(0),
         });
@@ -546,10 +546,6 @@ export default class Notes {
 
         renderGFM(discussionElement);
         const $discussion = $(discussionElement).unwrap();
-
-        if (noteEntity.on_image) {
-          discussionElement.classList.add('discussion-notes', 'gl-block');
-        }
 
         if (!this.isParallelView() || row.hasClass('js-temp-notes-holder') || noteEntity.on_image) {
           // insert the note and the reply button after the temp row
@@ -1540,7 +1536,7 @@ export default class Notes {
          <div class="timeline-entry-inner">
             <div class="timeline-icon">
                <a href="/${escape(currentUsername)}">
-                 <img class="avatar s32" src="${currentUserAvatar}" />
+                 <img class="avatar s40" src="${currentUserAvatar}" />
                </a>
             </div>
             <div class="timeline-content ${discussionClass}">

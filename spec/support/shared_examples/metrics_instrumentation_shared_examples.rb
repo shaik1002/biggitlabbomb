@@ -17,13 +17,7 @@ RSpec.shared_examples 'a correct instrumented metric value' do |params|
   end
 
   it 'has correct value' do
-    metric_value = metric.value
-
-    if metric_value.is_a?(Float)
-      expect(metric_value).to be_within(0.000001).of(expected_value)
-    else
-      expect(metric_value).to eq(expected_value)
-    end
+    expect(metric.value).to eq(expected_value)
   end
 end
 

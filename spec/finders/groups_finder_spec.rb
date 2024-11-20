@@ -301,30 +301,6 @@ RSpec.describe GroupsFinder, feature_category: :groups_and_projects do
       end
     end
 
-    context 'with group ids' do
-      let_it_be(:group_one) { create(:group, :public, name: 'group_one') }
-      let_it_be(:group_two) { create(:group, :public, name: 'group_two') }
-      let_it_be(:group_three) { create(:group, :public, name: 'group_three') }
-
-      subject { described_class.new(user, { ids: [group_one.id, group_three.id] }).execute }
-
-      it 'returns only the groups listed in the list of ids' do
-        is_expected.to contain_exactly(group_one, group_three)
-      end
-    end
-
-    context 'with top level groups only' do
-      let_it_be(:group_one) { create(:group, :public, name: 'group_one') }
-      let_it_be(:group_two) { create(:group, :public, name: 'group_two', parent: group_one) }
-      let_it_be(:group_three) { create(:group, :public, name: 'group_three', parent: group_one) }
-
-      subject { described_class.new(user, { top_level_only: true }).execute }
-
-      it 'returns only top level groups' do
-        is_expected.to contain_exactly(group_one)
-      end
-    end
-
     context 'with organization' do
       let_it_be(:organization_user) { create(:organization_user) }
       let_it_be(:organization) { organization_user.organization }
@@ -433,7 +409,7 @@ RSpec.describe GroupsFinder, feature_category: :groups_and_projects do
           )
         end
 
-        it "returns project's ancestor groups if user is member of project" do
+        it "returns project's parent group if user is member of project" do
           project = create(:project, :private, namespace: private_sub_subgroup)
           project.add_developer(user)
 
@@ -443,8 +419,7 @@ RSpec.describe GroupsFinder, feature_category: :groups_and_projects do
             public_subgroup2,
             internal_sub_subgroup,
             public_sub_subgroup,
-            private_sub_subgroup,
-            private_subgroup2
+            private_sub_subgroup
           )
         end
 

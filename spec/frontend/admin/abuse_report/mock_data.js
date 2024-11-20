@@ -80,7 +80,7 @@ export const mockAbuseReport = {
 };
 
 export const mockLabel1 = {
-  id: 'gid://gitlab/AntiAbuse::Reports::Label/1',
+  id: 'gid://gitlab/Admin::AbuseReportLabel/1',
   title: 'Uno',
   color: '#F0AD4E',
   textColor: '#FFFFFF',
@@ -88,7 +88,7 @@ export const mockLabel1 = {
 };
 
 export const mockLabel2 = {
-  id: 'gid://gitlab/AntiAbuse::Reports::Label/2',
+  id: 'gid://gitlab/Admin::AbuseReportLabel/2',
   title: 'Dos',
   color: '#F0AD4E',
   textColor: '#FFFFFF',
@@ -124,7 +124,7 @@ export const mockCreateLabelResponse = {
   data: {
     labelCreate: {
       label: {
-        id: 'gid://gitlab/AntiAbuse::Reports::Label/1',
+        id: 'gid://gitlab/Admin::AbuseReportLabel/1',
         color: '#ed9121',
         description: null,
         title: 'abuse report label',
@@ -517,15 +517,15 @@ export const mockNotesByIdResponse = {
 
 export const createAbuseReportNoteResponse = {
   data: {
-    createAbuseReportNote: {
+    createNote: {
       note: {
-        id: 'gid://gitlab/AntiAbuse::Reports::Note/6',
+        id: 'gid://gitlab/Note/6',
         discussion: {
           id: 'gid://gitlab/Discussion/90ca230051611e6e1676c50ba7178e0baeabd98d',
           notes: {
             nodes: [
               {
-                id: 'gid://gitlab/AntiAbuse::Reports::Note/6',
+                id: 'gid://gitlab/Note/6',
                 body: 'Another comment',
                 bodyHtml: '<p data-sourcepos="1:1-1:15" dir="auto">Another comment</p>',
                 createdAt: '2023-11-02T02:45:46Z',
@@ -542,12 +542,15 @@ export const createAbuseReportNoteResponse = {
                   webPath: '/root',
                 },
                 lastEditedBy: null,
+                userPermissions: {
+                  resolveNote: true,
+                },
                 discussion: {
                   id: 'gid://gitlab/Discussion/90ca230051611e6e1676c50ba7178e0baeabd98d',
                   notes: {
                     nodes: [
                       {
-                        id: 'gid://gitlab/AntiAbuse::Reports::Note/6',
+                        id: 'gid://gitlab/Note/6',
                       },
                     ],
                   },
@@ -564,7 +567,7 @@ export const createAbuseReportNoteResponse = {
 
 export const editAbuseReportNoteResponse = {
   data: {
-    updateAbuseReportNote: {
+    updateNote: {
       errors: [],
       note: {
         id: 'gid://gitlab/Note/1',
@@ -590,15 +593,6 @@ export const editAbuseReportNoteResponse = {
           __typename: 'NotePermissions',
         },
       },
-    },
-  },
-};
-
-export const editAbuseReportNoteResponseWithErrors = {
-  data: {
-    updateAbuseReportNote: {
-      errors: ['foo', 'bar'],
-      note: null,
     },
   },
 };

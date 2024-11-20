@@ -59,7 +59,7 @@ class BlueprintFrontMatter
   end
 
   def validate_creation_date
-    return if /\d{4}-[01]\d-[0123]\d/.match?(@metadata['creation-date'])
+    return if @metadata['creation-date'] =~ /\d{4}-[01]\d-[0123]\d/
 
     add_error("Invalid creation-date: the date format must be 'yyyy-mm-dd'")
   end

@@ -36,7 +36,7 @@ You can read more about enabling browser-specific keyboard navigation on [a11ypr
   [checkbox](#checkbox-inputs-with-accessible-names),
   [radio](#radio-inputs-with-accessible-names),
   [file](#file-inputs-with-accessible-names),
-  and [toggle](#gltoggle-components-with-accessible-names) inputs have accessible names.
+  and [toggle](#gltoggle-components-with-an-accessible-names) inputs have accessible names.
 - [Buttons](#buttons-and-links-with-descriptive-accessible-names),
   [links](#buttons-and-links-with-descriptive-accessible-names),
   and [images](#images-with-accessible-names) have descriptive accessible names.
@@ -244,7 +244,7 @@ File input examples:
 <input id="attach-file" type="file" />
 ```
 
-#### GlToggle components with accessible names
+#### GlToggle components with an accessible names
 
 `GlToggle` examples:
 
@@ -256,9 +256,9 @@ File input examples:
 <gl-toggle v-model="notifications" :label="__('Notifications')" label-position="hidden" />
 ```
 
-#### GlFormCombobox components with accessible names
+#### GlFormCombobox components with an accessible names
 
-`GlFormCombobox` example:
+`GlFormCombobox` examples:
 
 ```html
 <!-- GlFormCombobox with label -->
@@ -461,16 +461,18 @@ The following code snippet is a good example of an icon with a tooltip.
 
 - It is automatically focusable, as it is a button.
 - It is given an accessible name with `aria-label`, as it is a button with no text.
+- We can use the `gl-hover-bg-transparent!` class if we don't want the button's background to become gray on hover.
+- We can use the `gl-p-0!` class to remove the button padding, if needed.
 
 ```html
-<button
+<gl-button
   v-gl-tooltip
-  class="gl-border-0 gl-bg-transparent gl-p-0 gl-leading-0"
+  class="gl-hover-bg-transparent! gl-p-0!"
+  icon="warning"
+  category="tertiary"
   :title="tooltipText"
   :aria-label="__('Warning')"
->
-  <gl-icon name="warning" />
-</button>
+/>
 ```
 
 ## Hiding elements

@@ -172,11 +172,14 @@ RSpec.describe API::VirtualRegistries::Packages::Maven, :aggregate_failures, fea
         expect { api_request }.to change { registry_class.count }.by(1)
 
         expect(registry_class.last.group_id).to eq(params[:group_id])
+        expect(registry_class.last.cache_validity_hours).to eq(
+          params[:cache_validity_hours] || registry_class.new.cache_validity_hours
+        )
       end
     end
 
     context 'with valid params' do
-      let(:params) { { group_id: group.id } }
+      let(:params) { { group_id: group.id, cache_validity_hours: 24 } }
 
       it { is_expected.to have_request_urgency(:low) }
 
@@ -203,6 +206,17 @@ RSpec.describe API::VirtualRegistries::Packages::Maven, :aggregate_failures, fea
         else
           it_behaves_like 'returning response status', params[:status]
         end
+      end
+
+      context 'without cache_validity_hours param' do
+        let(:params) { { group_id: group.id } }
+
+        before_all do
+          registry_class.for_group(group).delete_all
+          group.add_maintainer(user)
+        end
+
+        it_behaves_like 'successful response'
       end
 
       context 'with existing registry' do
@@ -252,18 +266,22 @@ RSpec.describe API::VirtualRegistries::Packages::Maven, :aggregate_failures, fea
     end
 
     context 'with invalid params' do
+      let(:valid_group_id) { group.id }
+
       before_all do
         group.add_maintainer(user)
       end
 
-      where(:group_id, :status) do
-        non_existing_record_id  | :not_found
-        'foo'                   | :bad_request
-        ''                      | :bad_request
+      where(:group_id, :cache_validity_hours, :status) do
+        non_existing_record_id | 1   | :not_found
+        'foo'                  | 1   | :bad_request
+        ''                     | 1   | :bad_request
+        ref(:valid_group_id)   | 'a' | :bad_request
+        ref(:valid_group_id)   | -1  | :bad_request
       end
 
       with_them do
-        let(:params) { { group_id: group_id } }
+        let(:params) { { group_id: group_id, cache_validity_hours: cache_validity_hours } }
 
         it_behaves_like 'returning response status', params[:status]
       end
@@ -272,7 +290,7 @@ RSpec.describe API::VirtualRegistries::Packages::Maven, :aggregate_failures, fea
     context 'with subgroup' do
       let(:subgroup) { create(:group, parent: group, visibility_level: group.visibility_level) }
 
-      let(:params) { { group_id: subgroup.id } }
+      let(:params) { { group_id: subgroup.id, cache_validity_hours: 1 } }
 
       before_all do
         group.add_maintainer(user)
@@ -360,6 +378,104 @@ RSpec.describe API::VirtualRegistries::Packages::Maven, :aggregate_failures, fea
             token_basic_auth(token)
           end
         end
+
+        it_behaves_like 'returning response status', params[:status]
+      end
+    end
+  end
+
+  describe 'PATCH /api/v4/virtual_registries/packages/maven/registries/:id' do
+    let(:registry_id) { registry.id }
+    let(:url) { "/virtual_registries/packages/maven/registries/#{registry_id}" }
+
+    subject(:api_request) { patch api(url), headers: headers, params: params }
+
+    shared_examples 'successful response' do
+      it 'returns a successful response' do
+        api_request
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response['cache_validity_hours']).to eq(registry.reset.cache_validity_hours)
+      end
+    end
+
+    context 'with valid params' do
+      let(:params) { { cache_validity_hours: 2 } }
+
+      it { is_expected.to have_request_urgency(:low) }
+
+      it_behaves_like 'disabled feature flag'
+      it_behaves_like 'disabled dependency proxy'
+      it_behaves_like 'not authenticated user'
+
+      where(:user_role, :status) do
+        :owner      | :ok
+        :maintainer | :ok
+        :developer  | :forbidden
+        :reporter   | :forbidden
+        :guest      | :forbidden
+      end
+
+      with_them do
+        before do
+          group.send(:"add_#{user_role}", user)
+        end
+
+        if params[:status] == :ok
+          it_behaves_like 'successful response'
+        else
+          it_behaves_like 'returning response status', params[:status]
+        end
+      end
+
+      context 'for authentication' do
+        before_all do
+          group.add_maintainer(user)
+        end
+
+        where(:token, :sent_as, :status) do
+          :personal_access_token | :header     | :ok
+          :personal_access_token | :basic_auth | :ok
+          :deploy_token          | :header     | :forbidden
+          :deploy_token          | :basic_auth | :forbidden
+          :job_token             | :header     | :ok
+          :job_token             | :basic_auth | :ok
+        end
+
+        with_them do
+          let(:headers) do
+            case sent_as
+            when :header
+              token_header(token)
+            when :basic_auth
+              token_basic_auth(token)
+            end
+          end
+
+          it_behaves_like 'returning response status', params[:status]
+        end
+      end
+    end
+
+    context 'with invalid params' do
+      let(:valid_registry_id) { registry.id }
+
+      before_all do
+        group.add_maintainer(user)
+      end
+
+      where(:registry_id, :cache_validity_hours, :status) do
+        non_existing_record_id  | 1   | :not_found
+        'foo'                   | 1   | :bad_request
+        ''                      | 1   | :not_found
+        ref(:valid_registry_id) | 'a' | :bad_request
+        ref(:valid_registry_id) | ''  | :bad_request
+        ref(:valid_registry_id) | -1  | :bad_request
+        ref(:valid_registry_id) | nil | :bad_request
+      end
+
+      with_them do
+        let(:params) { { cache_validity_hours: cache_validity_hours } }
 
         it_behaves_like 'returning response status', params[:status]
       end
@@ -538,10 +654,6 @@ RSpec.describe API::VirtualRegistries::Packages::Maven, :aggregate_failures, fea
       it 'returns a successful response' do
         expect { api_request }.to change { ::VirtualRegistries::Packages::Maven::Upstream.count }.by(1)
           .and change { ::VirtualRegistries::Packages::Maven::RegistryUpstream.count }.by(1)
-
-        expect(::VirtualRegistries::Packages::Maven::Upstream.last.cache_validity_hours).to eq(
-          params[:cache_validity_hours] || ::VirtualRegistries::Packages::Maven::Upstream.new.cache_validity_hours
-        )
       end
     end
 
@@ -588,11 +700,10 @@ RSpec.describe API::VirtualRegistries::Packages::Maven, :aggregate_failures, fea
 
     context 'for params' do
       where(:params, :status) do
-        { url: 'http://example.com', username: 'test', password: 'test', cache_validity_hours: 3 } | :created
-        { url: 'http://example.com', username: 'test', password: 'test' }                          | :created
-        { url: '', username: 'test', password: 'test' }                                            | :bad_request
-        { url: 'http://example.com', username: 'test' }                                            | :bad_request
-        {}                                                                                         | :bad_request
+        { url: 'http://example.com', username: 'test', password: 'test' } | :created
+        { url: '', username: 'test', password: 'test' }                   | :bad_request
+        { url: 'http://example.com', username: 'test' }                   | :bad_request
+        {}                                                                | :bad_request
       end
 
       before do
@@ -789,25 +900,19 @@ RSpec.describe API::VirtualRegistries::Packages::Maven, :aggregate_failures, fea
         group.add_maintainer(user)
       end
 
-      let(:params) do
-        { url: param_url, username: username, password: password, cache_validity_hours: cache_validity_hours }.compact
-      end
-
-      where(:param_url, :username, :password, :cache_validity_hours, :status) do
-        nil                  | 'test' | 'test' | 3   | :ok
-        'http://example.com' | nil    | 'test' | 3   | :ok
-        'http://example.com' | 'test' | nil    | 3   | :ok
-        'http://example.com' | 'test' | 'test' | nil | :ok
-        nil                  | nil    | nil    | 3   | :ok
-        'http://example.com' | 'test' | 'test' | 3   | :ok
-        ''                   | 'test' | 'test' | 3   | :bad_request
-        'http://example.com' | ''     | 'test' | 3   | :bad_request
-        'http://example.com' | 'test' | ''     | 3   | :bad_request
-        'http://example.com' | 'test' | 'test' | -1  | :bad_request
-        nil                  | nil    | nil    | nil | :bad_request
+      where(:param_url, :username, :password, :status) do
+        nil                  | 'test' | 'test' | :ok
+        'http://example.com' | nil    | 'test' | :ok
+        'http://example.com' | 'test' | nil    | :ok
+        ''                   | 'test' | 'test' | :bad_request
+        'http://example.com' | ''     | 'test' | :bad_request
+        'http://example.com' | 'test' | ''     | :bad_request
+        nil                  | nil    | nil    | :bad_request
       end
 
       with_them do
+        let(:params) { { url: param_url, username: username, password: password }.compact }
+
         it_behaves_like 'returning response status', params[:status]
       end
     end
@@ -892,16 +997,6 @@ RSpec.describe API::VirtualRegistries::Packages::Maven, :aggregate_failures, fea
       "/virtual_registries/packages/maven/registries/#{registry.id}/upstreams/#{upstream_id}/cached_responses"
     end
 
-    let_it_be(:processing_cached_response) do
-      create(
-        :virtual_registries_packages_maven_cached_response,
-        :processing,
-        upstream: upstream,
-        group: upstream.group,
-        relative_path: cached_response.relative_path
-      )
-    end
-
     subject(:api_request) { get api(url), headers: headers }
 
     shared_examples 'successful response' do
@@ -913,7 +1008,7 @@ RSpec.describe API::VirtualRegistries::Packages::Maven, :aggregate_failures, fea
           cached_response
             .as_json
             .merge('cached_response_id' => Base64.urlsafe_encode64(cached_response.relative_path))
-            .except('id', 'object_storage_key', 'file_store', 'status', 'file_final_path')
+            .except('id', 'object_storage_key', 'file_store')
         )
       end
     end
@@ -1009,16 +1104,6 @@ RSpec.describe API::VirtualRegistries::Packages::Maven, :aggregate_failures, fea
     let(:url) do
       "/virtual_registries/packages/maven/registries/#{registry.id}/upstreams/#{upstream.id}/" \
         "cached_responses/#{cached_response_id}"
-    end
-
-    let_it_be(:processing_cached_response) do
-      create(
-        :virtual_registries_packages_maven_cached_response,
-        :processing,
-        upstream: upstream,
-        group: upstream.group,
-        relative_path: cached_response.relative_path
-      )
     end
 
     subject(:api_request) { delete api(url), headers: headers }
@@ -1143,23 +1228,6 @@ RSpec.describe API::VirtualRegistries::Packages::Maven, :aggregate_failures, fea
 
     shared_examples 'returning the workhorse send_dependency response' do
       it 'returns a workhorse send_url response' do
-        expect(::VirtualRegistries::CachedResponseUploader).to receive(:workhorse_authorize).with(
-          a_hash_including(
-            use_final_store_path: true,
-            final_store_path_root_id: registry.id
-          )
-        ).and_call_original
-
-        expect(Gitlab::Workhorse).to receive(:send_dependency).with(
-          an_instance_of(Hash),
-          an_instance_of(String),
-          a_hash_including(
-            allow_localhost: true,
-            ssrf_filter: true,
-            allowed_uris: ObjectStoreSettings.enabled_endpoint_uris
-          )
-        ).and_call_original
-
         request
 
         expect(response).to have_gitlab_http_status(:ok)
@@ -1179,15 +1247,14 @@ RSpec.describe API::VirtualRegistries::Packages::Maven, :aggregate_failures, fea
         end
 
         expected_upload_config = {
-          'Headers' => { described_class::UPSTREAM_GID_HEADER => [upstream.to_global_id.to_s] },
-          'AuthorizedUploadResponse' => a_kind_of(Hash)
+          'Headers' => { described_class::UPSTREAM_GID_HEADER => [upstream.to_global_id.to_s] }
         }
 
         expect(send_data_type).to eq('send-dependency')
         expect(send_data['Url']).to be_present
         expect(send_data['Headers']).to eq(expected_headers)
         expect(send_data['ResponseHeaders']).to eq(expected_resp_headers)
-        expect(send_data['UploadConfig']).to include(expected_upload_config)
+        expect(send_data['UploadConfig']).to eq(expected_upload_config)
       end
     end
 
@@ -1199,7 +1266,7 @@ RSpec.describe API::VirtualRegistries::Packages::Maven, :aggregate_failures, fea
     context 'with a valid user' do
       let(:headers) { { 'Private-Token' => personal_access_token.token } }
 
-      context 'with successul handle request service responses' do
+      context 'when the handle request service returns download_file' do
         let_it_be(:cached_response) do
           create(
             :virtual_registries_packages_maven_cached_response,
@@ -1215,39 +1282,23 @@ RSpec.describe API::VirtualRegistries::Packages::Maven, :aggregate_failures, fea
           allow(::VirtualRegistries::Packages::Maven::HandleFileRequestService).to receive(:new).and_call_original
         end
 
-        context 'when the handle request service returns download_file' do
-          it 'returns the workhorse send_url response' do
-            request
+        it 'returns the workhorse send_url response' do
+          request
 
-            expect(response).to have_gitlab_http_status(:ok)
-            expect(response.media_type).to eq(cached_response.content_type)
-            # this is a direct download from the file system, workhorse is not involved
-            expect(response.headers[Gitlab::Workhorse::SEND_DATA_HEADER]).to eq(nil)
-          end
-        end
-
-        context 'when the handle request service returns download_digest' do
-          let(:path) { "#{super()}.sha1" }
-
-          it 'returns the requested digest' do
-            request
-
-            expect(response).to have_gitlab_http_status(:ok)
-            expect(response.media_type).to eq('text/plain')
-            expect(response.body).to eq(cached_response.file_sha1)
-          end
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(response.media_type).to eq(cached_response.content_type)
+          # this is a direct download from the file system, workhorse is not involved
+          expect(response.headers[Gitlab::Workhorse::SEND_DATA_HEADER]).to eq(nil)
         end
       end
 
       context 'with service response errors' do
         where(:reason, :expected_status) do
-          :path_not_present                     | :bad_request
-          :unauthorized                         | :unauthorized
-          :no_upstreams                         | :bad_request
-          :file_not_found_on_upstreams          | :not_found
-          :digest_not_found_in_cached_responses | :not_found
-          :upstream_not_available               | :bad_request
-          :fips_unsupported_md5                 | :bad_request
+          :path_not_present            | :bad_request
+          :unauthorized                | :unauthorized
+          :no_upstreams                | :bad_request
+          :file_not_found_on_upstreams | :not_found
+          :upstream_not_available      | :bad_request
         end
 
         with_them do
@@ -1296,9 +1347,58 @@ RSpec.describe API::VirtualRegistries::Packages::Maven, :aggregate_failures, fea
     it_behaves_like 'not authenticated user'
   end
 
+  describe 'POST /api/v4/virtual_registries/packages/maven/:id/*path/upload/authorize' do
+    include_context 'workhorse headers'
+
+    let(:path) { 'com/test/package/1.2.3/package-1.2.3.pom' }
+    let(:url) { "/virtual_registries/packages/maven/#{registry.id}/#{path}/upload/authorize" }
+
+    subject(:request) do
+      post api(url), headers: headers
+    end
+
+    shared_examples 'returning the workhorse authorization response' do
+      it 'authorizes the upload' do
+        request
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(response.media_type).to eq(Gitlab::Workhorse::INTERNAL_API_CONTENT_TYPE)
+        expect(json_response['TempPath']).not_to be_nil
+      end
+    end
+
+    it_behaves_like 'authenticated endpoint',
+      success_shared_example_name: 'returning the workhorse authorization response' do
+        let(:headers) { workhorse_headers }
+      end
+
+    context 'with a valid user' do
+      let(:headers) { workhorse_headers.merge(token_header(:personal_access_token)) }
+
+      context 'with no workhorse headers' do
+        let(:headers) { token_header(:personal_access_token) }
+
+        it_behaves_like 'returning response status', :forbidden
+      end
+
+      context 'with no permissions on registry' do
+        let_it_be(:user) { create(:user) }
+
+        it_behaves_like 'returning response status', :forbidden
+      end
+
+      it_behaves_like 'disabled feature flag'
+      it_behaves_like 'disabled dependency proxy'
+    end
+
+    it_behaves_like 'not authenticated user'
+  end
+
   describe 'POST /api/v4/virtual_registries/packages/maven/:id/*path/upload' do
     include_context 'workhorse headers'
 
+    let(:path) { 'com/test/package/1.2.3/package-1.2.3.pom' }
+    let(:url) { "/virtual_registries/packages/maven/#{registry.id}/#{path}/upload" }
     let(:file_upload) { fixture_file_upload('spec/fixtures/packages/maven/my-app-1.0-20180724.124855-1.pom') }
     let(:gid_header) { { described_class::UPSTREAM_GID_HEADER => upstream.to_global_id.to_s } }
     let(:additional_headers) do
@@ -1307,24 +1407,12 @@ RSpec.describe API::VirtualRegistries::Packages::Maven, :aggregate_failures, fea
 
     let(:headers) { workhorse_headers.merge(additional_headers) }
 
-    let_it_be(:path) { 'com/test/package/1.2.3/package-1.2.3.pom' }
-    let_it_be(:url) { "/virtual_registries/packages/maven/#{registry.id}/#{path}/upload" }
-    let_it_be(:processing_cached_response) do
-      create(
-        :virtual_registries_packages_maven_cached_response,
-        :processing,
-        upstream: upstream,
-        group: upstream.group,
-        relative_path: "/#{path}"
-      )
-    end
-
     subject(:request) do
       workhorse_finalize(
         api(url),
         file_key: :file,
         headers: headers,
-        params: { file: file_upload, 'file.md5' => 'md5', 'file.sha1' => 'sha1' },
+        params: { file: file_upload },
         send_rewritten_field: true
       )
     end
@@ -1333,15 +1421,13 @@ RSpec.describe API::VirtualRegistries::Packages::Maven, :aggregate_failures, fea
       it 'accepts the upload', :freeze_time do
         expect { request }.to change { upstream.cached_responses.count }.by(1)
 
-        expect(response).to have_gitlab_http_status(:ok)
-        expect(response.body).to eq('')
+        expect(response).to have_gitlab_http_status(:created)
         expect(upstream.cached_responses.last).to have_attributes(
           relative_path: "/#{path}",
+          downloads_count: 1,
           upstream_etag: nil,
           upstream_checked_at: Time.zone.now,
-          downloaded_at: Time.zone.now,
-          file_sha1: kind_of(String),
-          file_md5: kind_of(String)
+          downloaded_at: Time.zone.now
         )
       end
     end

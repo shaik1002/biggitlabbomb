@@ -1,13 +1,12 @@
 <script>
-import { GlButton, GlLink, GlTooltip, GlTooltipDirective } from '@gitlab/ui';
+import { GlButton, GlLink, GlTooltip } from '@gitlab/ui';
 import { createAlert } from '~/alert';
 import { __, s__, sprintf } from '~/locale';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import CiIcon from '~/vue_shared/components/ci_icon/ci_icon.vue';
 import SafeHtml from '~/vue_shared/directives/safe_html';
-import { BRIDGE_KIND, BUILD_KIND } from '~/ci/pipeline_details/graph/constants';
+import { BRIDGE_KIND } from '~/ci/pipeline_details/graph/constants';
 import RetryMrFailedJobMutation from '~/ci/merge_requests/graphql/mutations/retry_mr_failed_job.mutation.graphql';
-import RootCauseAnalysisButton from 'ee_else_ce/ci/job_details/components/root_cause_analysis_button.vue';
 
 export default {
   components: {
@@ -15,19 +14,13 @@ export default {
     GlButton,
     GlLink,
     GlTooltip,
-    RootCauseAnalysisButton,
   },
   directives: {
-    GlTooltip: GlTooltipDirective,
     SafeHtml,
   },
   props: {
     job: {
       type: Object,
-      required: true,
-    },
-    canTroubleshootJob: {
-      type: Boolean,
       required: true,
     },
   },
@@ -40,14 +33,8 @@ export default {
     canRetryJob() {
       return this.job.retryable && this.job.userPermissions.updateBuild && !this.isBridgeJob;
     },
-    detailedStatus() {
-      return this.job?.detailedStatus;
-    },
     detailsPath() {
-      return this.detailedStatus?.detailsPath;
-    },
-    statusGroup() {
-      return this.detailedStatus?.group;
+      return this.job?.detailedStatus?.detailsPath;
     },
     isBridgeJob() {
       return this.job.kind === BRIDGE_KIND;
@@ -62,9 +49,6 @@ export default {
     },
     tooltipText() {
       return sprintf(this.$options.i18n.jobActionTooltipText, { jobName: this.job.name });
-    },
-    isBuildJob() {
-      return this.job.kind === BUILD_KIND;
     },
   },
   methods: {
@@ -98,15 +82,15 @@ export default {
     cannotRetry: s__('Job|You do not have permission to run this job again.'),
     cannotRetryTrigger: s__('Job|You cannot rerun trigger jobs from this list.'),
     jobActionTooltipText: s__('Pipelines|Retry %{jobName} Job'),
-    retry: __('Run again'),
-    retryError: __('There was an error while running this job again'),
+    retry: __('Retry'),
+    retryError: __('There was an error while retrying this job'),
   },
 };
 </script>
 <template>
   <div class="container-fluid gl-my-1 gl-grid-rows-auto">
-    <div class="row gl-my-3 gl-flex gl-items-center" data-testid="widget-row">
-      <div class="align-items-center col-4 gl-flex gl-text-gray-900">
+    <div class="row gl-flex gl-items-center" data-testid="widget-row">
+      <div class="align-items-center col-6 gl-flex gl-font-bold gl-text-gray-900">
         <ci-icon :status="job.detailedStatus" />
         <gl-link
           class="gl-ml-2 !gl-text-gray-900 !gl-no-underline"
@@ -124,21 +108,12 @@ export default {
       <gl-tooltip v-if="!canRetryJob" :target="() => $refs.retryBtn" placement="top">
         {{ tooltipErrorText }}
       </gl-tooltip>
-      <div class="col-4 gl-text-right">
-        <root-cause-analysis-button
-          class="gl-mr-2"
-          :job-gid="job.id"
-          :job-status-group="statusGroup"
-          :can-troubleshoot-job="canTroubleshootJob"
-          :is-build="isBuildJob"
-        />
-
+      <div class="col-2 gl-text-right">
         <span ref="retryBtn">
           <gl-button
-            v-gl-tooltip
             :disabled="!canRetryJob"
             icon="retry"
-            category="secondary"
+            category="tertiary"
             :loading="isLoadingAction"
             :title="$options.i18n.retry"
             :aria-label="$options.i18n.retry"

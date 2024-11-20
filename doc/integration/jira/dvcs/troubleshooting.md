@@ -38,7 +38,7 @@ Problems with SSL and TLS can cause this error message:
 Error obtaining access token. Cannot access https://gitlab.example.com from Jira.
 ```
 
-- The [Jira issues integration](../index.md) requires
+- The [Jira integration](../index.md) requires
   GitLab to connect to Jira. Any TLS issues that arise from a private certificate
   authority or self-signed certificate are resolved
   [on the GitLab server](https://docs.gitlab.com/omnibus/settings/ssl/index.html#install-custom-public-certificates),
@@ -89,7 +89,7 @@ Potential resolutions:
    [GitLab account configuration](https://confluence.atlassian.com/adminjiraserver/linking-gitlab-accounts-1027142272.html#LinkingGitLabaccounts-InGitLab). Review
    the **Scopes** field and ensure the `api` checkbox is selected.
 
-## Error: `410 Gone`
+## `410 Gone` when connecting to Jira
 
 When you connect to Jira and synchronize repositories, you might get a `410 Gone` error.
 This issue occurs when you use the Jira DVCS connector and your integration is configured to use **GitHub Enterprise**.
@@ -111,9 +111,9 @@ resynchronize the information:
 For more information, see the
 [Atlassian documentation](https://support.atlassian.com/jira-cloud-administration/docs/integrate-with-development-tools/).
 
-## Error: `Sync Failed`
+## `Sync Failed` when refreshing repository data
 
-If you get a `Sync Failed` error in Jira when you [refresh repository data](index.md#refresh-data-imported-to-jira) for specific projects, check your Jira DVCS connector logs. Look for errors that occur when executing requests to API resources in GitLab. For example:
+If you get a `Sync Failed` error in Jira when [refreshing repository data](index.md#refresh-data-imported-to-jira) for specific projects, check your Jira DVCS connector logs. Look for errors that occur when executing requests to API resources in GitLab. For example:
 
 ```plaintext
 Failed to execute request [https://gitlab.com/api/v4/projects/:id/merge_requests?page=1&per_page=100 GET https://gitlab.com/api/v4/projects/:id/merge_requests?page=1&per_page=100 returned a response status of 403 Forbidden] errors:

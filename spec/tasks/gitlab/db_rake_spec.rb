@@ -9,7 +9,6 @@ RSpec.describe 'gitlab:db namespace rake task', :silence_stdout, feature_categor
     Rake.application.rake_require 'tasks/gitlab/click_house/migration'
     Rake.application.rake_require 'tasks/gitlab/db'
     Rake.application.rake_require 'tasks/gitlab/db/lock_writes'
-    Rake.application.rake_require 'tasks/gitlab/db/alter_cell_sequences_range'
   end
 
   before do
@@ -126,24 +125,12 @@ RSpec.describe 'gitlab:db namespace rake task', :silence_stdout, feature_categor
   end
 
   describe 'configure' do
-    let(:topology_service_enabled) { true }
-    let(:configured_cell) { true }
-
-    before do
-      allow(Settings).to receive(:topology_service_enabled?).and_return(topology_service_enabled)
-      allow(Settings).to receive(:has_configured_cell?).and_return(configured_cell)
-    end
-
     context 'with a single database' do
       let(:connection) { Gitlab::Database.database_base_models[:main].connection }
       let(:main_config) { double(:config, name: 'main') }
 
       before do
         skip_if_database_exists(:ci)
-
-        allow_next_instance_of(Gitlab::TopologyServiceClient::CellService) do |instance|
-          allow(instance).to receive(:cell_sequence_range).and_return([0, 1000])
-        end
       end
 
       context 'when geo is not configured' do
@@ -160,7 +147,6 @@ RSpec.describe 'gitlab:db namespace rake task', :silence_stdout, feature_categor
             expect(Rake::Task['db:schema:load']).not_to receive(:invoke)
             expect(Rake::Task['gitlab:db:lock_writes']).not_to receive(:invoke)
             expect(Rake::Task['db:seed_fu']).not_to receive(:invoke)
-            expect(Rake::Task['gitlab:db:alter_cell_sequences_range']).not_to receive(:invoke)
 
             run_rake_task('gitlab:db:configure')
           end
@@ -174,7 +160,6 @@ RSpec.describe 'gitlab:db namespace rake task', :silence_stdout, feature_categor
             expect(Rake::Task['gitlab:db:lock_writes']).to receive(:invoke)
             expect(Rake::Task['db:seed_fu']).to receive(:invoke)
             expect(Rake::Task['db:migrate']).not_to receive(:invoke)
-            expect(Rake::Task['gitlab:db:alter_cell_sequences_range']).to receive(:invoke).with(0, 1000)
 
             run_rake_task('gitlab:db:configure')
           end
@@ -188,7 +173,6 @@ RSpec.describe 'gitlab:db namespace rake task', :silence_stdout, feature_categor
             expect(Rake::Task['gitlab:db:lock_writes']).to receive(:invoke)
             expect(Rake::Task['db:seed_fu']).to receive(:invoke)
             expect(Rake::Task['db:migrate']).not_to receive(:invoke)
-            expect(Rake::Task['gitlab:db:alter_cell_sequences_range']).to receive(:invoke).with(0, 1000)
 
             run_rake_task('gitlab:db:configure')
           end
@@ -202,7 +186,6 @@ RSpec.describe 'gitlab:db namespace rake task', :silence_stdout, feature_categor
             expect(Rake::Task['gitlab:db:lock_writes']).not_to receive(:invoke)
             expect(Rake::Task['db:seed_fu']).not_to receive(:invoke)
             expect(Rake::Task['db:migrate']).not_to receive(:invoke)
-            expect(Rake::Task['gitlab:db:alter_cell_sequences_range']).not_to receive(:invoke)
 
             expect { run_rake_task('gitlab:db:configure') }.to raise_error(RuntimeError, 'error')
           end
@@ -228,7 +211,6 @@ RSpec.describe 'gitlab:db namespace rake task', :silence_stdout, feature_categor
               expect(Rake::Task['gitlab:db:lock_writes']).to receive(:invoke)
               expect(Rake::Task['db:seed_fu']).to receive(:invoke)
               expect(Rake::Task['db:migrate']).not_to receive(:invoke)
-              expect(Rake::Task['gitlab:db:alter_cell_sequences_range']).to receive(:invoke).with(0, 1000)
 
               run_rake_task('gitlab:db:configure')
 
@@ -245,7 +227,6 @@ RSpec.describe 'gitlab:db namespace rake task', :silence_stdout, feature_categor
               expect(Rake::Task['db:schema:load']).not_to receive(:invoke)
               expect(Rake::Task['gitlab:db:lock_writes']).not_to receive(:invoke)
               expect(Rake::Task['db:seed_fu']).not_to receive(:invoke)
-              expect(Rake::Task['gitlab:db:alter_cell_sequences_range']).not_to receive(:invoke)
 
               run_rake_task('gitlab:db:configure')
 
@@ -269,8 +250,6 @@ RSpec.describe 'gitlab:db namespace rake task', :silence_stdout, feature_categor
             expect(Rake::Task['db:migrate:geo']).not_to receive(:invoke)
             expect(Rake::Task['db:schema:load:geo']).not_to receive(:invoke)
 
-            expect(Rake::Task['gitlab:db:alter_cell_sequences_range']).not_to receive(:invoke)
-
             run_rake_task('gitlab:db:configure')
           end
         end
@@ -289,10 +268,6 @@ RSpec.describe 'gitlab:db namespace rake task', :silence_stdout, feature_categor
         skip_if_shared_database(:ci)
 
         allow(Gitlab::Database).to receive(:database_base_models_with_gitlab_shared).and_return(base_models)
-
-        allow_next_instance_of(Gitlab::TopologyServiceClient::CellService) do |instance|
-          allow(instance).to receive(:cell_sequence_range).and_return([0, 1000])
-        end
       end
 
       context 'when geo is not configured' do
@@ -307,7 +282,7 @@ RSpec.describe 'gitlab:db namespace rake task', :silence_stdout, feature_categor
             allow(ci_model.connection).to receive(:tables).and_return([])
           end
 
-          it 'loads the schema, seeds all the databases and alter cell sequences range' do
+          it 'loads the schema and seeds all the databases' do
             expect(Rake::Task['db:schema:load:main']).to receive(:invoke)
             expect(Rake::Task['db:schema:load:ci']).to receive(:invoke)
 
@@ -316,8 +291,6 @@ RSpec.describe 'gitlab:db namespace rake task', :silence_stdout, feature_categor
 
             expect(Rake::Task['gitlab:db:lock_writes']).to receive(:invoke)
             expect(Rake::Task['db:seed_fu']).to receive(:invoke)
-
-            expect(Rake::Task['gitlab:db:alter_cell_sequences_range']).to receive(:invoke).with(0, 1000)
 
             run_rake_task('gitlab:db:configure')
           end
@@ -329,7 +302,7 @@ RSpec.describe 'gitlab:db namespace rake task', :silence_stdout, feature_categor
             allow(ci_model.connection).to receive(:tables).and_return(%w[table1 table2])
           end
 
-          it 'migrates the databases without seeding them and alter cell sequences range' do
+          it 'migrates the databases without seeding them' do
             expect(Rake::Task['db:migrate:main']).to receive(:invoke)
             expect(Rake::Task['db:migrate:ci']).to receive(:invoke)
 
@@ -338,8 +311,6 @@ RSpec.describe 'gitlab:db namespace rake task', :silence_stdout, feature_categor
 
             expect(Rake::Task['gitlab:db:lock_writes']).not_to receive(:invoke)
             expect(Rake::Task['db:seed_fu']).not_to receive(:invoke)
-
-            expect(Rake::Task['gitlab:db:alter_cell_sequences_range']).not_to receive(:invoke)
 
             run_rake_task('gitlab:db:configure')
           end
@@ -351,7 +322,7 @@ RSpec.describe 'gitlab:db namespace rake task', :silence_stdout, feature_categor
             allow(ci_model.connection).to receive(:tables).and_return([])
           end
 
-          it 'migrates, loads the schema correctly and alter cell sequences without seeding the databases' do
+          it 'migrates and loads the schema correctly, without seeding the databases' do
             expect(Rake::Task['db:migrate:main']).to receive(:invoke)
             expect(Rake::Task['db:schema:load:main']).not_to receive(:invoke)
 
@@ -359,34 +330,6 @@ RSpec.describe 'gitlab:db namespace rake task', :silence_stdout, feature_categor
             expect(Rake::Task['db:migrate:ci']).not_to receive(:invoke)
 
             expect(Rake::Task['db:seed_fu']).not_to receive(:invoke)
-
-            expect(Rake::Task['gitlab:db:alter_cell_sequences_range']).not_to receive(:invoke)
-
-            run_rake_task('gitlab:db:configure')
-          end
-        end
-
-        context 'when has cell configuration but has no sequence range available' do
-          before do
-            allow(main_model.connection).to receive(:tables).and_return(%w[schema_migrations])
-            allow(ci_model.connection).to receive(:tables).and_return([])
-
-            allow_next_instance_of(Gitlab::TopologyServiceClient::CellService) do |instance|
-              allow(instance).to receive(:cell_sequence_range).and_return(nil)
-            end
-          end
-
-          it 'loads the schema, seeds all the databases but does not alter cell sequences range' do
-            expect(Rake::Task['db:schema:load:main']).to receive(:invoke)
-            expect(Rake::Task['db:schema:load:ci']).to receive(:invoke)
-
-            expect(Rake::Task['db:migrate:main']).not_to receive(:invoke)
-            expect(Rake::Task['db:migrate:ci']).not_to receive(:invoke)
-
-            expect(Rake::Task['gitlab:db:lock_writes']).to receive(:invoke)
-            expect(Rake::Task['db:seed_fu']).to receive(:invoke)
-
-            expect(Rake::Task['gitlab:db:alter_cell_sequences_range']).not_to receive(:invoke)
 
             run_rake_task('gitlab:db:configure')
           end
@@ -410,8 +353,6 @@ RSpec.describe 'gitlab:db namespace rake task', :silence_stdout, feature_categor
 
           expect(Rake::Task['db:migrate:geo']).not_to receive(:invoke)
           expect(Rake::Task['db:schema:load:geo']).not_to receive(:invoke)
-
-          expect(Rake::Task['gitlab:db:alter_cell_sequences_range']).to receive(:invoke)
 
           run_rake_task('gitlab:db:configure')
         end
@@ -463,23 +404,19 @@ RSpec.describe 'gitlab:db namespace rake task', :silence_stdout, feature_categor
       ]
     end
 
+    let(:rake_output) do
+      <<~MSG
+        index_statement_1
+        index_statement_2
+      MSG
+    end
+
     before do
       allow(Gitlab::Schema::Validation::Runner).to receive(:new).and_return(runner)
     end
 
-    it 'prints the inconsistency message along with the log info' do
-      expected_messages = [
-        'index_statement_1',
-        'index_statement_2',
-        'This task is a diagnostic tool to be used under the guidance of GitLab Support. You should not use the task for routine checks as database inconsistencies might be expected.'
-      ]
-
-      expect { run_rake_task('gitlab:db:schema_checker:run') }
-        .to output { |output|
-          expected_messages.each do |message|
-            expect(output).to include(message)
-          end
-        }.to_stdout
+    it 'prints the inconsistency message' do
+      expect { run_rake_task('gitlab:db:schema_checker:run') }.to output(rake_output).to_stdout
     end
   end
 

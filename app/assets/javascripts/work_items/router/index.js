@@ -10,6 +10,7 @@ Vue.use(VueRouter);
 
 export function createRouter({
   fullPath,
+  workItemType = 'work_items',
   workspaceType = WORKSPACE_PROJECT,
   defaultBranch,
   isGroup,
@@ -23,6 +24,6 @@ export function createRouter({
   return new VueRouter({
     routes: routes(isGroup),
     mode: 'history',
-    base: joinPaths(gon?.relative_url_root, workspacePath, fullPath, '-'),
+    base: joinPaths(gon?.relative_url_root, workspacePath, fullPath, '-', workItemType),
   });
 }

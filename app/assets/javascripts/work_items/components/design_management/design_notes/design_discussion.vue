@@ -1,7 +1,6 @@
 <script>
 import { GlButton, GlLink, GlTooltipDirective } from '@gitlab/ui';
 import { s__ } from '~/locale';
-import highlightCurrentUser from '~/behaviors/markdown/highlight_current_user';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 import DesignNotePin from '~/vue_shared/components/design_management/design_note_pin.vue';
 import { isLoggedIn } from '~/lib/utils/common_utils';
@@ -81,16 +80,6 @@ export default {
       return this.discussion.notes.some(({ id }) => id === this.activeDesignDiscussion.id);
     },
   },
-  mounted() {
-    this.$nextTick(() => {
-      highlightCurrentUser(this.$el.querySelectorAll('.gfm-project_member'));
-    });
-  },
-  updated() {
-    this.$nextTick(() => {
-      highlightCurrentUser(this.$el.querySelectorAll('.gfm-project_member'));
-    });
-  },
   methods: {
     shouldScrollToDiscussion(activeDesignDiscussion) {
       const ALLOWED_ACTIVE_DISCUSSION_SOURCES = [
@@ -108,7 +97,7 @@ export default {
   <div class="design-discussion-wrapper" @click="$emit('update-active-discussion')">
     <design-note-pin :is-resolved="discussion.resolved" :label="discussion.index" />
     <ul
-      class="design-discussion gl-border gl-relative gl-list-none gl-rounded-base gl-border-section gl-p-0"
+      class="design-discussion bordered-box gl-relative gl-list-none gl-p-0"
       :class="{ 'gl-bg-blue-50': isDiscussionActive }"
       data-testid="design-discussion-content"
     >

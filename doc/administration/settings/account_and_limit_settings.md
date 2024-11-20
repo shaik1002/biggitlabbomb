@@ -105,10 +105,6 @@ DETAILS:
 **Tier:** Premium, Ultimate
 **Offering:** Self-managed
 
-NOTE:
-The repository size limit includes repository files and LFS, but does not include artifacts, uploads,
-wiki, packages, containers, or snippets. The repository size limit applies to both private and public projects.
-
 Repositories in your GitLab instance can grow quickly, especially if you are
 using LFS. Their size can grow exponentially, rapidly consuming available storage.
 To prevent this from happening, you can set a hard limit for your repositories' size.
@@ -154,7 +150,11 @@ The first push of a new project, including LFS objects, is checked for size.
 If the sum of their sizes exceeds the maximum allowed repository size, the push
 is rejected.
 
-For details on manually purging files, see [reducing the repository size using Git](../../user/project/repository/repository_size.md#methods-to-reduce-repository-size).
+NOTE:
+The repository size limit includes repository files and LFS, but does not include artifacts, uploads,
+wiki, packages, or snippets. The repository size limit applies to both private and public projects.
+
+For details on manually purging files, see [reducing the repository size using Git](../../user/project/repository/reducing_the_repo_size_using_git.md).
 
 ## Session duration
 
@@ -164,10 +164,7 @@ You can change how long users can remain signed in without activity.
 
 1. On the left sidebar, at the bottom, select **Admin**.
 1. Select **Settings > General**.
-1. Expand **Account and limit**.
-1. Fill in the **Session duration (minutes)** field.
-1. Select **Save changes**.
-1. Restart GitLab to apply the changes.
+1. Expand **Account and limit**. The set duration is in **Session duration (minutes)**.
 
    WARNING:
    Setting **Session duration (minutes)** to `0` breaks your GitLab instance.
@@ -241,26 +238,6 @@ When you require expiration dates for new access tokens:
 - Users must set an expiration date that does not exceed the allowed lifetime for new access tokens.
 - To control the maximum access token lifetime, use the [**Limit the lifetime of access tokens** setting](#limit-the-lifetime-of-access-tokens).
 
-## Allow top-level group Owners to create service accounts
-
-DETAILS:
-**Tier:** Premium, Ultimate
-**Offering:** Self-managed
-
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/163726) in GitLab 17.5 [with a feature flag](../feature_flags.md) named `allow_top_level_group_owners_to_create_service_accounts` for GitLab self-managed. Disabled by default.
-> - [Generally available](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/125835) in GitLab 17.6. Feature flag `allow_top_level_group_owners_to_create_service_accounts` removed.
-
-FLAG:
-On GitLab self-managed, by default this feature is not available. To make it available, an administrator can [enable the feature flag](../feature_flags.md) named `allow_top_level_group_owners_to_create_service_accounts`. On GitLab.com, this feature is available.
-
-By default, in GitLab self-managed, top-level group Owners can not create service accounts. GitLab administrators can allow top-level group Owners to create service accounts.
-
-1. On the left sidebar, at the bottom, select **Admin**.
-1. Select **Settings > General**.
-1. Expand **Account and limit**.
-1. Under **Service account creation**, select the **Allow top-level group owners to create Service accounts** checkbox.
-1. Select **Save changes**.
-
 ## Limit the lifetime of SSH keys
 
 DETAILS:
@@ -270,12 +247,6 @@ DETAILS:
 Users can optionally specify a lifetime for
 [SSH keys](../../user/ssh.md).
 This lifetime is not a requirement, and can be set to any arbitrary number of days.
-
-> - Maximum allowable lifetime limit [extended to 400 days](https://gitlab.com/gitlab-org/gitlab/-/issues/461901) in GitLab 17.6 [with a flag](../feature_flags.md) named `buffered_token_expiration_limit`. Disabled by default.
-
-FLAG:
-The availability of the extended maximum allowable lifetime limit is controlled by a feature flag.
-For more information, see the history.
 
 SSH keys are user credentials to access GitLab.
 However, organizations with security requirements may want to enforce more protection by
@@ -296,9 +267,8 @@ To set a lifetime on how long SSH keys are valid:
 
 Once a lifetime for SSH keys is set, GitLab:
 
-- Requires users to set an expiration date that is no later than the allowed lifetime on new SSH keys. The maximum allowed lifetime is:
-  - 365 days by default.
-  - 400 days, if you enable the `buffered_token_expiration_limit` feature flag.
+- Requires users to set an expiration date that is no later than the allowed lifetime on new
+  SSH keys.
 - Applies the lifetime restriction to existing SSH keys. Keys with no expiry or a lifetime
   greater than the maximum immediately become invalid.
 
@@ -311,24 +281,10 @@ DETAILS:
 **Tier:** Ultimate
 **Offering:** Self-managed
 
-> - Maximum allowable lifetime limit [extended to 400 days](https://gitlab.com/gitlab-org/gitlab/-/issues/461901) in GitLab 17.6 [with a flag](../feature_flags.md) named `buffered_token_expiration_limit`. Disabled by default.
-
-FLAG:
-The availability of the extended maximum allowable lifetime limit is controlled by a feature flag.
-For more information, see the history.
-
 Users can optionally specify a maximum lifetime in days for
 access tokens, this includes [personal](../../user/profile/personal_access_tokens.md),
 [group](../../user/group/settings/group_access_tokens.md), and [project](../../user/project/settings/project_access_tokens.md) access tokens.
-This lifetime is not a requirement, and can be set to any value greater than 0 and less than or equal to:
-
-- 365 days by default.
-- 400 days, if you enable the `buffered_token_expiration_limit` feature flag.
-
-If this setting is left blank, the default allowable lifetime of access tokens is:
-
-- 365 days by default.
-- 400 days, if you enable the `buffered_token_expiration_limit` feature flag.
+This lifetime is not a requirement, and can be set to any value greater than 0 and less than or equal to 365. If this setting is left blank, the default allowable lifetime of access tokens is 365 days.
 
 Access tokens are the only tokens needed for programmatic access to GitLab.
 However, organizations with security requirements may want to enforce more protection by
@@ -355,26 +311,6 @@ Once a lifetime for access tokens is set, GitLab:
   allowed lifetime. Three hours is given to allow administrators to change the allowed lifetime,
   or remove it, before revocation takes place.
 
-## User OAuth applications setting
-
-DETAILS:
-**Tier:** Free, Premium, Ultimate
-**Offering:** Self-managed
-
-Prerequisites:
-
-You must be an administrator.
-
-The **User OAuth applications** setting controls whether users can register applications to use GitLab as an OAuth provider. This setting affects user-owned OAuth application, but does not affect group-level OAuth applications.
-
-To toggle on or off the **User OAuth applications** setting:
-
-1. On the left sidebar, at the bottom, select **Admin**.
-1. Select **Settings > General**.
-1. Expand the **Account and limit** section.
-1. Select or clear the **User OAuth applications** checkbox.
-1. Select **Save changes**.
-
 ## Disable user profile name changes
 
 DETAILS:
@@ -393,7 +329,7 @@ To do this:
 NOTE:
 When this ability is disabled, GitLab administrators can still use the
 [**Admin** area](../../administration/admin_area.md#administering-users) or the
-[API](../../api/users.md#modify-a-user) to update usernames.
+[API](../../api/users.md#user-modification) to update usernames.
 
 ## Prevent users from creating organizations
 
@@ -531,4 +467,4 @@ Your push has been rejected, because this repository has exceeded its size limit
 To resolve this problem, either of these options helps in the short- to middle-term:
 
 - Increase the [repository size limit](#repository-size-limit).
-- [Reduce the repository size](../../user/project/repository/repository_size.md#methods-to-reduce-repository-size).
+- [Reduce the repository size](../../user/project/repository/reducing_the_repo_size_using_git.md).

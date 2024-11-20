@@ -3,7 +3,7 @@
 class BulkImportWorker
   include ApplicationWorker
 
-  data_consistency :sticky
+  data_consistency :always
   feature_category :importers
   sidekiq_options retry: 3, dead: false
   idempotent!

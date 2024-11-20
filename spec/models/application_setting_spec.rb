@@ -41,15 +41,12 @@ RSpec.describe ApplicationSetting, feature_category: :shared, type: :model do
     it { expect(setting.group_projects_api_limit).to eq(600) }
     it { expect(setting.group_shared_groups_api_limit).to eq(60) }
     it { expect(setting.groups_api_limit).to eq(200) }
-    it { expect(setting.create_organization_api_limit).to eq(10) }
     it { expect(setting.project_api_limit).to eq(400) }
     it { expect(setting.project_invited_groups_api_limit).to eq(60) }
     it { expect(setting.projects_api_limit).to eq(2000) }
-    it { expect(setting.resource_token_expiry_inherited_members).to eq(true) }
     it { expect(setting.user_contributed_projects_api_limit).to eq(100) }
     it { expect(setting.user_projects_api_limit).to eq(300) }
     it { expect(setting.user_starred_projects_api_limit).to eq(100) }
-    it { expect(setting.disable_password_authentication_for_users_with_sso_identities).to eq(false) }
   end
 
   describe 'USERS_UNCONFIRMED_SECONDARY_EMAILS_DELETE_AFTER_DAYS' do
@@ -95,8 +92,6 @@ RSpec.describe ApplicationSetting, feature_category: :shared, type: :model do
     it { expect(described_class).to validate_jsonb_schema(['application_setting_rate_limits']) }
     it { expect(described_class).to validate_jsonb_schema(['application_setting_package_registry']) }
     it { expect(described_class).to validate_jsonb_schema(['application_setting_service_ping_settings']) }
-    it { expect(described_class).to validate_jsonb_schema(['application_setting_sign_in_restrictions']) }
-    it { expect(described_class).to validate_jsonb_schema(['application_setting_transactional_emails']) }
 
     it { is_expected.to allow_value(nil).for(:home_page_url) }
     it { is_expected.to allow_value(http).for(:home_page_url) }
@@ -209,9 +204,6 @@ RSpec.describe ApplicationSetting, feature_category: :shared, type: :model do
 
     it { is_expected.to validate_inclusion_of(:silent_admin_exports_enabled).in_array([true, false]) }
 
-    it { is_expected.to allow_values([true, false]).for(:enforce_ci_inbound_job_token_scope_enabled) }
-    it { is_expected.not_to allow_value(nil).for(:enforce_ci_inbound_job_token_scope_enabled) }
-
     context 'for non-null integer attributes starting from 0' do
       where(:attribute) do
         %i[
@@ -245,7 +237,6 @@ RSpec.describe ApplicationSetting, feature_category: :shared, type: :model do
           package_registry_cleanup_policies_worker_capacity
           packages_cleanup_package_file_worker_capacity
           pipeline_limit_per_project_user_sha
-          create_organization_api_limit
           project_api_limit
           projects_api_limit
           projects_api_rate_limit_unauthenticated
@@ -1298,93 +1289,6 @@ RSpec.describe ApplicationSetting, feature_category: :shared, type: :model do
     end
   end
 
-  describe 'callbacks' do
-    describe 'before_save :ensure_runners_registration_token' do
-      it 'populates #runners_registration_token before save' do
-        application_setting = build(:application_setting)
-
-        # Don't use reader method as it lazily populates the token.
-        # See the tests for #runners_registration_token below.
-        expect(application_setting.attributes['runners_registration_token_encrypted']).to be_nil
-
-        application_setting.save!
-
-        expect(application_setting.attributes['runners_registration_token_encrypted']).to be_present
-      end
-    end
-
-    describe 'before_save :ensure_health_check_access_token' do
-      it 'populates #runners_registration_token before save' do
-        application_setting = build(:application_setting)
-
-        # Don't use reader method as it lazily populates the token.
-        # See the tests for #health_check_access_token below.
-        expect(application_setting.attributes['health_check_access_token']).to be_nil
-
-        application_setting.save!
-
-        expect(application_setting.attributes['health_check_access_token']).to be_present
-      end
-    end
-
-    describe 'before_save :ensure_error_tracking_access_token' do
-      it 'populates #runners_registration_token before save' do
-        application_setting = build(:application_setting)
-
-        # Don't use reader method as it lazily populates the token.
-        # See the tests for #error_tracking_access_token below.
-        expect(application_setting.attributes['error_tracking_access_token_encrypted']).to be_nil
-
-        application_setting.save!
-
-        expect(application_setting.attributes['error_tracking_access_token_encrypted']).to be_present
-      end
-    end
-  end
-
-  describe '#runners_registration_token' do
-    context 'when allowed by application setting' do
-      before do
-        stub_application_setting(allow_runner_registration_token: true)
-      end
-
-      it 'is lazily populated and persists the record' do
-        application_setting = build(:application_setting)
-
-        expect(application_setting.runners_registration_token).to be_present
-        expect(application_setting).to be_persisted
-      end
-    end
-
-    context 'when disallowed by application setting' do
-      before do
-        stub_application_setting(allow_runner_registration_token: false)
-      end
-
-      it 'is not lazily populated' do
-        expect(build(:application_setting).runners_registration_token).to be_nil
-      end
-    end
-  end
-
-  describe '#health_check_access_token' do
-    it 'is lazily populated and persists the record' do
-      application_setting = build(:application_setting)
-
-      expect(application_setting.health_check_access_token).to be_present
-      expect(application_setting).to be_persisted
-    end
-  end
-
-  describe '#error_tracking_access_token' do
-    it 'is lazily populated and persists the record' do
-      application_setting = build(:application_setting)
-
-      expect(application_setting.error_tracking_access_token).to be_present
-      expect(application_setting).to be_persisted
-    end
-  end
-
   context 'restrict creating duplicates' do
     let!(:current_settings) { described_class.create_from_defaults }
 
@@ -1805,9 +1709,5 @@ RSpec.describe ApplicationSetting, feature_category: :shared, type: :model do
         expect(setting).not_to have_received(:reset_deletion_warning_redis_key)
       end
     end
-  end
-
-  it_behaves_like 'TokenAuthenticatable' do
-    let(:token_field) { :runners_registration_token }
   end
 end

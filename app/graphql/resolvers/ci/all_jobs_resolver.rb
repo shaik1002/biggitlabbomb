@@ -13,9 +13,9 @@ module Resolvers
 
       argument :runner_types, [::Types::Ci::RunnerTypeEnum],
         required: false,
-        experiment: { milestone: '16.4' },
+        alpha: { milestone: '16.4' },
         description: 'Filter jobs by runner type if ' \
-          'feature flag `:admin_jobs_filter_runner_type` is enabled.'
+                     'feature flag `:admin_jobs_filter_runner_type` is enabled.'
 
       def resolve_with_lookahead(**args)
         jobs = ::Ci::JobsFinder.new(current_user: current_user, params: params_data(args)).execute

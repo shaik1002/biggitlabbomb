@@ -31,7 +31,7 @@ default:
 
 .default-ruby-variables: &default-ruby-variables
   RUBY_VERSION: "${RUBY_VERSION_DEFAULT}"
-  OMNIBUS_GITLAB_CACHE_EDITION: "GITLAB_RUBY3_2"
+  OMNIBUS_GITLAB_CACHE_EDITION: "GITLAB_RUBY3_1"
 
 .next-ruby-variables: &next-ruby-variables
   RUBY_VERSION: "${RUBY_VERSION_NEXT}"
@@ -114,10 +114,6 @@ workflow:
         <<: [*next-ruby-variables, *default-merge-request-variables]
         PIPELINE_NAME: 'Ruby $RUBY_VERSION MR'
     # For the scheduled pipelines, we set specific variables.
-    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_PIPELINE_SOURCE == "schedule" && $BUILD_WITH_NEXT_RUBY_VERSION == "true"'
-      variables:
-        <<: *next-ruby-variables
-        PIPELINE_NAME: 'Scheduled Ruby $RUBY_VERSION $CI_COMMIT_BRANCH branch'
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_PIPELINE_SOURCE == "schedule"'
       variables:
         <<: [*default-ruby-variables, *default-branch-pipeline-failure-variables]
@@ -185,7 +181,7 @@ variables:
   BUNDLE_FROZEN: "true"
   BUNDLE_GEMFILE: Gemfile
   # we override the max_old_space_size to prevent OOM errors
-  NODE_OPTIONS: --max-old-space-size=10240
+  NODE_OPTIONS: --max_old_space_size=5120
   GIT_DEPTH: "20"
   # 'GIT_STRATEGY: clone' optimizes the pack-objects cache hit ratio
   GIT_STRATEGY: "clone"
@@ -228,7 +224,6 @@ variables:
   RETRY_FAILED_TESTS_IN_NEW_PROCESS: "true"
   # Run with decomposed databases by default
   DECOMPOSED_DB: "true"
-  SEC_DECOMPOSED_DB: "false"
 
   DOCS_REVIEW_APPS_DOMAIN: "docs.gitlab-review.app"
   DOCS_GITLAB_REPO_SUFFIX: "ee"

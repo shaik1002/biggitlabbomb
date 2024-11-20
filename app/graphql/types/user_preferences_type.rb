@@ -21,6 +21,11 @@ module Types
       null: true
 
     # rubocop:disable GraphQL/ExtractType -- These are stored as user preferences
+    field :use_web_ide_extension_marketplace, GraphQL::Types::Boolean,
+      description: 'Whether Web IDE Extension Marketplace is enabled for the user.',
+      null: false,
+      deprecated: { reason: 'Use `extensions_marketplace_opt_in_status` instead', milestone: '16.11' }
+
     field :use_work_items_view, GraphQL::Types::Boolean,
       description: 'Use work item view instead of legacy issue view.',
       null: true
@@ -29,13 +34,13 @@ module Types
       Types::Organizations::GroupsProjectsSortEnum,
       description: 'Sort order for organization groups and projects.',
       null: true,
-      experiment: { milestone: '17.2' }
+      alpha: { milestone: '17.2' }
 
     field :organization_groups_projects_display,
       Types::Organizations::GroupsProjectsDisplayEnum,
       null: false,
       description: 'Default list view for organization groups and projects.',
-      experiment: { milestone: '17.2' }
+      alpha: { milestone: '17.2' }
     # rubocop:enable GraphQL/ExtractType
 
     def issues_sort

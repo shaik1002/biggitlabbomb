@@ -36,13 +36,13 @@ module SidebarsHelper
     Sidebars::Context.new(**context_data, **args)
   end
 
-  def super_sidebar_context(user, group:, project:, panel:, panel_type:)
+  def super_sidebar_context(user, group:, project:, panel:, panel_type:) # rubocop:disable Metrics/AbcSize
     return super_sidebar_logged_out_context(panel: panel, panel_type: panel_type) unless user
 
     super_sidebar_logged_in_context(user, group: group, project: project, panel: panel, panel_type: panel_type)
   end
 
-  def super_sidebar_logged_out_context(panel:, panel_type:)
+  def super_sidebar_logged_out_context(panel:, panel_type:) # rubocop:disable Metrics/AbcSize
     super_sidebar_instance_version_data.merge(super_sidebar_whats_new_data).merge({
       is_logged_in: false,
       context_switcher_links: context_switcher_links,
@@ -59,7 +59,7 @@ module SidebarsHelper
     })
   end
 
-  def super_sidebar_logged_in_context(user, group:, project:, panel:, panel_type:)
+  def super_sidebar_logged_in_context(user, group:, project:, panel:, panel_type:) # rubocop:disable Metrics/AbcSize
     super_sidebar_logged_out_context(panel: panel, panel_type: panel_type).merge({
       is_logged_in: true,
       is_admin: user.can_admin_all_resources?,
@@ -97,13 +97,7 @@ module SidebarsHelper
       sign_out_link: destroy_user_session_path,
       issues_dashboard_path: issues_dashboard_path(assignee_username: user.username),
       merge_request_dashboard_path: user.merge_request_dashboard_enabled? ? merge_requests_dashboard_path : nil,
-
-      todos_dashboard_path: if Feature.enabled?(:todos_vue_application, user)
-                              vue_dashboard_todos_path
-                            else
-                              dashboard_todos_path
-                            end,
-
+      todos_dashboard_path: dashboard_todos_path,
       create_new_menu_groups: create_new_menu_groups(group: group, project: project),
       merge_request_menu: create_merge_request_menu(user),
       projects_path: dashboard_projects_path,
@@ -372,7 +366,6 @@ module SidebarsHelper
           id: project.id,
           name: project.name,
           namespace: project.full_name,
-          fullPath: project.full_path,
           webUrl: project_path(project),
           avatarUrl: project.avatar_url
         }
@@ -386,7 +379,6 @@ module SidebarsHelper
           id: group.id,
           name: group.name,
           namespace: group.full_name,
-          fullPath: group.full_path,
           webUrl: group_path(group),
           avatarUrl: group.avatar_url
         }

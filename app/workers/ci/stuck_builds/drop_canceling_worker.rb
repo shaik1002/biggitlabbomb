@@ -13,7 +13,7 @@ module Ci
       include CronjobQueue
       # rubocop:enable Scalability/CronWorkerContext
 
-      data_consistency :always
+      data_consistency :always # rubocop:disable SidekiqLoadBalancing/WorkerDataConsistency -- This is a cron job
 
       feature_category :continuous_integration
 

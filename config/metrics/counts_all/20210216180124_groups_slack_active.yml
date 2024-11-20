@@ -3,8 +3,6 @@ data_category: optional
 key_path: counts.groups_slack_active
 description: Count of groups with active integrations for Slack
 product_group: import_and_integrate
-product_categories:
-- integrations
 value_type: number
 status: active
 time_frame: all
@@ -12,7 +10,7 @@ data_source: database
 distribution:
 - ce
 - ee
-tiers:
+tier:
 - free
 - premium
 - ultimate

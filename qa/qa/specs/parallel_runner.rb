@@ -1,58 +1,31 @@
 # frozen_string_literal: true
 
-require "etc"
+require 'open3'
 
 module QA
   module Specs
-    class ParallelRunner
-      class << self
-        def run(rspec_args)
-          cli_args = build_execution_args(rspec_args)
+    module ParallelRunner
+      module_function
 
-          Runtime::Logger.debug("Using parallel runner to trigger tests with arguments: '#{cli_args}'")
+      def run(args)
+        unless args.include?('--')
+          index = args.index { |opt| opt.include?('features') }
 
-          set_environment!
-          perform_global_setup!
-
-          ParallelTests::CLI.new.run(cli_args)
+          args.insert(index, '--') if index
         end
 
-        private
-
-        delegate :parallel_processes, to: Runtime::Env
-
-        def build_execution_args(rspec_args)
-          specs = rspec_args.select { |arg| arg.include?("qa/specs/features") }
-          options = (rspec_args - specs).reject { |arg| arg == "--" }
-          # if amount of specs is less than parallel processes, use the amount of specs as count
-          # to avoid starting empty runs with no tests
-          used_processes = !specs.empty? && specs.size < parallel_processes ? specs.size : parallel_processes
-
-          cli_args = [
-            "--type", "rspec",
-            "-n", used_processes.to_s,
-            "--serialize-stdout",
-            '--first-is-1',
-            "--combine-stderr"
-          ]
-          cli_args.push("--", *options) unless options.empty?
-          cli_args.push("--", *specs) unless specs.empty? # specific specs need to be seperated by additional "--"
-
-          cli_args
+        env = {}
+        Runtime::Env::ENV_VARIABLES.each_key do |key|
+          env[key] = ENV[key] if ENV[key]
         end
+        env['QA_RUNTIME_SCENARIO_ATTRIBUTES'] = Runtime::Scenario.attributes.to_json
+        env['GITLAB_QA_ACCESS_TOKEN'] = Runtime::API::Client.new(:gitlab).personal_access_token unless env['GITLAB_QA_ACCESS_TOKEN']
 
-        def perform_global_setup!
-          Runtime::Browser.configure!
-          Runtime::Release.perform_before_hooks
-        end
+        cmd = "bundle exec parallel_test -t rspec --combine-stderr --serialize-stdout -- #{args.flatten.join(' ')}"
+        ::Open3.popen2e(env, cmd) do |_, out, wait|
+          out.each { |line| puts line }
 
-        def set_environment!
-          ENV.store("NO_KNAPSACK", "true")
-
-          return if ENV["QA_GITLAB_URL"].present?
-
-          Support::GitlabAddress.define_gitlab_address_attribute!
-          ENV.store("QA_GITLAB_URL", Support::GitlabAddress.address_with_port(with_default_port: false))
+          exit wait.value.exitstatus
         end
       end
     end

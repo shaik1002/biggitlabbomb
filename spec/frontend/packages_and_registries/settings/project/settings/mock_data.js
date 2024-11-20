@@ -1,5 +1,5 @@
-export const containerTagsExpirationPolicyData = () => ({
-  __typename: 'ContainerTagsExpirationPolicy',
+export const containerExpirationPolicyData = () => ({
+  __typename: 'ContainerExpirationPolicy',
   cadence: 'EVERY_DAY',
   enabled: true,
   keepN: 'TEN_TAGS',
@@ -13,8 +13,8 @@ export const expirationPolicyPayload = (override) => ({
   data: {
     project: {
       id: '1',
-      containerTagsExpirationPolicy: {
-        ...containerTagsExpirationPolicyData(),
+      containerExpirationPolicy: {
+        ...containerExpirationPolicyData(),
         ...override,
       },
     },
@@ -24,7 +24,7 @@ export const expirationPolicyPayload = (override) => ({
 export const emptyExpirationPolicyPayload = () => ({
   data: {
     project: {
-      containerTagsExpirationPolicy: {},
+      containerExpirationPolicy: {},
     },
   },
 });
@@ -33,7 +33,7 @@ export const nullExpirationPolicyPayload = () => ({
   data: {
     project: {
       id: '1',
-      containerTagsExpirationPolicy: null,
+      containerExpirationPolicy: null,
     },
   },
 });
@@ -41,8 +41,8 @@ export const nullExpirationPolicyPayload = () => ({
 export const expirationPolicyMutationPayload = ({ override, errors = [] } = {}) => ({
   data: {
     updateContainerExpirationPolicy: {
-      containerTagsExpirationPolicy: {
-        ...containerTagsExpirationPolicyData(),
+      containerExpirationPolicy: {
+        ...containerExpirationPolicyData(),
         ...override,
       },
       errors,
@@ -171,11 +171,13 @@ export const containerProtectionRulesData = [
     id: `gid://gitlab/ContainerRegistry::Protection::Rule/${i}`,
     repositoryPathPattern: `@flight/flight/maintainer-${i}-*`,
     minimumAccessLevelForPush: 'MAINTAINER',
+    minimumAccessLevelForDelete: 'MAINTAINER',
   })),
   {
     id: 'gid://gitlab/ContainerRegistry::Protection::Rule/16',
     repositoryPathPattern: '@flight/flight/owner-16-*',
     minimumAccessLevelForPush: 'OWNER',
+    minimumAccessLevelForDelete: 'OWNER',
   },
 ];
 
@@ -216,6 +218,7 @@ export const createContainerProtectionRuleMutationPayload = ({ override, errors 
 export const createContainerProtectionRuleMutationInput = {
   repositoryPathPattern: `@flight/flight-maintainer-14-*`,
   minimumAccessLevelForPush: 'MAINTAINER',
+  minimumAccessLevelForDelete: 'MAINTAINER',
 };
 
 export const createContainerProtectionRuleMutationPayloadErrors = [

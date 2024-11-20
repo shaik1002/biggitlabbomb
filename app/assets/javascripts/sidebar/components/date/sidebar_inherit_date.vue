@@ -1,6 +1,6 @@
 <script>
 import { GlFormRadio } from '@gitlab/ui';
-import { localeDateFormat, newDate } from '~/lib/utils/datetime_utility';
+import { dateInWords, parsePikadayDate } from '~/lib/utils/datetime_utility';
 import { __ } from '~/locale';
 import { dateFields } from '../../constants';
 import SidebarFormattedDate from './sidebar_formatted_date.vue';
@@ -45,7 +45,7 @@ export default {
         return this.$options.i18n.noDate;
       }
 
-      return localeDateFormat.asDate.format(newDate(dateFixed));
+      return dateInWords(parsePikadayDate(dateFixed), true);
     },
     formattedInheritedDate() {
       const dateFromMilestones = this.issuable[dateFields[this.dateType].dateFromMilestones];
@@ -53,7 +53,7 @@ export default {
         return this.$options.i18n.noDate;
       }
 
-      return localeDateFormat.asDate.format(newDate(dateFromMilestones));
+      return dateInWords(parsePikadayDate(dateFromMilestones), true);
     },
   },
   i18n: {
@@ -74,7 +74,7 @@ export default {
         :disabled="!canUpdate || isLoading"
         class="gl-pr-2"
       >
-        <span :class="dateIsFixed ? 'gl-font-bold gl-text-default' : 'gl-text-subtle'">
+        <span :class="dateIsFixed ? 'gl-font-bold gl-text-gray-900' : 'gl-text-gray-500'">
           {{ $options.i18n.fixed }}
         </span>
       </gl-form-radio>
@@ -95,7 +95,7 @@ export default {
         :disabled="!canUpdate || isLoading"
         class="gl-pr-2"
       >
-        <span :class="!dateIsFixed ? 'gl-font-bold gl-text-default' : 'gl-text-disalbed'">
+        <span :class="!dateIsFixed ? 'gl-font-bold gl-text-gray-900' : 'gl-text-gray-500'">
           {{ $options.i18n.inherited }}
         </span>
       </gl-form-radio>

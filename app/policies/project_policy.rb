@@ -210,7 +210,7 @@ class ProjectPolicy < BasePolicy
 
   with_scope :subject
   condition(:model_registry_enabled) do
-    @subject.feature_available?(:model_registry, @user)
+    Feature.enabled?(:model_registry, @subject) && @subject.feature_available?(:model_registry, @user)
   end
 
   with_scope :subject
@@ -537,7 +537,6 @@ class ProjectPolicy < BasePolicy
     enable :create_release
     enable :update_release
     enable :destroy_release
-    enable :publish_catalog_version
     enable :read_alert_management_alert
     enable :update_alert_management_alert
     enable :read_terraform_state
@@ -1019,11 +1018,7 @@ class ProjectPolicy < BasePolicy
     enable :read_namespace_catalog
   end
 
-  rule { public_project & model_registry_enabled }.policy do
-    enable :read_model_registry
-  end
-
-  rule { ~public_project & guest & model_registry_enabled }.policy do
+  rule { reporter & model_registry_enabled }.policy do
     enable :read_model_registry
   end
 
@@ -1031,11 +1026,7 @@ class ProjectPolicy < BasePolicy
     enable :write_model_registry
   end
 
-  rule { public_project & model_experiments_enabled }.policy do
-    enable :read_model_experiments
-  end
-
-  rule { ~public_project & guest & model_experiments_enabled }.policy do
+  rule { reporter & model_experiments_enabled }.policy do
     enable :read_model_experiments
   end
 

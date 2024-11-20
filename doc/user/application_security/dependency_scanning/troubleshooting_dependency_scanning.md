@@ -1,5 +1,5 @@
 ---
-stage: Application Security Testing
+stage: Secure
 group: Composition Analysis
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
@@ -187,23 +187,14 @@ gemnasium-python-dependency_scanning:
 This error can occur when the automatically generated `CI_JOB_TOKEN` starts with a hyphen (`-`).
 To avoid this error, follow [Poetry's configuration advice](https://python-poetry.org/docs/repositories/#configuring-credentials).
 
-## Error: project has unresolved dependencies
+## Error: Project has `<number>` unresolved dependencies
 
-The following error messages indicate a Gradle dependency resolution issue
-caused by your `build.gradle` or `build.gradle.kts` file:
-
-- `Project has <number> unresolved dependencies` (GitLab 16.7 to 16.9)
-- `project has unresolved dependencies: ["dependency_name:version"]` (GitLab 17.0 and later)
-
+The error message `Project has <number> unresolved dependencies` indicates a dependency resolution problem caused by your `gradle.build` or `gradle.build.kts` file.
 In GitLab 16.7 to 16.9, `gemnasium-maven` cannot continue processing when an unresolved dependency is encountered.
-
-In GitLab 17.0 and later, `gemnasium-maven` supports the `DS_GRADLE_RESOLUTION_POLICY` environment variable which you can use to control how unresolved dependencies are handled. By default, the scan fails when unresolved dependencies are encountered. However, you can set the environment variable `DS_GRADLE_RESOLUTION_POLICY` to `"none"` to allow the scan to continue and produce partial results.
-
-Consult the [Gradle dependency resolution documentation](https://docs.gradle.org/current/userguide/dependency_resolution.html) for guidance on
-fixing your `build.gradle` file. For more details, refer to [issue 482650](https://gitlab.com/gitlab-org/gitlab/-/issues/482650).
-
-Additionally, there is a known issue in `Kotlin 2.0.0` affecting dependency resolution, which is scheduled to be fixed in `Kotlin 2.0.20`.
-For more information, refer to [this issue](https://github.com/gradle/github-dependency-graph-gradle-plugin/issues/140#issuecomment-2230255380).
+Consult the [Gradle dependency resolution documentation](https://docs.gradle.org/current/userguide/dependency_resolution.html)
+for details on how to fix your `gradle.build` file.
+More details can be found in [epic 12361](https://gitlab.com/groups/gitlab-org/-/epics/12361)
+and [issue 437278](https://gitlab.com/gitlab-org/gitlab/-/issues/437278).
 
 ## Setting build constraints when scanning Go projects
 
@@ -318,13 +309,3 @@ gemnasium-dependency_scanning:
         DS_REMEDIATE: 'false'
     - if: "$CI_COMMIT_BRANCH && $GITLAB_FEATURES =~ /\\bdependency_scanning\\b/"
 ```
-
-## Dependency Scanning fails with `gradlew: permission denied` 
-
-The `permission denied` error on `gradlew` typically indicates that `gradlew` was checked into the repository without an executable bit set. The error might appear in your job with this message:
-
-```plaintext
-[FATA] [gemnasium-maven] [2024-11-14T21:55:59Z] [/go/src/app/cmd/gemnasium-maven/main.go:65] ▶ fork/exec /builds/path/to/gradlew: permission denied
-```
-
-Make the file executable by running `chmod +ux gradlew` locally and pushing it to your Git repository.

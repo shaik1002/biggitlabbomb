@@ -38,7 +38,7 @@ Run this command to include this project with
 [`packadd`](https://neovim.io/doc/user/repeat.html#%3Apackadd) on startup:
 
 ```shell
-git clone https://gitlab.com/gitlab-org/editor-extensions/gitlab.vim.git ~/.local/share/nvim/site/pack/gitlab/start/gitlab.vim
+git clone git@gitlab.com:gitlab-org/editor-extensions/gitlab.vim.git ~/.local/share/nvim/site/pack/gitlab/start/gitlab.vim
 ```
 
 :::TabTitle `lazy.nvim`
@@ -99,13 +99,13 @@ use {
      },
      code_suggestions = {
        # For the full list of default languages, see the 'auto_filetypes' array in
-       # https://gitlab.com/gitlab-org/editor-extensions/gitlab.vim/-/blob/main/lua/gitlab/config/defaults.lua
+       # https://gitlab.com/gitlab-org/editor-extensions/gitlab.vim/-/blob/main/lua/gitlab/config/defaults.lua 
        auto_filetypes = { 'ruby', 'javascript' }, -- Default is { 'ruby' }
      }
    })
    ```
 
-1. [Configure Omni Completion](#configure-omni-completion) to set up the key mapping to trigger Code Suggestions.
+1. Optional. [Configure Omni Completion](#configure-omni-completion).
 1. Optional. [Configure `<Plug>` key mappings](#configure-plug-key-mappings).
 1. Optional. Set up helptags using `:helptags ALL` for access to
    [`:help gitlab.txt`](https://gitlab.com/gitlab-org/editor-extensions/gitlab.vim/-/blob/main/doc/gitlab.txt).
@@ -169,6 +169,4 @@ rm ~/.local/share/nvim/gitlab-code-suggestions-language-server-*
 
 ## Related topics
 
-- [Neovim troubleshooting](neovim_troubleshooting.md)
 - [View source code](https://gitlab.com/gitlab-org/editor-extensions/gitlab.vim)
-- [GitLab Language Server documentation](../language_server/index.md)

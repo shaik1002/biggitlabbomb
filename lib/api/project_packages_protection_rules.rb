@@ -6,6 +6,10 @@ module API
     helpers ::API::Helpers::PackagesHelpers
 
     after_validation do
+      if Feature.disabled?(:packages_protected_packages, user_project)
+        render_api_error!("'packages_protected_packages' feature flag is disabled", :not_found)
+      end
+
       authenticate!
       authorize_admin_package!
     end
@@ -24,6 +28,7 @@ module API
           ]
           tags %w[projects]
           is_array true
+          hidden true
         end
         get do
           present user_project.package_protection_rules, with: Entities::Projects::Packages::Protection::Rule
@@ -39,6 +44,7 @@ module API
             { code: 422, message: 'Unprocessable Entity' }
           ]
           tags %w[projects]
+          hidden true
         end
         params do
           requires :package_name_pattern, type: String,
@@ -74,6 +80,7 @@ module API
               { code: 422, message: 'Unprocessable Entity' }
             ]
             tags %w[projects]
+            hidden true
           end
           params do
             optional :package_name_pattern, type: String,
@@ -106,6 +113,7 @@ module API
               { code: 404, message: 'Not Found' }
             ]
             tags %w[projects]
+            hidden true
           end
           delete do
             package_protection_rule = user_project.package_protection_rules.find(params[:package_protection_rule_id])

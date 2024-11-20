@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Banzai::Pipeline::GfmPipeline, feature_category: :markdown do
+RSpec.describe Banzai::Pipeline::GfmPipeline, feature_category: :team_planning do
   it_behaves_like 'sanitize pipeline'
 
   describe 'integration between parsing regular and external issue references' do

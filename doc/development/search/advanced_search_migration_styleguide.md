@@ -232,10 +232,7 @@ end
 Reindexes all documents in the index that stores the specified document type and updates `schema_version`.
 
 Requires the `DOCUMENT_TYPE` and `NEW_SCHEMA_VERSION` constants.
-The index mapping must have a `schema_version` integer field in a `YYWW` (year/week) format.
-
-NOTE:
-Previously index mapping `schema_version` used `YYMM` format. New versions should use the `YYWW` format.
+The index mapping must have a `schema_version` integer field in a `YYMM` format.
 
 ```ruby
 class MigrationName < Elastic::Migration
@@ -246,7 +243,7 @@ class MigrationName < Elastic::Migration
   throttle_delay 1.minute
 
   DOCUMENT_TYPE = WorkItem
-  NEW_SCHEMA_VERSION = 24_46
+  NEW_SCHEMA_VERSION = 23_08
   UPDATE_BATCH_SIZE = 100
 end
 ```
@@ -256,10 +253,7 @@ end
 Deletes all documents in the index that stores the specified document type and has `schema_version` less than the given value.
 
 Requires the `DOCUMENT_TYPE` constant and `schema_version` method.
-The index mapping must have a `schema_version` integer field in a `YYWW` (year/week) format.
-
-NOTE:
-Previously index mapping `schema_version` used `YYMM` format. New versions should use the `YYWW` format.
+The index mapping must have a `schema_version` integer field in a `YYMM` format.
 
 ```ruby
 class MigrationName < Elastic::Migration
@@ -448,7 +442,7 @@ safely can.
 
 We choose to use GitLab [required stops](../database/required_stops.md) as a safe time to remove
 backwards compatibility for indices that have not been fully migrated. We
-[document this in our upgrade documentation](../../update/plan_your_upgrade.md).
+[document this in our upgrade documentation](../../update/index.md#upgrading-to-a-new-major-version).
 
 [GitLab Housekeeper](https://gitlab.com/gitlab-org/gitlab/-/blob/master/gems/gitlab-housekeeper/README.md)
 is used to automate the cleanup process. This process includes
@@ -515,6 +509,5 @@ recent obsolete migration.
 
 The MR assignee must:
 
-1. Backup migrations from the default branch to the [migration graveyard](https://gitlab.com/gitlab-org/search-team/migration-graveyard)
 1. Verify that no references to the migration or spec files exist in the `.rubocop_todo/` directory.
 1. Push any required changes to the merge request.

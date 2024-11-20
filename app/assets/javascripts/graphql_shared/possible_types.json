@@ -23,12 +23,7 @@
     "AbuseReportNote",
     "Note"
   ],
-  "CiJobTokenScopeTarget": [
-    "Group",
-    "Project"
-  ],
   "CiRunnerCloudProvisioning": [
-    "CiRunnerGkeProvisioning",
     "CiRunnerGoogleCloudProvisioning"
   ],
   "CiVariable": [
@@ -92,14 +87,9 @@
     "CiBuildNeed",
     "CiJob"
   ],
-  "LabelInterface": [
-    "AbuseReportLabel",
-    "Label"
-  ],
   "MemberInterface": [
     "GroupMember",
     "PendingGroupMember",
-    "PendingProjectMember",
     "ProjectMember"
   ],
   "NoteableInterface": [
@@ -111,8 +101,7 @@
     "Issue",
     "MergeRequest",
     "Snippet",
-    "Vulnerability",
-    "WikiPage"
+    "Vulnerability"
   ],
   "NoteableType": [
     "Design",
@@ -123,8 +112,7 @@
     "ApprovalPolicy",
     "PipelineExecutionPolicy",
     "ScanExecutionPolicy",
-    "ScanResultPolicy",
-    "VulnerabilityManagementPolicy"
+    "ScanResultPolicy"
   ],
   "PackageFileMetadata": [
     "ConanFileMetadata",
@@ -137,10 +125,6 @@
     "NugetMetadata",
     "PypiMetadata",
     "TerraformModuleMetadata"
-  ],
-  "PendingMemberInterface": [
-    "PendingGroupMember",
-    "PendingProjectMember"
   ],
   "Registrable": [
     "CiSecureFileRegistry",
@@ -165,10 +149,6 @@
     "AbuseReportNote",
     "Discussion",
     "Note"
-  ],
-  "RoleInterface": [
-    "MemberRole",
-    "StandardRole"
   ],
   "SecurityPolicySource": [
     "GroupSecurityPolicySource",
@@ -196,11 +176,9 @@
     "EpicIssue",
     "Group",
     "Issue",
-    "Key",
     "MergeRequest",
     "Namespace",
     "Project",
-    "Vulnerability",
     "WorkItem"
   ],
   "User": [

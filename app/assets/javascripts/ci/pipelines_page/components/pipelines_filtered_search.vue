@@ -22,8 +22,16 @@ export default {
     GlFilteredSearch,
   },
   mixins: [Tracking.mixin()],
-  inject: ['defaultBranchName', 'projectId'],
   props: {
+    projectId: {
+      type: String,
+      required: true,
+    },
+    defaultBranchName: {
+      type: String,
+      required: false,
+      default: null,
+    },
     params: {
       type: Object,
       required: true,

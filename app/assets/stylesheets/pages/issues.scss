@@ -153,7 +153,7 @@ ul.related-merge-requests > li gl-emoji {
     // override dropdown item styles
     .btn.btn-confirm {
       @include btn-default;
-      @include btn-color($blue-500, $blue-600, $blue-600, $blue-700, $blue-700, $blue-800, $white-contrast);
+      @include btn-blue;
 
       border-width: 1px;
       line-height: $line-height-base;
@@ -162,7 +162,7 @@ ul.related-merge-requests > li gl-emoji {
       &.disabled {
         background-color: $gray-10;
         border-color: $gray-100;
-        @apply gl-text-disabled;
+        color: $gl-text-color-disabled;
       }
     }
   }
@@ -171,6 +171,20 @@ ul.related-merge-requests > li gl-emoji {
 .discussion-reply-holder,
 .note-edit-form {
   display: block;
+}
+
+.issue-sort-dropdown {
+  .btn-group {
+    width: 100%;
+  }
+
+  .reverse-sort-btn {
+    color: $gl-text-color-secondary;
+
+    &.disabled {
+      color: $gl-text-color-disabled;
+    }
+  }
 }
 
 @include media-breakpoint-up(sm) {
@@ -239,18 +253,6 @@ ul.related-merge-requests > li gl-emoji {
   }
 }
 
-// These are composite classes for use with Vue Transition
-// https://vuejs.org/guide/built-ins/transition
-.issuable-header-slide-enter-active,
-.issuable-header-slide-leave-active {
-  @apply gl-transition-all;
-}
-
-.issuable-header-slide-enter,
-.issuable-header-slide-leave-to {
-  transform: translateY(-100%);
-}
-
 .issuable-sticky-header-visible {
   --issuable-sticky-header-height: 40px;
 }
@@ -258,8 +260,7 @@ ul.related-merge-requests > li gl-emoji {
 .md-header-preview {
   z-index: 1;
   position: sticky;
-  top: calc(#{$calc-application-header-height} + var(--issuable-sticky-header-height, 0px) - 2px);
-  @apply gl-bg-default;
+  top: calc(#{$calc-application-header-height} + var(--issuable-sticky-header-height, 0px));
 }
 
 .detail-page-description .md-header {

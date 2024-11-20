@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe ErrorTracking::SentryClient::Issue, feature_category: :observability do
+RSpec.describe ErrorTracking::SentryClient::Issue, feature_category: :error_tracking do
   include SentryClientHelpers
 
   let(:token) { 'test-token' }

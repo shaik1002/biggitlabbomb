@@ -1,16 +1,16 @@
-import { findKey, intersection, difference } from 'lodash';
+import { findKey, intersection } from 'lodash';
+import { languageFilterData } from '~/search/sidebar/components/language_filter/data';
+import {
+  LABEL_FILTER_PARAM,
+  LABEL_AGREGATION_NAME,
+} from '~/search/sidebar/components/label_filter/data';
 import {
   formatSearchResultCount,
   addCountOverLimit,
   injectRegexSearch,
 } from '~/search/store/utils';
 
-import {
-  SCOPE_BLOB,
-  LABEL_FILTER_PARAM,
-  LABEL_AGREGATION_NAME,
-  LANGUAGE_FILTER_PARAM,
-} from '~/search/sidebar/constants';
+import { PROJECT_DATA, SCOPE_BLOB } from '~/search/sidebar/constants';
 import { GROUPS_LOCAL_STORAGE_KEY, PROJECTS_LOCAL_STORAGE_KEY, ICON_MAP } from './constants';
 
 const queryLabelFilters = (state) => state?.query?.[LABEL_FILTER_PARAM] || [];
@@ -20,7 +20,7 @@ const appliedSelectedLabelsKeys = (state) =>
   intersection(urlQueryLabelFilters(state), queryLabelFilters(state));
 
 const unselectedLabelsKeys = (state) =>
-  difference(urlQueryLabelFilters(state), queryLabelFilters(state));
+  urlQueryLabelFilters(state)?.filter((label) => !queryLabelFilters(state)?.includes(label));
 
 const unappliedNewLabelKeys = (state) => {
   return state?.query?.[LABEL_FILTER_PARAM]?.filter(
@@ -28,7 +28,7 @@ const unappliedNewLabelKeys = (state) => {
   );
 };
 
-export const queryLanguageFilters = (state) => state.query[LANGUAGE_FILTER_PARAM] || [];
+export const queryLanguageFilters = (state) => state.query[languageFilterData.filterParam] || [];
 
 export const frequentGroups = (state) => {
   return state.frequentItems[GROUPS_LOCAL_STORAGE_KEY];
@@ -40,8 +40,9 @@ export const frequentProjects = (state) => {
 
 export const languageAggregationBuckets = (state) => {
   return (
-    state.aggregations.data.find((aggregation) => aggregation.name === LANGUAGE_FILTER_PARAM)
-      ?.buckets || []
+    state.aggregations.data.find(
+      (aggregation) => aggregation.name === languageFilterData.filterParam,
+    )?.buckets || []
   );
 };
 
@@ -64,10 +65,11 @@ export const filteredLabels = (state) => {
 export const filteredAppliedSelectedLabels = (state) =>
   filteredLabels(state)?.filter((label) => urlQueryLabelFilters(state)?.includes(label.title));
 
-export const appliedSelectedLabels = (state) =>
-  labelAggregationBuckets(state)?.filter((label) =>
+export const appliedSelectedLabels = (state) => {
+  return labelAggregationBuckets(state)?.filter((label) =>
     appliedSelectedLabelsKeys(state)?.includes(label.title),
   );
+};
 
 export const filteredUnselectedLabels = (state) =>
   filteredLabels(state)?.filter((label) => !urlQueryLabelFilters(state)?.includes(label.title));
@@ -94,4 +96,4 @@ export const navigationItems = (state) =>
     items: [],
   }));
 
-export const hasMissingProjectContext = (state) => !state?.projectInitialJson?.id;
+export const hasProjectContext = (state) => !state.query?.[PROJECT_DATA.queryParam];

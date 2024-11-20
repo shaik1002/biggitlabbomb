@@ -14,7 +14,7 @@ module Gitlab
             return unless license
 
             ::Gitlab::Ci::Reports::Sbom::License.new(
-              spdx_identifier: license['id'],
+              id: license['id'],
               name: license['name'],
               url: license['url']
             )

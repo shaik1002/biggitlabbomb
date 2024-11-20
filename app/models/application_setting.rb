@@ -5,8 +5,10 @@ class ApplicationSetting < ApplicationRecord
   include CacheMarkdownField
   include TokenAuthenticatable
   include ChronicDurationAttribute
+  include IgnorableColumns
   include Sanitizable
 
+  ignore_column :sign_in_text_html, remove_with: '17.5', remove_after: '2024-10-17'
   ignore_columns %i[
     encrypted_openai_api_key
     encrypted_openai_api_key_iv
@@ -18,7 +20,6 @@ class ApplicationSetting < ApplicationRecord
     encrypted_vertex_ai_access_token_iv
   ], remove_with: '17.5', remove_after: '2024-09-19'
   ignore_columns %i[toggle_security_policy_custom_ci lock_toggle_security_policy_custom_ci], remove_with: '17.6', remove_after: '2024-10-17'
-  ignore_column :runners_registration_token, remove_with: '17.7', remove_after: '2024-11-22'
 
   INSTANCE_REVIEW_MIN_USERS = 50
   GRAFANA_URL_ERROR_MESSAGE = 'Please check your Grafana URL setting in ' \
@@ -530,7 +531,6 @@ class ApplicationSetting < ApplicationRecord
       :concurrent_bitbucket_import_jobs_limit,
       :concurrent_bitbucket_server_import_jobs_limit,
       :concurrent_github_import_jobs_limit,
-      :concurrent_relation_batch_export_limit,
       :container_registry_token_expire_delay,
       :housekeeping_optimize_repository_period,
       :inactive_projects_delete_after_months,
@@ -599,7 +599,6 @@ class ApplicationSetting < ApplicationRecord
       :max_terraform_state_size_bytes,
       :members_delete_limit,
       :notes_create_limit,
-      :create_organization_api_limit,
       :package_registry_cleanup_policies_worker_capacity,
       :packages_cleanup_package_file_worker_capacity,
       :pages_extra_deployments_default_expiry_seconds,
@@ -624,7 +623,6 @@ class ApplicationSetting < ApplicationRecord
     concurrent_bitbucket_import_jobs_limit: [:integer, { default: 100 }],
     concurrent_bitbucket_server_import_jobs_limit: [:integer, { default: 100 }],
     concurrent_github_import_jobs_limit: [:integer, { default: 1000 }],
-    concurrent_relation_batch_export_limit: [:integer, { default: 8 }],
     downstream_pipeline_trigger_limit_per_project_user_sha: [:integer, { default: 0 }],
     group_api_limit: [:integer, { default: 400 }],
     group_invited_groups_api_limit: [:integer, { default: 60 }],
@@ -632,7 +630,6 @@ class ApplicationSetting < ApplicationRecord
     group_shared_groups_api_limit: [:integer, { default: 60 }],
     groups_api_limit: [:integer, { default: 200 }],
     members_delete_limit: [:integer, { default: 60 }],
-    create_organization_api_limit: [:integer, { default: 10 }],
     project_api_limit: [:integer, { default: 400 }],
     project_invited_groups_api_limit: [:integer, { default: 60 }],
     projects_api_limit: [:integer, { default: 2000 }],
@@ -649,22 +646,11 @@ class ApplicationSetting < ApplicationRecord
     throttle_unauthenticated_git_http_period_in_seconds: [:integer, { default: 3600 }]
 
   jsonb_accessor :importers,
-    silent_admin_exports_enabled: [:boolean, { default: false }],
-    allow_contribution_mapping_to_admins: [:boolean, { default: false }]
-
-  jsonb_accessor :sign_in_restrictions,
-    disable_password_authentication_for_users_with_sso_identities: [:boolean, { default: false }]
-
-  validates :sign_in_restrictions, json_schema: { filename: 'application_setting_sign_in_restrictions' }
+    silent_admin_exports_enabled: [:boolean, { default: false }]
 
   validates :rate_limits, json_schema: { filename: "application_setting_rate_limits" }
 
   validates :importers, json_schema: { filename: "application_setting_importers" }
-
-  jsonb_accessor :transactional_emails,
-    resource_token_expiry_inherited_members: [:boolean, { default: true }]
-
-  validates :transactional_emails, json_schema: { filename: "application_setting_transactional_emails" }
 
   jsonb_accessor :package_registry, nuget_skip_metadata_url_validation: [:boolean, { default: false }]
 
@@ -752,10 +738,6 @@ class ApplicationSetting < ApplicationRecord
     pages_extra_deployments_default_expiry_seconds: [:integer, { default: 86400 }]
 
   validates :pages, json_schema: { filename: "application_setting_pages" }
-
-  validates :enforce_ci_inbound_job_token_scope_enabled,
-    allow_nil: false,
-    inclusion: { in: [true, false], message: N_('must be a boolean value') }
 
   attr_encrypted :asset_proxy_secret_key,
     mode: :per_attribute_iv,

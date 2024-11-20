@@ -9,10 +9,6 @@ module Gitlab
         JobReplicaNotUpToDate = Class.new(::Gitlab::SidekiqMiddleware::RetryError)
 
         REPLICA_WAIT_SLEEP_SECONDS = 0.5
-        URGENT_REPLICA_WAIT_SLEEP_SECONDS = 0.1
-
-        SLEEP_ATTEMPTS = 3
-        URGENT_SLEEP_ATTEMPTS = 5
 
         def call(worker, job, _queue)
           # ActiveJobs have wrapped class stored in 'wrapped' key
@@ -22,14 +18,12 @@ module Gitlab
           job['load_balancing_strategy'] = strategy.to_s
 
           if use_primary?(strategy)
-            ::Gitlab::Database::LoadBalancing::SessionMap
-              .with_sessions(Gitlab::Database::LoadBalancing.base_models)
-              .use_primary!
+            ::Gitlab::Database::LoadBalancing::Session.current.use_primary!
           elsif strategy == :retry
             raise JobReplicaNotUpToDate, "Sidekiq job #{resolved_class} JID-#{job['jid']} couldn't use the replica. "\
               "Replica was not up to date."
           else
-            set_per_database_strategy(resolved_class)
+            # this means we selected an up-to-date replica, but there is nothing to do in this case.
           end
 
           yield
@@ -41,7 +35,7 @@ module Gitlab
 
         def clear
           ::Gitlab::Database::LoadBalancing.release_hosts
-          ::Gitlab::Database::LoadBalancing::SessionMap.clear_session
+          ::Gitlab::Database::LoadBalancing::Session.clear_session
         end
 
         def use_primary?(strategy)
@@ -58,8 +52,8 @@ module Gitlab
           # Happy case: we can read from a replica.
           return replica_strategy(worker_class, job) if databases_in_sync?(wal_locations)
 
-          sleep_attempts(worker_class).times do
-            sleep sleep_duration(worker_class)
+          3.times do
+            sleep REPLICA_WAIT_SLEEP_SECONDS
             break if databases_in_sync?(wal_locations)
           end
 
@@ -74,14 +68,6 @@ module Gitlab
           end
         end
 
-        def sleep_duration(worker_class)
-          worker_class.get_urgency == :high ? URGENT_REPLICA_WAIT_SLEEP_SECONDS : REPLICA_WAIT_SLEEP_SECONDS
-        end
-
-        def sleep_attempts(worker_class)
-          worker_class.get_urgency == :high ? URGENT_SLEEP_ATTEMPTS : SLEEP_ATTEMPTS
-        end
-
         def get_wal_locations(job)
           job['dedup_wal_locations'] || job['wal_locations']
         end
@@ -93,7 +79,7 @@ module Gitlab
         end
 
         def can_retry?(worker_class, job)
-          worker_class.get_least_restrictive_data_consistency == :delayed && not_yet_requeued?(job)
+          worker_class.get_data_consistency == :delayed && not_yet_requeued?(job)
         end
 
         def replica_strategy(worker_class, job)
@@ -101,15 +87,7 @@ module Gitlab
         end
 
         def retried_before?(worker_class, job)
-          worker_class.get_least_restrictive_data_consistency == :delayed && !not_yet_requeued?(job)
-        end
-
-        def set_per_database_strategy(worker_class)
-          ::Gitlab::Database::LoadBalancing.each_load_balancer do |lb|
-            next unless worker_class.get_data_consistency_per_database[lb.name] == :always
-
-            ::Gitlab::Database::LoadBalancing::SessionMap.current(lb).use_primary!
-          end
+          worker_class.get_data_consistency == :delayed && !not_yet_requeued?(job)
         end
 
         def not_yet_requeued?(job)

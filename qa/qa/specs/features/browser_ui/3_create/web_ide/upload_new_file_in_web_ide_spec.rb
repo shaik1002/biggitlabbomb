@@ -3,12 +3,16 @@
 module QA
   RSpec.describe 'Create', product_group: :remote_development do
     describe 'Upload a file in Web IDE' do
-      include_context "Web IDE test prep"
       let(:file_path) { File.absolute_path(File.join('qa', 'fixtures', 'web_ide', file_name)) }
       let(:project) { create(:project, :with_readme, name: 'webide-upload-file-project') }
 
       before do
-        load_web_ide
+        Flow::Login.sign_in
+        project.visit!
+        Page::Project::Show.perform(&:open_web_ide!)
+        Page::Project::WebIDE::VSCode.perform do |ide|
+          ide.wait_for_ide_to_load('README.md')
+        end
       end
 
       context 'when a file with the same name already exists' do

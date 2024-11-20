@@ -6,7 +6,6 @@ RSpec.describe Gitlab::Ci::Build::Rules::Rule::Clause::Exists, feature_category:
   let_it_be(:user) { create(:user) }
   let_it_be(:project) { create(:project, :small_repo, files: { 'subdir/my_file.txt' => '' }) }
   let_it_be(:other_project) { create(:project, :small_repo, files: { 'file.txt' => '' }) }
-  let(:pipeline) { instance_double(Ci::Pipeline, project: project, sha: 'sha', user: user) }
 
   let(:variables) do
     Gitlab::Ci::Variables::Collection.new([
@@ -14,7 +13,6 @@ RSpec.describe Gitlab::Ci::Build::Rules::Rule::Clause::Exists, feature_category:
       { key: 'FILE_TXT', value: 'file.txt' },
       { key: 'FULL_PATH_VALID', value: 'subdir/my_file.txt' },
       { key: 'FULL_PATH_INVALID', value: 'subdir/does_not_exist.txt' },
-      { key: 'NESTED_FULL_PATH_VALID', value: '$SUBDIR/my_file.txt' },
       { key: 'NEW_BRANCH', value: 'new_branch' },
       { key: 'MASKED_VAR', value: 'masked_value', masked: true }
     ])
@@ -31,7 +29,7 @@ RSpec.describe Gitlab::Ci::Build::Rules::Rule::Clause::Exists, feature_category:
   end
 
   describe '#satisfied_by?' do
-    subject(:satisfied_by?) { described_class.new(clause).satisfied_by?(pipeline, context) }
+    subject(:satisfied_by?) { described_class.new(clause).satisfied_by?(nil, context) }
 
     before do
       allow(context).to receive(:variables).and_return(variables)
@@ -66,20 +64,6 @@ RSpec.describe Gitlab::Ci::Build::Rules::Rule::Clause::Exists, feature_category:
           let(:globs) { ['$FULL_PATH_INVALID'] }
 
           it { is_expected.to be_falsey }
-        end
-
-        context 'when the variable is nested and matches' do
-          let(:globs) { ['$NESTED_FULL_PATH_VALID'] }
-
-          it { is_expected.to be_truthy }
-
-          context 'when expand_nested_variables_in_job_rules_exists_and_changes is disabled' do
-            before do
-              stub_feature_flags(expand_nested_variables_in_job_rules_exists_and_changes: false)
-            end
-
-            it { is_expected.to be_falsey }
-          end
         end
       end
 
@@ -130,14 +114,6 @@ RSpec.describe Gitlab::Ci::Build::Rules::Rule::Clause::Exists, feature_category:
             let(:globs) { ['$FILE_TXT'] }
 
             it { is_expected.to be_truthy }
-
-            context 'when expand_nested_variables_in_job_rules_exists_and_changes is disabled' do
-              before do
-                stub_feature_flags(expand_nested_variables_in_job_rules_exists_and_changes: false)
-              end
-
-              it { is_expected.to be_truthy }
-            end
           end
 
           context 'when the project path is invalid' do
@@ -159,19 +135,6 @@ RSpec.describe Gitlab::Ci::Build::Rules::Rule::Clause::Exists, feature_category:
                   "rules:exists:project `invalid/path/subdir` is not a valid project path"
                 )
               end
-
-              context 'when expand_nested_variables_in_job_rules_exists_and_changes is disabled' do
-                before do
-                  stub_feature_flags(expand_nested_variables_in_job_rules_exists_and_changes: false)
-                end
-
-                it 'raises an error' do
-                  expect { satisfied_by? }.to raise_error(
-                    Gitlab::Ci::Build::Rules::Rule::Clause::ParseError,
-                    "rules:exists:project `invalid/path/subdir` is not a valid project path"
-                  )
-                end
-              end
             end
 
             context 'when the project path contains a masked variable' do
@@ -180,7 +143,7 @@ RSpec.describe Gitlab::Ci::Build::Rules::Rule::Clause::Exists, feature_category:
               it 'raises an error with the variable masked' do
                 expect { satisfied_by? }.to raise_error(
                   Gitlab::Ci::Build::Rules::Rule::Clause::ParseError,
-                  "rules:exists:project `invalid/path/[MASKED]xxxx` is not a valid project path"
+                  "rules:exists:project `invalid/path/xxxxxxxxxxxx` is not a valid project path"
                 )
               end
             end
@@ -202,14 +165,6 @@ RSpec.describe Gitlab::Ci::Build::Rules::Rule::Clause::Exists, feature_category:
               let(:ref) { '$NEW_BRANCH' }
 
               it { is_expected.to be_truthy }
-
-              context 'when expand_nested_variables_in_job_rules_exists_and_changes is disabled' do
-                before do
-                  stub_feature_flags(expand_nested_variables_in_job_rules_exists_and_changes: false)
-                end
-
-                it { is_expected.to be_truthy }
-              end
             end
 
             context 'when the ref is invalid' do
@@ -232,29 +187,15 @@ RSpec.describe Gitlab::Ci::Build::Rules::Rule::Clause::Exists, feature_category:
                     "in project `#{other_project.full_path}`"
                   )
                 end
-
-                context 'when expand_nested_variables_in_job_rules_exists_and_changes is disabled' do
-                  before do
-                    stub_feature_flags(expand_nested_variables_in_job_rules_exists_and_changes: false)
-                  end
-
-                  it 'raises an error' do
-                    expect { satisfied_by? }.to raise_error(
-                      Gitlab::Ci::Build::Rules::Rule::Clause::ParseError,
-                      "rules:exists:ref `invalid/ref/new_branch` is not a valid ref " \
-                        "in project `#{other_project.full_path}`"
-                    )
-                  end
-                end
               end
 
               context 'when the ref contains a masked variable' do
                 let(:ref) { 'invalid/ref/$MASKED_VAR' }
 
-                it 'raises an error with the variable masked' do
+                it 'raises an error' do
                   expect { satisfied_by? }.to raise_error(
                     Gitlab::Ci::Build::Rules::Rule::Clause::ParseError,
-                    "rules:exists:ref `invalid/ref/[MASKED]xxxx` is not a valid ref " \
+                    "rules:exists:ref `invalid/ref/xxxxxxxxxxxx` is not a valid ref " \
                     "in project `#{other_project.full_path}`"
                   )
                 end

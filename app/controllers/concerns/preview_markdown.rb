@@ -3,6 +3,7 @@
 module PreviewMarkdown
   extend ActiveSupport::Concern
 
+  # rubocop:disable Gitlab/ModuleWithInstanceVariables
   def preview_markdown
     result = PreviewMarkdownService.new(
       container: resource_parent,
@@ -46,10 +47,7 @@ module PreviewMarkdown
 
   def markdown_context_params
     case controller_name
-    when 'wikis'
-      wiki_page = wiki.find_page(params[:id])
-
-      { pipeline: :wiki, wiki: wiki, page_slug: params[:id], repository: wiki.repository }
+    when 'wikis'           then { pipeline: :wiki, wiki: wiki, page_slug: params[:id] }
     when 'snippets'        then { skip_project_check: true }
     when 'groups'          then { group: group, issuable_reference_expansion_enabled: true }
     when 'projects'        then projects_filter_params
@@ -57,11 +55,13 @@ module PreviewMarkdown
     when 'organizations'   then { pipeline: :description }
     else {}
     end.merge(
-      requested_path: params[:path] || wiki_page&.path,
+      requested_path: params[:path],
       ref: params[:ref],
       # Disable comments in markdown for IE browsers because comments in IE
       # could allow script execution.
       allow_comments: !browser.ie?
     )
   end
+
+  # rubocop:enable Gitlab/ModuleWithInstanceVariables
 end

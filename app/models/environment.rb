@@ -3,7 +3,6 @@
 class Environment < ApplicationRecord
   include Gitlab::Utils::StrongMemoize
   include ReactiveCaching
-  include CacheMarkdownField
   include FastDestroyAll::Helpers
   include Presentable
   include NullifyIfBlank
@@ -16,14 +15,12 @@ class Environment < ApplicationRecord
   self.reactive_cache_hard_limit = 10.megabytes
   self.reactive_cache_work_type = :external_dependency
 
-  cache_markdown_field :description
-
   belongs_to :project, optional: false
   belongs_to :merge_request, optional: true
   belongs_to :cluster_agent, class_name: 'Clusters::Agent', optional: true, inverse_of: :environments
 
   use_fast_destroy :all_deployments
-  nullify_if_blank :external_url, :kubernetes_namespace, :flux_resource_path, :description
+  nullify_if_blank :external_url, :kubernetes_namespace, :flux_resource_path
 
   has_many :all_deployments, class_name: 'Deployment'
   has_many :deployments, -> { visible }
@@ -72,16 +69,6 @@ class Environment < ApplicationRecord
   validates :external_url,
     length: { maximum: 255 },
     allow_nil: true
-
-  validates :description,
-    length: { maximum: 10000 },
-    allow_nil: true,
-    if: :description_changed?
-
-  validates :description_html,
-    length: { maximum: 50000 },
-    allow_nil: true,
-    if: :description_html_changed?
 
   validates :kubernetes_namespace,
     allow_nil: true,
@@ -377,15 +364,16 @@ class Environment < ApplicationRecord
     actions = []
 
     stop_actions.each do |stop_action|
-      play_job = ->(job) do
+      Gitlab::OptimisticLocking.retry_lock(
+        stop_action,
+        name: 'environment_stop_with_actions'
+      ) do |job|
         actions << job.play(job.user)
       rescue StateMachines::InvalidTransition
-        # Ci::PlayBuildService rescues an error of StateMachines::InvalidTransition and fall back to retry.
-        # However, Ci::PlayBridgeService doesn't rescue it, so we're ignoring the error if it's not playable.
+        # Ci::PlayBuildService rescues an error of StateMachines::InvalidTransition and fall back to retry. However,
+        # Ci::PlayBridgeService doesn't rescue it, so we're ignoring the error if it's not playable.
         # We should fix this inconsistency in https://gitlab.com/gitlab-org/gitlab/-/issues/420855.
       end
-
-      play_job.call(stop_action)
     end
 
     actions

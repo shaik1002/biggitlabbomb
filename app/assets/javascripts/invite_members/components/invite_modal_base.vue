@@ -3,14 +3,13 @@ import { GlFormGroup, GlModal, GlDatepicker, GlLink, GlSprintf, GlButton } from 
 
 import Tracking from '~/tracking';
 import { sprintf } from '~/locale';
-import ContentTransition from '~/invite_members/components/content_transition.vue';
+import ContentTransition from '~/vue_shared/components/content_transition.vue';
 import { initialSelectedRole, roleDropdownItems } from 'ee_else_ce/members/utils';
 import RoleSelector from '~/members/components/role_selector.vue';
 import {
   ACCESS_LEVEL,
   ACCESS_EXPIRE_DATE,
   READ_MORE_TEXT,
-  READ_MORE_ACCESS_EXPIRATION_TEXT,
   INVITE_BUTTON_TEXT,
   INVITE_BUTTON_TEXT_DISABLED,
   CANCEL_BUTTON_TEXT,
@@ -69,10 +68,6 @@ export default {
       default: null,
     },
     helpLink: {
-      type: String,
-      required: true,
-    },
-    accessExpirationHelpLink: {
       type: String,
       required: true,
     },
@@ -251,7 +246,6 @@ export default {
   ACCESS_EXPIRE_DATE,
   ACCESS_LEVEL,
   READ_MORE_TEXT,
-  READ_MORE_ACCESS_EXPIRATION_TEXT,
   INVITE_BUTTON_TEXT,
   CANCEL_BUTTON_TEXT,
   DEFAULT_SLOT,
@@ -315,9 +309,7 @@ export default {
           <template #description>
             <gl-sprintf :message="$options.READ_MORE_TEXT">
               <template #link="{ content }">
-                <gl-link :href="helpLink" target="_blank" data-testid="invite-modal-help-link">{{
-                  content
-                }}</gl-link>
+                <gl-link :href="helpLink" target="_blank">{{ content }}</gl-link>
               </template>
             </gl-sprintf>
           </template>
@@ -343,18 +335,6 @@ export default {
             :min-date="minDate"
             :target="null"
           />
-          <template #description>
-            <gl-sprintf :message="$options.READ_MORE_ACCESS_EXPIRATION_TEXT">
-              <template #link="{ content }">
-                <gl-link
-                  :href="accessExpirationHelpLink"
-                  target="_blank"
-                  data-testid="invite-modal-access-expiration-link"
-                  >{{ content }}</gl-link
-                >
-              </template>
-            </gl-sprintf>
-          </template>
         </gl-form-group>
       </template>
 

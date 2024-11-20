@@ -25,10 +25,7 @@
               "enum": [
                 "user.id",
                 "project.id",
-                "namespace.id",
-                "label",
-                "property",
-                "value"
+                "namespace.id"
               ]
             },
             "filter": {
@@ -44,18 +41,7 @@
                   "type": "number"
                 }
               },
-              "additionalProperties": {
-                "type": [
-                  "string",
-                  "number"
-                ]
-              }
-            },
-            "operator": {
-              "type": "string",
-              "enum": [
-                "sum(value)"
-              ]
+              "additionalProperties": false
             }
           },
           "additionalProperties": false

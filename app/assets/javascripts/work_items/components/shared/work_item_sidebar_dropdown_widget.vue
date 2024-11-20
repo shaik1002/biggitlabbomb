@@ -244,7 +244,7 @@ export default {
             <slot name="list-item" :item="item">{{ item.text }}</slot>
           </template>
           <template v-if="showFooter" #footer>
-            <div class="gl-border-t-1 gl-border-t-dropdown !gl-p-2 gl-border-t-solid">
+            <div class="gl-border-t-1 gl-border-t-gray-200 !gl-p-2 gl-border-t-solid">
               <slot name="footer"></slot>
             </div>
           </template>
@@ -253,7 +253,7 @@ export default {
     </gl-form>
     <slot v-else-if="hasValue" name="readonly"></slot>
     <slot v-else name="none">
-      <span class="gl-text-subtle">{{ $options.i18n.none }}</span>
+      <span class="gl-text-secondary">{{ $options.i18n.none }}</span>
     </slot>
   </div>
 </template>

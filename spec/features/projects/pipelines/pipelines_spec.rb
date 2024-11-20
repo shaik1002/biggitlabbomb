@@ -94,8 +94,8 @@ RSpec.describe 'Pipelines', :js, feature_category: :continuous_integration do
           wait_for_requests
         end
 
-        it 'renders "New pipeline" link' do
-          expect(page).to have_link('New pipeline')
+        it 'renders "Run pipeline" link' do
+          expect(page).to have_link('Run pipeline')
         end
       end
 
@@ -616,7 +616,7 @@ RSpec.describe 'Pipelines', :js, feature_category: :continuous_integration do
 
               wait_for_requests
 
-              within first('[data-testid="job-item"]') do
+              within first('[data-testid="job-with-link"]') do
                 expect(find_by_testid('play-icon')).to be_visible
               end
 
@@ -665,16 +665,15 @@ RSpec.describe 'Pipelines', :js, feature_category: :continuous_integration do
           visit project_pipelines_path(project, page: '2')
           wait_for_requests
 
-          expect(page).to have_selector('[data-testid="gl-pagination-li"]', count: 4)
+          expect(page).to have_selector('.gl-pagination .page-link', count: 4)
         end
 
         it 'shows updated content' do
           visit project_pipelines_path(project)
           wait_for_requests
+          page.find('.page-link.next-page-item').click
 
-          find_by_testid('gl-pagination-next').click
-
-          expect(page).to have_selector('[data-testid="gl-pagination-li"]', count: 4)
+          expect(page).to have_selector('.gl-pagination .page-link', count: 4)
         end
       end
 

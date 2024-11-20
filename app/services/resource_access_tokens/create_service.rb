@@ -75,7 +75,7 @@ module ResourceAccessTokens
     end
 
     def delete_failed_user(user)
-      DeleteUserWorker.perform_async(current_user.id, user.id, hard_delete: true, skip_authorization: true, reason_for_deletion: "Access token creation failed")
+      DeleteUserWorker.perform_async(current_user.id, user.id, hard_delete: true, skip_authorization: true)
     end
 
     def default_user_params
@@ -85,8 +85,7 @@ module ResourceAccessTokens
         username: username_and_email_generator.username,
         user_type: :project_bot,
         skip_confirmation: true, # Bot users should always have their emails confirmed.
-        organization_id: resource.organization_id,
-        bot_namespace: bot_namespace
+        organization_id: resource.organization_id
       }
     end
 
@@ -126,12 +125,6 @@ module ResourceAccessTokens
       end
 
       nil
-    end
-
-    def bot_namespace
-      return resource if resource_type == 'group'
-
-      resource.project_namespace
     end
 
     def log_event(token)

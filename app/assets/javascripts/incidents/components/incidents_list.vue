@@ -13,7 +13,7 @@ import {
 } from '@gitlab/ui';
 import { STATUS_CLOSED } from '~/issues/constants';
 import { visitUrl, mergeUrlParams, joinPaths } from '~/lib/utils/url_utility';
-import { isValidDateString } from '~/lib/utils/datetime_utility';
+import { isValidDateString } from '~/lib/utils/datetime_range';
 import { s__, n__ } from '~/locale';
 import { INCIDENT_SEVERITY } from '~/sidebar/constants';
 import SeverityToken from '~/sidebar/components/severity/severity.vue';
@@ -90,8 +90,7 @@ export default {
       key: 'incidentSla',
       label: s__('IncidentManagement|Time to SLA'),
       variant: 'secondary',
-      thAlignRight: true,
-      thClass: `gl-w-2/20`,
+      thClass: `gl-text-right gl-w-2/20`,
       tdClass: `${tdClass} gl-text-right`,
       thAttr: TH_INCIDENT_SLA_TEST_ID,
       actualSortKey: 'SLA_DUE_AT',

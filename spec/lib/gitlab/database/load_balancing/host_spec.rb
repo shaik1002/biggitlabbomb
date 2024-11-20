@@ -49,49 +49,35 @@ RSpec.describe Gitlab::Database::LoadBalancing::Host, feature_category: :databas
   end
 
   describe '#disconnect!' do
-    shared_examples 'disconnects the pool' do
-      it 'disconnects the pool' do
-        connection = double(:connection, in_use?: false)
-        pool = double(:pool, connections: [connection])
+    it 'disconnects the pool' do
+      connection = double(:connection, in_use?: false)
+      pool = double(:pool, connections: [connection])
 
-        allow(host)
-          .to receive(:pool)
-                .and_return(pool)
+      allow(host)
+        .to receive(:pool)
+        .and_return(pool)
 
-        expect(host)
-          .not_to receive(:sleep)
+      expect(host)
+        .not_to receive(:sleep)
 
-        expect(host.pool)
-          .to receive(disconnect_method)
+      expect(host.pool)
+        .to receive(:disconnect!)
 
-        host.disconnect!
-      end
-
-      it 'disconnects the pool when waiting for connections takes too long' do
-        connection = double(:connection, in_use?: true)
-        pool = double(:pool, connections: [connection])
-
-        allow(host)
-          .to receive(:pool)
-                .and_return(pool)
-
-        expect(host.pool)
-          .to receive(disconnect_method)
-
-        host.disconnect!(timeout: 1)
-      end
+      host.disconnect!
     end
 
-    let(:disconnect_method) { :disconnect! }
+    it 'disconnects the pool when waiting for connections takes too long' do
+      connection = double(:connection, in_use?: true)
+      pool = double(:pool, connections: [connection])
 
-    if ::Gitlab.next_rails?
-      it_behaves_like 'disconnects the pool'
-    else
-      context 'with Rails 7.0' do
-        let(:disconnect_method) { :disconnect_without_verify! }
+      allow(host)
+        .to receive(:pool)
+        .and_return(pool)
 
-        it_behaves_like 'disconnects the pool'
-      end
+      expect(host.pool)
+        .to receive(:disconnect!)
+
+      host.disconnect!(timeout: 1)
     end
   end
 
@@ -105,11 +91,7 @@ RSpec.describe Gitlab::Database::LoadBalancing::Host, feature_category: :databas
 
   describe '#offline!' do
     it 'marks the host as offline' do
-      if ::Gitlab.next_rails?
-        expect(host.pool).to receive(:disconnect!)
-      else
-        expect(host.pool).to receive(:disconnect_without_verify!)
-      end
+      expect(host.pool).to receive(:disconnect!)
 
       expect(Gitlab::Database::LoadBalancing::Logger).to receive(:warn)
         .with(hash_including(event: :host_offline))
@@ -448,7 +430,7 @@ RSpec.describe Gitlab::Database::LoadBalancing::Host, feature_category: :databas
 
     context 'with the flag set' do
       before do
-        stub_feature_flags(load_balancer_low_statement_timeout: Feature.current_pod)
+        stub_feature_flags(load_balancer_low_statement_timeout: true)
       end
 
       it 'returns quickly if the underlying query takes a long time' do
@@ -463,11 +445,8 @@ RSpec.describe Gitlab::Database::LoadBalancing::Host, feature_category: :databas
         duration = Benchmark.realtime do
           expect(host.replication_lag_time).to be_nil
         end
-        # This should ideally be roughly < 0.2, since we're setting a 100ms timeout in
-        # query_and_release_fast_timeout, but sometimes in CI the network is exceptionally slow and this flakes.
-        # Set it to a really large number, but still less than the 5 seconds from pg_sleep(5) to prove that the
-        # statement was cancelled.
-        expect(duration).to be < (4)
+
+        expect(duration).to be < (0.2)
       end
     end
 

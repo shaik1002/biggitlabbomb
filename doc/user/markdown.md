@@ -1,6 +1,6 @@
 ---
 stage: Plan
-group: Knowledge
+group: Project Management
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
 
@@ -50,8 +50,7 @@ You can use GitLab Flavored Markdown in the following areas:
 You can also use other rich text files in GitLab. You might have to install a dependency
 to do so. For more information, see the [`gitlab-markup` gem project](https://gitlab.com/gitlab-org/gitlab-markup).
 
-Support for GitLab Flavored Markdown preview in the Web IDE is proposed in
-[issue 645](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/645).
+Support for improvements to Markdown preview when using GitLab Flavored Markdown in the Web IDE is proposed in [issue 645](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/645).
 
 ### Differences between GitLab Flavored Markdown and standard Markdown
 
@@ -78,7 +77,6 @@ The following features are not found in standard Markdown:
 - [Footnotes](#footnotes)
 - [Front matter](#front-matter)
 - [GitLab-specific references](#gitlab-specific-references)
-- [Includes](#includes)
 - [Inline diffs](#inline-diff)
 - [Math equations and symbols written in LaTeX](#math)
 - [Strikethrough](#emphasis)
@@ -1534,68 +1532,6 @@ $example = array(
 ---
 ```
 
-## Includes
-
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/195798) in GitLab 17.7 [with a flag](../administration/feature_flags.md) named `markdown_include_directive`. Disabled by default.
-
-FLAG:
-The availability of this feature is controlled by a feature flag. For more information, see the history.
-
-Use includes, or include directives, to add the content of a document inside another document.
-
-For example, a book could be split into multiple chapters, and then each chapter could be included in
-the main book document:
-
-```markdown
-::include{file=chapter1.md}
-
-::include{file=chapter2.md}
-```
-
-In GitLab, include directives are used only in Markdown files and wiki pages, not the other
-places where Markdown formatting is supported.
-
-Use an include directive in a Markdown file:
-
-```markdown
-::include{file=example_file.md}
-```
-
-Use an include directive in a wiki page:
-
-```markdown
-::include{file=example_page.md}
-```
-
-Each `::include` must start at the beginning of a line, and specifies a file or URL for `file=`.
-The content of the specified file (or URL) is included at the position of the `::include` and
-processed with the remaining Markdown.
-
-Include directives inside the included file are ignored.
-For example, if `file1` includes `file2`, and `file2` includes `file3`, when `file1` is processed,
-it doesn't have the contents of `file3`.
-
-### Limits
-
-To guarantee good system performance and prevent malicious documents from causing problems, GitLab
-enforces a maximum limit on the number of include directives processed in a document.
-By default, a document can have up to 32 include directives.
-
-To customize the number of processed include directives, administrators can change the
-`asciidoc_max_includes` application setting with the
-[application settings API](../api/settings.md#list-of-settings-that-can-be-accessed-via-api-calls).
-
-### Use includes from external URLs
-
-To use includes from separate wiki pages or external URLs, administrators can enable the
-`wiki_asciidoc_allow_uri_includes`
-[application setting](../administration/wikis/index.md#allow-uri-includes-for-asciidoc).
-
-```markdown
-<!-- define application setting wiki_asciidoc_allow_uri_includes to true to allow content to be read from URI -->
-::include{file=https://example.org/installation.md}
-```
-
 ## Escape characters
 
 [View this topic rendered in GitLab](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/user/markdown.md#escape-characters).
@@ -2118,9 +2054,17 @@ references refresh.
 ### Show comment preview when hovering on a link
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/29663) in GitLab 17.3 [with a flag](../administration/feature_flags.md) named `comment_tooltips`. Disabled by default.
-> - Feature flag removed in GitLab 17.6
 
-Hovering over a link to a comment shows the author and first line of the comment.
+FLAG:
+The availability of this feature is controlled by a feature flag.
+For more information, see the history.
+This feature is available for testing, but not ready for production use.
+
+When this feature is enabled, hovering over a link to a comment shows the author and
+part of the comment.
+
+When this feature is disabled, hovering over a link to a comment shows information about the item,
+such as issue or epic.
 
 ### Embedding Observability dashboards
 

@@ -150,7 +150,6 @@ module Integrations
     data_field :project_key
     data_field :vulnerabilities_enabled
     data_field :vulnerabilities_issuetype
-    data_field :customize_jira_issue_enabled
 
     # When these are false GitLab does not create cross reference
     # comments on Jira except when an issue gets transitioned.
@@ -215,7 +214,7 @@ module Integrations
     end
 
     def self.title
-      'Jira issues'
+      'Jira'
     end
 
     def self.description
@@ -224,7 +223,7 @@ module Integrations
 
     def self.help
       jira_doc_link_start = format('<a href="%{url}" target="_blank" rel="noopener noreferrer">'.html_safe,
-        url: Gitlab::Routing.url_helpers.help_page_path('integration/jira/index.md'))
+        url: Gitlab::Routing.url_helpers.help_page_path('integration/jira/index'))
       format(
         s_("JiraService|You must configure Jira before enabling this integration. " \
            "%{jira_doc_link_start}Learn more.%{link_end}"),

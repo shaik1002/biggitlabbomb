@@ -81,7 +81,7 @@ export default {
           />
           <div class="gl-flex-row">
             <div class="gl-mb-3">
-              <strong class="gl-text-default" data-testid="template-name">
+              <strong class="gl-text-gray-800" data-testid="template-name">
                 {{ template.name }}
               </strong>
             </div>
@@ -93,7 +93,7 @@ export default {
         <gl-button
           :disabled="disabled"
           category="primary"
-          variant="default"
+          variant="confirm"
           :href="template.link"
           data-testid="template-link"
           @click="trackEvent(template.name)"

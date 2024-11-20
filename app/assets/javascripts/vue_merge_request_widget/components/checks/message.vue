@@ -1,12 +1,17 @@
 <script>
-import { GlLoadingIcon } from '@gitlab/ui';
 import StatusIcon from '../widget/status_icon.vue';
-import { FAILURE_REASONS, ICON_NAMES } from './constants';
+import { FAILURE_REASONS } from './constants';
+
+const ICON_NAMES = {
+  failed: 'failed',
+  inactive: 'neutral',
+  success: 'success',
+  warning: 'warning',
+};
 
 export default {
   name: 'MergeChecksMessage',
   components: {
-    GlLoadingIcon,
     StatusIcon,
   },
   props: {
@@ -34,14 +39,7 @@ export default {
 <template>
   <div class="gl-py-3 gl-pl-7 gl-pr-4">
     <div class="gl-flex">
-      <gl-loading-icon
-        v-if="check.status === 'CHECKING'"
-        size="sm"
-        inline
-        class="mr-widget-check-checking gl-mr-3 gl-self-center"
-        data-testid="checking-icon"
-      />
-      <status-icon v-else :icon-name="iconName" :level="2" />
+      <status-icon :icon-name="iconName" :level="2" />
       <div class="gl-w-full gl-min-w-0">
         <div class="gl-flex">{{ failureReason }}</div>
       </div>

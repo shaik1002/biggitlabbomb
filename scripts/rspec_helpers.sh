@@ -1,7 +1,51 @@
 #!/usr/bin/env bash
 
+function retrieve_tests_metadata() {
+  mkdir -p $(dirname "${KNAPSACK_RSPEC_SUITE_REPORT_PATH}") $(dirname "${FLAKY_RSPEC_SUITE_REPORT_PATH}") "${RSPEC_PROFILING_FOLDER_PATH}"
+
+  curl --fail --location -o "${KNAPSACK_RSPEC_SUITE_REPORT_PATH}" "https://gitlab-org.gitlab.io/gitlab/${KNAPSACK_RSPEC_SUITE_REPORT_PATH}" ||
+    echo "{}" > "${KNAPSACK_RSPEC_SUITE_REPORT_PATH:-unknown_file}"
+
+  curl --fail --location -o "${FLAKY_RSPEC_SUITE_REPORT_PATH}" "https://gitlab-org.gitlab.io/gitlab/${FLAKY_RSPEC_SUITE_REPORT_PATH}" ||
+    echo "{}" > "${FLAKY_RSPEC_SUITE_REPORT_PATH}"
+
+  curl --fail --location -o "${RSPEC_FAST_QUARANTINE_PATH}" "https://gitlab-org.gitlab.io/quality/engineering-productivity/fast-quarantine/${RSPEC_FAST_QUARANTINE_PATH}" ||
+    echo "" > "${RSPEC_FAST_QUARANTINE_PATH}"
+}
+
 function update_tests_metadata() {
-  scripts/setup/tests-metadata.rb update
+  local rspec_flaky_folder_path="$(dirname "${FLAKY_RSPEC_SUITE_REPORT_PATH:-unknown_folder}")/"
+  local knapsack_folder_path="$(dirname "${KNAPSACK_RSPEC_SUITE_REPORT_PATH:-unknown_folder}")/"
+
+  if [[ ! -f "${KNAPSACK_RSPEC_SUITE_REPORT_PATH}" ]]; then
+    curl --fail --location -o "${KNAPSACK_RSPEC_SUITE_REPORT_PATH}" "https://gitlab-org.gitlab.io/gitlab/${KNAPSACK_RSPEC_SUITE_REPORT_PATH}" ||
+      echo "{}" > "${KNAPSACK_RSPEC_SUITE_REPORT_PATH}"
+  fi
+
+  if [[ ! -f "${FLAKY_RSPEC_SUITE_REPORT_PATH}" ]]; then
+    curl --fail --location -o "${FLAKY_RSPEC_SUITE_REPORT_PATH}" "https://gitlab-org.gitlab.io/gitlab/${FLAKY_RSPEC_SUITE_REPORT_PATH}" ||
+      echo "{}" > "${FLAKY_RSPEC_SUITE_REPORT_PATH}"
+  fi
+
+  if [[ ! -f "${RSPEC_FAST_QUARANTINE_PATH}" ]]; then
+    curl --fail --location -o "${RSPEC_FAST_QUARANTINE_PATH}" "https://gitlab-org.gitlab.io/quality/engineering-productivity/fast-quarantine/${RSPEC_FAST_QUARANTINE_PATH}" ||
+      echo "" > "${RSPEC_FAST_QUARANTINE_PATH}"
+  fi
+
+  if [[ "$AVERAGE_KNAPSACK_REPORT" == "true" ]]; then
+    # a comma separated list of file names matching the glob
+    local new_reports="$(printf '%s,' ${knapsack_folder_path:-unknown_folder}rspec*.json)"
+    scripts/pipeline/average_reports.rb -i "${KNAPSACK_RSPEC_SUITE_REPORT_PATH:-unknown_file}" -n "${new_reports}"
+  else
+    scripts/merge-reports "${KNAPSACK_RSPEC_SUITE_REPORT_PATH:-unknown_file}" ${knapsack_folder_path:-unknown_folder}rspec*.json
+  fi
+
+  export FLAKY_RSPEC_GENERATE_REPORT="true"
+  scripts/merge-reports "${FLAKY_RSPEC_SUITE_REPORT_PATH:-unknown_file}" ${rspec_flaky_folder_path:-unknown_folder}all_*.json
+
+  # Prune flaky tests that weren't flaky in the last 7 days, *after* updating the flaky tests detected
+  # in this pipeline, so that first_flaky_at for tests that are still flaky is maintained.
+  scripts/flaky_examples/prune-old-flaky-examples "${FLAKY_RSPEC_SUITE_REPORT_PATH:-unknown_file}"
 
   if [[ "$CI_PIPELINE_SOURCE" == "schedule" ]]; then
     if [[ -n "$RSPEC_PROFILING_PGSSLKEY" ]]; then
@@ -157,124 +201,35 @@ function debug_rspec_variables() {
 
 function handle_retry_rspec_in_new_process() {
   local rspec_run_status="${1}"
-  local rspec_retry_status=0
-  local auto_retry_status=1
 
   if [[ $rspec_run_status -eq 3 ]]; then
     echoerr "Not retrying failing examples since we failed early on purpose!"
-    auto_retry_exit_code_if_known_flaky_tests || auto_retry_status=$?
-    exit "${auto_retry_status}"
+    exit 1
   fi
 
   if [[ $rspec_run_status -eq 2 ]]; then
     echoerr "Not retrying failing examples since there were errors happening outside of the RSpec examples!"
-    auto_retry_exit_code_if_known_flaky_tests || auto_retry_status=$?
-    exit "${auto_retry_status}"
+    exit 1
   fi
 
   if [[ $rspec_run_status -eq 1 ]]; then
     if is_rspec_last_run_results_file_missing; then
-      auto_retry_exit_code_if_known_flaky_tests || auto_retry_status=$?
-      exit "${auto_retry_status}"
+      exit 1
     fi
 
     local failed_examples_count=$(grep -c " failed" "${RSPEC_LAST_RUN_RESULTS_FILE}")
     if [[ "${failed_examples_count}" -eq "${RSPEC_FAIL_FAST_THRESHOLD}" ]]; then
       echoerr "Not retrying failing examples since we reached the maximum number of allowed test failures!"
-      auto_retry_exit_code_if_known_flaky_tests || auto_retry_status=$?
-      exit "${auto_retry_status}"
+      exit 1
     fi
 
-    retry_failed_rspec_examples || rspec_retry_status=$?
+    retry_failed_rspec_examples
+    rspec_run_status=$?
   else
     echosuccess "No examples to retry, congrats!"
-    exit "${rspec_run_status}"
   fi
 
-  # The retry in a new RSpec process succeeded.
-  if [[ $rspec_retry_status -eq 0 ]]; then
-    exit "${rspec_retry_status}"
-  fi
-
-  # At this stage, we know the CI/CD job will fail.
-  #
-  # We'll change the exit code to auto-retry the CI job if the failure was due to a known flaky test.
-  auto_retry_exit_code_if_known_flaky_tests || auto_retry_status=$?
-  exit "${auto_retry_status}"
-}
-
-function auto_retry_exit_code_if_known_flaky_tests() {
-  # Default exit status
-  rspec_retry_status=1
-
-  if [[ "${CI_AUTO_RETRY_JOBS_WITH_FLAKY_TESTS_ENABLED}" != "true" ]]; then
-    echoinfo "INFO: auto-retry of CI/CD job that failed due to a known flaky test is disabled because CI_AUTO_RETRY_JOBS_WITH_FLAKY_TESTS_ENABLED=${CI_AUTO_RETRY_JOBS_WITH_FLAKY_TESTS_ENABLED}."
-    return "${rspec_retry_status}"
-  fi
-
-  echo "*******************************************************"
-  echo "Retry CI job if known flaky tests failed the job"
-  echo "*******************************************************"
-
-  found_known_flaky_tests_status=0
-  found_known_flaky_tests_output=$(found_known_flaky_tests) || found_known_flaky_tests_status=$?
-
-  echo "${found_known_flaky_tests_output}"
-  if [[ $found_known_flaky_tests_status -eq 0 ]]; then
-    echo
-    echo "We'll ensure this CI/CD job is auto-retried (i.e. setting exit code: 112)."
-
-    if [[ "${CI_AUTO_RETRY_JOBS_WITH_FLAKY_TESTS_NOTIFICATIONS_ENABLED}" == "true" ]]; then
-      comment=$(cat <<-EOF
-Job ${CI_JOB_NAME} (${CI_JOB_URL}, ${CI_PIPELINE_URL}) failed because of a flaky test, and was auto-retried.
-
-${found_known_flaky_tests_output}
-EOF
-      )
-
-      echo
-      echo "Reporting to https://gitlab.com/gitlab-org/quality/engineering-productivity/team/-/issues/573 (project id: 34408484)"
-      new_comment_in_issue \
-        "34408484" \
-        "573" \
-        "${comment}" || true
-    fi
-
-    # Exit code for auto-retrying a job that had known flaky tests in it
-    #
-    # See .gitlab/ci/global.gitlab-ci.yml for the list of custom exit codes we use to auto-retry jobs
-    rspec_retry_status=112
-  else
-    echo
-    echo "Not changing the CI/CD job exit code."
-  fi
-
-  return "${rspec_retry_status}"
-}
-
-function found_known_flaky_tests() {
-  # For the input files, we want to get both rspec-${CI_JOB_ID}.json (first RSpec run)
-  # and rspec-retry-${CI_JOB_ID}.json (second RSpec run).
-  #
-  # Depending on where this function will be called,
-  # we might have the two files, just one, or none available.
-  bundle exec existing-test-health-issue \
-    --token "${TEST_FAILURES_PROJECT_TOKEN}" \
-    --project "gitlab-org/gitlab" \
-    --input-files "rspec/rspec-*${CI_JOB_ID}.json" \
-    --health-problem-type failures;
-}
-
-function new_comment_in_issue() {
-  local project_id="${1}"
-  local issue_id="${2}"
-  local body="${3}"
-
-  curl --silent -o /dev/null --request POST \
-    --header "PRIVATE-TOKEN: ${TEST_FAILURES_PROJECT_TOKEN}" \
-    --header "Content-Type: application/x-www-form-urlencoded" \
-    --data "body=${body}" \
-    "${CI_API_V4_URL}/projects/${project_id}/issues/${issue_id}/notes" || true
+  exit "${rspec_run_status}"
 }
 
 function rspec_parallelized_job() {
@@ -343,23 +298,21 @@ function rspec_parallelized_job() {
   handle_retry_rspec_in_new_process $rspec_run_status
 }
 
-# this function must be executed from 'qa' directory
 function run_e2e_specs() {
   local url=$1
   local tests=$2
   local tags=$3
 
-  export QA_COMMAND="bundle exec bin/qa ${QA_SCENARIO:=Test::Instance::All} $url -- $tests $tags --order random --force-color --format documentation"
+  export QA_COMMAND="bundle exec bin/qa ${QA_SCENARIO:=Test::Instance::All} $url -- $tests $tags --order random --force-color --format documentation --format QA::Support::JsonFormatter --out tmp/rspec-${CI_JOB_ID}-\${QA_RSPEC_RETRIED:-false}.json"
   echo "Running e2e specs via command: '$QA_COMMAND'"
 
-  if eval "$QA_COMMAND"; then
+  if eval "$QA_COMMAND --format RspecJunitFormatter --out tmp/rspec-${CI_JOB_ID}.xml"; then
     echo "Test run finished successfully"
   else
     retry_failed_e2e_rspec_examples
   fi
 }
 
-# this function must be executed from 'qa' directory
 function retry_failed_e2e_rspec_examples() {
   local rspec_run_status=0
 
@@ -376,38 +329,22 @@ function retry_failed_e2e_rspec_examples() {
     exit 1
   fi
 
+  local junit_retry_file="tmp/retried-rspec-${CI_JOB_ID}.xml"
+
   export QA_RSPEC_RETRIED="true"
   export NO_KNAPSACK="true"
 
   echoinfo "Initial test run failed, retrying tests in new process" "yes"
 
-  if eval "$QA_COMMAND --only-failures"; then
+  if eval "$QA_COMMAND --format RspecJunitFormatter --out ${junit_retry_file} --only-failures"; then
     echosuccess "Retry run finished successfully" "yes"
   else
     rspec_run_status=$?
     echoerr "Retry run did not finish successfully, job will be failed!" "yes"
   fi
 
-  # default junit file pattern is set in 'qa/qa/specs/runner.rb'
-  local junit_retry_file=$(ls tmp/rspec-*-retried-true.xml)
-
   echoinfo "Merging junit reports" "yes"
-  if [[ ! -f "${junit_retry_file}" ]]; then
-    echoerr "Junit retry file not found '${junit_retry_file}', skipping report merge"
-    return 0
-  fi
-
-  if [[ "$QA_RUN_IN_PARALLEL" == "true" ]]; then
-    echoinfo "Parallel run detected, merging with parallel reports"
-    bundle exec junit_merge tmp/rspec-*-retried-false*.xml
-    mv "$(ls tmp/rspec-*-retried-false*.xml | tail -n 1)" "tmp/rspec-${CI_JOB_ID}.xml"
-    rm tmp/rspec-*-retried-false*.xml
-
-    bundle exec junit_merge --update-only $junit_retry_file "tmp/rspec-${CI_JOB_ID}.xml"
-  else
-    bundle exec junit_merge --update-only $junit_retry_file tmp/rspec-*-retried-false.xml
-  fi
-  rm $junit_retry_file
+  bundle exec junit_merge ${junit_retry_file} tmp/rspec-${CI_JOB_ID}.xml --update-only
   echosuccess " junit results merged successfully!"
 
   exit $rspec_run_status
@@ -451,7 +388,8 @@ function retry_failed_rspec_examples() {
   local junit_retry_file="rspec/rspec-retry-${CI_JOB_ID}.xml"
 
   # Retry only the tests that failed on first try
-  rspec_simple_job "--only-failures --pattern \"${knapsack_test_file_pattern}\"" "${json_retry_file}" "${junit_retry_file}" || rspec_run_status=$?
+  rspec_simple_job "--only-failures --pattern \"${knapsack_test_file_pattern}\"" "${json_retry_file}" "${junit_retry_file}"
+  rspec_run_status=$?
 
   # Merge the reports from retry into the first-try report
   scripts/merge-reports "rspec/rspec-${CI_JOB_ID}.json" "${json_retry_file}"
@@ -463,7 +401,7 @@ function retry_failed_rspec_examples() {
     warn_on_successfully_retried_test
   fi
 
-  return $rspec_run_status
+  exit $rspec_run_status
 }
 
 # Exit with an allowed_failure exit code if the flaky test was part of the MR that triggered this pipeline
@@ -582,7 +520,7 @@ function cleanup_individual_job_reports() {
     rspec/retried_tests_*_report.txt \
     ${RSPEC_LAST_RUN_RESULTS_FILE:-unknown_folder} \
     ${RSPEC_PROFILING_FOLDER_PATH:-unknown_folder}/**/*
-  rmdir ${RSPEC_PROFILING_FOLDER_PATH:-unknown_folder} || true
+  rmdir ${RSPEC_PROFILING_FOLDER_PAT:-unknown_folder} || true
 }
 
 function generate_flaky_tests_reports() {

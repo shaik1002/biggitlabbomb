@@ -38,7 +38,9 @@ module Clusters
                      raise ArgumentError, "unknown type for #{clusterable}"
                    end
 
-      cte << same_namespace_management_clusters_query if clusterable.is_a?(::Project)
+      if clusterable.is_a?(::Project)
+        cte << same_namespace_management_clusters_query
+      end
 
       cte << base_query
       cte << parent_query(cte)

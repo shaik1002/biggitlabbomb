@@ -1,9 +1,7 @@
 # frozen_string_literal: true
 
 module Integrations
-  class HangoutsChat < Integration
-    include Base::ChatNotification
-
+  class HangoutsChat < BaseChatNotification
     # Enum value of the messageReplyOption query parameter that indicates that messages should be created as replies to
     # the specified threads if possible and start new threads otherwise
     # https://developers.google.com/workspace/chat/api/reference/rest/v1/spaces.messages/create#messagereplyoption
@@ -38,7 +36,7 @@ module Integrations
 
     def self.help
       build_help_page_url(
-        'user/project/integrations/hangouts_chat.md',
+        'user/project/integrations/hangouts_chat',
         'Before enabling this integration, create a webhook for the space in Google Chat where you want to ' \
         'receive notifications from this project.',
         _('How do I set up a Google Chat webhook?')

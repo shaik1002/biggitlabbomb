@@ -13,10 +13,7 @@ module Repositories
     rescue_from Gitlab::GitAccessProject::CreationError, with: :render_422_with_exception
     rescue_from Gitlab::GitAccess::TimeoutError, with: :render_503_with_exception
     rescue_from GRPC::Unavailable do |e|
-      render_503_with_exception(
-        e,
-        message: 'The git server, Gitaly, is not available at this time. Please contact your administrator.'
-      )
+      render_503_with_exception(e, message: 'The git server, Gitaly, is not available at this time. Please contact your administrator.')
     end
 
     # GET /foo/bar.git/info/refs?service=git-upload-pack (git pull)
@@ -138,7 +135,7 @@ module Repositories
       Gitlab::EventStore.publish(
         Users::ActivityEvent.new(data: {
           user_id: user.id,
-          namespace_id: project.root_ancestor.id
+          namespace_id: project.namespace_id
         })
       )
     end

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe ErrorTracking::SentryClient::Token, feature_category: :observability do
+RSpec.describe ErrorTracking::SentryClient::Token, feature_category: :error_tracking do
   describe '.masked_token?' do
     subject { described_class.masked_token?(token) }
 

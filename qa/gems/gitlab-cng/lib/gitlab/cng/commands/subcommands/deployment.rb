@@ -49,12 +49,8 @@ module Gitlab
                 type: :string,
                 repeatable: true,
                 aliases: "-e"
-              option :retry,
-                desc: "Max number of retries for failed deployment",
-                default: 0,
-                type: :numeric
 
-              super
+              super(name)
             end
           end
 
@@ -96,9 +92,9 @@ module Gitlab
             return print_deploy_args("kind") if options[:print_deploy_args] && options[:ci]
 
             if options[:create_cluster]
-              Kind::Cluster.new(**symbolized_options.slice(
+              invoke(Commands::Create, :cluster, [], **symbolized_options.slice(
                 :docker_hostname, :ci, :host_http_port, :host_ssh_port
-              )).create
+              ))
             end
 
             configuration_args = symbolized_options.slice(
@@ -124,7 +120,7 @@ module Gitlab
           def installation(name, configuration)
             Cng::Deployment::Installation.new(
               name, configuration: configuration,
-              **symbolized_options.slice(:namespace, :set, :ci, :gitlab_domain, :timeout, :chart_sha, :env, :retry)
+              **symbolized_options.slice(:namespace, :set, :ci, :gitlab_domain, :timeout, :chart_sha, :env)
             )
           end
 

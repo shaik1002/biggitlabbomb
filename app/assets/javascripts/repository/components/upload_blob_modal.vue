@@ -5,11 +5,10 @@ import {
   GlFormGroup,
   GlFormInput,
   GlFormTextarea,
+  GlToggle,
   GlButton,
   GlAlert,
-  GlFormCheckbox,
 } from '@gitlab/ui';
-import FileIcon from '~/vue_shared/components/file_icon.vue';
 import { createAlert } from '~/alert';
 import axios from '~/lib/utils/axios_utils';
 import { contentTypeMultipartFormData } from '~/lib/utils/headers';
@@ -39,11 +38,10 @@ export default {
     GlFormGroup,
     GlFormInput,
     GlFormTextarea,
+    GlToggle,
     GlButton,
     UploadDropzone,
     GlAlert,
-    FileIcon,
-    GlFormCheckbox,
   },
   i18n: {
     COMMIT_LABEL,
@@ -215,7 +213,7 @@ export default {
       @primary.prevent="submitForm"
     >
       <upload-dropzone
-        class="gl-mb-6 gl-h-26"
+        class="gl-h-200! gl-mb-4"
         single-file-selection
         :valid-file-mimetypes="$options.validFileMimetypes"
         :is-file-valid="() => true"
@@ -225,12 +223,9 @@ export default {
           v-if="file"
           class="card upload-dropzone-card upload-dropzone-border gl-h-full gl-w-full gl-items-center gl-justify-center gl-p-3"
         >
-          <file-icon :file-name="file.name" :size="24" />
-          <div class="gl-mb-2">
-            {{ file.name }}
-            &middot;
-            <span class="gl-text-subtle">{{ formattedFileSize }}</span>
-          </div>
+          <img v-if="filePreviewURL" :src="filePreviewURL" class="gl-h-11" />
+          <div>{{ formattedFileSize }}</div>
+          <div>{{ file.name }}</div>
           <gl-button
             category="tertiary"
             variant="confirm"
@@ -248,11 +243,14 @@ export default {
         :label="$options.i18n.TARGET_BRANCH_LABEL"
         label-for="branch_name"
       >
-        <gl-form-input id="branch_name" v-model="target" :disabled="loading" name="branch_name" />
+        <gl-form-input v-model="target" :disabled="loading" name="branch_name" />
       </gl-form-group>
-      <gl-form-checkbox v-if="showCreateNewMrToggle" v-model="createNewMr" :disabled="loading">
-        {{ $options.i18n.TOGGLE_CREATE_MR_LABEL }}
-      </gl-form-checkbox>
+      <gl-toggle
+        v-if="showCreateNewMrToggle"
+        v-model="createNewMr"
+        :disabled="loading"
+        :label="$options.i18n.TOGGLE_CREATE_MR_LABEL"
+      />
       <gl-alert v-if="!canPushCode" variant="info" :dismissible="false" class="gl-mt-3">
         {{ $options.i18n.NEW_BRANCH_IN_FORK }}
       </gl-alert>

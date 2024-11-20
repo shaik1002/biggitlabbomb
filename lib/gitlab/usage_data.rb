@@ -57,6 +57,7 @@ module Gitlab
         {
           counts: {
             assignee_lists: count(List.assignee),
+            ci_builds: count(::Ci::Build),
             ci_external_pipelines: count(::Ci::Pipeline.external),
             ci_pipeline_config_auto_devops: count(::Ci::Pipeline.auto_devops_source),
             ci_pipeline_config_repository: count(::Ci::Pipeline.repository_source),
@@ -65,7 +66,9 @@ module Gitlab
             auto_devops_enabled: count(::ProjectAutoDevops.enabled),
             auto_devops_disabled: count(::ProjectAutoDevops.disabled),
             deploy_keys: count(DeployKey),
+            # rubocop: disable UsageData/LargeTable:
             feature_flags: count(Operations::FeatureFlag),
+            # rubocop: enable UsageData/LargeTable:
             environments: count(::Environment),
             clusters: count(::Clusters::Cluster),
             clusters_enabled: count(::Clusters::Cluster.enabled),
@@ -437,6 +440,7 @@ module Gitlab
           Gitlab::Utils::UsageData::FALLBACK
         else
           # rubocop: disable CodeReuse/ActiveRecord
+          # rubocop: disable UsageData/LargeTable
           start = ::Event.where(time_period).select(:id).order(created_at: :asc).first&.id
           finish = ::Event.where(time_period).select(:id).order(created_at: :desc).first&.id
           estimate_batch_distinct_count(::Event.where(time_period), :author_id, start: start, finish: finish)

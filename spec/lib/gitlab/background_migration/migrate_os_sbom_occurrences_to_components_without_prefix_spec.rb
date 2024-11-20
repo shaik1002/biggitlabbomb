@@ -3,13 +3,6 @@
 require 'spec_helper'
 
 RSpec.describe Gitlab::BackgroundMigration::MigrateOsSbomOccurrencesToComponentsWithoutPrefix, feature_category: :software_composition_analysis do
-  before(:all) do
-    # This migration will not work if a sec database is configured. It should be finalized and removed prior to
-    # sec db rollout.
-    # Consult https://gitlab.com/gitlab-org/gitlab/-/merge_requests/171707 for more info.
-    skip_if_multiple_databases_are_setup(:sec)
-  end
-
   let(:projects) { table(:projects) }
   let(:namespaces) { table(:namespaces) }
   let(:sbom_components) { table(:sbom_components) }
@@ -40,31 +33,22 @@ RSpec.describe Gitlab::BackgroundMigration::MigrateOsSbomOccurrencesToComponents
   end
 
   context 'when sbom occurrence belongs to sbom component with os prefix' do
-    let(:alpine_src_component) do
-      sbom_components.create!(name: 'alpine/curl', purl_type: 9, component_type: 0, organization_id: 1)
-    end
-
+    let(:alpine_src_component) { sbom_components.create!(name: 'alpine/curl', purl_type: 9, component_type: 0) }
     let(:alpine_src_version) do
       sbom_component_versions.create!(version: '1.0.0', component_id: alpine_src_component.id,
-        source_package_name: 'curl', organization_id: 1)
+        source_package_name: 'curl')
     end
 
-    let(:redhat_src_component) do
-      sbom_components.create!(name: 'redhat/curl', purl_type: 10, component_type: 0, organization_id: 1)
-    end
-
+    let(:redhat_src_component) { sbom_components.create!(name: 'redhat/curl', purl_type: 10, component_type: 0) }
     let(:redhat_src_version) do
       sbom_component_versions.create!(version: '1.0.0', component_id: redhat_src_component.id,
-        source_package_name: 'curl', organization_id: 1)
+        source_package_name: 'curl')
     end
 
-    let(:debian_src_component) do
-      sbom_components.create!(name: 'debian/curl', purl_type: 11, component_type: 0, organization_id: 1)
-    end
-
+    let(:debian_src_component) { sbom_components.create!(name: 'debian/curl', purl_type: 11, component_type: 0) }
     let(:debian_src_version) do
       sbom_component_versions.create!(version: '1.0.0', component_id: debian_src_component.id,
-        source_package_name: 'curl', organization_id: 1)
+        source_package_name: 'curl')
     end
 
     subject(:perform_migration) do
@@ -80,13 +64,13 @@ RSpec.describe Gitlab::BackgroundMigration::MigrateOsSbomOccurrencesToComponents
     end
 
     it 'migrates the data correctly' do
-      alpine_dst_component = sbom_components.create!(name: 'curl', purl_type: 9, component_type: 0, organization_id: 1)
+      alpine_dst_component = sbom_components.create!(name: 'curl', purl_type: 9, component_type: 0)
       alpine_occurrence = create_sbom_occurrence(alpine_src_component, alpine_src_version)
 
-      redhat_dst_component = sbom_components.create!(name: 'curl', purl_type: 10, component_type: 0, organization_id: 1)
+      redhat_dst_component = sbom_components.create!(name: 'curl', purl_type: 10, component_type: 0)
       redhat_occurrence = create_sbom_occurrence(redhat_src_component, redhat_src_version)
 
-      debian_dst_component = sbom_components.create!(name: 'curl', purl_type: 11, component_type: 0, organization_id: 1)
+      debian_dst_component = sbom_components.create!(name: 'curl', purl_type: 11, component_type: 0)
       debian_occurrence = create_sbom_occurrence(debian_src_component, debian_src_version)
 
       perform_migration
@@ -106,13 +90,11 @@ RSpec.describe Gitlab::BackgroundMigration::MigrateOsSbomOccurrencesToComponents
     end
 
     context 'when components have no versions' do
-      let(:src_component) do
-        sbom_components.create!(name: 'alpine/curl', purl_type: 9, component_type: 0, organization_id: 1)
-      end
+      let(:src_component) { sbom_components.create!(name: 'alpine/curl', purl_type: 9, component_type: 0) }
 
       it 'does not raise error' do
         occurrence = create_sbom_occurrence(src_component, nil)
-        dst_component = sbom_components.create!(name: 'curl', purl_type: 9, component_type: 0, organization_id: 1)
+        dst_component = sbom_components.create!(name: 'curl', purl_type: 9, component_type: 0)
 
         expect { perform_migration }.not_to raise_error
 
@@ -124,7 +106,7 @@ RSpec.describe Gitlab::BackgroundMigration::MigrateOsSbomOccurrencesToComponents
 
     context 'when components have no occurrences' do
       it 'does not raise an error' do
-        sbom_components.create!(name: 'alpine/curl', purl_type: 9, component_type: 0, organization_id: 1)
+        sbom_components.create!(name: 'alpine/curl', purl_type: 9, component_type: 0)
 
         expect { perform_migration }.not_to raise_error
       end

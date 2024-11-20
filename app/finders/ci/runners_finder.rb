@@ -53,10 +53,7 @@ module Ci
     end
 
     def allowed_sorts
-      %w[
-        contacted_asc contacted_desc created_at_asc created_at_desc
-        created_date token_expires_at_asc token_expires_at_desc
-      ]
+      %w[contacted_asc contacted_desc created_at_asc created_at_desc created_date token_expires_at_asc token_expires_at_desc]
     end
 
     def all_runners
@@ -129,7 +126,7 @@ module Ci
       tag_list = @params[:tag_name].presence
       return items unless tag_list
 
-      items.tagged_with(tag_list, like_search_enabled: true)
+      items.tagged_with(tag_list)
     end
 
     def by_creator_id(items)

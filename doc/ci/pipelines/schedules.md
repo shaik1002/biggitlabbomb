@@ -33,7 +33,7 @@ To add a pipeline schedule:
    - **Interval Pattern**: Select one of the preconfigured intervals, or enter a custom
      interval in [cron notation](../../topics/cron/index.md). You can use any cron value,
      but scheduled pipelines cannot run more frequently than the instance's
-     [maximum scheduled pipeline frequency](../../administration/cicd/index.md#change-maximum-scheduled-pipeline-frequency).
+     [maximum scheduled pipeline frequency](../../administration/cicd.md#change-maximum-scheduled-pipeline-frequency).
    - **Target branch or tag**: Select the branch or tag for the pipeline.
    - **Variables**: Add any number of [CI/CD variables](../variables/index.md) to the schedule.
      These variables are available only when the scheduled pipeline runs,
@@ -137,9 +137,3 @@ To get an overview of all existing schedules and identify opportunities to distr
    For example, you might see many schedules set to run at the start of each hour (`0 * * * *`).
 1. Adjust the schedules to create a staggered [`cron` pattern](../../topics/cron/index.md#cron-syntax), especially for large repositories.
    For example, instead of multiple schedules running at the start of each hour, distribute them throughout the hour (`5 * * * *`, `15 * * * *`, `25 * * * *`).
-
-### Scheduled pipeline suddenly becomes inactive
-
-If a scheduled pipeline status changes to `Inactive` unexpectedly, it might be because
-the owner of the schedule was blocked or removed. [Take ownership](#take-ownership)
-of the schedule to modify and activate it.

@@ -4,7 +4,7 @@
 
 .top-bar-fixed {
   @apply gl-shadow-inner-b-1-gray-100;
-  @apply gl-bg-default;
+  background-color: $body-bg;
   position: fixed;
   left: var(--application-bar-left);
   right: var(--application-bar-right);
@@ -20,8 +20,3 @@
     @apply gl-transition-[width,left,right];
   }
 }
-
-.top-app-header {
-  top: $calc-application-header-height;
-}
-

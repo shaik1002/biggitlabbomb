@@ -14,8 +14,7 @@ module Namespaces
     has_one :project, inverse_of: :project_namespace
 
     delegate :execute_hooks, :execute_integrations, :group, to: :project, allow_nil: true
-    delegate :external_references_supported?, :default_issues_tracker?, :pending_delete?, to: :project
-    delegate :service_desk_alias_address, to: :project
+    delegate :external_references_supported?, :default_issues_tracker?, to: :project
 
     def self.sti_name
       'Project'
@@ -61,12 +60,5 @@ module Namespaces
 
       assign_attributes(attributes_to_sync)
     end
-
-    # It's always 1 project but it has to be an AR relation
-    def all_projects
-      Project.where(id: project.id)
-    end
   end
 end
-
-Namespaces::ProjectNamespace.prepend_mod

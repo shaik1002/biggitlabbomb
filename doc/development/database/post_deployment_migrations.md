@@ -22,8 +22,7 @@ bundle exec rake db:migrate
 This however skips post deployment migrations:
 
 ```shell
-export SKIP_POST_DEPLOYMENT_MIGRATIONS=true
-bundle exec rake db:migrate
+SKIP_POST_DEPLOYMENT_MIGRATIONS=true bundle exec rake db:migrate
 ```
 
 For GitLab.com, these migrations are executed on a daily basis at the discretion of
@@ -38,8 +37,7 @@ usually use the command `chef-client` to do so. To make use of this feature
 you'd have to run this command as follows:
 
 ```shell
-export SKIP_POST_DEPLOYMENT_MIGRATIONS=true
-sudo chef-client
+SKIP_POST_DEPLOYMENT_MIGRATIONS=true sudo chef-client
 ```
 
 Once all servers have been updated you can run `chef-client` again on a single

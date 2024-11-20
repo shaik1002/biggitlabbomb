@@ -113,7 +113,7 @@ export default {
         <ref-selector
           :project-id="String(projectInitialJson.id)"
           :value="repositoryRef"
-          class="gl-inline-block"
+          class="gl-inline"
           @input="handleInput"
         />
       </template>

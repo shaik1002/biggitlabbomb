@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Mutations::Metrics::Dashboard::Annotations::Create, feature_category: :observability do
+RSpec.describe Mutations::Metrics::Dashboard::Annotations::Create, feature_category: :metrics do
   include GraphqlHelpers
 
   let_it_be(:current_user) { create(:user) }

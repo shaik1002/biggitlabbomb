@@ -138,6 +138,7 @@ describe('Deploy Board', () => {
     });
 
     it('should render the empty state', () => {
+      expect(wrapper.find('.deploy-board-empty-state-svg svg')).toBeDefined();
       expect(
         wrapper.find('.deploy-board-empty-state-text .deploy-board-empty-state-title').text(),
       ).toContain('Kubernetes deployment not found');

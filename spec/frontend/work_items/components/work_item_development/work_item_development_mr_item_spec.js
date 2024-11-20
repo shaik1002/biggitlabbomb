@@ -1,6 +1,6 @@
 import { GlLink, GlIcon, GlAvatarsInline, GlAvatarLink, GlAvatar } from '@gitlab/ui';
 import { shallowMount, mount } from '@vue/test-utils';
-import { workItemDevelopmentMRNodes } from 'jest/work_items/mock_data';
+import { workItemDevelopmentNodes } from 'jest/work_items/mock_data';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { STATUS_OPEN, STATUS_CLOSED, STATUS_MERGED } from '~/issues/constants';
 import WorkItemDevelopmentMRItem from '~/work_items/components/work_item_development/work_item_development_mr_item.vue';
@@ -8,7 +8,7 @@ import WorkItemDevelopmentMRItem from '~/work_items/components/work_item_develop
 describe('WorkItemDevelopmentMRItem', () => {
   let wrapper;
 
-  const openMergeRequest = workItemDevelopmentMRNodes[0].mergeRequest;
+  const openMergeRequest = workItemDevelopmentNodes[0].mergeRequest;
   const closedMergeRequest = {
     ...openMergeRequest,
     state: STATUS_CLOSED,
@@ -18,12 +18,12 @@ describe('WorkItemDevelopmentMRItem', () => {
     state: STATUS_MERGED,
   };
 
-  const mergeRequestWithNoAssignees = workItemDevelopmentMRNodes[1].mergeRequest;
+  const mergeRequestWithNoAssignees = workItemDevelopmentNodes[1].mergeRequest;
 
   const createComponent = ({ mergeRequest = openMergeRequest, mountFn = shallowMount } = {}) => {
     wrapper = mountFn(WorkItemDevelopmentMRItem, {
       propsData: {
-        itemContent: mergeRequest,
+        mergeRequest,
       },
     });
   };
@@ -37,9 +37,9 @@ describe('WorkItemDevelopmentMRItem', () => {
   describe('MR status badge', () => {
     it.each`
       state            | icon                     | mergeRequest          | iconClass
-      ${STATUS_OPEN}   | ${'merge-request'}       | ${openMergeRequest}   | ${'gl-fill-icon-success'}
-      ${STATUS_MERGED} | ${'merge'}               | ${mergedMergeRequest} | ${'gl-fill-icon-info'}
-      ${STATUS_CLOSED} | ${'merge-request-close'} | ${closedMergeRequest} | ${'gl-fill-icon-danger'}
+      ${STATUS_OPEN}   | ${'merge-request'}       | ${openMergeRequest}   | ${'gl-text-green-500'}
+      ${STATUS_MERGED} | ${'merge'}               | ${mergedMergeRequest} | ${'gl-text-blue-500'}
+      ${STATUS_CLOSED} | ${'merge-request-close'} | ${closedMergeRequest} | ${'gl-text-red-500'}
     `(
       'renders icon "$icon" when the state of the MR is "$state"',
       ({ icon, iconClass, mergeRequest }) => {

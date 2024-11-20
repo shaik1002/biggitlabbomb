@@ -3,9 +3,7 @@
 require "discordrb/webhooks"
 
 module Integrations
-  class Discord < Integration
-    include Integrations::Base::ChatNotification
-
+  class Discord < BaseChatNotification
     ATTACHMENT_REGEX = Gitlab::UntrustedRegexp.new(': (?<entry>[^\n]*)\n - (?<name>[^\n]*)\n*')
 
     field :webhook,
@@ -36,7 +34,7 @@ module Integrations
 
     def self.help
       build_help_page_url(
-        'user/project/integrations/discord_notifications.md',
+        'user/project/integrations/discord_notifications',
         s_("DiscordService|Send notifications about project events to a Discord channel."),
         _('How do I set up this integration?')
       )

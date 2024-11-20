@@ -2,7 +2,7 @@
 <script>
 import NO_PIPELINES_SVG from '@gitlab/svgs/dist/illustrations/empty-state/empty-pipeline-md.svg?url';
 import ERROR_STATE_SVG from '@gitlab/svgs/dist/illustrations/empty-state/empty-job-failed-md.svg?url';
-import { GlCollapsibleListbox, GlEmptyState, GlIcon, GlLoadingIcon } from '@gitlab/ui';
+import { GlEmptyState, GlIcon, GlLoadingIcon, GlCollapsibleListbox } from '@gitlab/ui';
 import { isEqual } from 'lodash';
 import * as Sentry from '~/sentry/sentry_browser_wrapper';
 import { createAlert, VARIANT_INFO, VARIANT_WARNING } from '~/alert';
@@ -58,12 +58,25 @@ export default {
       type: Boolean,
       required: true,
     },
+    canCreatePipeline: {
+      type: Boolean,
+      required: true,
+    },
     resetCachePath: {
       type: String,
       required: false,
       default: null,
     },
     newPipelinePath: {
+      type: String,
+      required: false,
+      default: null,
+    },
+    projectId: {
+      type: String,
+      required: true,
+    },
+    defaultBranchName: {
       type: String,
       required: false,
       default: null,
@@ -338,12 +351,8 @@ export default {
       v-if="shouldRenderTabs || shouldRenderButtons"
       class="top-area scrolling-tabs-container inner-page-scroll-tabs gl-border-none"
     >
-      <div class="fade-left">
-        <gl-icon name="chevron-lg-left" :size="12" />
-      </div>
-      <div class="fade-right">
-        <gl-icon name="chevron-lg-right" :size="12" />
-      </div>
+      <div class="fade-left"><gl-icon name="chevron-lg-left" :size="12" /></div>
+      <div class="fade-right"><gl-icon name="chevron-lg-right" :size="12" /></div>
 
       <navigation-tabs
         v-if="shouldRenderTabs"
@@ -367,6 +376,8 @@ export default {
       >
         <pipelines-filtered-search
           class="gl-flex gl-max-w-full gl-flex-grow"
+          :project-id="projectId"
+          :default-branch-name="defaultBranchName"
           :params="validatedParams"
           @filterPipelines="filterPipelines"
         />
@@ -392,6 +403,7 @@ export default {
       <no-ci-empty-state
         v-else-if="stateToRender === $options.stateMap.emptyState"
         :empty-state-svg-path="$options.noPipelinesSvgPath"
+        :can-set-ci="canCreatePipeline"
       />
 
       <gl-empty-state
@@ -410,6 +422,7 @@ export default {
       <div v-else-if="stateToRender === $options.stateMap.tableList">
         <pipelines-table
           :pipelines="state.pipelines"
+          :update-graph-dropdown="updateGraphDropdown"
           :pipeline-id-type="selectedPipelineKeyOption.value"
           @cancel-pipeline="onCancelPipeline"
           @refresh-pipelines-table="onRefreshPipelinesTable"

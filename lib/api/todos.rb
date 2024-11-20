@@ -6,7 +6,7 @@ module API
 
     before { authenticate! }
 
-    feature_category :notifications
+    feature_category :team_planning
     urgency :low
 
     ISSUABLE_TYPES = {

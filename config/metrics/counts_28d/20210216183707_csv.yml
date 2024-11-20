@@ -3,8 +3,6 @@ data_category: optional
 key_path: usage_activity_by_stage_monthly.manage.issue_imports.csv
 description: Count of (issue) imports from CSV file
 product_group: import_and_integrate
-product_categories:
-- importers
 value_type: number
 status: active
 time_frame: 28d
@@ -13,7 +11,7 @@ instrumentation_class: CountCsvImportsMetric
 distribution:
 - ce
 - ee
-tiers:
+tier:
 - free
 - premium
 - ultimate

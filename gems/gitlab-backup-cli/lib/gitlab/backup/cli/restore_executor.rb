@@ -8,37 +8,29 @@ module Gitlab
       # A Restore Executor handles the creation and deletion of
       # temporary environment necessary for a restoration to happen
       #
-      class RestoreExecutor < BaseExecutor
+      class RestoreExecutor
         attr_reader :context, :backup_id, :workdir, :archive_directory
 
-        # @param [Context::SourceContext|Context::OmnibusContext] context
+        # @param [Gitlab::Backup::Cli::SourceContext] context
         # @param [String] backup_id
-        def initialize(
-          context:,
-          backup_id: nil,
-          backup_bucket: nil,
-          wait_for_completion: nil,
-          registry_bucket: nil,
-          service_account_file: nil
-        )
+        def initialize(context:, backup_id:)
           @context = context
           @backup_id = backup_id
           @workdir = create_temporary_workdir!
           @archive_directory = context.backup_basedir.join(backup_id)
 
           @metadata = nil
-          super(
-            backup_bucket: backup_bucket,
-            wait_for_completion: wait_for_completion,
-            registry_bucket: registry_bucket,
-            service_account_file: service_account_file
-          )
+          @backup_options = nil
         end
 
         def execute
           read_metadata!
 
           execute_all_tasks
+        end
+
+        def backup_options
+          @backup_options ||= build_backup_options!
         end
 
         def metadata
@@ -53,36 +45,27 @@ module Gitlab
         private
 
         def execute_all_tasks
-          tasks = []
-          Gitlab::Backup::Cli::Tasks.build_each(context: context) do |task|
-            # This is a temporary hack while we move away from options and use config instead
-            # This hack will be removed as part of https://gitlab.com/gitlab-org/gitlab/-/issues/498455
-            task.set_registry_bucket(registry_bucket) if task.is_a?(Gitlab::Backup::Cli::Tasks::Registry)
-
+          # TODO: when we migrate targets to the new codebase, recreate options to have only what we need here
+          # https://gitlab.com/gitlab-org/gitlab/-/issues/454906
+          Gitlab::Backup::Cli::Tasks.build_each(context: context, options: backup_options) do |task|
             Gitlab::Backup::Cli::Output.info("Executing restoration of #{task.human_name}...")
 
             duration = measure_duration do
-              tasks << { name: task.human_name, result: task.restore!(archive_directory) }
+              task.restore!(archive_directory)
             end
-
-            next if task.object_storage?
 
             Gitlab::Backup::Cli::Output.success("Finished restoration of #{task.human_name}! (#{duration.in_seconds}s)")
-          end
-
-          if wait_for_completion
-            tasks.each do |task|
-              next unless task[:result].respond_to?(:wait_until_done)
-
-              wait_for_task(task[:result])
-            end
-          else
-            Gitlab::Backup::Cli::Output.info("Restore tasks complete! Not waiting for object storage tasks to complete")
           end
         end
 
         def read_metadata!
           @metadata = Gitlab::Backup::Cli::Metadata::BackupMetadata.load!(archive_directory)
+        end
+
+        def build_backup_options!
+          ::Backup::Options.new(
+            backup_id: backup_id
+          )
         end
 
         # @return [Pathname] temporary directory
@@ -99,17 +82,6 @@ module Gitlab
           yield
 
           ActiveSupport::Duration.build(Time.now - start)
-        end
-
-        def wait_for_task(task)
-          Gitlab::Backup::Cli::Output.info("Waiting for Restore of #{task.name} to finish...")
-
-          r = task.wait_until_done!
-          if r.error?
-            Gitlab::Backup::Cli::Output.error("Restore of #{task.name} failed!")
-          else
-            Gitlab::Backup::Cli::Output.success("Finished Restore of #{task.name}!")
-          end
         end
       end
     end

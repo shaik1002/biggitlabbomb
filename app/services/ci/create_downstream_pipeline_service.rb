@@ -41,15 +41,10 @@ module Ci
         .payload
 
       log_downstream_pipeline_creation(downstream_pipeline)
-      log_audit_event(downstream_pipeline)
       update_bridge_status!(@bridge, downstream_pipeline)
     rescue StandardError => e
       @bridge.reset.drop!(:data_integrity_failure)
       raise e
-    end
-
-    def log_audit_event(downstream_pipeline)
-      # defined in EE
     end
 
     private
@@ -177,5 +172,3 @@ module Ci
     end
   end
 end
-
-Ci::CreateDownstreamPipelineService.prepend_mod_with('Ci::CreateDownstreamPipelineService')

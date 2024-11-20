@@ -44,11 +44,11 @@ class GitlabSchema < GraphQL::Schema
       super(queries, **kwargs)
     end
 
-    def get_type(type_name, *other_args)
+    def get_type(type_name, context = GraphQL::Query::NullContext)
       type_name = Gitlab::GlobalId::Deprecations.apply_to_graphql_name(type_name)
       type_name = Gitlab::Graphql::TypeNameDeprecations.apply_to_graphql_name(type_name)
 
-      super(type_name, *other_args)
+      super(type_name, context)
     end
 
     def id_from_object(object, _type = nil, _ctx = nil)
@@ -189,4 +189,4 @@ class GitlabSchema < GraphQL::Schema
   end
 end
 
-GitlabSchema.prepend_mod_with('GitlabSchema')
+GitlabSchema.prepend_mod_with('GitlabSchema') # rubocop: disable Cop/InjectEnterpriseEditionModule

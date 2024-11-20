@@ -3,10 +3,7 @@
 RSpec.describe QA::Specs::Runner do
   shared_examples 'excludes default skipped, and geo' do
     it 'excludes the default skipped and geo tags, and includes default args' do
-      expect_rspec_runner_arguments(DEFAULT_SKIPPED_TAGS + ['--tag', '~geo',
-                                    '--format', 'documentation', '--format', 'QA::Support::JsonFormatter',
-                                    '--out', "tmp/rspec-#{ENV['CI_JOB_ID'] || 'local'}-retried-false.json",
-                                    '--format', 'RspecJunitFormatter', '--out', "tmp/rspec-#{ENV['CI_JOB_ID'] || 'local'}-retried-false.xml", *described_class::DEFAULT_TEST_PATH_ARGS])
+      expect_rspec_runner_arguments(DEFAULT_SKIPPED_TAGS + ['--tag', '~geo', *described_class::DEFAULT_TEST_PATH_ARGS])
 
       subject.perform
     end
@@ -31,10 +28,7 @@ RSpec.describe QA::Specs::Runner do
 
       it 'sets the `--tty` flag' do
         expect_rspec_runner_arguments(
-          ['--tty'] + DEFAULT_SKIPPED_TAGS + ['--tag', '~geo',
-          '--format', 'documentation', '--format', 'QA::Support::JsonFormatter',
-          '--out', "tmp/rspec-#{ENV['CI_JOB_ID'] || 'local'}-retried-false.json",
-          '--format', 'RspecJunitFormatter', '--out', "tmp/rspec-#{ENV['CI_JOB_ID'] || 'local'}-retried-false.xml", *described_class::DEFAULT_TEST_PATH_ARGS]
+          ['--tty'] + DEFAULT_SKIPPED_TAGS + ['--tag', '~geo', *described_class::DEFAULT_TEST_PATH_ARGS]
         )
 
         subject.perform
@@ -43,37 +37,63 @@ RSpec.describe QA::Specs::Runner do
 
     context 'when count_examples_only is set as an option' do
       let(:out) { StringIO.new }
-      let(:err) { StringIO.new }
 
       before do
         QA::Runtime::Scenario.define(:count_examples_only, true)
-        allow(StringIO).to receive(:new).and_return(out, err)
-        allow(RSpec::Core::Runner).to receive(:run).and_return(0)
+        out.string = '22 examples,'
+        allow(StringIO).to receive(:new).and_return(out)
       end
 
       after do
         QA::Runtime::Scenario.attributes.delete(:count_examples_only)
       end
 
-      it 'sets the `--dry-run` flag and minimal arguments' do
+      it 'sets the `--dry-run` flag' do
         expect_rspec_runner_arguments(
-          ['--dry-run', '--tag', '~orchestrated', '--tag', '~transient', '--tag', '~geo', *described_class::DEFAULT_TEST_PATH_ARGS],
-          [err, out]
+          ['--dry-run'] + DEFAULT_SKIPPED_TAGS + ['--tag', '~geo', *described_class::DEFAULT_TEST_PATH_ARGS],
+          [$stderr, anything]
         )
 
-        expect { subject.perform }.to raise_error(JSON::ParserError, /Failed to detect example count/)
+        subject.perform
+      end
+
+      it 'writes to file when examples are more than zero' do
+        allow(RSpec::Core::Runner).to receive(:run).and_return(0)
+
+        expect(File).to receive(:open).with('no_of_examples/test_instance_all.txt', 'w') { '22' }
+
+        subject.perform
+      end
+
+      it 'does not write to file when zero examples' do
+        out.string = '0 examples,'
+        allow(RSpec::Core::Runner).to receive(:run).and_return(0)
+
+        expect(File).not_to receive(:open)
+
+        subject.perform
+      end
+
+      it 'raises error when Rspec output does not match regex' do
+        out.string = '0'
+        allow(RSpec::Core::Runner).to receive(:run).and_return(0)
+
+        expect { subject.perform }
+          .to raise_error(QA::Specs::Runner::RegexMismatchError, 'Rspec output did not match regex')
       end
 
       context 'when --tag is specified as an option' do
         subject { described_class.new.tap { |runner| runner.options = %w[--tag actioncable] } }
 
-        it 'includes the tag in the RSpec arguments' do
+        it 'includes the option value in the file name' do
           expect_rspec_runner_arguments(
             ['--dry-run', '--tag', '~geo', '--tag', 'actioncable', *described_class::DEFAULT_TEST_PATH_ARGS],
-            [err, out]
+            [$stderr, anything]
           )
 
-          expect { subject.perform }.to raise_error(JSON::ParserError, /Failed to detect example count/)
+          expect(File).to receive(:open).with('no_of_examples/test_instance_all_actioncable.txt', 'w') { '22' }
+
+          subject.perform
         end
       end
     end
@@ -96,8 +116,21 @@ RSpec.describe QA::Specs::Runner do
       it 'sets the `--dry-run` flag' do
         expect_rspec_runner_arguments(
           ['--dry-run', *described_class::DEFAULT_TEST_PATH_ARGS],
-          [$stderr, $stdout]
+          [$stderr, anything]
         )
+
+        subject.perform
+      end
+
+      it 'configures json formatted output to file' do
+        allow(QA::Runtime::Path).to receive(:qa_root).and_return('/root')
+
+        expect(rspec_config).to receive(:add_formatter)
+          .with(QA::Support::JsonFormatter, output_file)
+        expect(rspec_config).to receive(:fail_if_no_examples=)
+          .with(true)
+
+        allow(RSpec::Core::Runner).to receive(:run).and_return(0)
 
         subject.perform
       end
@@ -108,10 +141,7 @@ RSpec.describe QA::Specs::Runner do
 
       it 'focuses on the given tags' do
         expect_rspec_runner_arguments(
-          ['--tag', 'orchestrated', '--tag', 'github', '--tag', '~geo',
-          '--format', 'documentation', '--format', 'QA::Support::JsonFormatter',
-          '--out', "tmp/rspec-#{ENV['CI_JOB_ID'] || 'local'}-retried-false.json",
-          '--format', 'RspecJunitFormatter', '--out', "tmp/rspec-#{ENV['CI_JOB_ID'] || 'local'}-retried-false.xml", *described_class::DEFAULT_TEST_PATH_ARGS]
+          ['--tag', 'orchestrated', '--tag', 'github', '--tag', '~geo', *described_class::DEFAULT_TEST_PATH_ARGS]
         )
 
         subject.perform
@@ -122,10 +152,7 @@ RSpec.describe QA::Specs::Runner do
       subject { described_class.new.tap { |runner| runner.options = %w[--tag smoke] } }
 
       it 'focuses on the given tag without excluded tags' do
-        expect_rspec_runner_arguments(['--tag', '~geo', '--tag', 'smoke',
-        '--format', 'documentation', '--format', 'QA::Support::JsonFormatter',
-        '--out', "tmp/rspec-#{ENV['CI_JOB_ID'] || 'local'}-retried-false.json",
-        '--format', 'RspecJunitFormatter', '--out', "tmp/rspec-#{ENV['CI_JOB_ID'] || 'local'}-retried-false.xml", *described_class::DEFAULT_TEST_PATH_ARGS])
+        expect_rspec_runner_arguments(['--tag', '~geo', '--tag', 'smoke', *described_class::DEFAULT_TEST_PATH_ARGS])
 
         subject.perform
       end
@@ -135,13 +162,7 @@ RSpec.describe QA::Specs::Runner do
       subject { described_class.new.tap { |runner| runner.options = %w[qa/specs/features/foo] } }
 
       it 'passes the given tests path and excludes the default skipped, and geo tags' do
-        expect_rspec_runner_arguments(
-          ['--tag', '~orchestrated', '--tag', '~transient', '--tag', '~geo',
-           'qa/specs/features/foo',
-           '--format', 'documentation', '--format', 'QA::Support::JsonFormatter',
-           '--out', "tmp/rspec-#{ENV['CI_JOB_ID'] || 'local'}-retried-false.json",
-           '--format', 'RspecJunitFormatter', '--out', "tmp/rspec-#{ENV['CI_JOB_ID'] || 'local'}-retried-false.xml"]
-        )
+        expect_rspec_runner_arguments(DEFAULT_SKIPPED_TAGS + ['--tag', '~geo', 'qa/specs/features/foo'])
 
         subject.perform
       end
@@ -151,13 +172,7 @@ RSpec.describe QA::Specs::Runner do
       subject { described_class.new.tap { |runner| runner.options = %w[--tag smoke qa/specs/features/foo] } }
 
       it 'focuses on the given tag and includes the path without excluding the orchestrated or transient tags' do
-        expect_rspec_runner_arguments(
-          ['--tag', '~geo', '--tag', 'smoke',
-           'qa/specs/features/foo',
-           '--format', 'documentation', '--format', 'QA::Support::JsonFormatter',
-           '--out', "tmp/rspec-#{ENV['CI_JOB_ID'] || 'local'}-retried-false.json",
-           '--format', 'RspecJunitFormatter', '--out', "tmp/rspec-#{ENV['CI_JOB_ID'] || 'local'}-retried-false.xml"]
-        )
+        expect_rspec_runner_arguments(['--tag', '~geo', '--tag', 'smoke', 'qa/specs/features/foo'])
 
         subject.perform
       end
@@ -169,10 +184,7 @@ RSpec.describe QA::Specs::Runner do
       end
 
       it 'includes default args and excludes the skip_signup_disabled tag' do
-        expect_rspec_runner_arguments(DEFAULT_SKIPPED_TAGS + ['--tag', '~geo', '--tag', '~skip_signup_disabled',
-        '--format', 'documentation', '--format', 'QA::Support::JsonFormatter',
-        '--out', "tmp/rspec-#{ENV['CI_JOB_ID'] || 'local'}-retried-false.json",
-        '--format', 'RspecJunitFormatter', '--out', "tmp/rspec-#{ENV['CI_JOB_ID'] || 'local'}-retried-false.xml", *described_class::DEFAULT_TEST_PATH_ARGS])
+        expect_rspec_runner_arguments(DEFAULT_SKIPPED_TAGS + ['--tag', '~geo', '--tag', '~skip_signup_disabled', *described_class::DEFAULT_TEST_PATH_ARGS])
 
         subject.perform
       end
@@ -184,10 +196,7 @@ RSpec.describe QA::Specs::Runner do
       end
 
       it 'includes default args and excludes the skip_live_env tag' do
-        expect_rspec_runner_arguments(DEFAULT_SKIPPED_TAGS + ['--tag', '~geo', '--tag', '~skip_live_env',
-        '--format', 'documentation', '--format', 'QA::Support::JsonFormatter',
-        '--out', "tmp/rspec-#{ENV['CI_JOB_ID'] || 'local'}-retried-false.json",
-        '--format', 'RspecJunitFormatter', '--out', "tmp/rspec-#{ENV['CI_JOB_ID'] || 'local'}-retried-false.xml", *described_class::DEFAULT_TEST_PATH_ARGS])
+        expect_rspec_runner_arguments(DEFAULT_SKIPPED_TAGS + ['--tag', '~geo', '--tag', '~skip_live_env', *described_class::DEFAULT_TEST_PATH_ARGS])
         subject.perform
       end
     end
@@ -204,10 +213,7 @@ RSpec.describe QA::Specs::Runner do
       subject { described_class.new.tap { |runner| runner.tags = %i[geo] } }
 
       it 'includes the geo tag' do
-        expect_rspec_runner_arguments(['--tag', 'geo',
-        '--format', 'documentation', '--format', 'QA::Support::JsonFormatter',
-        '--out', "tmp/rspec-#{ENV['CI_JOB_ID'] || 'local'}-retried-false.json",
-        '--format', 'RspecJunitFormatter', '--out', "tmp/rspec-#{ENV['CI_JOB_ID'] || 'local'}-retried-false.xml", *described_class::DEFAULT_TEST_PATH_ARGS])
+        expect_rspec_runner_arguments(['--tag', 'geo', *described_class::DEFAULT_TEST_PATH_ARGS])
         subject.perform
       end
     end
@@ -225,9 +231,7 @@ RSpec.describe QA::Specs::Runner do
         it 'includes default args and excludes all unsupported tags' do
           expect_rspec_runner_arguments(
             DEFAULT_SKIPPED_TAGS + ['--tag', '~geo', *excluded_feature_tags_except(feature),
-                                    '--format', 'documentation', '--format', 'QA::Support::JsonFormatter',
-                                    '--out', "tmp/rspec-#{ENV['CI_JOB_ID'] || 'local'}-retried-false.json",
-                                    '--format', 'RspecJunitFormatter', '--out', "tmp/rspec-#{ENV['CI_JOB_ID'] || 'local'}-retried-false.xml", *described_class::DEFAULT_TEST_PATH_ARGS]
+                                    *described_class::DEFAULT_TEST_PATH_ARGS]
           )
 
           subject.perform

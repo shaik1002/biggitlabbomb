@@ -12,5 +12,3 @@ export const i18n = {
   downvots: __('Downvotes'),
   newMergeRequest: __('New merge request'),
 };
-
-export const BRANCH_LIST_REFRESH_INTERVAL = 600000; // 10 minutes (* 60 seconds, * 1000 milliseconds)

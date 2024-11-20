@@ -4,7 +4,7 @@ module Integrations
   class ExecuteWorker # rubocop:disable Scalability/IdempotentWorker
     include ApplicationWorker
 
-    data_consistency :delayed
+    data_consistency :always
     sidekiq_options retry: 3
     sidekiq_options dead: false
     feature_category :integrations

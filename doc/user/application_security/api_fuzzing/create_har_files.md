@@ -1,5 +1,5 @@
 ---
-stage: Application Security Testing
+stage: Secure
 group: Dynamic Analysis
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
@@ -236,4 +236,4 @@ intact.
 The following example demonstrates use of [Visual Studio Code](https://code.visualstudio.com/) text
 editor to edit an Authorization token found in a header.
 
-![Authorization token edited in Visual Studio Code](img/vscode_har_edit_auth_header_v13_12.png)
+![Authorization token edited in Visual Studio Code](img/vscode_har_edit_auth_header.png)

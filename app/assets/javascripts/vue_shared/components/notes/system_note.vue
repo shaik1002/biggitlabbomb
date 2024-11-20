@@ -105,7 +105,7 @@ export default {
       return this.getNoteableData.noteableType === 'MergeRequest';
     },
     iconBgClass() {
-      return ICON_COLORS[this.note.system_note_icon_name] || 'gl-bg-gray-50 gl-text-subtle';
+      return ICON_COLORS[this.note.system_note_icon_name] || 'gl-bg-gray-50 gl-text-gray-600';
     },
     systemNoteIconName() {
       let icon = this.note.system_note_icon_name;
@@ -218,7 +218,7 @@ export default {
         ></div>
         <div v-if="hasMoreCommits" class="flex-list">
           <div
-            class="flex-row gl-relative gl-z-2 gl-cursor-pointer gl-pl-4 gl-pt-3 gl-text-link hover:gl-underline"
+            class="flex-row gl-relative gl-z-2 gl-cursor-pointer gl-pl-4 gl-pt-3 gl-text-blue-500 hover:gl-underline"
             @click="expanded = !expanded"
           >
             <gl-icon :name="toggleIcon" :size="12" class="gl-mr-2" />

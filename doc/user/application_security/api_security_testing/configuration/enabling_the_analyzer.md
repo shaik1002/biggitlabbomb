@@ -1,5 +1,5 @@
 ---
-stage: Application Security Testing
+stage: Secure
 group: Dynamic Analysis
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
@@ -75,7 +75,7 @@ stages:
   - dast
 
 include:
-  - template: Security/API-Security.gitlab-ci.yml
+  - template: API-Security.gitlab-ci.yml
 
 variables:
   APISEC_PROFILE: Quick
@@ -139,7 +139,7 @@ stages:
   - dast
 
 include:
-  - template: Security/API-Security.gitlab-ci.yml
+  - template: API-Security.gitlab-ci.yml
 
 variables:
   APISEC_PROFILE: Quick
@@ -196,7 +196,7 @@ stages:
   - dast
 
 include:
-  - template: Security/API-Security.gitlab-ci.yml
+  - template: API-Security.gitlab-ci.yml
 
 api_security:
   variables:
@@ -237,7 +237,7 @@ stages:
   - dast
 
 include:
-  - template: Security/API-Security.gitlab-ci.yml
+  - template: API-Security.gitlab-ci.yml
 
 api_security:
   variables:
@@ -253,7 +253,7 @@ stages:
   - dast
 
 include:
-  - template: Security/API-Security.gitlab-ci.yml
+  - template: API-Security.gitlab-ci.yml
 
 api_security:
   variables:
@@ -316,7 +316,7 @@ stages:
   - dast
 
 include:
-  - template: Security/API-Security.gitlab-ci.yml
+  - template: API-Security.gitlab-ci.yml
 
 variables:
   APISEC_PROFILE: Quick
@@ -343,15 +343,15 @@ requests. These placeholders are called variables, as explained in [using variab
 You can use variables to store and reuse values in your requests and scripts. For example, you can
 edit the collection to add variables to the document:
 
-![Edit collection variable tab View](../img/dast_api_postman_collection_edit_variable_v13_9.png)
+![Edit collection variable tab View](../img/dast_api_postman_collection_edit_variable.png)
 
 Or alternatively, you can add variables in an environment:
 
-![Edit environment variables View](../img/dast_api_postman_environment_edit_variable_v13_9.png)
+![Edit environment variables View](../img/dast_api_postman_environment_edit_variable.png)
 
 You can then use the variables in sections such as URL, headers, and others:
 
-![Edit request using variables View](../img/dast_api_postman_request_edit_v13_9.png)
+![Edit request using variables View](../img/dast_api_postman_request_edit.png)
 
 Postman has grown from a basic client tool with a nice UX experience to a more complex ecosystem that allows testing APIs with scripts, creating complex collections that trigger secondary requests, and setting variables along the way. Not every feature in the Postman ecosystem is supported. For example, scripts are not supported. The main focus of the Postman support is to ingest Postman Collection definitions that are used by the Postman Client and their related variables defined in the workspace, environments, and the collections themselves.
 
@@ -598,7 +598,7 @@ stages:
   - dast
 
 include:
-  - template: Security/API-Security.gitlab-ci.yml
+  - template: API-Security.gitlab-ci.yml
 
 variables:
   APISEC_PROFILE: Quick
@@ -618,7 +618,7 @@ stages:
   - dast
 
 include:
-  - template: Security/API-Security.gitlab-ci.yml
+  - template: API-Security.gitlab-ci.yml
 
 variables:
   APISEC_PROFILE: Quick
@@ -638,7 +638,7 @@ stages:
   - dast
 
 include:
-  - template: Security/API-Security.gitlab-ci.yml
+  - template: API-Security.gitlab-ci.yml
 
 variables:
   APISEC_PROFILE: Quick
@@ -657,7 +657,7 @@ stages:
   - dast
 
 include:
-  - template: Security/API-Security.gitlab-ci.yml
+  - template: API-Security.gitlab-ci.yml
 
 variables:
   APISEC_PROFILE: Quick
@@ -691,7 +691,7 @@ stages:
   - dast
 
 include:
-  - template: Security/API-Security.gitlab-ci.yml
+  - template: API-Security.gitlab-ci.yml
 
 variables:
   APISEC_PROFILE: Quick
@@ -723,7 +723,7 @@ stages:
   - dast
 
 include:
-  - template: Security/API-Security.gitlab-ci.yml
+  - template: API-Security.gitlab-ci.yml
 
 variables:
   APISEC_PROFILE: Quick
@@ -758,7 +758,7 @@ stages:
   - dast
 
 include:
-  - template: Security/API-Security.gitlab-ci.yml
+  - template: API-Security.gitlab-ci.yml
 
 variables:
   APISEC_PROFILE: Quick

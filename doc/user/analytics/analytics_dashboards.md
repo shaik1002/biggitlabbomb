@@ -1,6 +1,6 @@
 ---
 stage: Monitor
-group: Platform Insights
+group: Product Analytics
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
 
@@ -24,7 +24,7 @@ filters and visualizations to query and retrieve results.
 
 Analytics dashboards use the following data sources:
 
-- [Product analytics](../../operations/product_analytics/index.md)
+- [Product analytics](../product_analytics/index.md)
 - [Value Stream Management](../analytics/value_streams_dashboard.md)
 
 You can also add [custom visualization data sources](../../development/fe_guide/customizable_dashboards.md#adding-a-new-visualization-data-source).
@@ -37,14 +37,14 @@ You cannot edit the built-in dashboards, but you can create custom dashboards wi
 
 ### Product analytics dashboards
 
-When product analytics is enabled and onboarded, two built-in dashboards are available:
+When [product analytics](../product_analytics/index.md) is enabled and onboarded, two built-in dashboards are available:
 
 - **Audience** displays metrics related to traffic, such as the number of users and sessions.
 - **Behavior** displays metrics related to user activity, such as the number of page views and events.
 
 ### Value Stream Management dashboard
 
-- **Value Streams Dashboard** displays metrics related to [DevOps performance, security exposure, and workstream optimization](../analytics/value_streams_dashboard.md#devsecops-metrics-comparison-panels).
+- **Value Streams Dashboard** displays metrics related to [DevOps performance, security exposure, and workstream optimization](../analytics/value_streams_dashboard.md#devsecops-metrics-comparison-panel).
 
 ## Custom dashboards
 
@@ -52,7 +52,7 @@ Use custom dashboards to design and create visualizations for the metrics that a
 You can create custom dashboards with the dashboard designer.
 
 - Each project can have an unlimited number of dashboards.
-  The only limitation might be the [repository size limit](../project/repository/repository_size.md#size-and-storage-limits).
+  The only limitation might be the [repository size limit](../project/repository/reducing_the_repo_size_using_git.md#storage-limits).
 - Each dashboard can reference one or more [visualizations](#define-a-chart-visualization).
 - Visualizations are shared across dashboards.
 
@@ -78,7 +78,7 @@ You can use the dashboard designer to:
 > - [Generally available](https://gitlab.com/gitlab-org/gitlab/-/issues/425048) in GitLab 16.7. Feature flag `combined_analytics_visualization_editor` removed.
 
 NOTE:
-This feature is only compatible with the product analytics data source.
+This feature is only compatible with the [product analytics](../product_analytics/index.md) data source.
 
 You can use the visualization designer to:
 
@@ -269,12 +269,11 @@ After you save a visualization, you can add it to a new or existing custom dashb
 ### Generate a custom visualization with GitLab Duo
 
 DETAILS:
-**Tier:** Ultimate with GitLab Duo Enterprise - [Start a trial](https://about.gitlab.com/solutions/gitlab-duo-pro/sales/?type=free-trial)
+**Tier:** For a limited time, Ultimate. In the future, Ultimate with [GitLab Duo Enterprise](../../subscriptions/subscription-add-ons.md).
 **Offering:** GitLab.com
 **Status:** Experiment
 
 > - Introduced in GitLab 16.11 as an [experiment](../../policy/experiment-beta-support.md#experiment) feature [with a flag](../../administration/feature_flags.md) named `generate_cube_query`. Disabled by default.
-> - Changed to require GitLab Duo add-on in GitLab 17.6 and later.
 
 Prerequisites:
 
@@ -299,8 +298,6 @@ To generate a custom visualization with GitLab Duo using a natural language quer
 1. Select **Save**.
 
 After you save a visualization, you can add it to a new or existing custom dashboard in the same project.
-
-Provide feedback on this experimental feature in [issue 455363](https://gitlab.com/gitlab-org/gitlab/-/issues/455363).
 
 ### Visualization query builder
 
@@ -328,7 +325,7 @@ If the dashboard displays a global error message that data could not be loaded, 
 If the error persists:
 
 - Check that your configurations match the [dashboard JSON schema](#define-a-dashboard) defined in `ee/app/validators/json_schemas/analytics_dashboard.json`.
-- For product analytics, make sure your [admin and project settings](../../operations/product_analytics/index.md#project-level-settings) are set up correctly.
+- For product analytics, make sure your [admin and project settings](../product_analytics/index.md#project-level-settings) are set up correctly.
 
 ### `Invalid dashboard configuration`
 
@@ -344,9 +341,9 @@ defined in `ee/app/validators/json_schemas/analytics_visualization.json`.
 
 If a dashboard panel displays an error message:
 
-- Make sure your [Cube query](../../operations/product_analytics/index.md#product-analytics-dashboards) and
+- Make sure your [Cube query](../product_analytics/index.md#product-analytics-dashboards) and
   [visualization](../analytics/analytics_dashboards.md#define-a-chart-visualization) configurations are set up correctly.
-- For product analytics, also check that your visualization's Cube query is valid.
+- For [product analytics](../product_analytics/index.md), also check that your visualization's Cube query is valid.
 
 ### Generate visualization with GitLab Duo returns unexpected results
 

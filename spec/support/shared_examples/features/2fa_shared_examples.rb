@@ -5,9 +5,9 @@ RSpec.shared_examples 'hardware device for 2fa' do |device_type|
   include Spec::Support::Helpers::ModalHelpers
 
   def register_device(device_type, **kwargs)
-    case device_type
-    when 'WebAuthn'
-      webauthn_device_registration(**kwargs)
+    case device_type.downcase
+    when "webauthn"
+      register_webauthn_device(**kwargs)
     else
       raise "Unknown device type #{device_type}"
     end
@@ -26,16 +26,11 @@ RSpec.shared_examples 'hardware device for 2fa' do |device_type|
         user.update_attribute(:otp_required_for_login, false)
       end
 
-      it 'allows registering a new device' do
+      it 'does not allow registering a new device' do
         visit profile_account_path
-        click_on _('Enable two-factor authentication')
+        click_on 'Enable two-factor authentication'
 
-        device = register_device(device_type, password: user.password)
-        expect(page).to have_content("Your #{device_type} device was registered")
-        copy_recovery_codes
-        manage_two_factor_authentication
-
-        expect(page).to have_content(device.name)
+        expect(page).to have_button("Set up new device", disabled: true)
       end
     end
 
@@ -43,35 +38,26 @@ RSpec.shared_examples 'hardware device for 2fa' do |device_type|
       it 'allows registering a new device with a name' do
         visit profile_account_path
         manage_two_factor_authentication
-        expect(page).to have_content(_("You've already enabled two-factor authentication using a one-time password authenticator. In order to register a different device, you must first delete this authenticator."))
+        expect(page).to have_content("You've already enabled two-factor authentication using one time password authenticators")
 
-        device = register_device(device_type, password: user.password)
-        expect(page).to have_content("Your #{device_type} device was registered")
-        copy_recovery_codes
-        manage_two_factor_authentication
+        device = register_device(device_type)
 
         expect(page).to have_content(device.name)
+        expect(page).to have_content("Your #{device_type} device was registered")
       end
 
       it 'allows deleting a device' do
         visit profile_account_path
         manage_two_factor_authentication
-        expect(page).to have_content(_("You've already enabled two-factor authentication using a one-time password authenticator. In order to register a different device, you must first delete this authenticator."))
+        expect(page).to have_content("You've already enabled two-factor authentication using one time password authenticators")
 
-        first_device = register_device(device_type, password: user.password)
-        copy_recovery_codes
-        manage_two_factor_authentication
-        second_device = register_device(device_type, name: 'My other device', password: user.password)
+        first_device = register_device(device_type)
+        second_device = register_device(device_type, name: 'My other device')
 
         expect(page).to have_content(first_device.name)
         expect(page).to have_content(second_device.name)
 
-        click_button _('Delete WebAuthn device'), match: :first if device_type == 'WebAuthn'
-
-        within_modal do
-          fill_in _('Current password'), with: user.password
-          find_by_testid('2fa-action-primary').click
-        end
+        accept_gl_confirm(button_text: 'Delete') { click_on 'Delete', match: :first }
 
         expect(page).to have_content('Successfully deleted')
         expect(page.body).not_to have_content(first_device.name)
@@ -104,7 +90,7 @@ RSpec.shared_examples 'hardware device for 2fa' do |device_type|
     describe 'when a device is registered' do
       before do
         manage_two_factor_authentication
-        register_device(device_type, password: user.password)
+        register_device(device_type)
         gitlab_sign_out
         gitlab_sign_in(user)
       end

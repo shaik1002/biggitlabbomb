@@ -36,10 +36,6 @@ RSpec.describe StageEntity, feature_category: :continuous_integration do
       expect(subject[:name]).to eq 'test'
     end
 
-    it 'contains valid id' do
-      expect(subject[:id]).to eq stage.id
-    end
-
     it 'contains path to the stage' do
       expect(subject[:path])
         .to include "pipelines/#{pipeline.id}##{stage.name}"

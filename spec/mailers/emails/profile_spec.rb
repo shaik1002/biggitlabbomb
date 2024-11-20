@@ -157,24 +157,6 @@ RSpec.describe Emails::Profile, feature_category: :user_profile do
     end
   end
 
-  describe 'personal access token is about to expire' do
-    let_it_be(:user) { create(:user) }
-
-    subject { Notify.access_token_about_to_expire_email(user, ['example token']) }
-
-    it { is_expected.to deliver_to(user) }
-    it { is_expected.to have_subject(/^Your personal access tokens will expire in 7 days or less$/i) }
-    it { is_expected.to have_body_text(/#{user_settings_personal_access_tokens_path}/) }
-    it { is_expected.to have_body_text(/example token/) }
-
-    context 'when passed days_to_expire parameter' do
-      subject { Notify.access_token_about_to_expire_email(user, ['example token'], days_to_expire: 42) }
-
-      it { is_expected.to have_subject(/^Your personal access tokens will expire in 42 days or less$/i) }
-      it { is_expected.to have_body_text('42') }
-    end
-  end
-
   describe 'resource access token is about to expire' do
     let_it_be(:user) { create(:user) }
 
@@ -221,12 +203,6 @@ RSpec.describe Emails::Profile, feature_category: :user_profile do
       it 'includes the email reason' do
         is_expected.to have_body_text _('You are receiving this email because you are an Owner of the Group.')
       end
-
-      context 'when passed days_to_expire parameter' do
-        subject { Notify.bot_resource_access_token_about_to_expire_email(user, resource, expiring_token.name, days_to_expire: 42) }
-
-        it { is_expected.to have_body_text('42') }
-      end
     end
 
     context 'when access token belongs to a project' do
@@ -249,12 +225,6 @@ RSpec.describe Emails::Profile, feature_category: :user_profile do
 
       it 'includes the email reason' do
         is_expected.to have_body_text _('You are receiving this email because you are either an Owner or Maintainer of the project.')
-      end
-
-      context 'when passed days_to_expire parameter' do
-        subject { Notify.bot_resource_access_token_about_to_expire_email(user, resource, expiring_token.name, days_to_expire: 42) }
-
-        it { is_expected.to have_body_text('42') }
       end
     end
   end
@@ -473,12 +443,10 @@ RSpec.describe Emails::Profile, feature_category: :user_profile do
   end
 
   describe 'user unknown sign in email' do
-    let(:user) { create(:user) }
-    let(:ip) { '169.0.0.1' }
-    let(:current_time) { Time.current }
-    let(:country) { 'Germany' }
-    let(:city) { 'Frankfurt' }
-    let(:email) { Notify.unknown_sign_in_email(user, ip, current_time, country: country, city: city) }
+    let_it_be(:user) { create(:user) }
+    let_it_be(:ip) { '169.0.0.1' }
+    let_it_be(:current_time) { Time.current }
+    let_it_be(:email) { Notify.unknown_sign_in_email(user, ip, current_time) }
 
     subject { email }
 
@@ -508,7 +476,7 @@ RSpec.describe Emails::Profile, feature_category: :user_profile do
     end
 
     it 'includes a link to the change password documentation' do
-      is_expected.to have_body_text help_page_url('user/profile/user_passwords.md', anchor: 'change-your-password')
+      is_expected.to have_body_text help_page_url('user/profile/user_passwords', anchor: 'change-your-password')
     end
 
     it 'mentions two factor authentication when two factor is not enabled' do
@@ -516,20 +484,7 @@ RSpec.describe Emails::Profile, feature_category: :user_profile do
     end
 
     it 'includes a link to two-factor authentication documentation' do
-      is_expected.to have_body_text help_page_url('user/profile/account/two_factor_authentication.md')
-    end
-
-    it 'shows location information' do
-      is_expected.to have_body_text _('Location')
-      is_expected.to have_body_text country
-      is_expected.to have_body_text city
-    end
-
-    context 'when no location information was given' do
-      let(:country) { nil }
-      let(:city) { nil }
-
-      it { is_expected.not_to have_body_text _('Location') }
+      is_expected.to have_body_text help_page_url('user/profile/account/two_factor_authentication')
     end
 
     context 'when two factor authentication is enabled' do
@@ -571,7 +526,7 @@ RSpec.describe Emails::Profile, feature_category: :user_profile do
     end
 
     it 'includes a link to the change password documentation' do
-      is_expected.to have_body_text help_page_url('user/profile/user_passwords.md', anchor: 'change-your-password')
+      is_expected.to have_body_text help_page_url('user/profile/user_passwords', anchor: 'change-your-password')
     end
   end
 

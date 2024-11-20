@@ -616,10 +616,6 @@ FactoryBot.define do
     empty_repo
   end
 
-  factory :project_with_repo, parent: :project do
-    repository
-  end
-
   factory :forked_project_with_submodules, parent: :project do
     path { 'forked-gitlabhq' }
 
@@ -657,12 +653,6 @@ FactoryBot.define do
     after :create do |project|
       create(:namespace_settings, namespace: project.namespace) unless project.namespace.namespace_settings
       project.namespace.namespace_settings.update!(allow_runner_registration_token: true)
-    end
-  end
-
-  trait :import_user_mapping_enabled do
-    import_data_attributes do
-      { data: { user_contribution_mapping_enabled: true } }
     end
   end
 end

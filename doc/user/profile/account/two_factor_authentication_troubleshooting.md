@@ -1,5 +1,5 @@
 ---
-stage: Software Supply Chain Security
+stage: Govern
 group: Authentication
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
@@ -10,12 +10,13 @@ DETAILS:
 **Tier:** Free, Premium, Ultimate
 **Offering:** GitLab.com, Self-managed
 
-## Error: `HTTP Basic: Access denied. If a password was provided for Git authentication ...`
+## Error: `HTTP Basic: Access denied. The provided password or token ...`
 
 When making a request, you can receive the following error:
 
 ```plaintext
-HTTP Basic: Access denied. If a password was provided for Git authentication, the password was incorrect or you're required to use a token instead of a password. If a token was provided, it was either incorrect, expired, or improperly scoped.
+HTTP Basic: Access denied. The provided password or token is incorrect or your account has 2FA enabled and you must use a personal
+access token instead of a password.
 ```
 
 This error occurs in the following scenarios:

@@ -12,7 +12,10 @@ DETAILS:
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/110603) in GitLab 15.9 [with a flag](../administration/feature_flags.md) named `group_protected_branches`. Disabled by default.
 > - Flag `group_protected_branches` [renamed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/116779) [flag](../administration/feature_flags.md) to `allow_protected_branches_for_group` GitLab 15.11.
-> - [Generally available](https://gitlab.com/gitlab-org/gitlab/-/issues/500250) in GitLab 17.6. Feature flag `group_protected_branches` removed.
+
+FLAG:
+On self-managed GitLab, by default this feature is not available. To make it available, an administrator can [enable the feature flag](../administration/feature_flags.md) named `allow_protected_branches_for_group`.
+On GitLab.com and GitLab Dedicated, this feature is not available.
 
 Use the Group-level protected branches API to manage protected branch rules.
 It provides endpoints to list, create, update, and delete protected branch rules that apply to projects within a group.
@@ -43,7 +46,7 @@ GET /groups/:id/protected_branches
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `id` | integer or string | yes | The ID or [URL-encoded path of the group](rest/index.md#namespaced-paths). |
+| `id` | integer or string | yes | The ID or [URL-encoded path of the group](rest/index.md#namespaced-path-encoding) owned by the authenticated user. |
 | `search` | string | no | Name or part of the name of protected branches to be searched for. |
 
 ```shell
@@ -117,7 +120,7 @@ GET /groups/:id/protected_branches/:name
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `id` | integer or string | yes | The ID or [URL-encoded path of the group](rest/index.md#namespaced-paths). |
+| `id` | integer or string | yes | The ID or [URL-encoded path of the group](rest/index.md#namespaced-path-encoding) owned by the authenticated user. |
 | `name` | string | yes | The name of the branch or wildcard. |
 
 ```shell
@@ -169,7 +172,7 @@ curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" \
 
 | Attribute                                    | Type | Required | Description |
 | -------------------------------------------- | ---- | -------- | ----------- |
-| `id`                                         | integer or string | yes | The ID or [URL-encoded path of the group](rest/index.md#namespaced-paths). |
+| `id`                                         | integer or string | yes | The ID or [URL-encoded path of the group](rest/index.md#namespaced-path-encoding) owned by the authenticated user. |
 | `name`                                       | string         | yes | The name of the branch or wildcard. |
 | `allow_force_push`                           | boolean        | no  | Allow all users with push access to force push. Default: `false`. |
 | `allowed_to_merge`                           | array          | no  | Array of access levels allowed to merge, with each described by a hash of the form `{user_id: integer}`, `{group_id: integer}`, or `{access_level: integer}`. |
@@ -349,7 +352,7 @@ curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" \
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `id` | integer or string | yes | The ID or [URL-encoded path of the group](rest/index.md#namespaced-paths). |
+| `id` | integer or string | yes | The ID or [URL-encoded path of the group](rest/index.md#namespaced-path-encoding) owned by the authenticated user. |
 | `name` | string | yes | The name of the branch. |
 
 Example response:
@@ -384,7 +387,7 @@ curl --request PATCH --header "PRIVATE-TOKEN: <your_access_token>" \
 
 | Attribute                                    | Type           | Required | Description                                                                                                                          |
 | -------------------------------------------- | ---- | -------- | ----------- |
-| `id`                                         | integer or string | yes      | The ID or [URL-encoded path of the group](rest/index.md#namespaced-paths).                       |
+| `id`                                         | integer or string | yes      | The ID or [URL-encoded path of the group](rest/index.md#namespaced-path-encoding) owned by the authenticated user.                       |
 | `name`                                       | string         | yes      | The name of the branch.                                                                                                               |
 | `allow_force_push`                           | boolean        | no       | When enabled, members who can push to this branch can also force push.                                                               |
 | `allowed_to_push`                            | array          | no       | Array of push access levels, with each described by a hash.                                                                          |

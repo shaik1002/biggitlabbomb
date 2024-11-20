@@ -5,8 +5,6 @@ source scripts/utils.sh
 function archive_doesnt_exist() {
   local package_url="${1}"
 
-  echoinfo "Downloading archive at ${package_url}..."
-
   status=$(curl -I --silent --retry 3 --output /dev/null -w "%{http_code}" "${package_url}")
 
   if [[ "${status}" = "200" ]]; then

@@ -15,7 +15,6 @@ class Groups::ApplicationController < ApplicationController
 
   before_action do
     push_namespace_setting(:math_rendering_limits_enabled, @group)
-    push_frontend_feature_flag(:async_sidebar_counts, @group&.root_ancestor)
   end
 
   private
@@ -78,8 +77,8 @@ class Groups::ApplicationController < ApplicationController
     false
   end
 
-  def validate_crm_group!
-    render_404 unless group.crm_group?
+  def validate_root_group!
+    render_404 unless group.root?
   end
 
   def authorize_action!(action)

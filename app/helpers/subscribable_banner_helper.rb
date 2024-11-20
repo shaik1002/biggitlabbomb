@@ -2,7 +2,8 @@
 
 module SubscribableBannerHelper
   # Overridden in EE
-  def display_subscription_banner!; end
+  def display_subscription_banner!
+  end
 end
 
 SubscribableBannerHelper.prepend_mod_with('SubscribableBannerHelper')

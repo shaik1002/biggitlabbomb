@@ -40,7 +40,7 @@ export default {
       <div class="ml-auto">
         <button
           :aria-label="__('Close')"
-          class="gl-rounded-none gl-border-none !gl-bg-transparent gl-p-0 !gl-shadow-none !gl-outline-none"
+          class="btn-blank"
           type="button"
           data-testid="close"
           @click="dismiss"

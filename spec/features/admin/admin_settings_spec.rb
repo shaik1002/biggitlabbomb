@@ -545,22 +545,6 @@ RSpec.describe 'Admin updates settings', feature_category: :shared do
         end
       end
 
-      context 'Job token permissions' do
-        it 'allows admin to set allowlist enforcement' do
-          visit ci_cd_admin_application_settings_path
-
-          expect(current_settings.enforce_ci_inbound_job_token_scope_enabled).to eq(false)
-
-          within_testid('job-token-permissions-settings') do
-            find('input[type="checkbox"]').click
-            click_button 'Save changes'
-          end
-
-          expect(current_settings.enforce_ci_inbound_job_token_scope_enabled).to eq(true)
-          expect(page).to have_content 'Application settings saved successfully'
-        end
-      end
-
       context 'Container Registry' do
         let(:client_support) { true }
         let(:settings_titles) do
@@ -891,20 +875,6 @@ RSpec.describe 'Admin updates settings', feature_category: :shared do
 
           expect(page).to have_content 'Application settings saved successfully'
           expect(current_settings[application_setting_key]).to eq(new_rate_limit)
-        end
-      end
-
-      describe 'organizations API rate limits' do
-        let_it_be(:network_settings_section) { 'organizations-api-limits-settings' }
-
-        context 'for POST /organizations API requests' do
-          let(:rate_limit_field) do
-            format(_('Maximum requests to the %{api_name} API per %{timeframe} per user'), api_name: 'POST /organizations', timeframe: 'minute')
-          end
-
-          let(:application_setting_key) { :create_organization_api_limit }
-
-          it_behaves_like 'API rate limit setting'
         end
       end
 

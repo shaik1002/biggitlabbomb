@@ -51,7 +51,6 @@ export default {
         :active="isActive(tab.hash)"
         :data-testid="`${tab.testid}-tab-content`"
         :title-link-attributes="glTabLinkAttributes(tab)"
-        lazy
         @click="updateActiveTab(tab)"
       >
         <component :is="tab.component" :data-testid="`${tab.testid}-app`" />

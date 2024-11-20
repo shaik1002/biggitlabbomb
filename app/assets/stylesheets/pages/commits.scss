@@ -9,7 +9,7 @@
  * custom merge request message
  */
 .commit-message-container {
-  @apply gl-bg-default;
+  background-color: $body-bg;
   position: relative;
   font-family: $monospace-font;
   $left: 12px;
@@ -40,6 +40,30 @@
   }
 }
 
+.text-expander {
+  display: inline-flex;
+  background: $white;
+  color: $gl-text-color-secondary;
+  padding: 1px $gl-padding-4;
+  cursor: pointer;
+  border: 1px solid $gray-100;
+  border-radius: $gl-border-radius-base;
+  margin-left: 5px;
+  font-size: 12px;
+  line-height: $gl-font-size;
+  outline: none;
+
+  &.open {
+    background-color: $gray-100;
+    box-shadow: inset 0 0 2px rgba($black, 0.2);
+  }
+
+  &:hover {
+    background-color: $gray-100;
+    text-decoration: none;
+  }
+}
+
 .commit-content {
   padding-right: 10px;
   white-space: normal;
@@ -50,10 +74,10 @@
   }
 
   .committer {
-    @apply gl-text-subtle;
+    color: $gl-text-color-secondary;
 
     .commit-author-link {
-      @apply gl-text-default;
+      color: $gl-text-color;
     }
 
     // stylelint-disable-next-line gitlab/no-gl-class
@@ -110,12 +134,13 @@
 
   .label-monospace {
     user-select: text;
-    @apply gl-text-default;
+    color: $gl-text-color;
     background-color: $gray-10;
   }
 
   .btn svg {
     top: auto;
+    fill: $gl-text-color-secondary;
   }
 
   :first-child {
@@ -136,7 +161,7 @@
 .commit,
 .generic-commit-status {
   a {
-    @apply gl-text-default;
+    color: $gl-text-color;
   }
 
   .commit-row-description {
@@ -164,7 +189,7 @@
       height: 14px;
       width: 14px;
       vertical-align: middle;
-      @apply gl-fill-icon-subtle;
+      fill: $gl-text-color-secondary;
     }
   }
 }

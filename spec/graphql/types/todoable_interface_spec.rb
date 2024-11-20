@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Types::TodoableInterface, feature_category: :notifications do
+RSpec.describe Types::TodoableInterface, feature_category: :team_planning do
   include GraphqlHelpers
 
   it 'exposes the expected fields' do
@@ -23,7 +23,6 @@ RSpec.describe Types::TodoableInterface, feature_category: :notifications do
       expect(described_class.resolve_type(build(:commit), {})).to eq(Types::CommitType)
       expect(described_class.resolve_type(build(:project), {})).to eq(Types::ProjectType)
       expect(described_class.resolve_type(build(:group), {})).to eq(Types::GroupType)
-      expect(described_class.resolve_type(build(:key), {})).to eq(Types::KeyType)
     end
 
     it 'raises an error for an unknown type' do

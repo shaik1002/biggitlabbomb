@@ -25,6 +25,10 @@ RSpec.describe IssuePolicy, feature_category: :team_planning do
     described_class.new(user, issue)
   end
 
+  before do
+    stub_feature_flags(enforce_check_group_level_work_items_license: true)
+  end
+
   shared_examples 'support bot with service desk enabled' do
     before do
       allow(::Gitlab::Email::IncomingEmail).to receive(:enabled?) { true }
@@ -453,8 +457,8 @@ RSpec.describe IssuePolicy, feature_category: :team_planning do
 
         it 'does not allow accessing notes' do
           # if notes widget is disabled not even maintainer can access notes
-          expect(permissions(maintainer, issue)).to be_disallowed(:create_note, :read_note, :mark_note_as_internal, :read_internal_note, :admin_note)
-          expect(permissions(admin, issue)).to be_disallowed(:create_note, :read_note, :read_internal_note, :mark_note_as_internal, :set_note_created_at, :admin_note)
+          expect(permissions(maintainer, issue)).to be_disallowed(:create_note, :read_note, :mark_note_as_internal, :read_internal_note)
+          expect(permissions(admin, issue)).to be_disallowed(:create_note, :read_note, :read_internal_note, :mark_note_as_internal, :set_note_created_at)
         end
       end
 
@@ -462,11 +466,10 @@ RSpec.describe IssuePolicy, feature_category: :team_planning do
         it 'allows accessing notes' do
           # with notes widget enabled, even guests can access notes
           expect(permissions(guest, issue)).to be_allowed(:create_note, :read_note)
-          expect(permissions(guest, issue)).to be_disallowed(:read_internal_note, :mark_note_as_internal, :set_note_created_at, :admin_note)
+          expect(permissions(guest, issue)).to be_disallowed(:read_internal_note, :mark_note_as_internal, :set_note_created_at)
           expect(permissions(reporter, issue)).to be_allowed(:create_note, :read_note, :read_internal_note, :mark_note_as_internal)
-          expect(permissions(reporter, issue)).to be_disallowed(:admin_note)
-          expect(permissions(maintainer, issue)).to be_allowed(:create_note, :read_note, :read_internal_note, :mark_note_as_internal, :admin_note)
-          expect(permissions(owner, issue)).to be_allowed(:create_note, :read_note, :read_internal_note, :mark_note_as_internal, :set_note_created_at, :admin_note)
+          expect(permissions(maintainer, issue)).to be_allowed(:create_note, :read_note, :read_internal_note, :mark_note_as_internal)
+          expect(permissions(owner, issue)).to be_allowed(:create_note, :read_note, :read_internal_note, :mark_note_as_internal, :set_note_created_at)
         end
       end
     end
@@ -584,32 +587,6 @@ RSpec.describe IssuePolicy, feature_category: :team_planning do
 
         expect(policies).to be_disallowed(:read_crm_contacts)
         expect(policies).to be_disallowed(:set_issue_crm_contacts)
-      end
-    end
-
-    context 'when custom crm_group configured' do
-      let_it_be(:crm_settings) { create(:crm_settings, source_group: create(:group)) }
-      let_it_be(:subgroup) { create(:group, parent: create(:group), crm_settings: crm_settings) }
-      let_it_be(:project) { create(:project, group: subgroup) }
-
-      context 'when custom crm_group guest' do
-        it 'is disallowed' do
-          subgroup.parent.add_reporter(user)
-          crm_settings.source_group.add_guest(user)
-
-          expect(policies).to be_disallowed(:read_crm_contacts)
-          expect(policies).to be_disallowed(:set_issue_crm_contacts)
-        end
-      end
-
-      context 'when custom crm_group reporter' do
-        it 'is allowed' do
-          subgroup.parent.add_reporter(user)
-          crm_settings.source_group.add_reporter(user)
-
-          expect(policies).to be_allowed(:read_crm_contacts)
-          expect(policies).to be_allowed(:set_issue_crm_contacts)
-        end
       end
     end
   end

@@ -4,8 +4,8 @@ import {
   GlDisclosureDropdownItem,
   GlIcon,
   GlTooltipDirective,
+  GlBadge,
 } from '@gitlab/ui';
-import ProtectedBadge from '~/vue_shared/components/badges/protected_badge.vue';
 import { sprintf, n__, s__ } from '~/locale';
 import MetadataItem from '~/vue_shared/components/registry/metadata_item.vue';
 import TitleArea from '~/vue_shared/components/registry/title_area.vue';
@@ -44,7 +44,7 @@ export default {
     GlIcon,
     TitleArea,
     MetadataItem,
-    ProtectedBadge,
+    GlBadge,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -109,15 +109,13 @@ export default {
       return n__('%d tag', '%d tags', this.imageDetails.tagsCount);
     },
     cleanupTextAndTooltip() {
-      if (!this.imageDetails.project.containerTagsExpirationPolicy?.enabled) {
+      if (!this.imageDetails.project.containerExpirationPolicy?.enabled) {
         return { text: CLEANUP_DISABLED_TEXT, tooltip: CLEANUP_DISABLED_TOOLTIP };
       }
       return {
         [UNSCHEDULED_STATUS]: {
           text: sprintf(CLEANUP_UNSCHEDULED_TEXT, {
-            time: this.timeFormatted(
-              this.imageDetails.project.containerTagsExpirationPolicy.nextRunAt,
-            ),
+            time: this.timeFormatted(this.imageDetails.project.containerExpirationPolicy.nextRunAt),
           }),
         },
         [SCHEDULED_STATUS]: { text: CLEANUP_SCHEDULED_TEXT, tooltip: CLEANUP_SCHEDULED_TOOLTIP },
@@ -217,10 +215,15 @@ export default {
     </template>
 
     <template #metadata-protection-rule-exists>
-      <protected-badge
+      <gl-badge
         v-if="showBadgeProtected"
-        :tooltip-text="$options.i18n.BADGE_PROTECTED_TOOLTIP_TEXT"
-      />
+        v-gl-tooltip="{ title: $options.i18n.BADGE_PROTECTED_TOOLTIP_TEXT }"
+        icon-size="sm"
+        size="sm"
+        variant="neutral"
+      >
+        {{ __('protected') }}
+      </gl-badge>
     </template>
 
     <template v-if="!deleteButtonDisabled" #right-actions>

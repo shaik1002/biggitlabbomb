@@ -12,7 +12,7 @@ RSpec.describe 'User searches for issues', :js, :clean_gitlab_redis_rate_limitin
 
   def search_for_issue(search)
     submit_dashboard_search(search)
-    select_search_scope('Work items')
+    select_search_scope('Issues')
   end
 
   context 'when signed in' do
@@ -139,7 +139,7 @@ RSpec.describe 'User searches for issues', :js, :clean_gitlab_redis_rate_limitin
       it 'is redirected to login page' do
         visit(search_path)
 
-        expect(page).to have_content('You need to sign in or sign up before continuing.')
+        expect(page).to have_content('You must be logged in to search across all of GitLab')
       end
     end
   end

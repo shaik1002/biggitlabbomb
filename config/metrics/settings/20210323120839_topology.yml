@@ -12,7 +12,7 @@ data_source: prometheus
 distribution:
 - ce
 - ee
-tiers:
+tier:
 - free
 - premium
 - ultimate

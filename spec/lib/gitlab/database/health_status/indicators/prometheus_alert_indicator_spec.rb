@@ -2,8 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::Database::HealthStatus::Indicators::PrometheusAlertIndicator, :aggregate_failures,
-  feature_category: :database do
+RSpec.describe Gitlab::Database::HealthStatus::Indicators::PrometheusAlertIndicator, :aggregate_failures, feature_category: :database do # rubocop:disable Layout/LineLength
   let(:connection) { Gitlab::Database.database_base_models[:main].connection }
 
   let(:context) do

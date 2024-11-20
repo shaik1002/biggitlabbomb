@@ -4,7 +4,7 @@ import * as Sentry from '~/sentry/sentry_browser_wrapper';
 import axios from '~/lib/utils/axios_utils';
 import { normalizeHeaders, parseIntPagination } from '~/lib/utils/common_utils';
 import Api, { DEFAULT_PER_PAGE } from '~/api';
-import { groupsPath, initialSelectionPropValidator } from './utils';
+import { groupsPath } from './utils';
 import {
   GROUP_TOGGLE_TEXT,
   GROUP_HEADER_TEXT,
@@ -34,11 +34,6 @@ export default {
       required: false,
       default: '',
     },
-    description: {
-      type: String,
-      required: false,
-      default: '',
-    },
     inputName: {
       type: String,
       required: true,
@@ -48,10 +43,9 @@ export default {
       required: true,
     },
     initialSelection: {
-      type: [String, Number, Object],
+      type: String,
       required: false,
       default: null,
-      validator: initialSelectionPropValidator,
     },
     clearable: {
       type: Boolean,
@@ -131,7 +125,6 @@ export default {
 <template>
   <entity-select
     :label="label"
-    :description="description"
     :input-name="inputName"
     :input-id="inputId"
     :initial-selection="initialSelection"

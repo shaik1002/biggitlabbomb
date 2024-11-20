@@ -96,11 +96,7 @@ module Gitlab
       end
 
       def match?
-        if Feature.enabled?(:diff_line_match, Feature.current_request)
-          type.to_s == 'match'
-        else
-          type == :match
-        end
+        type == :match
       end
 
       def discussable?
@@ -130,18 +126,6 @@ module Gitlab
       # Conflict::File#as_json renders json diff lines in sections
       def as_json(opts = nil)
         DiffLineSerializer.new.represent(self)
-      end
-
-      def text_content
-        rich_text ? rich_text[1..] : text(prefix: false)
-      end
-
-      def id(file_hash, side)
-        return if meta?
-
-        prefix = side == :old ? "L" : "R"
-        position = side == :old ? old_pos : new_pos
-        "line_#{file_hash}_#{prefix}#{position}"
       end
 
       private

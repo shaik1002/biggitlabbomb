@@ -30,6 +30,7 @@ if ! scripts/lint-docs-metadata.sh
 then
   # shellcheck disable=2059
   printf "${COLOR_RED}ERROR: These documentation pages need front matter!${COLOR_RESET}"
+  printf " See https://docs.gitlab.com/ee/development/documentation/index.html#stage-and-group-metadata for how to add it.\n" >&2
   ((ERRORCODE++))
 fi
 
@@ -105,7 +106,7 @@ fi
 
 # Do not use dashes (-) in filenames, use underscores (_) instead.
 # Number of filenames with dashes as of 2024-06-17
-FILE_NUMBER_DASHES=68
+FILE_NUMBER_DASHES=70
 FILE_FIND_DASHES=$(find doc -type f -name "*-*.md" | wc -l)
 # shellcheck disable=2059
 printf "${COLOR_GREEN}INFO: Checking for filenames containing dashes...${COLOR_RESET}\n"
@@ -201,7 +202,7 @@ function run_locally_or_in_container() {
   local cmd=$1
   local args=$2
   local files=$3
-  local registry_url="registry.gitlab.com/gitlab-org/gitlab-docs/lint-markdown:alpine-3.20-vale-3.7.1-markdownlint2-0.14.0-lychee-0.15.1"
+  local registry_url="registry.gitlab.com/gitlab-org/gitlab-docs/lint-markdown:alpine-3.20-vale-3.7.1-markdownlint2-0.13.0-lychee-0.15.1"
 
   if hash "${cmd}" 2>/dev/null
   then

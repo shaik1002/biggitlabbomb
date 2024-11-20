@@ -6,8 +6,6 @@ RSpec.describe Gitlab::Auth::AuthFinders, feature_category: :system_access do
   include described_class
   include HttpBasicAuthHelpers
 
-  let_it_be(:organization) { create(:organization) }
-
   # Create the feed_token and static_object_token for the user
   let_it_be(:user, freeze: true) { create(:user).tap(&:feed_token).tap(&:static_object_token) }
   let_it_be(:personal_access_token, freeze: true) { create(:personal_access_token, user: user) }
@@ -131,7 +129,7 @@ RSpec.describe Gitlab::Auth::AuthFinders, feature_category: :system_access do
 
     context 'with oauth token' do
       let(:application) { Doorkeeper::Application.create!(name: 'MyApp', redirect_uri: 'https://app.com', owner: user) }
-      let(:doorkeeper_access_token) { Doorkeeper::AccessToken.create!(application_id: application.id, resource_owner_id: user.id, scopes: 'api', organization_id: organization.id) }
+      let(:doorkeeper_access_token) { Doorkeeper::AccessToken.create!(application_id: application.id, resource_owner_id: user.id, scopes: 'api') }
 
       before do
         set_bearer_token(doorkeeper_access_token.plaintext_token)
@@ -709,7 +707,7 @@ RSpec.describe Gitlab::Auth::AuthFinders, feature_category: :system_access do
 
   describe '#find_oauth_access_token' do
     let(:application) { Doorkeeper::Application.create!(name: 'MyApp', redirect_uri: 'https://app.com', owner: user) }
-    let(:doorkeeper_access_token) { Doorkeeper::AccessToken.create!(application_id: application.id, resource_owner_id: user.id, scopes: 'api', organization_id: organization.id) }
+    let(:doorkeeper_access_token) { Doorkeeper::AccessToken.create!(application_id: application.id, resource_owner_id: user.id, scopes: 'api') }
 
     context 'passed as header' do
       before do

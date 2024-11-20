@@ -180,11 +180,13 @@ class UsersFinder
     users.without_project_bot
   end
 
+  # rubocop: disable CodeReuse/ActiveRecord
   def order(users)
     return users unless params[:sort]
 
     users.order_by(params[:sort])
   end
+  # rubocop: enable CodeReuse/ActiveRecord
 
   def user_can_read_group?(group)
     Ability.allowed?(current_user, :read_group, group)

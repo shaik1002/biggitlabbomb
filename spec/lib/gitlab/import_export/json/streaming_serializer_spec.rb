@@ -21,10 +21,9 @@ RSpec.describe Gitlab::ImportExport::Json::StreamingSerializer, :clean_gitlab_re
   end
 
   let_it_be(:issue) do
-    # TODO: .reload can be removed after the migration https://gitlab.com/gitlab-org/gitlab/-/issues/497857
     create(:issue,
       assignees: [user],
-      project: exportable).reload
+      project: exportable)
   end
 
   let(:exportable_path) { 'project' }
@@ -79,51 +78,6 @@ RSpec.describe Gitlab::ImportExport::Json::StreamingSerializer, :clean_gitlab_re
         expect(Gitlab::SafeRequestStore).to receive(:clear!)
 
         subject.execute
-      end
-
-      context 'when batch export raises an error' do
-        it 'does not raise an error and logs' do
-          allow(json_writer).to receive(:write_relation_array).and_raise(StandardError, 'Error!')
-          allow(logger).to receive(:error)
-
-          expect { subject.execute }.not_to raise_error
-
-          expect(logger).to have_received(:error).with(
-            importer: 'Import/Export',
-            message: 'Error exporting relation batch',
-            exception_message: 'Error!',
-            exception_class: 'StandardError',
-            relation: :issues,
-            project_id: exportable.id,
-            project_name: exportable.name,
-            project_path: exportable.full_path,
-            sql: nil
-          )
-        end
-
-        context 'when error has sql query' do
-          it 'logs the error message and the sql query' do
-            allow(json_writer)
-              .to receive(:write_relation_array)
-              .and_raise(ActiveRecord::QueryCanceled.new('PG::QueryCanceled: statement timeout', sql: 'SQL query'))
-
-            allow(logger).to receive(:error)
-
-            expect { subject.execute }.not_to raise_error
-
-            expect(logger).to have_received(:error).with(
-              importer: 'Import/Export',
-              message: 'Error exporting relation batch',
-              exception_message: 'PG::QueryCanceled: statement timeout',
-              exception_class: 'ActiveRecord::QueryCanceled',
-              relation: :issues,
-              project_id: exportable.id,
-              project_name: exportable.name,
-              project_path: exportable.full_path,
-              sql: 'SQL query'
-            )
-          end
-        end
       end
 
       it 'logs the relation name and the number of records to export' do
@@ -354,12 +308,7 @@ RSpec.describe Gitlab::ImportExport::Json::StreamingSerializer, :clean_gitlab_re
 
     describe 'load balancing' do
       it 'reads from replica' do
-        expect(Gitlab::Database::LoadBalancing::SessionMap)
-          .to receive(:with_sessions).with(Gitlab::Database::LoadBalancing.base_models).and_call_original
-
-        expect_next_instance_of(Gitlab::Database::LoadBalancing::ScopedSessions) do |inst|
-          expect(inst).to receive(:use_replicas_for_read_queries).and_call_original
-        end
+        expect(Gitlab::Database::LoadBalancing::Session.current).to receive(:use_replicas_for_read_queries).and_call_original
 
         subject.execute
       end
@@ -367,8 +316,7 @@ RSpec.describe Gitlab::ImportExport::Json::StreamingSerializer, :clean_gitlab_re
 
     describe 'with inaccessible associations' do
       let_it_be(:milestone) { create(:milestone, project: exportable) }
-      # TODO: .reload can be removed after the migration https://gitlab.com/gitlab-org/gitlab/-/issues/497857
-      let_it_be(:issue) { create(:issue, assignees: [user], project: exportable, milestone: milestone).reload }
+      let_it_be(:issue) { create(:issue, assignees: [user], project: exportable, milestone: milestone) }
       let_it_be(:label1) { create(:label, project: exportable) }
       let_it_be(:label2) { create(:label, project: exportable) }
       let_it_be(:link1) { create(:label_link, label: label1, target: issue) }

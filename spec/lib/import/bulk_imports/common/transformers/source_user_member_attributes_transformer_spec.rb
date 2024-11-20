@@ -15,7 +15,7 @@ RSpec.describe Import::BulkImports::Common::Transformers::SourceUserMemberAttrib
     let_it_be(:import_source_user) do
       create(:import_source_user,
         namespace: context.portable.root_ancestor,
-        source_hostname: bulk_import.configuration.url,
+        source_hostname: bulk_import.configuration.source_hostname,
         import_type: Import::SOURCE_DIRECT_TRANSFER,
         source_user_identifier: '101'
       )
@@ -24,7 +24,7 @@ RSpec.describe Import::BulkImports::Common::Transformers::SourceUserMemberAttrib
     let_it_be(:reassigned_import_source_user) do
       create(:import_source_user, :completed,
         namespace: context.portable.root_ancestor,
-        source_hostname: bulk_import.configuration.url,
+        source_hostname: bulk_import.configuration.source_hostname,
         import_type: Import::SOURCE_DIRECT_TRANSFER,
         source_user_identifier: '102'
       )
@@ -91,14 +91,8 @@ RSpec.describe Import::BulkImports::Common::Transformers::SourceUserMemberAttrib
         )
       end
 
-      it 'returns placeholder membership hash' do
-        expect(subject.transform(context, data)).to eq(
-          source_user: Import::SourceUser.last,
-          access_level: 30,
-          expires_at: nil,
-          group: entity.group,
-          project: entity.project
-        )
+      it 'retuns nil' do
+        expect(subject.transform(context, data)).to eq(nil)
       end
 
       context 'when importer_user_mapping is disabled' do
@@ -121,14 +115,8 @@ RSpec.describe Import::BulkImports::Common::Transformers::SourceUserMemberAttrib
         expect { subject.transform(context, data) }.not_to change { Import::SourceUser.count }
       end
 
-      it 'returns placeholder membership hash' do
-        expect(subject.transform(context, data)).to eq(
-          source_user: import_source_user,
-          access_level: 30,
-          expires_at: nil,
-          group: entity.group,
-          project: entity.project
-        )
+      it 'retuns nil' do
+        expect(subject.transform(context, data)).to eq(nil)
       end
     end
 

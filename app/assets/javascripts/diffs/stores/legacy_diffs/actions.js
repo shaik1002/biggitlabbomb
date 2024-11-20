@@ -422,14 +422,14 @@ export function setHighlightedRow({ lineCode, event }) {
 // This is adding line discussions to the actual lines in the diff tree
 // once for parallel and once for inline mode
 export function assignDiscussionsToDiff(discussions) {
-  const targetDiscussions = discussions || useNotes().discussions;
+  const targetDiscussions = discussions || useNotes().notes.discussions;
   const id = window?.location?.hash;
   const isNoteLink = id.indexOf('#note') === 0;
   const diffPositionByLineCode = getDiffPositionByLineCode(this.diffFiles);
   const hash = getLocationHash();
 
   targetDiscussions
-    .filter((discussion) => discussion?.diff_discussion)
+    .filter((discussion) => discussion.diff_discussion)
     .forEach((discussion) => {
       this[types.SET_LINE_DISCUSSIONS_FOR_FILE]({
         discussion,
@@ -463,7 +463,7 @@ export function toggleLineDiscussions(options) {
 }
 
 export function renderFileForDiscussionId(discussionId) {
-  const discussion = useNotes().discussions.find((d) => d.id === discussionId);
+  const discussion = useNotes().notes.discussions.find((d) => d.id === discussionId);
 
   if (discussion && discussion.diff_file) {
     const file = this.diffFiles.find((f) => f.file_hash === discussion.diff_file.file_hash);

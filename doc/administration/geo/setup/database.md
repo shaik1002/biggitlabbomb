@@ -210,9 +210,9 @@ There is an [issue where support is being discussed](https://gitlab.com/gitlab-o
    `127.0.0.1`. For more information, see [issue 5258](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/5258).
 
    Depending on your network configuration, the suggested addresses may
-   be incorrect. If your **primary** and **secondary** sites connect over a local
-   area network, or a virtual network connecting availability zones like the
-   [Amazon VPC](https://aws.amazon.com/vpc/) or the [Google VPC](https://cloud.google.com/vpc/),
+   be incorrect. If your **primary** site and **secondary** sites connect over a local
+   area network, or a virtual network connecting availability zones like
+   [Amazon's VPC](https://aws.amazon.com/vpc/) or [Google's VPC](https://cloud.google.com/vpc/),
    you should use the **secondary** site's private address for `postgresql['md5_auth_cidr_addresses']`.
 
    Edit `/etc/gitlab/gitlab.rb` and add the following, replacing the IP
@@ -509,16 +509,6 @@ data before running `pg_basebackup`.
    This command also takes a number of additional options. You can use `--help`
    to list them all, but here are some tips:
 
-   - If your primary site has a single node, use the primary node host as the `--host` parameter.
-   - If your primary site is using an external PostgreSQL database, you need to adjust the `--host` parameter:
-      - For PgBouncer setups, target the actual PostgreSQL database host directly, not the PgBouncer address.
-      - For Patroni configurations, target the current Patroni leader host.
-      - When using a load balancer (for example, HAProxy), if the load balancer is configured to always route to the Patroni leader, you can target the load balancer's
-        If not, you must target the actual database host.
-      - For setups with a dedicated PostgreSQL node, target the dedicated database host directly.
-   - Change the `--slot-name` to the name of the replication slot
-     to be used on the **primary** database. The script attempts to create the
-     replication slot automatically if it does not exist.
    - If PostgreSQL is listening on a non-standard port, add `--port=`.
    - If your database is too large to be transferred in 30 minutes, you need
      to increase the timeout. For example, use `--backup-timeout=3600` if you expect the
@@ -530,15 +520,18 @@ data before running `pg_basebackup`.
      [PostgreSQL documentation](https://www.postgresql.org/docs/12/libpq-ssl.html#LIBPQ-SSL-PROTECTION).
      The instructions above are carefully written to ensure protection against
      both passive eavesdroppers and active "man-in-the-middle" attackers.
+   - Change the `--slot-name` to the name of the replication slot
+     to be used on the **primary** database. The script attempts to create the
+     replication slot automatically if it does not exist.
    - If you're repurposing an old site into a Geo **secondary** site, you must
      add `--force` to the command line.
    - When not in a production machine, you can disable the backup step (if you
      are certain this is what you want) by adding `--skip-backup`.
+   - If you are using PgBouncer, you need to target the database host directly.
+   - If you are using Patroni on your primary site, you must target the current leader host.
+   - If you are using a load balancer proxy (for example HAProxy) and it is targeting the Patroni leader for the primary, you should target the load balancer proxy instead.
 
 The replication process is now complete.
-
-NOTE:
-The replication process only copies the data from the primary site's database to the secondary site's database. To complete your secondary site configuration, [add the secondary site on your primary site](../replication/configuration.md#step-3-add-the-secondary-site).
 
 ### PgBouncer support (optional)
 
@@ -746,25 +739,6 @@ Leader instance**:
 
    ```shell
    sudo -i
-   ```
-
-1. Edit `/etc/gitlab/gitlab.rb` and add the following:
-
-   ```ruby
-   postgresql['max_wal_senders'] = 2 # Use 2 per secondary site (1 temporary slot for initial Patroni replication + 1 reserved slot for a Geo secondary)
-   postgresql['max_replication_slots'] = 2 # Use 2 per secondary site (1 temporary slot for initial Patroni replication + 1 reserved slot for a Geo secondary)
-   ```
-
-1. Reconfigure GitLab:
-
-   ```shell
-   gitlab-ctl reconfigure
-   ```
-
-1. Restart the PostgreSQL service so the new changes take effect:
-
-   ```shell
-   gitlab-ctl restart postgresql
    ```
 
 1. Start a Database console
@@ -996,43 +970,8 @@ For each node running a Patroni instance on the secondary site:
         rm -rf /var/opt/gitlab/postgresql/data
         /opt/gitlab/embedded/bin/patronictl -c /var/opt/gitlab/patroni/patroni.yaml remove postgresql-ha
         gitlab-ctl reconfigure
-        ```
-
-     1. Start Patroni on the leader Patroni node to initiate the replication process from the primary database:
-
-        ```shell
         gitlab-ctl start patroni
         ```
-
-     1. Check the status of the Patroni cluster:
-
-        ```shell
-        gitlab-ctl patroni members
-        ```
-
-        Verify that:
-
-        - The current Patroni node appears in the output.
-        - The role is `Standby Leader`. The role might initially show `Replica`.
-        - The state is `Running`. The state might initially show `Creating replica`.
-
-        Wait until the node's role stabilizes as `Standby Leader` and the state is `Running`. This might take a few minutes.
-
-     1. When the leader Patroni node is the `Standby Leader` and is `Running`, start Patroni on the other Patroni nodes in the standby cluster:
-
-        ```shell
-        gitlab-ctl start patroni
-        ```
-
-        The other Patroni nodes should join the new standby cluster as replicas and begin replicating from the leader Patroni node automatically.
-
-1. Verify the cluster status:
-
-   ```shell
-   gitlab-ctl patroni members
-   ```
-
-   Ensure all Patroni nodes are listed in the `Running` state. There should be one `Standby Leader` node and multiple `Replica` nodes.
 
 ### Migrating a single tracking database node to Patroni
 

@@ -71,8 +71,6 @@ module Gitlab
           )
           @online = true
           @last_checked_at = Time.zone.now
-          @lag_time = nil
-          @lag_size = nil
 
           # Randomly somewhere in between interval and 2*interval we'll refresh the status of the host
           interval = load_balancer.configuration.replica_check_interval
@@ -99,7 +97,7 @@ module Gitlab
         # Returns true if the pool was disconnected, false if not.
         def try_disconnect
           if pool.connections.none?(&:in_use?)
-            pool_disconnect!
+            pool.disconnect!
             return true
           end
 
@@ -107,13 +105,7 @@ module Gitlab
         end
 
         def force_disconnect!
-          pool_disconnect!
-        end
-
-        def pool_disconnect!
-          return pool.disconnect! if ::Gitlab.next_rails?
-
-          pool.disconnect_without_verify!
+          pool.disconnect!
         end
 
         def offline!
@@ -125,7 +117,7 @@ module Gitlab
           )
 
           @online = false
-          pool_disconnect!
+          @pool.disconnect!
         end
 
         # Returns true if the host is online.
@@ -141,9 +133,7 @@ module Gitlab
               event: :host_online,
               message: 'Host is online after replica status check',
               db_host: @host,
-              db_port: @port,
-              lag_time: @lag_time,
-              lag_size: @lag_size
+              db_port: @port
             )
           # Always log if the host goes offline
           elsif !@online
@@ -151,9 +141,7 @@ module Gitlab
               event: :host_offline,
               message: 'Host is offline after replica status check',
               db_host: @host,
-              db_port: @port,
-              lag_time: @lag_time,
-              lag_size: @lag_size
+              db_port: @port
             )
           end
 
@@ -178,24 +166,24 @@ module Gitlab
         end
 
         def replication_lag_below_threshold?
-          @lag_time = replication_lag_time
-          return false unless @lag_time
-          return true if @lag_time <= load_balancer.configuration.max_replication_lag_time
+          lag_time = replication_lag_time
+          return false unless lag_time
+          return true if lag_time <= load_balancer.configuration.max_replication_lag_time
 
           if ignore_replication_lag_time?
             ::Gitlab::Database::LoadBalancing::Logger.info(
               event: :replication_lag_ignored,
-              lag_time: @lag_time,
+              lag_time: lag_time,
               message: 'Replication lag is treated as low because of load_balancer_ignore_replication_lag_time feature flag'
             )
 
             return true
           end
 
-          if double_replication_lag_time? && @lag_time <= (load_balancer.configuration.max_replication_lag_time * 2)
+          if double_replication_lag_time? && lag_time <= (load_balancer.configuration.max_replication_lag_time * 2)
             ::Gitlab::Database::LoadBalancing::Logger.info(
               event: :replication_lag_below_double,
-              lag_time: @lag_time,
+              lag_time: lag_time,
               message: 'Replication lag is treated as low because of load_balancer_double_replication_lag_time feature flag'
             )
 
@@ -215,8 +203,8 @@ module Gitlab
           # of the replica is small enough for the replica to be useful. We
           # only do this if we haven't replicated in a while so we only need
           # to connect to the primary when truly necessary.
-          if (@lag_size = replication_lag_size)
-            @lag_size <= load_balancer.configuration.max_replication_difference
+          if (lag_size = replication_lag_size)
+            lag_size <= load_balancer.configuration.max_replication_difference
           else
             false
           end
@@ -328,7 +316,7 @@ module Gitlab
         end
 
         def low_timeout_for_host_queries?
-          Feature.enabled?(:load_balancer_low_statement_timeout, Feature.current_pod)
+          Feature.enabled?(:load_balancer_low_statement_timeout)
         end
       end
     end

@@ -10,6 +10,7 @@ import {
   GlTooltipDirective,
 } from '@gitlab/ui';
 import ProjectSetPreReceiveSecretDetection from '~/security_configuration/graphql/set_pre_receive_secret_detection.graphql';
+import BetaBadge from '~/vue_shared/components/badges/beta_badge.vue';
 import { __, s__ } from '~/locale';
 import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
@@ -22,6 +23,7 @@ export default {
     GlPopover,
     GlToggle,
     GlAlert,
+    BetaBadge,
     GlButton,
   },
   directives: {
@@ -59,10 +61,7 @@ export default {
       return this.available && this.toggleValue;
     },
     cardClasses() {
-      return { 'gl-bg-strong': !this.available };
-    },
-    textClasses() {
-      return { 'gl-text-subtle': !this.available };
+      return { 'gl-bg-gray-10': !this.available };
     },
     statusClasses() {
       const { enabled } = this;
@@ -70,8 +69,12 @@ export default {
       return {
         'gl-ml-auto': true,
         'gl-shrink-0': true,
-        'gl-text-disabled': !enabled,
-        'gl-text-success': enabled,
+        'gl-text-gray-500': !enabled,
+        'gl-text-green-500': enabled,
+        'gl-w-full': true,
+        'gl-justify-between': true,
+        'gl-flex': true,
+        'gl-mb-4': true,
       };
     },
     isToggleDisabled() {
@@ -136,7 +139,7 @@ export default {
     notEnabled: s__('SecurityConfiguration|Not enabled'),
     availableWith: s__('SecurityConfiguration|Available with Ultimate'),
     learnMore: __('Learn more'),
-    tooltipTitle: s__('SecretDetection|Action unavailable'),
+    tooltipTitle: s__('SecretDetection|Feature not available'),
     tooltipDescription: s__(
       'SecretDetection|This feature has been disabled at the instance level. Please reach out to your instance administrator to request activation.',
     ),
@@ -152,45 +155,45 @@ export default {
 
 <template>
   <gl-card :class="cardClasses">
-    <template #header>
-      <div class="gl-flex gl-items-baseline">
-        <h3 class="gl-m-0 gl-mr-3 gl-text-base" :class="textClasses">
-          {{ feature.name }}
-          <gl-icon v-if="showLock" id="lockIcon" name="lock" />
-        </h3>
-        <gl-popover target="lockIcon" placement="right">
-          <template #title> {{ $options.i18n.tooltipTitle }} </template>
-          <slot>
-            {{ featureLockDescription }}
-          </slot>
-        </gl-popover>
+    <div class="gl-flex gl-flex-col-reverse gl-items-baseline">
+      <h3 class="gl-m-0 gl-mr-3 gl-text-lg">
+        {{ feature.name }}
+        <gl-icon v-if="showLock" id="lockIcon" name="lock" class="gl-mb-1" />
+      </h3>
+      <gl-popover target="lockIcon" placement="right">
+        <template #title> {{ $options.i18n.tooltipTitle }} </template>
+        <slot>
+          {{ featureLockDescription }}
+        </slot>
+      </gl-popover>
 
-        <div
-          :class="statusClasses"
-          data-testid="feature-status"
-          :data-qa-feature="`${feature.type}_${enabled}_status`"
-        >
-          <template v-if="enabled">
-            <span>
-              <gl-icon name="check-circle-filled" />
-              <span class="gl-text-green-700">{{ $options.i18n.enabled }}</span>
-            </span>
-          </template>
+      <div
+        :class="statusClasses"
+        data-testid="feature-status"
+        :data-qa-feature="`${feature.type}_${enabled}_status`"
+      >
+        <beta-badge size="sm" />
 
-          <template v-else-if="available">
-            <span>{{ $options.i18n.notEnabled }}</span>
-          </template>
+        <template v-if="enabled">
+          <span>
+            <gl-icon name="check-circle-filled" />
+            <span class="gl-text-green-700">{{ $options.i18n.enabled }}</span>
+          </span>
+        </template>
 
-          <template v-else>
-            {{ $options.i18n.availableWith }}
-          </template>
-        </div>
+        <template v-else-if="available">
+          <span>{{ $options.i18n.notEnabled }}</span>
+        </template>
+
+        <template v-else>
+          {{ $options.i18n.availableWith }}
+        </template>
       </div>
-    </template>
+    </div>
 
-    <p class="gl-mb-0" :class="textClasses">
+    <p class="gl-mb-0 gl-mt-5">
       {{ feature.description }}
-      <gl-link :href="feature.helpPath" target="_blank">{{ $options.i18n.learnMore }}.</gl-link>
+      <gl-link :href="feature.helpPath" target="_blank">{{ $options.i18n.learnMore }}</gl-link>
     </p>
 
     <template v-if="available">

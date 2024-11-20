@@ -20,15 +20,15 @@ Event type                                   | Trigger
 ---------------------------------------------|-----------------------------------------------------------------------------
 [Push event](#push-events)                   | A push is made to the repository.
 [Tag event](#tag-events)                     | Tags are created or deleted in the repository.
-[Work item event](#work-item-events)         | A new work item is created or an existing one is edited, closed, or reopened.
+[Issue event](#issue-events)                 | A new issue is created or an existing issue is updated, closed, or reopened.
 [Comment event](#comment-events)             | A new comment is made or edited on commits, merge requests, issues, and code snippets. <sup>1</sup>
-[Merge request event](#merge-request-events) | A merge request is created, edited, merged, or closed, or a commit is added in the source branch.
-[Wiki page event](#wiki-page-events)         | A wiki page is created, edited, or deleted.
+[Merge request event](#merge-request-events) | A merge request is created, updated, merged, or closed, or a commit is added in the source branch.
+[Wiki page event](#wiki-page-events)         | A wiki page is created, updated, or deleted.
 [Pipeline event](#pipeline-events)           | A pipeline status changes.
 [Job event](#job-events)                     | A job status changes.
 [Deployment event](#deployment-events)       | A deployment starts, succeeds, fails, or is canceled.
 [Feature flag event](#feature-flag-events)   | A feature flag is turned on or off.
-[Release event](#release-events)             | A release is created, edited, or deleted.
+[Release event](#release-events)             | A release is created, updated, or deleted.
 [Emoji event](#emoji-events)                 | An emoji reaction is added or removed.
 [Project or group access token event](#project-and-group-access-token-events) | A project or group access token will expire in seven days.
 
@@ -41,7 +41,6 @@ Event type                                   | Trigger
 Event type                                   | Trigger
 ---------------------------------------------|-----------------------------------------------------------------------------
 [Group member event](#group-member-events)   | A user is added or removed from a group, or a user's access level or access expiration date changes.
-[Project event](#project-events)             | A project is created or deleted in a group.
 [Subgroup event](#subgroup-events)           | A subgroup is created or removed from a group.
 
 NOTE:
@@ -208,16 +207,13 @@ Payload example:
 }
 ```
 
-## Work item events
+## Issue events
 
 > - `type` attribute in `object_attributes` [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/467415) in GitLab 17.2.
-> - Support for epics [introduced](https://gitlab.com/groups/gitlab-org/-/epics/13056) in GitLab 17.3. Your administrator must have [enabled the new look for epics](../../group/epics/epic_work_items.md).
 
-Work item events are triggered when a work item is created, edited, closed, or reopened.
+Issue events are triggered when an issue or work item is created, updated, closed, or reopened.
 The supported work item types are:
 
-- [Epics](../../group/epics/index.md)
-- [Issue](../../project/issues/index.md)
 - [Tasks](../../tasks.md)
 - [Incidents](../../../operations/incident_management/incidents.md)
 - [Test cases](../../../ci/test_cases/index.md)
@@ -226,8 +222,6 @@ The supported work item types are:
 
 For issues and [Service Desk](../service_desk/index.md) issues, the `object_kind` is `issue`, and the `type` is `Issue`.
 For all other work items, the `object_kind` field is `work_item`, and the `type` is the work item type.
-
-For work item type `Epic`, to get events for changes, the webhook must be registered for the group.
 
 The available values for `object_attributes.action` in the payload are:
 
@@ -1564,7 +1558,7 @@ Deployment events are triggered when a deployment:
 - Starts
 - Succeeds
 - Fails
-- Is canceled
+- Is cancelled
 
 The `deployable_id` and `deployable_url` in the payload represent a CI/CD job that executed the deployment.
 When the deployment event occurs by [API](../../../ci/environments/external_deployment_tools.md) or [`trigger` jobs](../../../ci/pipelines/downstream_pipelines.md), `deployable_url` is `null`.
@@ -1625,6 +1619,7 @@ Payload example:
 
 DETAILS:
 **Tier:** Premium, Ultimate
+**Offering:** GitLab.com, Self-managed, GitLab Dedicated
 
 > - Access request events [introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/163094) in GitLab 17.4.
 
@@ -1726,7 +1721,11 @@ Payload example:
 ### A user requests access
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/163094) in GitLab 17.4 [with a flag](../../../administration/feature_flags.md) named `group_access_request_webhooks`. Disabled by default.
-> - [Generally available](https://gitlab.com/gitlab-org/gitlab/-/issues/479877) in GitLab 17.5. Feature flag `group_access_request_webhooks` removed.
+
+FLAG:
+The availability of this feature is controlled by a feature flag.
+For more information, see the history.
+This feature is available for testing, but not ready for production use.
 
 Request header:
 
@@ -1757,7 +1756,11 @@ Payload example:
 ### An access request is denied
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/163094) in GitLab 17.4 [with a flag](../../../administration/feature_flags.md) named `group_access_request_webhooks`. Disabled by default.
-> - [Generally available](https://gitlab.com/gitlab-org/gitlab/-/issues/479877) in GitLab 17.5. Feature flag `group_access_request_webhooks` removed.
+
+FLAG:
+The availability of this feature is controlled by a feature flag.
+For more information, see the history.
+This feature is available for testing, but not ready for production use.
 
 Request header:
 
@@ -1785,80 +1788,11 @@ Payload example:
 }
 ```
 
-## Project events
-
-DETAILS:
-**Tier:** Premium, Ultimate
-
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/359044) in GitLab 17.6.
-
-These events are triggered for [group webhooks](webhooks.md#group-webhooks) only.
-
-Project events are triggered when:
-
-- A [project is created in a group](#create-a-project-in-a-group).
-- A [project is deleted in a group](#delete-a-project-in-a-group).
-
-### Create a project in a group
-
-Request header:
-
-```plaintext
-X-Gitlab-Event: Project Hook
-```
-
-Payload example:
-
-```json
-{
-  "event_name": "project_create",
-  "created_at": "2024-10-07T10:43:48Z",
-  "updated_at": "2024-10-07T10:43:48Z",
-  "name": "project1",
-  "path": "project1",
-  "path_with_namespace": "group1/project1",
-  "project_id": 22,
-  "project_namespace_id": 32,
-  "owners": [{
-    "name": "John",
-    "email": "user1@example.com"
-  }],
-  "project_visibility": "private"
-}
-```
-
-### Delete a project in a group
-
-Request header:
-
-```plaintext
-X-Gitlab-Event: Project Hook
-```
-
-Payload example:
-
-```json
-{
-  "event_name": "project_destroy",
-  "created_at": "2024-10-07T10:43:48Z",
-  "updated_at": "2024-10-07T10:43:48Z",
-  "name": "project1",
-  "path": "project1",
-  "path_with_namespace": "group1/project1",
-  "project_id": 22,
-  "project_namespace_id": 32,
-  "owners": [{
-    "name": "John",
-    "email": "user1@example.com"
-  }],
-  "project_visibility": "private"
-}
-```
-
 ## Subgroup events
 
 DETAILS:
 **Tier:** Premium, Ultimate
+**Offering:** GitLab.com, Self-managed, GitLab Dedicated
 
 These events are triggered for [group webhooks](webhooks.md#group-webhooks) only.
 
@@ -2073,7 +2007,6 @@ Payload example:
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/123952) in GitLab 16.2 [with a flag](../../../administration/feature_flags.md) named `emoji_webhooks`. Disabled by default.
 > - [Enabled on GitLab.com](https://gitlab.com/gitlab-org/gitlab/-/issues/417288) in GitLab 16.3.
 > - [Enabled by default](https://gitlab.com/gitlab-org/gitlab/-/issues/417288) in GitLab 16.4.
-> - [Generally available](https://gitlab.com/gitlab-org/gitlab/-/issues/417288) in GitLab 17.5. Feature flag `emoji_webhooks` removed.
 
 FLAG:
 On self-managed GitLab, by default this feature is available. To hide the feature, an administrator can
@@ -2221,7 +2154,7 @@ Payload example:
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/141907) in GitLab 16.10 [with a flag](../../../administration/feature_flags.md) named `access_token_webhooks`. Disabled by default.
 > - [Enabled on GitLab.com](https://gitlab.com/gitlab-org/gitlab/-/issues/439379) in GitLab 16.11.
 > - [Generally available](https://gitlab.com/gitlab-org/gitlab/-/issues/454642) in GitLab 16.11. Feature flag `access_token_webhooks` removed.
-> - `full_path` attribute [added](https://gitlab.com/gitlab-org/gitlab/-/issues/465421) in GitLab 17.4.
+> - `full_path` attribute [added](https://gitlab.com/gitlab-org/gitlab/-/issues/465421) in GitLab 17.4. 
 
 Two access token expiration events are generated:
 

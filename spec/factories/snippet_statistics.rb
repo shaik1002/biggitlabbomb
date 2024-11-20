@@ -2,7 +2,7 @@
 
 FactoryBot.define do
   factory :snippet_statistics do
-    snippet factory: :project_snippet
+    snippet
 
     initialize_with do
       # statistics are automatically created when a snippet is created

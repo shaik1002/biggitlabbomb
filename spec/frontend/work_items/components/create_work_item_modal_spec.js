@@ -8,7 +8,6 @@ import createMockApollo from 'helpers/mock_apollo_helper';
 import waitForPromises from 'helpers/wait_for_promises';
 import CreateWorkItem from '~/work_items/components/create_work_item.vue';
 import CreateWorkItemModal from '~/work_items/components/create_work_item_modal.vue';
-import { WORK_ITEMS_TYPE_MAP, WORK_ITEM_TYPE_ROUTE_WORK_ITEM } from '~/work_items/constants';
 import namespaceWorkItemTypesQuery from '~/work_items/graphql/namespace_work_item_types.query.graphql';
 
 const showToast = jest.fn();
@@ -26,7 +25,6 @@ describe('CreateWorkItemModal', () => {
   const findDropdownItem = () => wrapper.findComponent(GlDisclosureDropdownItem);
   const findModal = () => wrapper.findComponent(GlModal);
   const findForm = () => wrapper.findComponent(CreateWorkItem);
-  const findOpenInFullPageButton = () => wrapper.find('[data-testid="new-work-item-modal-link"]');
 
   const namespaceSingleWorkItemTypeQueryResponse = {
     data: {
@@ -79,9 +77,6 @@ describe('CreateWorkItemModal', () => {
           show: showToast,
         },
       },
-      stubs: {
-        GlModal,
-      },
     });
   };
 
@@ -105,32 +100,16 @@ describe('CreateWorkItemModal', () => {
   });
 
   describe('default trigger', () => {
-    it('opens modal and prevents following link on click', async () => {
+    it('opens modal on trigger click', async () => {
       createComponent();
 
       await waitForPromises();
 
-      const mockEvent = { preventDefault: jest.fn() };
-      findTrigger().vm.$emit('click', mockEvent);
+      findTrigger().vm.$emit('click');
 
       await nextTick();
 
       expect(findModal().props('visible')).toBe(true);
-      expect(mockEvent.preventDefault).toHaveBeenCalled();
-    });
-
-    it('does not open modal or prevent link default on ctrl+click', async () => {
-      createComponent();
-
-      await waitForPromises();
-
-      const mockEvent = { preventDefault: jest.fn(), ctrlKey: true };
-      findTrigger().vm.$emit('click', mockEvent);
-
-      await nextTick();
-
-      expect(findModal().props('visible')).toBe(false);
-      expect(mockEvent.preventDefault).not.toHaveBeenCalled();
     });
 
     it('does not render when hideButton=true', () => {
@@ -170,20 +149,6 @@ describe('CreateWorkItemModal', () => {
     expect(findModal().props('visible')).toBe(false);
   });
 
-  for (const [workItemTypeName, vals] of Object.entries(WORK_ITEMS_TYPE_MAP)) {
-    it(`has link to new work item page in modal header for ${workItemTypeName}`, async () => {
-      createComponent({ workItemTypeName });
-
-      const routeParamName = vals.routeParamName || WORK_ITEM_TYPE_ROUTE_WORK_ITEM;
-
-      await waitForPromises();
-
-      expect(findOpenInFullPageButton().attributes().href).toBe(
-        `/full-path/-/${routeParamName}/new`,
-      );
-    });
-  }
-
   it('when there are no work item types it does not set the cache', async () => {
     createComponent({ namespaceWorkItemTypesQueryHandler: workItemTypesEmptyQueryHandler });
 
@@ -198,17 +163,5 @@ describe('CreateWorkItemModal', () => {
     await waitForPromises();
 
     expect(setNewWorkItemCache).not.toHaveBeenCalled();
-  });
-
-  it('resets the cache on work item created event', async () => {
-    createComponent();
-
-    await waitForPromises();
-
-    await nextTick();
-
-    findForm().vm.$emit('workItemCreated', { webUrl: '/' });
-
-    expect(setNewWorkItemCache).toHaveBeenCalled();
   });
 });

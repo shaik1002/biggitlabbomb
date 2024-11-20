@@ -81,8 +81,6 @@ To delete the active epic board:
 
 ### Create a new list
 
-> - Creating a list between existing lists [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/462515) in GitLab 17.5.
-
 Prerequisites:
 
 - You must have at least the Reporter role for a group.
@@ -91,22 +89,10 @@ To create a new list:
 
 1. On the left sidebar, select **Search or go to** and find your group.
 1. Select **Plan > Epic boards**.
-1. In the upper-right corner, select **New list**.
-1. Hover or move keyboard focus between two lists.
-1. Select **New list**.
-   The new list panel opens.
-
-   ![creating a new list between two lists in an issue board](../../project/img/issue_board_add_list_between_lists_v17_6.png)
+1. In the upper-right corner, select **Create list**.
 1. In the **New list** column expand the **Select a label** dropdown list and select the label to use as
    list scope.
 1. Select **Add to board**.
-
-The new list is inserted in the same position on the board as the new list panel.
-
-To move and reorder lists, drag them around.
-
-Alternatively, you can select the **New list** at the right end of the board.
-The new list is inserted at the right end of the lists, before **Closed**.
 
 ### Remove a list
 
@@ -138,14 +124,6 @@ To create an epic from a list in epic board:
 1. Select **Create epic**.
 
 ![Create a GitLab epic from an epic board](img/epic_board_epic_create_v15_10.png)
-
-### Edit an epic
-
-<!-- When epics_list_drawer feature flag is removed, change the info below into a proper task topic -->
-
-If your administrator enabled the [epic drawer](manage_epics.md#open-epics-in-a-drawer),
-when you select an epic card from the epic board, the epic opens in a drawer.
-There, you can edit all the fields, including the description, comments, or related items.
 
 ### Filter epics
 

@@ -74,9 +74,9 @@ For every target namespace, all images in the following workload resources are s
 
 ### Enable via scan execution policies
 
-To enable scanning of images in your Kubernetes cluster by using scan execution policies, use the
+To enable scanning of all images within your Kubernetes cluster via scan execution policies, we can use the
 [scan execution policy editor](../../application_security/policies/scan_execution_policies.md#scan-execution-policy-editor)
-to create a new schedule rule.
+To create a new schedule rule.
 
 NOTE:
 The Kubernetes agent must be running in your cluster to scan running container images
@@ -105,7 +105,7 @@ The keys for a schedule rule are:
 
 - `cadence` (required): a [CRON expression](https://docs.oracle.com/cd/E12058_01/doc/doc.1014/e12030/cron_expressions.htm) for when the scans are run
 - `agents:<agent-name>` (required): The name of the agent to use for scanning
-- `agents:<agent-name>:namespaces` (required): The Kubernetes namespaces to scan.
+- `agents:<agent-name>:namespaces` (optional): The Kubernetes namespaces to scan. If omitted, all namespaces are scanned
 
 NOTE:
 Other elements of the [CRON syntax](https://docs.oracle.com/cd/E12058_01/doc/doc.1014/e12030/cron_expressions.htm) may work in the cadence field if supported by the [cron](https://github.com/robfig/cron) we are using in our implementation, however, GitLab does not officially test or support them.
@@ -114,14 +114,6 @@ NOTE:
 The CRON expression is evaluated in [UTC](https://www.timeanddate.com/worldclock/timezone/utc) using the system-time of the Kubernetes-agent pod.
 
 You can view the complete schema within the [scan execution policy documentation](../../application_security/policies/scan_execution_policies.md#scan-execution-policies-schema).
-
-## OCS vulnerability resolution for multi cluster configuration
-
-To ensure accurate vulnerability tracking with OCS, you should create a separate GitLab project with OCS enabled for each cluster. If you have multiple clusters, be sure to use one project for each cluster.
-
-OCS resolves vulnerabilities that are no longer found in your cluster after each scan by comparing the current scan vulnerabilities with those previously detected. Any vulnerabilities from earlier scans that are no longer present in the current scan are resolved for the GitLab project.
-
-If multiple clusters are configured in the same project, an OCS scan in one cluster (for example, Project A) would resolve previously detected vulnerabilities from another cluster (for example, Project B), leading to incorrect vulnerability reporting.
 
 ## Configure scanner resource requirements
 

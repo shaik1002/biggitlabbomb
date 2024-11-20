@@ -43,18 +43,9 @@ module Backup
         enqueue_consecutive
 
       ensure
-        begin
-          strategy.finish!
-
-        rescue Error => e
-          logger.error(e.message)
-        end
+        strategy.finish!
 
         restore_object_pools
-      end
-
-      def asynchronous?
-        false
       end
 
       private

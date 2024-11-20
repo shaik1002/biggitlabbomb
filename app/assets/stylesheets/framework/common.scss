@@ -71,7 +71,7 @@
 
 /** COLORS **/
 .text-secondary {
-  @apply gl-text-subtle;
+  color: $gl-text-color-secondary;
 }
 
 .text-warning,
@@ -88,6 +88,10 @@
   background: $line-target-blue;
 }
 
+.text-break-word {
+  word-break: break-all;
+}
+
 .text-underline,
 .text-underline:hover {
   text-decoration: underline;
@@ -98,10 +102,10 @@
   color: $gray-200;
 }
 
-.light { @apply gl-text-default; }
+.light { color: $gl-text-color; }
 
 .slead {
-  @apply gl-text-default;
+  color: $gl-text-color;
   font-size: 14px;
   margin-bottom: 12px;
   font-weight: $gl-font-weight-normal;
@@ -310,10 +314,15 @@ li.note {
     padding: 0 10px;
     clip: auto;
     text-decoration: none;
-    @apply gl-text-default;
+    color: $gl-text-color;
     background: $gray-10;
     z-index: 1;
   }
+}
+
+.bordered-box {
+  border: 1px solid $border-color;
+  border-radius: $gl-border-radius-base;
 }
 
 .tooltip {
@@ -355,6 +364,7 @@ li.note {
 .h-32-px { height: 32px;}
 
 .mw-6em { max-width: 6em; }
+.mw-70p { max-width: 70%; }
 
 // By default flex items don't shrink below their minimum content size.
 // To change this, these clases set a min-width or min-height
@@ -414,7 +424,7 @@ li.note {
 .gl-pseudo-placeholder:empty::before {
   content: attr(data-placeholder);
   font-weight: $gl-font-weight-normal;
-  color: var(--gl-control-placeholder-color);
+  color: $gl-text-color-secondary;
   cursor: text;
 }
 
@@ -440,12 +450,12 @@ li.note {
 }
 
 .ref-container {
-  @apply gl-text-link #{!important};
+  color: var(--blue-500, $blue-500) !important;
   background-color: var(--blue-50, $blue-50);
 }
 
 .commit-sha-container {
-  @apply gl-text-subtle #{!important};
+  color: var(--gray-700, $gray-700) !important;
   background-color: var(--gray-50, $gray-50);
 }
 
@@ -455,7 +465,9 @@ li.note {
 
 copy-code {
   position: absolute;
+  @apply gl-transition-all;
   opacity: 0;
+
   top: $gl-spacing-scale-3;
   right: $gl-spacing-scale-3;
 

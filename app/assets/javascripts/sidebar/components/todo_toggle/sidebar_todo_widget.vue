@@ -1,5 +1,5 @@
 <script>
-import { GlButton, GlTooltipDirective, GlAnimatedTodoIcon } from '@gitlab/ui';
+import { GlButton, GlIcon, GlTooltipDirective } from '@gitlab/ui';
 import { produce } from 'immer';
 import { createAlert } from '~/alert';
 import { TYPE_MERGE_REQUEST } from '~/issues/constants';
@@ -16,8 +16,8 @@ const trackingMixin = Tracking.mixin();
 export default {
   components: {
     GlButton,
+    GlIcon,
     TodoButton,
-    GlAnimatedTodoIcon,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -48,11 +48,11 @@ export default {
   },
   data() {
     return {
-      todoId: null,
       loading: false,
     };
   },
   apollo: {
+    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     todoId: {
       query() {
         return todoQueries[this.issuableType].query;
@@ -85,19 +85,6 @@ export default {
           }),
         });
       },
-      subscribeToMore: {
-        document() {
-          return todoQueries[this.issuableType].subscription;
-        },
-        variables() {
-          return {
-            issuableId: this.issuableId,
-          };
-        },
-        skip() {
-          return !todoQueries[this.issuableType].subscription;
-        },
-      },
     },
   },
   computed: {
@@ -124,6 +111,9 @@ export default {
         return todoMutationTypes.markDone;
       }
       return todoMutationTypes.create;
+    },
+    collapsedButtonIcon() {
+      return this.hasTodo ? 'todo-done' : 'todo-add';
     },
     tootltipTitle() {
       return todoLabel(this.hasTodo);
@@ -156,6 +146,7 @@ export default {
               query: this.todoIdQuery,
               variables: this.todoIdQueryVariables,
             };
+
             const sourceData = store.readQuery(queryProps);
             const data = produce(sourceData, (draftState) => {
               draftState.workspace.issuable.currentUserTodos.nodes = this.hasTodo ? [] : [todo];
@@ -212,7 +203,7 @@ export default {
       class="hide-collapsed"
       @click.stop.prevent="toggleTodo"
     >
-      <gl-animated-todo-icon :class="{ '!gl-text-blue-500': hasTodo }" :is-on="hasTodo" />
+      <gl-icon :class="{ 'todo-undone !gl-fill-blue-500': hasTodo }" :name="collapsedButtonIcon" />
     </todo-button>
     <todo-button
       v-else
@@ -233,7 +224,7 @@ export default {
       class="sidebar-collapsed-icon sidebar-collapsed-container !gl-rounded-none !gl-shadow-none"
       @click.stop.prevent="toggleTodo"
     >
-      <gl-animated-todo-icon :is-on="hasTodo" />
+      <gl-icon :class="{ 'todo-undone': hasTodo }" :name="collapsedButtonIcon" />
     </gl-button>
   </div>
 </template>

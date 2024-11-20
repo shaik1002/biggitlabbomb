@@ -6,40 +6,12 @@ module Gitlab
       module Chain
         module Limit
           class Size < Chain::Base
-            include ::Gitlab::Ci::Pipeline::Chain::Helpers
-
-            def initialize(*)
-              super
-
-              @limit = Gitlab::Ci::Pipeline::Quota::Size
-                .new(project.namespace, pipeline, command)
-            end
-
             def perform!
-              if limit.exceeded?
-                limit.log_error!(log_attrs)
-                error(limit.message, failure_reason: :size_limit_exceeded)
-              elsif limit.log_exceeded_limit?
-                limit.log_error!(log_attrs)
-              end
+              # to be overridden in EE
             end
 
             def break?
-              limit.exceeded?
-            end
-
-            private
-
-            attr_reader :limit
-
-            def log_attrs
-              {
-                jobs_count: pipeline.statuses.count,
-                pipeline_source: pipeline.source,
-                plan: project.actual_plan_name,
-                project_id: project.id,
-                project_full_path: project.full_path
-              }
+              false # to be overridden in EE
             end
           end
         end
@@ -47,3 +19,5 @@ module Gitlab
     end
   end
 end
+
+Gitlab::Ci::Pipeline::Chain::Limit::Size.prepend_mod_with('Gitlab::Ci::Pipeline::Chain::Limit::Size')

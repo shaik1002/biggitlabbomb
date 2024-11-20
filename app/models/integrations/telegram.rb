@@ -1,10 +1,8 @@
 # frozen_string_literal: true
 
 module Integrations
-  class Telegram < Integration
+  class Telegram < BaseChatNotification
     include HasAvatar
-    include Base::ChatNotification
-
     TELEGRAM_HOSTNAME = "%{hostname}/bot%{token}/sendMessage"
 
     field :hostname,
@@ -79,7 +77,7 @@ module Integrations
 
     def self.help
       build_help_page_url(
-        'user/project/integrations/telegram.md',
+        'user/project/integrations/telegram',
         s_("TelegramIntegration|Send notifications about project events to Telegram.")
       )
     end

@@ -1,6 +1,6 @@
 import $ from 'jquery';
 import Pikaday from 'pikaday';
-import { newDate, toISODateFormat } from '~/lib/utils/datetime_utility';
+import { parsePikadayDate, pikadayToString } from '~/lib/utils/datetime_utility';
 
 export default function initDatePickers() {
   $('.datepicker').each(function initPikaday() {
@@ -12,15 +12,15 @@ export default function initDatePickers() {
       theme: 'gl-datepicker-theme animate-picker',
       format: 'yyyy-mm-dd',
       container: $datePicker.parent().get(0),
-      parse: (dateString) => newDate(dateString),
-      toString: (date) => toISODateFormat(date),
+      parse: (dateString) => parsePikadayDate(dateString),
+      toString: (date) => pikadayToString(date),
       onSelect(dateText) {
         $datePicker.val(calendar.toString(dateText));
       },
       firstDay: gon.first_day_of_week,
     });
 
-    calendar.setDate(newDate(datePickerVal));
+    calendar.setDate(parsePikadayDate(datePickerVal));
 
     $datePicker.data('pikaday', calendar);
   });

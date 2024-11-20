@@ -156,7 +156,7 @@ RSpec.describe Gitlab::Ci::Config::External::File::Project, feature_category: :p
 
       it 'returns false' do
         expect(valid?).to be_falsy
-        expect(project_file.error_message).to include("Project `#{project.full_path}` file `[MASKED]xxx.yml` is empty!")
+        expect(project_file.error_message).to include("Project `#{project.full_path}` file `xxxxxxxxxxx.yml` is empty!")
       end
     end
 
@@ -180,7 +180,7 @@ RSpec.describe Gitlab::Ci::Config::External::File::Project, feature_category: :p
 
       it 'returns false' do
         expect(valid?).to be_falsy
-        expect(project_file.error_message).to include("Project `#{project.full_path}` file `[MASKED]xxxxxxxxxxx.yml` does not exist!")
+        expect(project_file.error_message).to include("Project `#{project.full_path}` file `xxxxxxxxxxxxxxxxxxx.yml` does not exist!")
       end
     end
 
@@ -206,7 +206,7 @@ RSpec.describe Gitlab::Ci::Config::External::File::Project, feature_category: :p
 
       it 'returns false with masked project name' do
         expect(valid?).to be_falsy
-        expect(project_file.error_message).to include("Project `[MASKED]xxxxxxxxxxxxxxx` not found or access denied!")
+        expect(project_file.error_message).to include("Project `xxxxxxxxxxxxxxxxxxxxxxx` not found or access denied!")
       end
     end
 
@@ -282,9 +282,9 @@ RSpec.describe Gitlab::Ci::Config::External::File::Project, feature_category: :p
           context_sha: project_sha,
           type: :file,
           location: 'file.yml',
-          blob: "http://localhost/#{namespace_path}/[MASKED]xxxxxxx/-/blob/#{included_project_sha}/file.yml",
-          raw: "http://localhost/#{namespace_path}/[MASKED]xxxxxxx/-/raw/#{included_project_sha}/file.yml",
-          extra: { project: "#{namespace_path}/[MASKED]xxxxxxx", ref: '[MASKED]xxxxxxxxxxxxxxxxxx' }
+          blob: "http://localhost/#{namespace_path}/xxxxxxxxxxxxxxx/-/blob/#{included_project_sha}/file.yml",
+          raw: "http://localhost/#{namespace_path}/xxxxxxxxxxxxxxx/-/raw/#{included_project_sha}/file.yml",
+          extra: { project: "#{namespace_path}/xxxxxxxxxxxxxxx", ref: 'xxxxxxxxxxxxxxxxxxxxxxxxxx' }
         )
       }
     end

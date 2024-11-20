@@ -10,18 +10,18 @@ RSpec.describe Ci::PipelineChatData, type: :model, feature_category: :continuous
   it { is_expected.to validate_presence_of(:chat_name_id) }
   it { is_expected.to validate_presence_of(:response_url) }
 
-  describe 'partitioning' do
+  describe 'partitioning', :ci_partitionable do
     include Ci::PartitioningHelpers
 
     let(:pipeline) { create(:ci_pipeline) }
-    let(:pipeline_chat_data) { create(:ci_pipeline_chat_data, pipeline: pipeline, project_id: pipeline.project_id) }
+    let(:pipeline_chat_data) { create(:ci_pipeline_chat_data, pipeline: pipeline) }
 
     before do
-      stub_current_partition_id(ci_testing_partition_id)
+      stub_current_partition_id(ci_testing_partition_id_for_check_constraints)
     end
 
     it 'assigns the same partition id as the one that pipeline has' do
-      expect(pipeline_chat_data.partition_id).to eq(ci_testing_partition_id)
+      expect(pipeline_chat_data.partition_id).to eq(ci_testing_partition_id_for_check_constraints)
     end
   end
 end

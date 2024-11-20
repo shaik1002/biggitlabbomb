@@ -12,7 +12,6 @@ RSpec.describe Gitlab::SidekiqMiddleware::PauseControl, feature_category: :globa
       :unknown               | ::Gitlab::SidekiqMiddleware::PauseControl::Strategies::None
       :click_house_migration | ::Gitlab::SidekiqMiddleware::PauseControl::Strategies::ClickHouseMigration
       :zoekt                 | ::Gitlab::SidekiqMiddleware::PauseControl::Strategies::Zoekt
-      :deprecated            | ::Gitlab::SidekiqMiddleware::PauseControl::Strategies::Deprecated
     end
 
     with_them do

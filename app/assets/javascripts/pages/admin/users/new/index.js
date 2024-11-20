@@ -1,7 +1,3 @@
-import {
-  setupInternalUserRegexHandler,
-  initAdminNewUserOrganizationField,
-} from '~/admin/users/new';
+import { setupInternalUserRegexHandler } from '~/admin/users/new';
 
 setupInternalUserRegexHandler();
-initAdminNewUserOrganizationField();

@@ -10,8 +10,7 @@ module Resolvers
 
     argument :title, GraphQL::Types::String,
       required: false,
-      description: 'Exact match on title. Cannot be used with `searchTerm`. ' \
-        '`searchIn` will be ignored if `title` argument is provided.'
+      description: 'Exact match on title. Cannot be used with `searchTerm`. `searchIn` will be ignored if `title` argument is provided.' # rubocop:disable Layout/LineLength -- This is just a long string
 
     argument :search_term, GraphQL::Types::String,
       required: false,

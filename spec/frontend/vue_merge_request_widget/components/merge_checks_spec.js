@@ -177,7 +177,7 @@ describe('Merge request merge checks component', () => {
   });
 
   it('sorts merge checks', async () => {
-    shallowMountComponent({
+    mountComponent({
       mergeabilityChecks: [
         { identifier: 'discussions_not_resolved', status: 'SUCCESS' },
         { identifier: 'status_checks_must_pass', status: 'INACTIVE' },
@@ -187,11 +187,15 @@ describe('Merge request merge checks component', () => {
 
     await waitForPromises();
 
-    wrapper.vm.toggleCollapsed();
+    await wrapper.findByTestId('widget-toggle').trigger('click');
 
-    expect(wrapper.vm.sortedChecks.length).toBe(2);
-    expect(wrapper.vm.sortedChecks[0].status).toBe('FAILED');
-    expect(wrapper.vm.sortedChecks[1].status).toBe('SUCCESS');
+    const mergeChecks = wrapper.findAllByTestId('merge-check');
+
+    expect(mergeChecks.length).toBe(2);
+    expect(mergeChecks.at(0).props('check')).toEqual(expect.objectContaining({ status: 'FAILED' }));
+    expect(mergeChecks.at(1).props('check')).toEqual(
+      expect.objectContaining({ status: 'SUCCESS' }),
+    );
   });
 
   it('does not render check component if no message exists', async () => {
@@ -205,8 +209,6 @@ describe('Merge request merge checks component', () => {
     await waitForPromises();
 
     await wrapper.findByTestId('widget-toggle').trigger('click');
-
-    await waitForPromises();
 
     const mergeChecks = wrapper.findAllByTestId('merge-check');
 
@@ -246,29 +248,6 @@ describe('Merge request merge checks component', () => {
       await wrapper.findByTestId('widget-toggle').trigger('click');
 
       expect(findMergeChecks().length).toBe(1);
-    });
-  });
-
-  describe('checking merge checks', () => {
-    const findMergeChecks = () => wrapper.findAllByTestId('merge-check');
-
-    beforeEach(() => {
-      mountComponent({
-        mergeabilityChecks: [
-          { identifier: 'discussions_not_resolved', status: 'CHECKING' },
-          { identifier: 'not_approved', status: 'SUCCESS' },
-        ],
-      });
-
-      return waitForPromises();
-    });
-
-    it('renders checking text', () => {
-      expect(wrapper.text()).toContain('Checking if merge request can be merged...');
-    });
-
-    it('renders checks expanded by default', () => {
-      expect(findMergeChecks()).toHaveLength(1);
     });
   });
 });

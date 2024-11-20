@@ -1,9 +1,8 @@
-import { GlModal, GlFormInput, GlFormTextarea, GlFormCheckbox, GlAlert } from '@gitlab/ui';
+import { GlModal, GlFormInput, GlFormTextarea, GlToggle, GlAlert } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
 import { nextTick } from 'vue';
-import FileIcon from '~/vue_shared/components/file_icon.vue';
 import waitForPromises from 'helpers/wait_for_promises';
 import { createAlert } from '~/alert';
 import { HTTP_STATUS_OK } from '~/lib/utils/http_status';
@@ -52,12 +51,11 @@ describe('UploadBlobModal', () => {
   const findAlert = () => wrapper.findComponent(GlAlert);
   const findCommitMessage = () => wrapper.findComponent(GlFormTextarea);
   const findBranchName = () => wrapper.findComponent(GlFormInput);
-  const findMrCheckbox = () => wrapper.findComponent(GlFormCheckbox);
+  const findMrToggle = () => wrapper.findComponent(GlToggle);
   const findUploadDropzone = () => wrapper.findComponent(UploadDropzone);
   const actionButtonDisabledState = () => findModal().props('actionPrimary').attributes.disabled;
   const cancelButtonDisabledState = () => findModal().props('actionCancel').attributes.disabled;
   const actionButtonLoadingState = () => findModal().props('actionPrimary').attributes.loading;
-  const findFileIcon = () => wrapper.findComponent(FileIcon);
 
   describe.each`
     canPushCode | displayBranchName | displayForkedBranchMessage
@@ -90,8 +88,8 @@ describe('UploadBlobModal', () => {
         expect(cancelButtonDisabledState()).toBe(false);
       });
 
-      it('does not display the MR checkbox', () => {
-        expect(findMrCheckbox().exists()).toBe(false);
+      it('does not display the MR toggle', () => {
+        expect(findMrToggle().exists()).toBe(false);
       });
 
       it(`${
@@ -106,12 +104,12 @@ describe('UploadBlobModal', () => {
 
       if (canPushCode) {
         describe('when changing the branch name', () => {
-          it('displays the MR checkbox', async () => {
+          it('displays the MR toggle', async () => {
             createComponent({ targetBranch: 'Not main' });
 
             await nextTick();
 
-            expect(findMrCheckbox().exists()).toBe(true);
+            expect(findMrToggle().exists()).toBe(true);
           });
         });
       }
@@ -156,10 +154,6 @@ describe('UploadBlobModal', () => {
             findModal().vm.$emit('primary', mockEvent);
 
             await waitForPromises();
-          });
-
-          it('displays the correct file type icon', () => {
-            expect(findFileIcon().props('fileName')).toBe('file.jpg');
           });
 
           it('redirects to the uploaded file', () => {

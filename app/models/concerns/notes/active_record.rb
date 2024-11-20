@@ -15,6 +15,10 @@ module Notes
 
       has_many :todos
 
+      # rubocop:disable Cop/ActiveRecordDependent -- polymorphic association
+      has_many :events, as: :target, dependent: :delete_all
+      # rubocop:enable Cop/ActiveRecordDependent
+
       delegate :name, :email, to: :author, prefix: true
 
       validates :note, presence: true

@@ -1,6 +1,5 @@
 <script>
 import {
-  GlAvatar,
   GlIcon,
   GlDropdown,
   GlDropdownDivider,
@@ -34,7 +33,6 @@ export default {
     ASSIGNEES_BLOCK: s__('AlertManagement|Alert assignees: %{assignees}'),
   },
   components: {
-    GlAvatar,
     GlIcon,
     GlDropdown,
     GlDropdownItem,
@@ -284,7 +282,7 @@ export default {
     >
       <div v-if="userName" class="gl-mt-2 gl-inline-flex" data-testid="assigned-users">
         <span class="gl-relative gl-mr-4">
-          <gl-avatar :src="userImg" :size="32" :alt="userName" />
+          <img :alt="userName" :src="userImg" :width="32" class="avatar avatar-inline s32 gl-m-0" />
         </span>
         <span class="gl-flex gl-flex-col gl-overflow-hidden">
           <strong class="dropdown-menu-user-full-name">
@@ -296,7 +294,7 @@ export default {
       <span v-else class="gl-flex gl-items-center gl-leading-normal">
         {{ __('None') }} -
         <gl-button
-          class="gl-ml-2"
+          class="gl-ml-2 !gl-text-inherit"
           href="#"
           category="tertiary"
           variant="link"

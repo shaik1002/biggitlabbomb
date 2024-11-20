@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::Changelog::Config, feature_category: :source_code_management do
+RSpec.describe Gitlab::Changelog::Config do
   include ProjectForksHelper
 
   let(:project) { build_stubbed(:project) }
@@ -57,34 +57,17 @@ RSpec.describe Gitlab::Changelog::Config, feature_category: :source_code_managem
       end
     end
 
-    context 'when changelog config is empty' do
-      subject(:from_git) { described_class.from_git(project) }
+    context 'when changelog is empty' do
+      it 'returns the default configuration' do
+        allow(project.repository)
+          .to receive(:changelog_config)
+          .and_return("")
 
-      shared_examples 'all attributes match the default config' do
-        let(:default_config) { described_class.new(project) }
-        let(:attributes) { %i[date_format categories template tag_regex always_credit_user_ids] }
+        expect(described_class)
+          .to receive(:new)
+          .with(project)
 
-        it 'does not modify any attributes from the default config' do
-          attributes.each do |attribute|
-            expect(from_git.public_send(attribute)).to eql(default_config.public_send(attribute))
-          end
-        end
-      end
-
-      before do
-        allow(project.repository).to receive(:changelog_config).and_return(changelog_config_content)
-      end
-
-      context 'when changelog config does not contain a header' do
-        let(:changelog_config_content) { "" }
-
-        it_behaves_like 'all attributes match the default config'
-      end
-
-      context 'when changelog config contains a header' do
-        let(:changelog_config_content) { "---\n\n" }
-
-        it_behaves_like 'all attributes match the default config'
+        described_class.from_git(project)
       end
     end
   end

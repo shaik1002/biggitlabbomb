@@ -80,7 +80,7 @@ module Gitlab
       end
 
       def header_start_pattern
-        /^##\s*#{Regexp.escape(version)}\s/
+        /^##\s*#{Regexp.escape(version)}/
       end
 
       private

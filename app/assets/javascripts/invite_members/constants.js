@@ -4,7 +4,6 @@ import { helpPagePath } from '~/helpers/help_page_helper';
 export const PROJECT_SELECT_LABEL_ID = 'project-select';
 export const SEARCH_DELAY = 200;
 export const VALID_TOKEN_BACKGROUND = 'gl-bg-green-100';
-export const WARNING_TOKEN_BACKGROUND = 'gl-bg-orange-100';
 export const INVALID_TOKEN_BACKGROUND = 'gl-bg-red-100';
 export const TOAST_MESSAGE_LOCALSTORAGE_KEY = 'members_invited_successfully';
 
@@ -79,9 +78,6 @@ export const TOAST_MESSAGE_SUCCESSFUL = s__('InviteMembersModal|Members were suc
 export const INVALID_FEEDBACK_MESSAGE_DEFAULT = s__('InviteMembersModal|Something went wrong');
 export const READ_MORE_TEXT = s__(
   `InviteMembersModal|%{linkStart}Read more%{linkEnd} about role permissions`,
-);
-export const READ_MORE_ACCESS_EXPIRATION_TEXT = s__(
-  `InviteMembersModal|%{linkStart}Read more%{linkEnd} about access expiration`,
 );
 export const INVITE_BUTTON_TEXT = s__('InviteMembersModal|Invite');
 export const INVITE_BUTTON_TEXT_DISABLED = s__('InviteMembersModal|Manage members');
@@ -173,5 +169,4 @@ export const BLOCKED_SEAT_OVERAGES_BODY = s__(
   'InviteMembersModal|You must purchase more seats for your subscription before this amount of users can be added.',
 );
 export const BLOCKED_SEAT_OVERAGES_CTA = s__('InviteMembersModal|Purchase more seats');
-export const BLOCKED_SEAT_OVERAGES_CTA_DOCS = s__('InviteMembersModal|Learn how to add seats');
 export const BLOCKED_SEAT_OVERAGES_ERROR_REASON = 'seat_limit_exceeded_error';

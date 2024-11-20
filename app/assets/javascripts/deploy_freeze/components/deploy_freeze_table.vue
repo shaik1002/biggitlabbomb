@@ -25,7 +25,7 @@ export default {
     {
       key: 'actions',
       label: __('Actions'),
-      thAlignRight: true,
+      thClass: 'gl-text-right',
     },
   ],
   i18n: {

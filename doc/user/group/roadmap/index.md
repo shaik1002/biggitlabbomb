@@ -50,8 +50,6 @@ heading to toggle the list of the milestone bars.
 
 ![roadmap view](img/roadmap_view_v14_3.png)
 
-From an epic, you can also [view the roadmap filtered to this epic's descendants](../epics/index.md#roadmap-in-epics).
-
 ## Sort and filter the roadmap
 
 > - Filtering by group was [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/385191) in GitLab 15.9.
@@ -87,7 +85,7 @@ In the Roadmap view, you can also filter by the epics':
 
 ![roadmap date range in weeks](img/roadmap_filters_v13_11.png)
 
-From an epic, you can also [view the roadmap filtered to this epic's descendants](../epics/index.md#roadmap-in-epics).
+You can also [visualize roadmaps inside of an epic](../epics/index.md#roadmap-in-epics).
 
 ### Improve the performance of the roadmap
 
@@ -114,10 +112,10 @@ You can configure the following:
   project milestones.
 - Show all, open, or closed epics.
 - Turn progress tracking for child issues on or off and select whether
-  to use issue weights or counts to calculate progress.
+  to use issue weights or counts.
 - Turn labels on or off.
 
-The roadmap configuration settings aren't saved in user preferences, but are saved or
+The progress tracking setting isn't saved in user preferences, but is saved or
 shared using URL parameters.
 
 ## Timeline duration
@@ -144,7 +142,7 @@ these layout presets:
 
 ### Quarters
 
-![roadmap date range in quarters](img/roadmap_timeline_quarters_v11_10.png)
+![roadmap date range in quarters](img/roadmap_timeline_quarters.png)
 
 In the **Quarters** preset, roadmap shows epics and milestones which have start or due dates
 **falling within** currently selected date range preset,
@@ -154,7 +152,7 @@ the timeline header represent the month of the quarter.
 
 ### Months
 
-![roadmap date range in months](img/roadmap_timeline_months_v11_10.png)
+![roadmap date range in months](img/roadmap_timeline_months.png)
 
 In the **Months** preset, roadmap shows epics and milestones which have start or
 due dates **falling within** or **going through** currently selected date range
@@ -164,7 +162,7 @@ on the start day (Sunday) of the week. This preset is selected by default.
 
 ### Weeks
 
-![roadmap date range in weeks](img/roadmap_timeline_weeks_v11_11.png)
+![roadmap date range in weeks](img/roadmap_timeline_weeks.png)
 
 In the **Weeks** preset, roadmap shows epics and milestones which have start or due dates **falling
 within** or **going through** currently selected date range preset, where **today**

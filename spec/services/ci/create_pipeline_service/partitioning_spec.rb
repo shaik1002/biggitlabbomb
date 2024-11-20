@@ -2,8 +2,8 @@
 
 require 'spec_helper'
 
-RSpec.describe Ci::CreatePipelineService, :aggregate_failures,
-  feature_category: :continuous_integration do
+RSpec.describe Ci::CreatePipelineService, :ci_config_feature_flag_correctness, :aggregate_failures,
+  :ci_partitionable, feature_category: :continuous_integration do
   let_it_be(:project) { create(:project, :repository) }
   let_it_be(:user)    { project.first_owner }
 
@@ -37,7 +37,7 @@ RSpec.describe Ci::CreatePipelineService, :aggregate_failures,
   end
 
   let(:pipeline) { service.execute(:push).payload }
-  let(:current_partition_id) { ci_testing_partition_id }
+  let(:current_partition_id) { ci_testing_partition_id_for_check_constraints }
 
   before do
     stub_ci_pipeline_yaml_file(config)

@@ -13,6 +13,7 @@ module Ci
     include TaggableQueries
     include Presentable
     include EachBatch
+    include IgnorableColumns
     include Ci::HasRunnerExecutor
     include Ci::HasRunnerStatus
     include Ci::Taggable
@@ -97,7 +98,6 @@ module Ci
     belongs_to :creator, class_name: 'User', optional: true
 
     before_save :ensure_token
-    after_destroy :cleanup_runner_queue
 
     scope :active, ->(value = true) { where(active: value) }
     scope :paused, -> { active(false) }
@@ -224,7 +224,6 @@ module Ci
     scope :with_creator, -> { preload(:creator) }
 
     validate :tag_constraints
-    validates :sharding_key_id, presence: true, unless: :instance_type?
     validates :name, length: { maximum: 256 }, if: :name_changed?
     validates :description, length: { maximum: 1024 }, if: :description_changed?
     validates :access_level, presence: true
@@ -232,7 +231,6 @@ module Ci
     validates :registration_type, presence: true
 
     validate :no_projects, unless: :project_type?
-    validate :no_sharding_key_id, if: :instance_type?
     validate :no_groups, unless: :group_type?
     validate :any_project, if: :project_type?
     validate :exactly_one_group, if: :group_type?
@@ -244,6 +242,8 @@ module Ci
 
       where(runner_type: runner_type)
     end
+
+    after_destroy :cleanup_runner_queue
 
     cached_attr_reader :contacted_at
 
@@ -331,18 +331,19 @@ module Ci
     end
 
     def runner_matcher
-      Gitlab::Ci::Matching::RunnerMatcher.new({
-        runner_ids: [id],
-        runner_type: runner_type,
-        public_projects_minutes_cost_factor: public_projects_minutes_cost_factor,
-        private_projects_minutes_cost_factor: private_projects_minutes_cost_factor,
-        run_untagged: run_untagged,
-        access_level: access_level,
-        tag_list: tag_list,
-        allowed_plan_ids: allowed_plan_ids
-      })
+      strong_memoize(:runner_matcher) do
+        Gitlab::Ci::Matching::RunnerMatcher.new({
+          runner_ids: [id],
+          runner_type: runner_type,
+          public_projects_minutes_cost_factor: public_projects_minutes_cost_factor,
+          private_projects_minutes_cost_factor: private_projects_minutes_cost_factor,
+          run_untagged: run_untagged,
+          access_level: access_level,
+          tag_list: tag_list,
+          allowed_plan_ids: allowed_plan_ids
+        })
+      end
     end
-    strong_memoize_attr :runner_matcher
 
     def assign_to(project, current_user = nil)
       if instance_type?
@@ -353,11 +354,6 @@ module Ci
 
       begin
         transaction do
-          if self.runner_projects.empty?
-            self.sharding_key_id = project.id
-            self.clear_memoization(:owner)
-          end
-
           self.runner_projects << ::Ci::RunnerProject.new(project: project, runner: self)
           self.save!
         end
@@ -387,20 +383,14 @@ module Ci
       end
     end
 
-    def owner
-      case runner_type
-      when 'instance_type'
-        ::User.find_by_id(creator_id)
-      when 'group_type'
-        ::Group.find_by_id(sharding_key_id)
-      when 'project_type'
-        ::Project.find_by_id(sharding_key_id)
-      end
+    def owner_project
+      return unless project_type?
+
+      runner_projects.order(:id).first&.project
     end
-    strong_memoize_attr :owner
 
     def belongs_to_one_project?
-      runner_projects.limit(2).count(:all) == 1
+      runner_projects.count == 1
     end
 
     def belongs_to_more_than_one_project?
@@ -418,12 +408,8 @@ module Ci
     def short_sha
       return unless token
 
-      # We want to show the first characters of the hash, so we need to bypass any fixed components of the token,
-      # such as CREATED_RUNNER_TOKEN_PREFIX or partition_id_prefix_in_16_bit_encode
-      partition_prefix = partition_id_prefix_in_16_bit_encode
       start_index = authenticated_user_registration_type? ? CREATED_RUNNER_TOKEN_PREFIX.length : 0
-      start_index += partition_prefix.length if token[start_index..].start_with?(partition_prefix)
-      token[start_index..start_index + RUNNER_SHORT_SHA_LENGTH - 1]
+      token[start_index..start_index + RUNNER_SHORT_SHA_LENGTH]
     end
 
     def tag_list
@@ -476,7 +462,7 @@ module Ci
       # not want to upgrade database connection proxy to use the primary
       # database after heartbeat write happens.
       #
-      ::Gitlab::Database::LoadBalancing::SessionMap.current(load_balancer).without_sticky_writes do
+      ::Gitlab::Database::LoadBalancing::Session.without_sticky_writes do
         values = { contacted_at: Time.current, creation_state: :finished }
 
         merge_cache_attributes(values)
@@ -506,9 +492,10 @@ module Ci
     end
 
     def namespace_ids
-      runner_namespaces.pluck(:namespace_id).compact
+      strong_memoize(:namespace_ids) do
+        runner_namespaces.pluck(:namespace_id).compact
+      end
     end
-    strong_memoize_attr :namespace_ids
 
     def compute_token_expiration
       case runner_type
@@ -521,13 +508,8 @@ module Ci
       end
     end
 
-    def ensure_manager(system_xid)
-      # rubocop: disable Performance/ActiveRecordSubtransactionMethods -- This is used only in API endpoints outside of transactions
-      RunnerManager.safe_find_or_create_by!(runner_id: id, system_xid: system_xid.to_s) do |m|
-        m.runner_type = runner_type
-        m.sharding_key_id = sharding_key_id
-      end
-      # rubocop: enable Performance/ActiveRecordSubtransactionMethods
+    def ensure_manager(system_xid, &blk)
+      RunnerManager.safe_find_or_create_by!(runner_id: id, system_xid: system_xid.to_s, &blk) # rubocop: disable Performance/ActiveRecordSubtransactionMethods
     end
 
     def registration_available?
@@ -589,41 +571,40 @@ module Ci
       end
     end
 
-    def no_sharding_key_id
-      errors.add(:runner, 'cannot have sharding_key_id assigned') if sharding_key_id
-    end
-
     def no_projects
-      errors.add(:runner, 'cannot have projects assigned') if runner_projects.any?
+      if runner_projects.any?
+        errors.add(:runner, 'cannot have projects assigned')
+      end
     end
 
     def no_groups
-      errors.add(:runner, 'cannot have groups assigned') if runner_namespaces.any?
+      if runner_namespaces.any?
+        errors.add(:runner, 'cannot have groups assigned')
+      end
     end
 
     def any_project
-      errors.add(:runner, 'needs to be assigned to at least one project') unless runner_projects.any?
+      unless runner_projects.any?
+        errors.add(:runner, 'needs to be assigned to at least one project')
+      end
     end
 
     def exactly_one_group
-      errors.add(:runner, 'needs to be assigned to exactly one group') unless runner_namespaces.size == 1
+      unless runner_namespaces.size == 1
+        errors.add(:runner, 'needs to be assigned to exactly one group')
+      end
     end
 
     def no_allowed_plan_ids
-      errors.add(:runner, 'cannot have allowed plans assigned') unless allowed_plan_ids.empty?
-    end
-
-    def partition_id_prefix_in_16_bit_encode
-      # Prefix with t1 / t2 / t3 (`t` as in runner type, to allow us to easily detect how a token got prefixed).
-      # This is needed in order to ensure that tokens have unique values across partitions
-      # in the new ci_runners_e59bb2812d partitioned table.
-      "t#{self.class.runner_types[runner_type].to_s(16)}_"
+      unless allowed_plan_ids.empty?
+        errors.add(:runner, 'cannot have allowed plans assigned')
+      end
     end
 
     def prefix_for_new_and_legacy_runner
-      return partition_id_prefix_in_16_bit_encode if registration_token_registration_type?
+      return if registration_token_registration_type?
 
-      "#{CREATED_RUNNER_TOKEN_PREFIX}#{partition_id_prefix_in_16_bit_encode}"
+      CREATED_RUNNER_TOKEN_PREFIX
     end
   end
 end

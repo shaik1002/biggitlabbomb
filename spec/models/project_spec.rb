@@ -58,7 +58,6 @@ RSpec.describe Project, factory_default: :keep, feature_category: :groups_and_pr
     it { is_expected.to have_one(:catalog_resource) }
     it { is_expected.to have_many(:ci_components).class_name('Ci::Catalog::Resources::Component') }
     it { is_expected.to have_many(:ci_component_usages).class_name('Ci::Catalog::Resources::Components::Usage') }
-    it { is_expected.to have_many(:ci_component_last_usages).class_name('Ci::Catalog::Resources::Components::LastUsage').inverse_of(:component_project) }
     it { is_expected.to have_many(:catalog_resource_versions).class_name('Ci::Catalog::Resources::Version') }
     it { is_expected.to have_many(:catalog_resource_sync_events).class_name('Ci::Catalog::Resources::SyncEvent') }
     it { is_expected.to have_one(:microsoft_teams_integration) }
@@ -712,6 +711,14 @@ RSpec.describe Project, factory_default: :keep, feature_category: :groups_and_pr
     it { is_expected.to validate_numericality_of(:max_artifacts_size).only_integer.is_greater_than(0) }
     it { is_expected.to validate_length_of(:suggestion_commit_message).is_at_most(255) }
 
+    context 'when require_organization feature is disabled' do
+      before do
+        stub_feature_flags(require_organization: false)
+      end
+
+      it { is_expected.not_to validate_presence_of(:organization) }
+    end
+
     it 'validates name is case-sensitively unique within the scope of namespace_id' do
       project = create(:project)
 
@@ -1016,12 +1023,6 @@ RSpec.describe Project, factory_default: :keep, feature_category: :groups_and_pr
 
   it_behaves_like 'a BulkUsersByEmailLoad model'
 
-  describe '#notification_group' do
-    it 'is expected to be an alias' do
-      expect(build(:project).method(:notification_group).original_name).to eq(:group)
-    end
-  end
-
   describe '#all_pipelines' do
     let_it_be(:project) { create(:project) }
 
@@ -1320,31 +1321,6 @@ RSpec.describe Project, factory_default: :keep, feature_category: :groups_and_pr
     describe '#ci_inbound_job_token_scope_enabled?' do
       it_behaves_like 'a ci_cd_settings predicate method', prefix: 'ci_', default: true do
         let(:delegated_method) { :inbound_job_token_scope_enabled? }
-      end
-
-      where(:ci_cd_settings_attrs, :instance_enabled, :expectation) do
-        nil | true | true
-        nil | false | true
-        { inbound_job_token_scope_enabled: true } | true | true
-        { inbound_job_token_scope_enabled: true } | false | true
-        { inbound_job_token_scope_enabled: false } | true | true
-        { inbound_job_token_scope_enabled: false } | false | false
-      end
-
-      with_them do
-        let_it_be(:project) { create(:project) }
-
-        before do
-          if ci_cd_settings_attrs.nil?
-            allow(project).to receive(:ci_cd_settings).and_return(nil)
-          else
-            project.ci_cd_settings.update_attribute(:inbound_job_token_scope_enabled, ci_cd_settings_attrs[:inbound_job_token_scope_enabled])
-          end
-
-          allow(::Gitlab::CurrentSettings).to receive(:enforce_ci_inbound_job_token_scope_enabled?).and_return(instance_enabled)
-        end
-
-        it { expect(project.ci_inbound_job_token_scope_enabled?).to be(expectation) }
       end
     end
 
@@ -2629,7 +2605,7 @@ RSpec.describe Project, factory_default: :keep, feature_category: :groups_and_pr
   describe '#service_desk_enabled?' do
     let_it_be(:namespace) { create(:namespace) }
 
-    subject(:project) { build(:project, :private, :service_desk_enabled, namespace: namespace) }
+    subject(:project) { build(:project, :private, namespace: namespace, service_desk_enabled: true) }
 
     before do
       allow(Gitlab::Email::IncomingEmail).to receive(:enabled?).and_return(true)
@@ -2642,18 +2618,8 @@ RSpec.describe Project, factory_default: :keep, feature_category: :groups_and_pr
     end
   end
 
-  describe '#default_service_desk_subaddress_part', feature_category: :service_desk do
-    let_it_be(:project) { create(:project, :service_desk_enabled) }
-
-    subject { project.default_service_desk_subaddress_part }
-
-    it 'contains the full path slug, project id and default suffix' do
-      is_expected.to eq("#{project.full_path_slug}-#{project.id}-issue-")
-    end
-  end
-
   describe '#service_desk_address', feature_category: :service_desk do
-    let_it_be(:project, reload: true) { create(:project, :service_desk_enabled) }
+    let_it_be(:project, reload: true) { create(:project, service_desk_enabled: true) }
 
     subject { project.service_desk_address }
 
@@ -4429,7 +4395,7 @@ RSpec.describe Project, factory_default: :keep, feature_category: :groups_and_pr
     let_it_be(:project) { create(:project) }
 
     it 'updates commit count' do
-      expect(ProjectCacheWorker).to receive(:perform_async).with(project.id, [], %w[commit_count])
+      expect(ProjectCacheWorker).to receive(:perform_async).with(project.id, [], [:commit_count])
 
       project.after_repository_change_head
     end
@@ -5713,9 +5679,10 @@ RSpec.describe Project, factory_default: :keep, feature_category: :groups_and_pr
     subject { project.predefined_project_variables.to_runner_variables }
 
     specify do
-      expect(subject).to include(
+      expect(subject).to include
+      [
         { key: 'CI_CONFIG_PATH', value: Ci::Pipeline::DEFAULT_CONFIG_PATH, public: true, masked: false }
-      )
+      ]
     end
 
     context 'when ci config path is overridden' do
@@ -5724,9 +5691,10 @@ RSpec.describe Project, factory_default: :keep, feature_category: :groups_and_pr
       end
 
       it do
-        expect(subject).to include(
+        expect(subject).to include
+        [
           { key: 'CI_CONFIG_PATH', value: 'random.yml', public: true, masked: false }
-        )
+        ]
       end
     end
   end
@@ -6164,7 +6132,7 @@ RSpec.describe Project, factory_default: :keep, feature_category: :groups_and_pr
       expect(project).to receive(:reset_counters_and_iids)
       expect(project).to receive(:after_create_default_branch)
       expect(project).to receive(:refresh_markdown_cache!)
-      expect(ProjectCacheWorker).to receive(:perform_async).with(project.id, [], %w[repository_size wiki_size])
+      expect(ProjectCacheWorker).to receive(:perform_async).with(project.id, [], [:repository_size, :wiki_size])
       expect(DetectRepositoryLanguagesWorker).to receive(:perform_async).with(project.id)
       expect(AuthorizedProjectUpdate::ProjectRecalculateWorker).to receive(:perform_async).with(project.id)
 
@@ -7700,7 +7668,7 @@ RSpec.describe Project, factory_default: :keep, feature_category: :groups_and_pr
       before do
         allow(project).to receive(:read_attribute).with(setting_name).and_return(project_setting)
         allow(namespace).to receive(:closest_setting).with(setting_name).and_return(group_setting)
-        stub_application_setting(setting_name => global_setting)
+        allow(Gitlab::CurrentSettings).to receive(setting_name).and_return(global_setting)
       end
 
       it 'returns closest non-nil value' do
@@ -7859,8 +7827,26 @@ RSpec.describe Project, factory_default: :keep, feature_category: :groups_and_pr
 
     subject { create(:project, group: group) }
 
-    it 'return all protected branches' do
-      expect(subject.all_protected_branches).to match_array([group_protected_branch, project_protected_branch])
+    context 'when feature flag `group_protected_branches` enabled' do
+      before do
+        stub_feature_flags(group_protected_branches: true)
+        stub_feature_flags(allow_protected_branches_for_group: true)
+      end
+
+      it 'return all protected branches' do
+        expect(subject.all_protected_branches).to match_array([group_protected_branch, project_protected_branch])
+      end
+    end
+
+    context 'when feature flag `group_protected_branches` disabled' do
+      before do
+        stub_feature_flags(group_protected_branches: false)
+        stub_feature_flags(allow_protected_branches_for_group: false)
+      end
+
+      it 'return only project-level protected branches' do
+        expect(subject.all_protected_branches).to match_array([project_protected_branch])
+      end
     end
   end
 
@@ -8569,15 +8555,12 @@ RSpec.describe Project, factory_default: :keep, feature_category: :groups_and_pr
   end
 
   shared_examples 'all_runners' do
-    let_it_be(:group) { create(:group) }
-    let_it_be_with_refind(:project) { create(:project, group: group) }
-    let_it_be(:other_group) { create(:group) }
-    let_it_be(:other_project) { create(:project) }
+    let_it_be_with_refind(:project) { create(:project, group: create(:group)) }
     let_it_be(:instance_runner) { create(:ci_runner, :instance) }
-    let_it_be(:group_runner) { create(:ci_runner, :group, groups: [group]) }
-    let_it_be(:other_group_runner) { create(:ci_runner, :group, groups: [other_group]) }
+    let_it_be(:group_runner) { create(:ci_runner, :group, groups: [project.group]) }
+    let_it_be(:other_group_runner) { create(:ci_runner, :group) }
     let_it_be(:project_runner) { create(:ci_runner, :project, projects: [project]) }
-    let_it_be(:other_project_runner) { create(:ci_runner, :project, projects: [other_project]) }
+    let_it_be(:other_project_runner) { create(:ci_runner, :project) }
 
     subject { project.all_runners }
 
@@ -9006,16 +8989,6 @@ RSpec.describe Project, factory_default: :keep, feature_category: :groups_and_pr
     it_behaves_like 'checks parent group and self feature flag' do
       let(:feature_flag_method) { :glql_integration_feature_flag_enabled? }
       let(:feature_flag) { :glql_integration }
-      let(:subject_project) { group_project }
-    end
-  end
-
-  describe '#wiki_comments_feature_flag_enabled?' do
-    let_it_be(:group_project) { create(:project, :in_subgroup) }
-
-    it_behaves_like 'checks parent group and self feature flag' do
-      let(:feature_flag_method) { :wiki_comments_feature_flag_enabled? }
-      let(:feature_flag) { :wiki_comments }
       let(:subject_project) { group_project }
     end
   end
@@ -9465,6 +9438,14 @@ RSpec.describe Project, factory_default: :keep, feature_category: :groups_and_pr
     end
   end
 
+  context 'with loose foreign key on organization_id' do
+    it_behaves_like 'cleanup by a loose foreign key' do
+      let_it_be(:parent) { create(:organization) }
+      let_it_be(:group) { create(:group, organization: parent) }
+      let_it_be(:model) { create(:project, group: group, organization: parent) }
+    end
+  end
+
   describe 'catalog resource process sync events worker' do
     let_it_be_with_reload(:project) { create(:project, name: 'Test project', description: 'Test description') }
 
@@ -9682,39 +9663,6 @@ RSpec.describe Project, factory_default: :keep, feature_category: :groups_and_pr
 
     it 'returns projects that contain any overlap with the provided traversal_ids array' do
       expect(described_class.by_any_overlap_with_traversal_ids(project_1.namespace_id)).to contain_exactly(project_1, project_2)
-    end
-  end
-
-  describe '#crm_group' do
-    context 'when project does not belong to group' do
-      let(:project) { build(:project) }
-
-      it 'returns nil' do
-        expect(project.crm_group).to be_nil
-      end
-    end
-
-    context 'when project belongs to a group' do
-      let(:group) { build(:group) }
-      let(:project) { build(:project, group: group) }
-
-      it 'returns the group.crm_group' do
-        expect(project.crm_group).to be(group.crm_group)
-      end
-    end
-  end
-
-  describe '#placeholder_reference_store' do
-    context 'when the project has an import state' do
-      let(:project) { build(:project, import_state: build(:import_state)) }
-
-      it { expect(project.placeholder_reference_store).to be_a(::Import::PlaceholderReferences::Store) }
-    end
-
-    context 'when the project has no import state' do
-      let(:project) { build(:project, import_state: nil) }
-
-      it { expect(project.placeholder_reference_store).to be_nil }
     end
   end
 end

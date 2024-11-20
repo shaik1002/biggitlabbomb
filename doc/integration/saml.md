@@ -1,5 +1,5 @@
 ---
-stage: Software Supply Chain Security
+stage: Govern
 group: Authentication
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
@@ -3194,7 +3194,7 @@ to the recommended [instance-wide SAML](../integration/saml.md). Use
 instance-wide SAML to take advantage of:
 
 - [LDAP compatibility](../administration/auth/ldap/index.md).
-- [LDAP Group Sync](../user/group/access_and_permissions.md#manage-group-memberships-with-ldap).
+- [LDAP Group Sync](../user/group/access_and_permissions.md#manage-group-memberships-via-ldap).
 - [Required groups](#required-groups).
 - [Administrator groups](#administrator-groups).
 - [Auditor groups](#auditor-groups).

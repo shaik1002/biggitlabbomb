@@ -17,8 +17,6 @@ import {
   TODO_ACTION_TYPE_REVIEW_REQUESTED,
   TODO_ACTION_TYPE_REVIEW_SUBMITTED,
   TODO_ACTION_TYPE_UNMERGEABLE,
-  TODO_ACTION_TYPE_SSH_KEY_EXPIRED,
-  TODO_ACTION_TYPE_SSH_KEY_EXPIRING_SOON,
 } from '../constants';
 
 export default {
@@ -48,13 +46,7 @@ export default {
       return this.todo.note.bodyFirstLineHtml.replace(/(<\/?)p>/g, '$1span>');
     },
     showAuthorOnNote() {
-      return (
-        this.todo.action !== TODO_ACTION_TYPE_BUILD_FAILED &&
-        this.todo.action !== TODO_ACTION_TYPE_MERGE_TRAIN_REMOVED &&
-        this.todo.action !== TODO_ACTION_TYPE_UNMERGEABLE &&
-        this.todo.action !== TODO_ACTION_TYPE_SSH_KEY_EXPIRED &&
-        this.todo.action !== TODO_ACTION_TYPE_SSH_KEY_EXPIRING_SOON
-      );
+      return this.todo.action !== TODO_ACTION_TYPE_BUILD_FAILED && !this.todo.unmergeable;
     },
     userIsAuthor() {
       return this.todo.author.id === this.currentUserId;
@@ -114,9 +106,7 @@ export default {
 
       if (this.todo.action === TODO_ACTION_TYPE_MEMBER_ACCESS_REQUESTED) {
         name = sprintf(s__('Todos|has requested access to %{what} %{which}'), {
-          what: this.todo.memberAccessType,
-          // This one doesn't seem to be available via GraphQL.
-          // We probably want to move this logic to the backend anyhow...
+          what: this.todo.member_access_type,
           which: this.todo.access_request_target_name,
         });
       }
@@ -127,16 +117,8 @@ export default {
 
       if (this.todo.action === TODO_ACTION_TYPE_OKR_CHECKIN_REQUESTED) {
         name = sprintf(s__('Todos|requested an OKR update for %{what}'), {
-          what: this.todo.targetEntity.title,
+          what: this.todo.target.title,
         });
-      }
-
-      if (this.todo.action === TODO_ACTION_TYPE_SSH_KEY_EXPIRED) {
-        name = s__('Todos|Your SSH key has expired');
-      }
-
-      if (this.todo.action === TODO_ACTION_TYPE_SSH_KEY_EXPIRING_SOON) {
-        name = s__('Todos|Your SSH key is expiring soon');
       }
 
       if (!name) {

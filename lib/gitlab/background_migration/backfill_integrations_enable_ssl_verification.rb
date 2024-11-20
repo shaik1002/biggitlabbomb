@@ -28,6 +28,8 @@ module Gitlab
 
       # Define the `Integration` model
       class Integration < ::ApplicationRecord
+        include IgnorableColumns
+
         self.table_name = :integrations
         self.inheritance_column = :_type_disabled
 

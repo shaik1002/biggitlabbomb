@@ -1,5 +1,5 @@
 ---
-stage: Software Supply Chain Security
+stage: Govern
 group: Authentication
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
@@ -46,23 +46,13 @@ accounts allowed under your license:
 - On GitLab Premium, you can create one service account for every paid seat you have.
 - On GitLab Ultimate, you can create an unlimited number of service accounts.
 
-How you create an account differs depending on whether you are a:
+How you create an account differs depending on whether you are on GitLab.com or self-managed.
 
-- Top-level group Owner.
-- In GitLab self-managed, an administrator.
-
-### Top-level group Owners
-
-> - Introduced for GitLab.com in GitLab 16.3
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/163726) in GitLab 17.5 [with a feature flag](../../administration/feature_flags.md) named `allow_top_level_group_owners_to_create_service_accounts` for GitLab Self-Managed. Disabled by default.
-
-FLAG:
-On GitLab self-managed, by default this feature is not available. To make it available, an administrator can [enable the feature flag](../../administration/feature_flags.md) named `allow_top_level_group_owners_to_create_service_accounts`. On GitLab.com, this feature is available.
+### GitLab.com
 
 Prerequisites:
 
 - You must have the Owner role in a top-level group.
-- For GitLab self-managed, top-level group Owners must be [allowed to create service accounts](../../administration/settings/account_and_limit_settings.md#allow-top-level-group-owners-to-create-service-accounts).
 
 1. [Create a service account](../../api/group_service_accounts.md#create-a-service-account-user).
 
@@ -82,10 +72,7 @@ Prerequisites:
 1. Make this service account a group or project member by [manually adding the service account user to the group or project](#add-a-service-account-to-subgroup-or-project).
 1. Use the returned personal access token value to authenticate as the service account user.
 
-### Administrators in GitLab self-managed
-
-DETAILS:
-**Offering:** Self-managed
+### Self-managed GitLab
 
 Prerequisites:
 
@@ -124,8 +111,8 @@ There is no limit to the number of service accounts you can add to a project or 
 
 A service account:
 
-- Can have different roles across multiple subgroups and projects of the same top-level group.
-- When created by a top-level group owner, only belongs to one top-level group.
+- Can have different roles across multiple subgroups and projects of the same top level group.
+- On GitLab.com, only belongs to one top-level group.
 
 ### Add to a subgroup or project
 
@@ -154,8 +141,8 @@ For more information on the attributes, see the [API documentation on editing a 
 
 Prerequisites:
 
-- For service accounts created by top-level group Owners, you must have the Owner role in the top-level group or be an administrator.
-- For service accounts created by administrators, you must be an administrator for your self-managed instance.
+- For GitLab.com, you must have the Owner role in a top-level group.
+- For self-managed GitLab, you must be an administrator for your self-managed instance.
 
 Use the groups API to [rotate the personal access token](../../api/group_service_accounts.md#rotate-a-personal-access-token-for-a-service-account-user) for a service account user.
 
@@ -172,7 +159,7 @@ To revoke a personal access token, use the [personal access tokens API](../../ap
 
 ### Delete a service account
 
-#### Top-Level Group Owners
+#### GitLab.com
 
 Prerequisites:
 
@@ -180,13 +167,13 @@ Prerequisites:
 
 To delete a service account, [use the service accounts API to delete the service account user](../../api/group_service_accounts.md#delete-a-service-account-user).
 
-#### Administrators in GitLab self-managed
+#### Self-managed GitLab
 
 Prerequisites:
 
 - You must be an administrator for the instance the service account is associated with.
 
-To delete a service account, [use the users API to delete the service account user](../../api/users.md#delete-a-user).
+To delete a service account, [use the users API to delete the service account user](../../api/users.md#user-deletion).
 
 ### Disable a service account
 

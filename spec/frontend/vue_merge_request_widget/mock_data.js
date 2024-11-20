@@ -94,14 +94,12 @@ export const artifacts = [
     text: 'result.txt',
     url: 'bar',
     job_name: 'generate-artifact',
-    name: 'generate-artifact',
     job_path: 'bar',
   },
   {
     text: 'foo.txt',
     url: 'foo',
     job_name: 'foo-artifact',
-    name: 'foo-artifact',
     job_path: 'foo',
   },
 ];
@@ -209,7 +207,6 @@ export default {
       stages: [
         {
           name: 'build',
-          id: 1,
           title: 'build: failed',
           status: {
             icon: 'status_failed',
@@ -225,7 +222,6 @@ export default {
         },
         {
           name: 'review',
-          id: 2,
           title: 'review: skipped',
           status: {
             icon: 'status_skipped',
@@ -424,9 +420,6 @@ export const mockStore = {
     flags: {},
     ref: {},
   },
-  pipelineEtag: '/etag',
-  pipelineIid: '12',
-  pipelineProjectPath: '/full/path',
   targetBranch: 'target-branch',
   targetProjectFullPath: '/group2/project2',
   sourceBranch: 'source-branch',
@@ -568,22 +561,6 @@ export const mockMergePipeline = {
     commit_path: '/root/ci-web-terminal/commit/aa1939133d373c94879becb79d91828a892ee319',
   },
   cancel_path: '/root/ci-web-terminal/pipelines/127/cancel',
-};
-
-export const mockMergePipelineQueryResponse = {
-  data: {
-    project: {
-      id: 'gid://gitlab/Project/20',
-      pipeline: {
-        id: 'gid://gitlab/Ci::Pipeline/315',
-        iid: '14',
-        project: {
-          id: 'gid://gitlab/Ci::Pipeline/1866',
-          fullPath: 'flightjs/Flight',
-        },
-      },
-    },
-  },
 };
 
 export const mockPostMergeDeployments = [

@@ -4,19 +4,11 @@ module QA
   module Resource
     module Repository
       class Push < Base
-        attr_accessor :file_name,
-          :file_content,
-          :commit_message,
-          :branch_name,
-          :new_branch,
-          :output,
-          :repository_http_uri,
-          :repository_ssh_uri,
-          :ssh_key, :use_lfs,
-          :tag_name,
-          :max_attempts
+        attr_accessor :file_name, :file_content, :commit_message,
+          :branch_name, :new_branch, :output, :repository_http_uri,
+          :repository_ssh_uri, :ssh_key, :user, :use_lfs, :tag_name, :max_attempts
 
-        attr_writer :remote_branch, :gpg_key_id, :merge_request_push_options, :user
+        attr_writer :remote_branch, :gpg_key_id, :merge_request_push_options
 
         def initialize
           @file_name = "file-#{SecureRandom.hex(8)}.txt"
@@ -56,21 +48,29 @@ module QA
           Git::Repository.perform do |repository|
             @output = ''
 
-            name = user.name
-            email = user.email
-
             if ssh_key
               repository.uri = repository_ssh_uri
               repository.use_ssh_key(ssh_key)
             else
               repository.uri = repository_http_uri
+              repository.use_default_credentials unless user
             end
 
             repository.use_lfs = use_lfs
-            repository.username = user.username
-            repository.password = user.password
 
-            repository.gpg_key_id = @gpg_key_id unless @gpg_key_id.nil?
+            name = 'GitLab QA'
+            email = 'root@gitlab.com'
+
+            if user
+              repository.username = user.username
+              repository.password = user.password
+              name = user.name
+              email = user.email
+            end
+
+            unless @gpg_key_id.nil?
+              repository.gpg_key_id = @gpg_key_id
+            end
 
             @output += repository.clone
             repository.configure_identity(name, email)
@@ -80,7 +80,7 @@ module QA
             @output += repository.checkout(branch_name, new_branch: new_branch)
 
             if @tag_name
-              @output += repository.delete_tag(@tag_name, max_attempts: @max_attempts)
+              @output += repository.delete_tag(@tag_name)
             else
               if @directory
                 @directory.each_child do |f|
@@ -95,8 +95,7 @@ module QA
               end
 
               @output += commit_to repository
-              @output += repository.push_changes("#{branch_name}:#{remote_branch}",
-                push_options: @merge_request_push_options, max_attempts: @max_attempts)
+              @output += repository.push_changes("#{branch_name}:#{remote_branch}", push_options: @merge_request_push_options, max_attempts: @max_attempts)
             end
 
             repository.delete_ssh_key
@@ -104,10 +103,6 @@ module QA
         end
 
         private
-
-        def user
-          @user ||= Runtime::UserStore.test_user || Runtime::UserStore.admin_user
-        end
 
         def default_branch(repository)
           repository.remote_branches.last || Runtime::Env.default_branch

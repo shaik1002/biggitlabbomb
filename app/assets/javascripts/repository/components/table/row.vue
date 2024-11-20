@@ -19,7 +19,6 @@ import FileIcon from '~/vue_shared/components/file_icon.vue';
 import TimeagoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 import blobInfoQuery from 'shared_queries/repository/blob_info.query.graphql';
 import getRefMixin from '../../mixins/get_ref';
-import { getRefType } from '../../utils/ref_type';
 
 export default {
   components: {
@@ -166,7 +165,7 @@ export default {
       this.apolloQuery(paginatedTreeQuery, {
         projectPath: this.projectPath,
         ref: this.ref,
-        refType: getRefType(this.refType),
+        refType: this.refType?.toUpperCase() || null,
         path: this.path,
         nextPageCursor: '',
         pageSize: TREE_PAGE_SIZE,
@@ -177,7 +176,7 @@ export default {
         projectPath: this.projectPath,
         filePath: [this.path],
         ref: this.ref,
-        refType: getRefType(this.refType),
+        refType: this.refType?.toUpperCase() || null,
         shouldFetchRawText: true,
       });
     },
@@ -229,11 +228,11 @@ export default {
           :submodule="isSubmodule"
           :loading="path === loadingPath"
           css-classes="position-relative file-icon"
-          class="gl-relative gl-mr-2 gl-text-subtle"
-        /><span class="gl-relative">{{ fullPath }}</span>
+          class="mr-1 position-relative text-secondary"
+        /><span class="position-relative">{{ fullPath }}</span>
       </component>
       <!-- eslint-disable @gitlab/vue-require-i18n-strings -->
-      <gl-badge v-if="lfsOid" variant="muted" class="gl-ml-2" data-testid="label-lfs">LFS</gl-badge>
+      <gl-badge v-if="lfsOid" variant="muted" class="ml-1" data-testid="label-lfs">LFS</gl-badge>
       <!-- eslint-enable @gitlab/vue-require-i18n-strings -->
       <template v-if="isSubmodule">
         @ <gl-link :href="submoduleTreeUrl" class="commit-sha">{{ shortSha }}</gl-link>
@@ -244,7 +243,7 @@ export default {
         :title="commitData.lockLabel"
         name="lock"
         :size="12"
-        class="gl-ml-2"
+        class="ml-1"
       />
     </td>
     <td class="tree-commit cursor-default gl-hidden sm:gl-table-cell">
@@ -253,13 +252,13 @@ export default {
         v-safe-html:[$options.safeHtmlConfig]="commitData.titleHtml"
         :href="commitData.commitPath"
         :title="commitData.message"
-        class="str-truncated-100 tree-commit-link gl-text-subtle"
+        class="str-truncated-100 tree-commit-link gl-text-gray-600"
       />
       <gl-intersection-observer @appear="rowAppeared" @disappear="rowDisappeared">
         <gl-skeleton-loader v-if="showSkeletonLoader" :lines="1" />
       </gl-intersection-observer>
     </td>
-    <td class="tree-time-ago cursor-default gl-text-right gl-text-subtle">
+    <td class="tree-time-ago text-right cursor-default gl-text-gray-600">
       <gl-intersection-observer @appear="rowAppeared" @disappear="rowDisappeared">
         <timeago-tooltip v-if="commitData" :time="commitData.committedDate" />
       </gl-intersection-observer>

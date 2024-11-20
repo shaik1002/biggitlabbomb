@@ -67,7 +67,7 @@ are very appreciative of the work done by translators and proofreaders!
 - Hungarian
   - Proofreaders needed.
 - Indonesian
-  - Rahayu Rafika - [GitLab](https://gitlab.com/Vkfikaa), [Crowdin](https://crowdin.com/profile/rahayurafika_12) 
+  - Proofreaders needed.
 - Italian
   - Proofreaders needed.
 - Japanese
@@ -142,8 +142,7 @@ translations to the GitLab project.
    In the merge request description, include links to any projects you have previously translated.
 
 1. [GitLab team members](https://about.gitlab.com/company/team/),
-   [core team members](https://about.gitlab.com/community/core-team/),
-   [globalization and localization team members](https://handbook.gitlab.com/handbook/marketing/localization/),
+   [Core team members](https://about.gitlab.com/community/core-team/),
    or current proofreaders fluent in the language consider your request to become a proofreader
    based on the merits of your previous translations.
 

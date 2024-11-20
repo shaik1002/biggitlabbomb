@@ -306,6 +306,10 @@ RSpec.describe Gitlab::HTTP_V2::UrlBlocker, :stub_invalid_dns_only, feature_cate
       context 'when domain cannot be resolved' do
         let(:import_url) { 'http://foobar.x' }
 
+        before do
+          stub_env('RSPEC_ALLOW_INVALID_URLS', 'false')
+        end
+
         it 'raises an error' do
           expect { subject }.to raise_error(described_class::BlockedUrlError)
         end
@@ -361,6 +365,8 @@ RSpec.describe Gitlab::HTTP_V2::UrlBlocker, :stub_invalid_dns_only, feature_cate
         let(:import_url) { 'http://1.1.1.1.1' }
 
         it 'raises an error' do
+          stub_env('RSPEC_ALLOW_INVALID_URLS', 'false')
+
           expect { subject }.to raise_error(described_class::BlockedUrlError)
         end
       end
@@ -425,6 +431,10 @@ RSpec.describe Gitlab::HTTP_V2::UrlBlocker, :stub_invalid_dns_only, feature_cate
 
       context 'when the URL hostname is a domain' do
         let(:import_url) { 'https://example.org' }
+
+        before do
+          stub_env('RSPEC_ALLOW_INVALID_URLS', 'false')
+        end
 
         context 'when domain can be resolved' do
           it_behaves_like 'validates URI and hostname' do
@@ -578,8 +588,11 @@ RSpec.describe Gitlab::HTTP_V2::UrlBlocker, :stub_invalid_dns_only, feature_cate
       aggregate_failures do
         expect(described_class).to be_blocked_url('ssh://-oProxyCommand=whoami/a', schemes: ['ssh'])
 
-        # URI does allow non-ascii host names.
-        expect(described_class).to be_blocked_url('ssh://ğitlab.com/a', schemes: ['ssh'])
+        # The leading character here is a Unicode "soft hyphen"
+        expect(described_class).to be_blocked_url('ssh://­oProxyCommand=whoami/a', schemes: ['ssh'])
+
+        # Unicode alphanumerics are allowed
+        expect(described_class).not_to be_blocked_url('ssh://ğitlab.com/a', schemes: ['ssh'])
       end
     end
 
@@ -619,6 +632,7 @@ RSpec.describe Gitlab::HTTP_V2::UrlBlocker, :stub_invalid_dns_only, feature_cate
           '0377.00000000377.00377.0000377', # Still octal
           '0xff.0xff.0xff.0xff', # hex
           '0xffffffff', # still hex
+          '0xBaaaaaaaaaaaaaaaaffffffff', # padded hex
           '255.255.255.255:65535', # with a port
           '4294967295', # as an integer / dword
           '[::ffff:ffff:ffff]', # short IPv6
@@ -725,6 +739,11 @@ RSpec.describe Gitlab::HTTP_V2::UrlBlocker, :stub_invalid_dns_only, feature_cate
         end
 
         it 'blocks limited broadcast address 255.255.255.255 and variants' do
+          # Raise BlockedUrlError for invalid URLs.
+          # The padded hex version, for example, is a valid URL on Mac but
+          # not on Ubuntu.
+          stub_env('RSPEC_ALLOW_INVALID_URLS', 'false')
+
           limited_broadcast_address_variants.each do |variant|
             expect(described_class).to be_blocked_url(
               "https://#{variant}", allow_local_network: false, schemes: schemes),
@@ -835,6 +854,10 @@ RSpec.describe Gitlab::HTTP_V2::UrlBlocker, :stub_invalid_dns_only, feature_cate
               shared_examples 'allowlists the domain' do
                 let(:allowlist) { [domain] }
                 let(:url) { "http://#{domain}" }
+
+                before do
+                  stub_env('RSPEC_ALLOW_INVALID_URLS', 'false')
+                end
 
                 it do
                   expect(described_class).not_to be_blocked_url(url, **options, dns_rebind_protection: dns_rebind_value)
@@ -949,10 +972,14 @@ RSpec.describe Gitlab::HTTP_V2::UrlBlocker, :stub_invalid_dns_only, feature_cate
     end
 
     it 'blocks urls with invalid ip address' do
+      stub_env('RSPEC_ALLOW_INVALID_URLS', 'false')
+
       expect(described_class).to be_blocked_url('http://8.8.8.8.8', schemes: schemes)
     end
 
     it 'blocks urls whose hostname cannot be resolved' do
+      stub_env('RSPEC_ALLOW_INVALID_URLS', 'false')
+
       expect(described_class).to be_blocked_url('http://foobar.x', schemes: schemes)
     end
 

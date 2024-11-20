@@ -1,5 +1,5 @@
 ---
-stage: Software Supply Chain Security
+stage: Govern
 group: Authentication
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
@@ -88,7 +88,7 @@ mutation{
 
 Project members that do not have the Owner or Maintainer role cannot access this GraphQL endpoint.
 
-You can also use the REST API for [projects](../api/project_markdown_uploads.md#delete-an-uploaded-file-by-secret-and-filename) or [groups](../api/group_markdown_uploads.md#delete-an-uploaded-file-by-secret-and-filename) to delete an uploaded file.
+You can also use the REST API for [projects](../api/project_markdown_uploads.md#delete-an-uploaded-file-by-secret-and-filename) or [groups](../api/groups.md#delete-an-uploaded-file-by-secret-and-filename) to delete an uploaded file.
 
 <!-- ## Troubleshooting
 

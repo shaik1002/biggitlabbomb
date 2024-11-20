@@ -9,8 +9,6 @@ extends: substitution
 message: "Use '%s' instead of '%s' when possible."
 link: https://docs.gitlab.com/ee/development/documentation/styleguide/word_list.html
 level: warning
-action:
-  name: replace
 ignorecase: true
 swap:
   active user: "billable user"
@@ -55,7 +53,6 @@ swap:
   OAuth2: "OAuth 2.0"
   omnibus gitlab: "Linux package"
   'omnibus(?!\))': "Linux package"
-  once a: "after a"
   once that: "after that"
   once the: "after the"
   once you: "after you"

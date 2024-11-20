@@ -28,7 +28,7 @@ how and where you can access these features.
 ### GitLab Duo Chat
 
 DETAILS:
-**Tier:** Premium with GitLab Duo Pro, Ultimate with GitLab Duo Pro or Enterprise - [Start a trial](https://about.gitlab.com/solutions/gitlab-duo-pro/sales/?type=free-trial)
+**Tier: GitLab.com and Self-managed:** For a limited time, Premium or Ultimate. In the future, Premium with GitLab Duo Pro or Ultimate with [GitLab Duo Pro or Enterprise](../../subscriptions/subscription-add-ons.md). **GitLab Dedicated:** GitLab Duo Pro or Enterprise.
 **Offering:** GitLab.com, Self-managed, GitLab Dedicated
 
 - Help you write and understand code faster, get up to speed on the status of projects,
@@ -42,38 +42,22 @@ DETAILS:
 - <i class="fa fa-youtube-play youtube" aria-hidden="true"></i> [Watch overview](https://www.youtube.com/watch?v=ZQBAuf-CTAY&list=PLFGfElNsQthYDx0A_FaNNfUm9NHsK6zED)
 - [View documentation](../gitlab_duo_chat/index.md).
 
-### Discussion Summary
-
-DETAILS:
-**Tier:** Ultimate with GitLab Duo Enterprise - [Start a trial](https://about.gitlab.com/solutions/gitlab-duo-pro/sales/?type=free-trial)
-**Offering:** GitLab.com, Self-managed, GitLab Dedicated
-
-> - Changed to require GitLab Duo add-on in GitLab 17.6 and later.
-
-- Helps everyone get up to speed by summarizing the lengthy conversations in an issue.
-- LLM: Anthropic [Claude 3.5 Sonnet](https://console.cloud.google.com/vertex-ai/publishers/anthropic/model-garden/claude-3-5-sonnet)
-- <i class="fa fa-youtube-play youtube" aria-hidden="true"></i> [Watch overview](https://www.youtube.com/watch?v=IcdxLfTIUgc)
-- [View documentation](../discussions/index.md#summarize-issue-discussions-with-duo-chat).
-
 ### Code Suggestions
 
 DETAILS:
-**Tier:** Premium with GitLab Duo Pro, Ultimate with GitLab Duo Pro or Enterprise - [Start a trial](https://about.gitlab.com/solutions/gitlab-duo-pro/sales/?type=free-trial)
+**Tier:** Premium with GitLab Duo Pro or Ultimate with [GitLab Duo Pro or Enterprise](../../subscriptions/subscription-add-ons.md)
 **Offering:** GitLab.com, Self-managed, GitLab Dedicated
 
 - Helps you write code more efficiently by generating code and showing suggestions as you type.
-- LLMs for code completion:
-  - Vertex AI Codey [`code-gecko`](https://console.cloud.google.com/vertex-ai/publishers/google/model-garden/code-gecko).
-  - Vertex AI [Codestral](https://console.cloud.google.com/vertex-ai/publishers/mistralai/model-garden/codestral).
-    Codestral does not involve any additional third-party LLM subprocessing because it is hosted entirely within Google Vertex AI.
-- LLM for code generation: Anthropic [Claude 3.5 Sonnet](https://console.cloud.google.com/vertex-ai/publishers/anthropic/model-garden/claude-3-5-sonnet).
+- LLM for code completion: Vertex AI Codey [`code-gecko`](https://console.cloud.google.com/vertex-ai/publishers/google/model-garden/code-gecko)
+- LLM for code generation: Anthropic [Claude 3.5 Sonnet](https://console.cloud.google.com/vertex-ai/publishers/anthropic/model-garden/claude-3-5-sonnet)
 - <i class="fa fa-youtube-play youtube" aria-hidden="true"></i> [Watch overview](https://youtu.be/ds7SG1wgcVM)
 - [View documentation](../project/repository/code_suggestions/index.md).
 
 ### Code Explanation
 
 DETAILS:
-**Tier:** Premium with GitLab Duo Pro, Ultimate with GitLab Duo Pro or Enterprise - [Start a trial](https://about.gitlab.com/solutions/gitlab-duo-pro/sales/?type=free-trial)
+**Tier: GitLab.com and Self-managed:** For a limited time, Premium or Ultimate. In the future, Premium with GitLab Duo Pro or Ultimate with [GitLab Duo Pro or Enterprise](../../subscriptions/subscription-add-ons.md). **GitLab Dedicated:** GitLab Duo Pro or Enterprise.
 **Offering:** GitLab.com, Self-managed, GitLab Dedicated
 
 - Helps you understand the selected code by explaining it more clearly.
@@ -86,43 +70,19 @@ DETAILS:
 ### Test Generation
 
 DETAILS:
-**Tier:** Premium with GitLab Duo Pro, Ultimate with GitLab Duo Pro or Enterprise - [Start a trial](https://about.gitlab.com/solutions/gitlab-duo-pro/sales/?type=free-trial)
+**Tier: GitLab.com and Self-managed:** For a limited time, Premium or Ultimate. In the future, Premium with GitLab Duo Pro or Ultimate with [GitLab Duo Pro or Enterprise](../../subscriptions/subscription-add-ons.md). **GitLab Dedicated:** GitLab Duo Pro or Enterprise.
 **Offering:** GitLab.com, Self-managed, GitLab Dedicated
 
 - Helps catch bugs early by generating tests for the selected code.
-- LLM: Anthropic [Claude 3.5 Sonnet](https://console.cloud.google.com/vertex-ai/publishers/anthropic/model-garden/claude-3-5-sonnet)
+- LLM: Anthropic [Claude 2.1](https://docs.anthropic.com/en/docs/about-claude/models#legacy-models)
 - <i class="fa fa-youtube-play youtube" aria-hidden="true"></i> [Watch overview](https://www.youtube.com/watch?v=zWhwuixUkYU&list=PLFGfElNsQthYDx0A_FaNNfUm9NHsK6zED)
 - [View documentation](../gitlab_duo_chat/examples.md#write-tests-in-the-ide).
-
-### Refactor Code
-
-DETAILS:
-**Tier:** Premium with GitLab Duo Pro, Ultimate with GitLab Duo Pro or Enterprise - [Start a trial](https://about.gitlab.com/solutions/gitlab-duo-pro/sales/?type=free-trial)
-**Offering:** GitLab.com, Self-managed, GitLab Dedicated
-
-- Improve or refactor the selected code.
-- LLM: Anthropic [Claude 3.5 Sonnet](https://console.cloud.google.com/vertex-ai/publishers/anthropic/model-garden/claude-3-5-sonnet)
-- <i class="fa fa-youtube-play youtube" aria-hidden="true"></i> [Watch overview](https://www.youtube.com/watch?v=zWhwuixUkYU&list=PLFGfElNsQthYDx0A_FaNNfUm9NHsK6zED)
-- [View documentation](../gitlab_duo_chat/examples.md#refactor-code-in-the-ide).
-
-### Fix Code
-
-DETAILS:
-**Tier:** Premium with GitLab Duo Pro, Ultimate with GitLab Duo Pro or Enterprise - [Start a trial](https://about.gitlab.com/solutions/gitlab-duo-pro/sales/?type=free-trial)
-**Offering:** GitLab.com, Self-managed, GitLab Dedicated
-
-- Fix quality problems such as bugs or typos in the selected code.
-- LLM: Anthropic [Claude 3.5 Sonnet](https://console.cloud.google.com/vertex-ai/publishers/anthropic/model-garden/claude-3-5-sonnet)
-- <i class="fa fa-youtube-play youtube" aria-hidden="true"></i> [Watch overview](https://www.youtube.com/watch?v=zWhwuixUkYU&list=PLFGfElNsQthYDx0A_FaNNfUm9NHsK6zED)
-- [View documentation](../gitlab_duo_chat/examples.md#fix-code-in-the-ide).
 
 ### GitLab Duo for the CLI
 
 DETAILS:
-**Tier:** Ultimate with GitLab Duo Enterprise - [Start a trial](https://about.gitlab.com/solutions/gitlab-duo-pro/sales/?type=free-trial)
+**Tier: GitLab.com and Self-managed:** For a limited time, Ultimate. In the future, Ultimate with [GitLab Duo Enterprise](../../subscriptions/subscription-add-ons.md). **GitLab Dedicated:** GitLab Duo Enterprise.
 **Offering:** GitLab.com, Self-managed, GitLab Dedicated
-
-> - Changed to require GitLab Duo add-on in GitLab 17.6 and later.
 
 - `glab duo ask` helps you discover or recall `git` commands when and where you need them.
 - LLM: Anthropic [Claude 3 Haiku](https://console.cloud.google.com/vertex-ai/publishers/anthropic/model-garden/claude-3-haiku)
@@ -131,10 +91,8 @@ DETAILS:
 ### Merge Commit Message Generation
 
 DETAILS:
-**Tier:** Ultimate with GitLab Duo Enterprise - [Start a trial](https://about.gitlab.com/solutions/gitlab-duo-pro/sales/?type=free-trial)
+**Tier: GitLab.com and Self-managed:** For a limited time, Ultimate. In the future, Ultimate with [GitLab Duo Enterprise](../../subscriptions/subscription-add-ons.md). **GitLab Dedicated:** GitLab Duo Enterprise.
 **Offering:** GitLab.com, Self-managed, GitLab Dedicated
-
-> - Changed to require GitLab Duo add-on in GitLab 17.6 and later.
 
 - Helps you merge more quickly by generating meaningful commit messages.
 - LLM: Anthropic [Claude 3.5 Sonnet](https://console.cloud.google.com/vertex-ai/publishers/anthropic/model-garden/claude-3-5-sonnet)
@@ -143,12 +101,11 @@ DETAILS:
 ### Root Cause Analysis
 
 DETAILS:
-**Tier:** Ultimate with GitLab Duo Enterprise - [Start a trial](https://about.gitlab.com/solutions/gitlab-duo-pro/sales/?type=free-trial)
+**Tier: GitLab.com and Self-managed:** For a limited time, Ultimate. In the future, Ultimate with [GitLab Duo Enterprise](../../subscriptions/subscription-add-ons.md). **GitLab Dedicated:** GitLab Duo Enterprise.
 **Offering:** GitLab.com, Self-managed, GitLab Dedicated
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/123692) in GitLab 16.2 as an [experiment](../../policy/experiment-beta-support.md#experiment) on GitLab.com.
 > - [Generally available](https://gitlab.com/gitlab-org/gitlab/-/issues/441681) and moved to GitLab Duo Chat in GitLab 17.3.
-> - Changed to require GitLab Duo add-on in GitLab 17.6 and later.
 
 - Helps you determine the root cause for a CI/CD job failure by analyzing the logs.
 - LLM: Anthropic [Claude 3.5 Sonnet](https://console.cloud.google.com/vertex-ai/publishers/anthropic/model-garden/claude-3-5-sonnet)
@@ -158,10 +115,8 @@ DETAILS:
 ### Vulnerability Explanation
 
 DETAILS:
-**Tier:** Ultimate with GitLab Duo Enterprise - [Start a trial](https://about.gitlab.com/solutions/gitlab-duo-pro/sales/?type=free-trial)
+**Tier: GitLab.com and Self-managed:** For a limited time, Ultimate. In the future, Ultimate with [GitLab Duo Enterprise](../../subscriptions/subscription-add-ons.md). **GitLab Dedicated:** GitLab Duo Enterprise.
 **Offering:** GitLab.com, Self-managed, GitLab Dedicated
-
-> - Changed to require GitLab Duo add-on in GitLab 17.6 and later.
 
 - Helps you understand vulnerabilities, how they can be exploited, and how to fix them.
 - LLM: Anthropic [Claude 3 Haiku](https://docs.anthropic.com/en/docs/about-claude/models#claude-3-a-new-generation-of-ai)
@@ -171,10 +126,8 @@ DETAILS:
 ### AI Impact Dashboard
 
 DETAILS:
-**Tier:** Ultimate with GitLab Duo Enterprise - [Start a trial](https://about.gitlab.com/solutions/gitlab-duo-pro/sales/?type=free-trial)
+**Tier:** For a limited time, Ultimate. In the future, Ultimate with [GitLab Duo Enterprise](../../subscriptions/subscription-add-ons.md).
 **Offering:** GitLab.com, Self-managed
-
-> - Changed to require GitLab Duo add-on in GitLab 17.6 and later.
 
 - Measure the AI effectiveness and impact on SDLC metrics.
 - Visualize which metrics improved as a result of investments in AI.
@@ -182,37 +135,25 @@ DETAILS:
 - Track the progress of AI adoption.
 - [View documentation](../analytics/ai_impact_analytics.md).
 
-## Beta features
-
-### Self-Hosted Models
+### Discussion summary
 
 DETAILS:
-**Tier:** Ultimate with GitLab Duo Enterprise - [Start a trial](https://about.gitlab.com/solutions/gitlab-duo-pro/sales/?type=free-trial)
-**Offering:** Self-managed
-**Status:** Beta
+**Tier:** For a limited time, Ultimate. In the future, Ultimate with [GitLab Duo Enterprise](../../subscriptions/subscription-add-ons.md).
+**Offering:** GitLab.com, Self-managed
 
-> - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/12972) in GitLab 17.1 [with a flag](../../administration/feature_flags.md) named `ai_custom_model`. Disabled by default.
-> - [Enabled on self-managed](https://gitlab.com/groups/gitlab-org/-/epics/15176) in GitLab 17.6.
-> - Changed to require GitLab Duo add-on in GitLab 17.6 and later.
+- Helps everyone get up to speed by summarizing the lengthy conversations in an issue.
+- LLM: Anthropic [Claude 3.5 Sonnet](https://console.cloud.google.com/vertex-ai/publishers/anthropic/model-garden/claude-3-5-sonnet)
+- <i class="fa fa-youtube-play youtube" aria-hidden="true"></i> [Watch overview](https://www.youtube.com/watch?v=IcdxLfTIUgc)
+- [View documentation](../discussions/index.md#summarize-issue-discussions-with-duo-chat).
 
-Use your own language models to power AI features in GitLab. Code Suggestions and Duo Chat are supported.
-
-You can use language model vendors provided by GitLab or fully manage language models in your self-hosted environment.
-
-- Use GitLab model vendors: Connect with default external model providers, like Google Vertex AI or Anthropic, by
-  using the GitLab-managed AI gateway.
-- Host your own models: Deploy and manage your own AI gateway and language models in your infrastructure,
-  without depending on GitLab-provided external language providers.
-- [View documentation](../../administration/self_hosted_models/index.md).
+## Beta features
 
 ### Merge Request Summary
 
 DETAILS:
-**Tier:** Ultimate with GitLab Duo Enterprise - [Start a trial](https://about.gitlab.com/solutions/gitlab-duo-pro/sales/?type=free-trial)
+**Tier:** For a limited time, Ultimate. In the future, Ultimate with [GitLab Duo Enterprise](../../subscriptions/subscription-add-ons.md).
 **Offering:** GitLab.com
 **Status:** Beta
-
-> - Changed to require GitLab Duo add-on in GitLab 17.6 and later.
 
 - Helps populate a merge request more quickly by generating a description based on the code changes.
 - LLM: Vertex AI Codey [`text-bison`](https://console.cloud.google.com/vertex-ai/publishers/google/model-garden/text-bison)
@@ -222,11 +163,9 @@ DETAILS:
 ### Vulnerability Resolution
 
 DETAILS:
-**Tier:** Ultimate with GitLab Duo Enterprise - [Start a trial](https://about.gitlab.com/solutions/gitlab-duo-pro/sales/?type=free-trial)
+**Tier: GitLab.com and Self-managed:** For a limited time, Ultimate. In the future, Ultimate with [GitLab Duo Enterprise](../../subscriptions/subscription-add-ons.md). **GitLab Dedicated:** GitLab Duo Enterprise.
 **Offering:** GitLab.com, Self-managed, GitLab Dedicated
 **Status:** Beta
-
-> - Changed to require GitLab Duo add-on in GitLab 17.6 and later.
 
 - Help resolve a vulnerability by generating a merge request that addresses it.
 - LLM: Anthropic [Claude 3.5 Sonnet](https://console.cloud.google.com/vertex-ai/publishers/anthropic/model-garden/claude-3-5-sonnet)
@@ -238,53 +177,36 @@ DETAILS:
 ### Issue Description Generation
 
 DETAILS:
-**Tier:** Ultimate with GitLab Duo Enterprise - [Start a trial](https://about.gitlab.com/solutions/gitlab-duo-pro/sales/?type=free-trial)
+**Tier:** For a limited time, Ultimate. In the future, Ultimate with [GitLab Duo Enterprise](../../subscriptions/subscription-add-ons.md).
 **Offering:** GitLab.com
 **Status:** Experiment
-
-> - Changed to require GitLab Duo add-on in GitLab 17.6 and later.
 
 - Helps populate an issue more quickly by generating a more in-depth description, based on a short summary you provide.
 - LLM: Anthropic [Claude 3 Haiku](https://docs.anthropic.com/en/docs/about-claude/models#claude-3-a-new-generation-of-ai)
-- [View documentation](../project/issues/managing_issues.md#populate-an-issue-with-issue-description-generation).
-
-### Code Review
-
-DETAILS:
-**Tier:** Ultimate with GitLab Duo Enterprise - [Start a trial](https://about.gitlab.com/solutions/gitlab-duo-pro/sales/?type=free-trial)
-**Offering:** GitLab.com
-**Status:** Experiment
-
-> - Changed to require GitLab Duo add-on in GitLab 17.6 and later.
-
-- Automated code review of the proposed changes in your merge request.
-- LLM: Anthropic [Claude 3.5 Sonnet](https://console.cloud.google.com/vertex-ai/publishers/anthropic/model-garden/claude-3-5-sonnet)
-- [View documentation](../project/merge_requests/duo_in_merge_requests.md#have-gitlab-duo-review-your-code).
+- [View documentation](experiments.md#populate-an-issue-with-issue-description-generation).
 
 ### Code Review Summary
 
 DETAILS:
-**Tier:** Ultimate with GitLab Duo Enterprise - [Start a trial](https://about.gitlab.com/solutions/gitlab-duo-pro/sales/?type=free-trial)
+**Tier:** For a limited time, Ultimate. In the future, Ultimate with [GitLab Duo Enterprise](../../subscriptions/subscription-add-ons.md).
 **Offering:** GitLab.com
 **Status:** Experiment
-
-> - Changed to require GitLab Duo add-on in GitLab 17.6 and later.
 
 - Helps make merge request handover to reviewers easier by summarizing all the comments in a merge request review.
 - LLM: Vertex AI Codey [`text-bison`](https://console.cloud.google.com/vertex-ai/publishers/google/model-garden/text-bison)
 - <i class="fa fa-youtube-play youtube" aria-hidden="true"></i> [Watch overview](https://www.youtube.com/watch?v=Bx6Zajyuy9k&list=PLFGfElNsQthYDx0A_FaNNfUm9NHsK6zED)
 - [View documentation](../project/merge_requests/duo_in_merge_requests.md#summarize-a-code-review).
 
-### GitLab Duo Workflow
+### Product Analytics
 
 DETAILS:
-**Tier:** Ultimate
+**Tier:** For a limited time, Ultimate. In the future, Ultimate with [GitLab Duo Enterprise](../../subscriptions/subscription-add-ons.md).
 **Offering:** GitLab.com
 **Status:** Experiment
 
-- Automate tasks and help increase productivity in your development workflow.
-- LLM: Anthropic [Claude 3.5 Sonnet](https://console.cloud.google.com/vertex-ai/publishers/anthropic/model-garden/claude-3-5-sonnet)
-- [View documentation](../duo_workflow/index.md).
+- Processes and responds to your questions about your application's usage data.
+- LLM: Vertex AI Codey [`codechat-bison`](https://cloud.google.com/vertex-ai/generative-ai/docs/model-reference/code-chat)
+- [View documentation](../analytics/analytics_dashboards.md#generate-a-custom-visualization-with-gitlab-duo).
 
 ## Disable GitLab Duo features for specific groups or projects or an entire instance
 

@@ -34,8 +34,7 @@ RSpec.describe Ci::PipelinesHelper, feature_category: :continuous_integration do
     end
 
     it 'has the expected keys' do
-      expect(subject.keys).to include(
-        :endpoint,
+      expect(subject.keys).to include(:endpoint,
         :project_id,
         :default_branch_name,
         :params,
@@ -50,9 +49,7 @@ RSpec.describe Ci::PipelinesHelper, feature_category: :continuous_integration do
         :suggested_ci_templates,
         :full_path,
         :visibility_pipeline_id_type,
-        :show_jenkins_ci_prompt,
-        :pipelines_analytics_path
-      )
+        :show_jenkins_ci_prompt)
     end
   end
 
@@ -130,31 +127,8 @@ RSpec.describe Ci::PipelinesHelper, feature_category: :continuous_integration do
         :project_path,
         :project_refs_endpoint,
         :settings_link,
-        :max_warnings,
-        :is_maintainer
+        :max_warnings
       )
-    end
-
-    describe 'is_maintainer' do
-      subject(:data) { helper.new_pipeline_data(project)[:is_maintainer] }
-
-      let_it_be(:user) { create(:user) }
-
-      before do
-        sign_in(user)
-      end
-
-      context 'when user is signed in but not a maintainer' do
-        it { expect(subject).to be_falsy }
-      end
-
-      context 'when user is signed in with a role that is maintainer or above' do
-        before_all do
-          project.add_maintainer(user)
-        end
-
-        it { expect(subject).to be_truthy }
-      end
     end
   end
 end

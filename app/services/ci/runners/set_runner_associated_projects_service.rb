@@ -26,11 +26,13 @@ module Ci
       private
 
       def set_associated_projects
-        new_project_ids = [runner.owner&.id].compact + project_ids
+        new_project_ids = [runner.owner_project&.id].compact + project_ids
 
         response = ServiceResponse.success
         runner.transaction do
-          current_project_ids = runner.project_ids # rubocop:disable CodeReuse/ActiveRecord -- reasonable use
+          # rubocop:disable CodeReuse/ActiveRecord
+          current_project_ids = runner.projects.ids
+          # rubocop:enable CodeReuse/ActiveRecord
 
           response = associate_new_projects(new_project_ids, current_project_ids)
           response = disassociate_old_projects(new_project_ids, current_project_ids) if response.success?

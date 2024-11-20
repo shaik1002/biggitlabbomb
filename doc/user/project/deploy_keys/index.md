@@ -44,33 +44,29 @@ A deploy key is given a permission level when it is created:
 You can change a deploy key's permission level after creating it. Changing a project deploy key's
 permissions only applies for the current project.
 
-If a push that uses a deploy key triggers additional processes, the creator of the key must be authorized. For example:
+GitLab authorizes the creator of the deploy key if the Git-command triggers additional processes. For example:
 
 - When a deploy key is used to push a commit to a [protected branch](../repository/branches/protected.md),
-  the creator of the deploy key must have access to the branch.
-- When a deploy key is used to push a commit that triggers a CI/CD pipeline, the creator of the
+  the _creator_ of the deploy key must have access to the branch.
+- When a deploy key is used to push a commit that triggers a CI/CD pipeline, the _creator_ of the
   deploy key must have access to the CI/CD resources, including protected environments and secret
   variables.
 
-### Security implications
+## Security implications
 
-Deploy keys are meant to facilitate non-human interaction with GitLab. For example, you can use a deploy key
-to grant permissions to a script that automatically runs on a server in your organization.
+The intended use case for deploy keys is for non-human interaction with GitLab, for example: an automated script running on a server in your organization.
 
 You should create a dedicated account to act as a service account, and create the deploy key with the service account.
-If you use another user account to create deploy keys, that user is granted privileges that persist until the deploy key is revoked.
+If you use another user account to create deploy keys, the user is granted persistent privileges.
 
 In addition:
 
 - Deploy keys work even if the user who created them is removed from the group or project.
 - The creator of a deploy key retains access to the group or project, even if the user is demoted or removed.
-- When a deploy key is specified in a protected branch rule, the creator of the deploy key:
-  - Gains access to the protected branch, as well as to the deploy key itself.
-  - Can push to the protected branch, if the deploy key has read-write permission.
-    This is true even if the branch is protected against changes from all users.
+- When a deploy key is specified in a protected branch rule, the creator of the deploy key gains access to the protected branch, as well as to the deploy key itself.
 
 As with all sensitive information, you should ensure only those who need access to the secret can read it.
-For human interactions, use credentials tied to users such as personal access tokens.
+For human interactions, use credentials tied to users such as Personal access tokens.
 
 To help detect a potential secret leak, you can use the
 [audit event](../../compliance/audit_event_schema.md#example-audit-event-payloads-for-git-over-ssh-events-with-deploy-key) feature.
@@ -200,20 +196,9 @@ There are a few scenarios where a deploy key fails to push to a
 - The deploy key has been [revoked](#revoke-project-access-of-a-deploy-key).
 - **No one** is selected in [the **Allowed to push and merge** section](../repository/branches/protected.md#add-protection-to-existing-branches) of the protected branch.
 
-This issue occurs because all deploy keys are associated to an account. Because the permissions for an account can change, this might lead to scenarios where a deploy key that was working is suddenly unable to push to a protected branch.
+All deploy keys are associated to an account. Since the permissions for an account can change, this might lead to scenarios where a deploy key that was working is suddenly unable to push to a protected branch.
 
-To resolve this issue, you can use the deploy keys API to create deploy keys for project service account users, instead of for your own users:
-
-1. [Create a service account user](../../../api/group_service_accounts.md#create-a-service-account-user).
-1. [Create a personal access token](../../../api/user_tokens.md#create-a-personal-access-token) for that service account user. This token must have at least the `api` scope.
-1. [Invite the service account user to the project](../../profile/service_accounts.md#add-to-a-subgroup-or-project).
-1. Use the deploy key API to [create a deploy key for the service account user](../../../api/deploy_keys.md#add-deploy-key):
-
-   ```shell
-   curl --request POST --header "PRIVATE-TOKEN: <service_account_access_token>" --header "Content-Type: application/json" \
-   --data '{"title": "My deploy key", "key": "ssh-rsa AAAA...", "can_push": "true"}' \
-   "https://gitlab.example.com/api/v4/projects/5/deploy_keys/"
-   ```
+We recommend you create a service account, and associate a deploy key to the service account, for projects using deploy keys.
 
 #### Identify deploy keys associated with non-member and blocked users
 

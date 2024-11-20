@@ -2,8 +2,20 @@
 
 module QA
   RSpec.describe 'Create' do
-    describe 'Repository Usage Quota', :skip_live_env, product_group: :source_code do
-      let(:project) { create(:project) }
+    describe 'Repository Usage Quota', :skip_live_env, product_group: :source_code, feature_flag: {
+      name: 'gitaly_revlist_for_repo_size',
+      scope: :global
+    } do
+      let(:project_name) { "repository-usage-#{SecureRandom.hex(8)}" }
+      let!(:flag_enabled) { Runtime::Feature.enabled?(:gitaly_revlist_for_repo_size) }
+
+      before do
+        Runtime::Feature.enable(:gitaly_revlist_for_repo_size)
+      end
+
+      after do
+        Runtime::Feature.set({ gitaly_revlist_for_repo_size: flag_enabled })
+      end
 
       # Previously, GitLab could report a size many times larger than a cloned copy. For example, 37Gb reported for a
       # repo that is 2Gb when cloned.
@@ -18,6 +30,8 @@ module QA
       # attempt to detect large differences that could indicate a regression to previous behavior.
       it 'matches cloned repo usage to reported usage', :blocking,
         testcase: 'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/365196' do
+        project = create(:project, name: project_name)
+
         shared_data = SecureRandom.random_bytes(500000)
 
         Resource::Repository::ProjectPush.fabricate! do |push|
@@ -32,7 +46,7 @@ module QA
           repository.use_default_credentials
           repository.default_branch = project.default_branch
           repository.clone
-          repository.use_default_identity
+          repository.configure_identity('GitLab QA', 'root@gitlab.com')
           # These two commits add a total of 1mb, but half of that is the same as content that has already been added to
           # the repository, so garbage collection will deduplicate it.
           repository.commit_file("new-data", SecureRandom.random_bytes(500000), "Add file")

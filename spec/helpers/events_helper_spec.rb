@@ -312,38 +312,28 @@ RSpec.describe EventsHelper, factory_default: :keep, feature_category: :user_pro
   end
 
   describe '#event_wiki_page_target_url' do
-    let_it_be(:project) { create(:project) }
+    let_it_be_with_reload(:project) { create(:project) }
+    let(:wiki_page) { create(:wiki_page, wiki: create(:project_wiki, project: project)) }
+    let(:event) { create(:wiki_page_event, project: project, wiki_page: wiki_page) }
 
-    context 'for project wiki' do
-      let(:wiki_page_meta) { create(:wiki_page_meta, :for_wiki_page, container: project) }
-      let(:event) { create(:event, target: wiki_page_meta, project: wiki_page_meta.project) }
+    it 'links to the wiki page' do
+      url = helper.project_wiki_url(project, wiki_page.slug)
 
-      it 'links to the wiki page' do
-        url = helper.project_wiki_url(wiki_page_meta.project, wiki_page_meta.canonical_slug)
-
-        expect(helper.event_wiki_page_target_url(event)).to eq(url)
-      end
-
-      context 'without canonical slug' do
-        before do
-          event.target.slugs.update_all(canonical: false)
-          event.target.clear_memoization(:canonical_slug)
-        end
-
-        it 'links to the home page' do
-          url = helper.project_wiki_url(wiki_page_meta.project, Wiki::HOMEPAGE)
-
-          expect(helper.event_wiki_page_target_url(event)).to eq(url)
-        end
-      end
+      expect(helper.event_wiki_page_target_url(event)).to eq(url)
     end
 
-    context 'for an event that has neither project nor group' do
-      let(:wiki_page_meta) { create(:wiki_page_meta, :for_wiki_page, container: project) }
-      let(:event) { create(:event, target: wiki_page_meta, group: nil, project: nil) }
+    context 'without canonical slug' do
+      let(:event) { create(:wiki_page_event, project: project) }
 
-      it 'returns nil' do
-        expect(helper.event_wiki_page_target_url(event)).to be_nil
+      before do
+        event.target.slugs.update_all(canonical: false)
+        event.target.clear_memoization(:canonical_slug)
+      end
+
+      it 'links to the home page' do
+        url = helper.project_wiki_url(project, Wiki::HOMEPAGE)
+
+        expect(helper.event_wiki_page_target_url(event)).to eq(url)
       end
     end
   end
@@ -435,18 +425,6 @@ RSpec.describe EventsHelper, factory_default: :keep, feature_category: :user_pro
         note_id  = event.target.id
 
         expect(subject).to eq("#{project_base_url}/-/issues/#{iid}/designs/#{filename}#note_#{note_id}")
-      end
-    end
-
-    context 'for wiki page notes' do
-      let(:event) { create(:event, :for_wiki_page_note) }
-      let(:project) { event.target.project }
-
-      it 'returns an appropriate URL' do
-        path = event.note_target.canonical_slug
-        note_id = event.target.id
-
-        expect(subject).to eq("#{project_base_url}/-/wikis/#{path}#note_#{note_id}")
       end
     end
   end

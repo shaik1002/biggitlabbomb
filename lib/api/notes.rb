@@ -8,9 +8,7 @@ module API
 
     before { authenticate! }
 
-    allow_access_with_scope :ai_workflows, if: ->(request) do
-      request.get? || request.head? || request.post?
-    end
+    allow_access_with_scope :ai_workflows
 
     urgency :low, [
       '/projects/:id/merge_requests/:noteable_id/notes',
@@ -99,16 +97,14 @@ module API
           }
 
           note = create_note(noteable, opts)
-          quick_action_status = note.quick_actions_status
 
-          if quick_action_status&.commands_only? && quick_action_status.success?
+          if note.errors.attribute_names == [:commands_only, :command_names]
             status 202
             present note, with: Entities::NoteCommands
           elsif note.persisted?
             present note, with: Entities.const_get(note.class.name, false)
-          elsif quick_action_status&.error?
-            bad_request!(quick_action_status.error_messages.join(', '))
-          elsif note.errors.present?
+          else
+            note.errors.delete(:commands_only) if note.errors.has_key?(:commands)
             bad_request!("Note #{note.errors.messages}")
           end
         end

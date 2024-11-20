@@ -24,10 +24,6 @@ module API
 
           private
 
-          def version
-            object.id.to_s
-          end
-
           def name
             object.name
           end
@@ -77,7 +73,7 @@ module API
           end
 
           def aliases
-            [object.version.to_s]
+            []
           end
         end
       end

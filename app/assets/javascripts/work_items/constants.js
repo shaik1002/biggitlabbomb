@@ -17,6 +17,7 @@ export const WIDGET_TYPE_CURRENT_USER_TODOS = 'CURRENT_USER_TODOS';
 export const WIDGET_TYPE_LABELS = 'LABELS';
 export const WIDGET_TYPE_START_AND_DUE_DATE = 'START_AND_DUE_DATE';
 export const WIDGET_TYPE_TIME_TRACKING = 'TIME_TRACKING';
+export const WIDGET_TYPE_ROLLEDUP_DATES = 'ROLLEDUP_DATES';
 export const WIDGET_TYPE_WEIGHT = 'WEIGHT';
 export const WIDGET_TYPE_PARTICIPANTS = 'PARTICIPANTS';
 export const WIDGET_TYPE_PROGRESS = 'PROGRESS';
@@ -30,7 +31,6 @@ export const WIDGET_TYPE_COLOR = 'COLOR';
 export const WIDGET_TYPE_DESIGNS = 'DESIGNS';
 export const WIDGET_TYPE_DEVELOPMENT = 'DEVELOPMENT';
 export const WIDGET_TYPE_CRM_CONTACTS = 'CRM_CONTACTS';
-export const WIDGET_TYPE_EMAIL_PARTICIPANTS = 'EMAIL_PARTICIPANTS';
 
 export const WORK_ITEM_TYPE_ENUM_INCIDENT = 'INCIDENT';
 export const WORK_ITEM_TYPE_ENUM_ISSUE = 'ISSUE';
@@ -41,13 +41,12 @@ export const WORK_ITEM_TYPE_ENUM_OBJECTIVE = 'OBJECTIVE';
 export const WORK_ITEM_TYPE_ENUM_KEY_RESULT = 'KEY_RESULT';
 export const WORK_ITEM_TYPE_ENUM_EPIC = 'EPIC';
 
-export const WORK_ITEM_TYPE_VALUE_WORK_ITEM = 'Work Item';
 export const WORK_ITEM_TYPE_VALUE_EPIC = 'Epic';
 export const WORK_ITEM_TYPE_VALUE_INCIDENT = 'Incident';
 export const WORK_ITEM_TYPE_VALUE_ISSUE = 'Issue';
 export const WORK_ITEM_TYPE_VALUE_TASK = 'Task';
-export const WORK_ITEM_TYPE_VALUE_TEST_CASE = 'Test Case';
-export const WORK_ITEM_TYPE_VALUE_REQUIREMENTS = 'Requirement';
+export const WORK_ITEM_TYPE_VALUE_TEST_CASE = 'Test case';
+export const WORK_ITEM_TYPE_VALUE_REQUIREMENTS = 'Requirements';
 export const WORK_ITEM_TYPE_VALUE_KEY_RESULT = 'Key Result';
 export const WORK_ITEM_TYPE_VALUE_OBJECTIVE = 'Objective';
 
@@ -104,7 +103,6 @@ export const I18N_WORK_ITEM_FETCH_AWARD_EMOJI_ERROR = s__(
 
 export const I18N_NEW_WORK_ITEM_BUTTON_LABEL = s__('WorkItem|New %{workItemType}');
 export const I18N_WORK_ITEM_CREATE_BUTTON_LABEL = s__('WorkItem|Create %{workItemType}');
-export const I18N_WORK_ITEM_NEW_RELATED_ITEM = s__('WorkItem|New related %{workItemType}');
 export const I18N_WORK_ITEM_ADD_BUTTON_LABEL = s__('WorkItem|Add %{workItemType}');
 export const I18N_WORK_ITEM_ADD_MULTIPLE_BUTTON_LABEL = s__('WorkItem|Add %{workItemType}s');
 export const I18N_WORK_ITEM_SEARCH_INPUT_PLACEHOLDER = s__(
@@ -139,7 +137,7 @@ export const I18N_MAX_WORK_ITEMS_ERROR_MESSAGE = sprintf(
   { MAX_WORK_ITEMS },
 );
 export const I18N_MAX_WORK_ITEMS_NOTE_LABEL = sprintf(
-  s__('WorkItem|Add up to %{MAX_WORK_ITEMS} items at a time.'),
+  s__('WorkItem|Add a maximum of %{MAX_WORK_ITEMS} items at a time.'),
   { MAX_WORK_ITEMS },
 );
 
@@ -172,7 +170,6 @@ export const WORK_ITEMS_TYPE_MAP = {
     icon: `issue-type-issue`,
     name: s__('WorkItem|Issue'),
     value: WORK_ITEM_TYPE_VALUE_ISSUE,
-    routeParamName: 'issues',
   },
   [WORK_ITEM_TYPE_ENUM_TASK]: {
     icon: `issue-type-task`,
@@ -203,7 +200,6 @@ export const WORK_ITEMS_TYPE_MAP = {
     icon: `epic`,
     name: s__('WorkItem|Epic'),
     value: WORK_ITEM_TYPE_VALUE_EPIC,
-    routeParamName: 'epics',
   },
 };
 
@@ -213,7 +209,6 @@ export const WORK_ITEM_TYPE_VALUE_MAP = {
   [WORK_ITEM_TYPE_VALUE_ISSUE]: WORK_ITEM_TYPE_ENUM_ISSUE,
   [WORK_ITEM_TYPE_VALUE_EPIC]: WORK_ITEM_TYPE_ENUM_EPIC,
   [WORK_ITEM_TYPE_VALUE_TASK]: WORK_ITEM_TYPE_ENUM_TASK,
-  [WORK_ITEM_TYPE_VALUE_INCIDENT]: WORK_ITEM_TYPE_ENUM_INCIDENT,
 };
 
 export const WORK_ITEMS_TREE_TEXT = {
@@ -273,12 +268,14 @@ export const TEST_ID_COPY_REFERENCE_ACTION = 'copy-reference-action';
 export const TEST_ID_COPY_CREATE_NOTE_EMAIL_ACTION = 'copy-create-note-email-action';
 export const TEST_ID_TOGGLE_ACTION = 'state-toggle-action';
 export const TEST_ID_REPORT_ABUSE = 'report-abuse-action';
-export const TEST_ID_NEW_RELATED_WORK_ITEM = 'new-related-work-item';
 
 export const TODO_ADD_ICON = 'todo-add';
 export const TODO_DONE_ICON = 'todo-done';
 export const TODO_DONE_STATE = 'done';
 export const TODO_PENDING_STATE = 'pending';
+
+export const EMOJI_THUMBSUP = 'thumbsup';
+export const EMOJI_THUMBSDOWN = 'thumbsdown';
 
 export const WORK_ITEM_TO_ISSUABLE_MAP = {
   [WIDGET_TYPE_ASSIGNEES]: 'assignees',
@@ -299,12 +296,6 @@ export const LINKED_CATEGORIES_MAP = {
   BLOCKS: 'blocks',
 };
 
-export const RELATIONSHIP_TYPE_ENUM = {
-  relates_to: 'RELATED',
-  blocks: 'BLOCKS',
-  is_blocked_by: 'BLOCKED_BY',
-};
-
 export const LINKED_ITEM_TYPE_VALUE = {
   RELATED: 'RELATED',
   BLOCKED_BY: 'BLOCKED_BY',
@@ -315,6 +306,14 @@ export const LINK_ITEM_FORM_HEADER_LABEL = {
   [WORK_ITEM_TYPE_VALUE_OBJECTIVE]: s__('WorkItem|The current objective'),
   [WORK_ITEM_TYPE_VALUE_KEY_RESULT]: s__('WorkItem|The current key result'),
   [WORK_ITEM_TYPE_VALUE_TASK]: s__('WorkItem|The current task'),
+};
+
+export const SUPPORTED_PARENT_TYPE_MAP = {
+  [WORK_ITEM_TYPE_VALUE_OBJECTIVE]: [WORK_ITEM_TYPE_ENUM_OBJECTIVE],
+  [WORK_ITEM_TYPE_VALUE_KEY_RESULT]: [WORK_ITEM_TYPE_ENUM_OBJECTIVE],
+  [WORK_ITEM_TYPE_VALUE_TASK]: [WORK_ITEM_TYPE_ENUM_ISSUE],
+  [WORK_ITEM_TYPE_VALUE_EPIC]: [WORK_ITEM_TYPE_ENUM_EPIC],
+  [WORK_ITEM_TYPE_VALUE_ISSUE]: [WORK_ITEM_TYPE_ENUM_EPIC],
 };
 
 export const LINKED_ITEMS_ANCHOR = 'linkeditems';
@@ -351,8 +350,10 @@ export const NEW_WORK_ITEM_IID = 'new-work-item-iid';
 
 export const NEW_WORK_ITEM_GID = 'gid://gitlab/WorkItem/new';
 
-export const NEW_EPIC_FEEDBACK_PROMPT_EXPIRY = '2024-12-31';
+export const NEW_EPIC_FEEDBACK_PROMPT_EXPIRY = '2024-11-01';
 export const FEATURE_NAME = 'work_item_epic_feedback';
+
+export const CLEAR_VALUE = 'CLEAR_VALUE';
 
 export const DETAIL_VIEW_QUERY_PARAM_NAME = 'show';
 export const ROUTES = {
@@ -362,22 +363,6 @@ export const ROUTES = {
   design: 'design',
 };
 
-export const WORK_ITEM_TYPE_ROUTE_WORK_ITEM = 'work_items';
-export const WORK_ITEM_TYPE_ROUTE_ISSUE = 'issues';
-export const WORK_ITEM_TYPE_ROUTE_EPIC = 'epics';
-
-export const WORK_ITEM_BASE_ROUTE_MAP = {
-  [WORK_ITEM_TYPE_ROUTE_WORK_ITEM]: null,
-  [WORK_ITEM_TYPE_ROUTE_ISSUE]: WORK_ITEM_TYPE_ENUM_ISSUE,
-  [WORK_ITEM_TYPE_ROUTE_EPIC]: WORK_ITEM_TYPE_ENUM_EPIC,
-};
-
 export const WORKITEM_LINKS_SHOWLABELS_LOCALSTORAGEKEY = 'workItemLinks.showLabels';
 export const WORKITEM_TREE_SHOWLABELS_LOCALSTORAGEKEY = 'workItemTree.showLabels';
-export const WORKITEM_TREE_SHOWCLOSED_LOCALSTORAGEKEY = 'workItemTree.showClosed';
 export const WORKITEM_RELATIONSHIPS_SHOWLABELS_LOCALSTORAGEKEY = 'workItemRelationships.showLabels';
-export const WORKITEM_RELATIONSHIPS_SHOWCLOSED_LOCALSTORAGEKEY = 'workItemRelationships.showClosed';
-
-export const INJECTION_LINK_CHILD_PREVENT_ROUTER_NAVIGATION = Symbol(
-  'injection:prevent-router-navigation',
-);

@@ -44,7 +44,8 @@ time to users. This in turn can be controlled using [GitLab ChatOps](../../ci/ch
 
 For an up to date list of feature flag commands see
 [the source code](https://gitlab.com/gitlab-com/chatops/blob/master/lib/chatops/commands/feature.rb).
-All the examples in that file must be preceded by `/chatops run`.
+Note that all the examples in that file must be preceded by
+`/chatops run`.
 
 If you get an error "Whoops! This action is not allowed. This incident
 will be reported." that means your Slack account is not allowed to
@@ -100,7 +101,7 @@ This depends on the feature and what sort of impact it might have.
 
 Guidelines:
 
-- Notify `#support_gitlab-com` beforehand. So in case if the feature has any side effects on user experience, they can mitigate and disable the feature flag to reduce some impact.
+- Consider notifying `#support_gitlab-com` beforehand. So in case if the feature has any side effects on user experience, they can mitigate and disable the feature flag to reduce some impact.
 - If the feature meets the requirements for creating a [Change Management](https://handbook.gitlab.com/handbook/engineering/infrastructure/change-management/#feature-flags-and-the-change-management-process) issue, create a Change Management issue per [criticality guidelines](https://handbook.gitlab.com/handbook/engineering/infrastructure/change-management/#change-request-workflows).
 - For simple, low-risk, easily reverted features, proceed and [enable the feature in `#production`](#process).
 - For support requests to toggle feature flags for specific groups or projects, follow the process outlined in the [support workflows](https://handbook.gitlab.com/handbook/support/workflows/saas_feature_flags/).
@@ -199,10 +200,12 @@ incidents or in-progress change issues, for example:
 
 Before enabling a feature flag, verify that you are not violating any [Production Change Lock periods](https://handbook.gitlab.com/handbook/engineering/infrastructure/change-management/#production-change-lock-pcl) and are in compliance with the [Feature flags and the Change Management Process](https://handbook.gitlab.com/handbook/engineering/infrastructure/change-management/#feature-flags-and-the-change-management-process).
 
-The following `/chatops` commands must be performed in the Slack
+The following `/chatops` commands should be performed in the Slack
 `#production` channel.
 
-##### Percentage of time roll out
+When you begin to enable the feature, link to the relevant
+feature flag rollout issue within a Slack thread of the first `/chatops`
+command you make so people can understand the change if they need to.
 
 To enable a feature for 25% of the time, run the following in Slack:
 
@@ -225,8 +228,6 @@ This will enable the feature for GitLab.com, with `new_navigation_bar` being the
 name of the feature.
 This command does *not* enable the feature for 25% of the total users.
 Instead, when the feature is checked with `enabled?`, it will return `true` 25% of the time.
-
-##### Percentage of actors roll out
 
 To enable a feature for 25% of actors such as users, projects, or groups,
 run the following in Slack:
@@ -306,7 +307,7 @@ generic namespace (including groups) use `--namespace`:
 /chatops run feature set --namespace=myusername some_feature true
 ```
 
-Actor-based gates are applied before percentages. For example, considering the
+Note that actor-based gates are applied before percentages. For example, considering the
 `group/project` as `gitlab-org/gitlab` and a given example feature as `some_feature`, if
 you run these 2 commands:
 
@@ -437,7 +438,7 @@ After turning on the feature flag, you need to [monitor the relevant graphs](htt
 
 In this illustration, you can see that the Apdex score started to decline after the feature flag was enabled at `09:46`. The feature flag was then deactivated at `10:31`, and the service returned to the original value:
 
-![Feature flag metrics](../img/feature-flag-metrics_v15_8.png)
+![Feature flag metrics](../img/feature-flag-metrics.png)
 
 Certain features necessitate extensive monitoring over multiple days, particularly those that are high-risk and critical to business operations. In contrast, other features may only require a 24-hour monitoring period before continuing with the rollout.
 
@@ -477,7 +478,7 @@ and reduces confidence in our testing suite covering all possible combinations.
 Additionally, a feature flag overwritten in some of the environments can result
 in undefined and untested system behavior.
 
-`development` type feature flags should have a short lifecycle because their purpose
+`development` type feature flags should have a short life-cycle because their purpose
 is for rolling out a persistent change. `development` feature flags that are older
 than 2 milestones are reported to engineering managers. The
 [report tool](https://gitlab.com/gitlab-org/gitlab-feature-flag-alert) runs on a

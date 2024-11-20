@@ -2,7 +2,7 @@
 data_category: optional
 key_path: counts.projects_with_alerts_created
 description: Count of projects with alerts created in given time period
-product_group: platform_insights
+product_group: respond
 value_type: number
 status: active
 time_frame: all
@@ -11,7 +11,7 @@ instrumentation_class: CountProjectsWithAlertsCreatedMetric
 distribution:
 - ce
 - ee
-tiers:
+tier:
 - free
 - premium
 - ultimate

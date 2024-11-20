@@ -7,7 +7,8 @@ module WebIde
     # @return [Boolean]
     def self.feature_enabled_for_any_user?
       feature_flag_enabled_for_any_actor?(:web_ide_extensions_marketplace) &&
-        feature_flag_enabled_for_any_actor?(:vscode_web_ide)
+        feature_flag_enabled_for_any_actor?(:vscode_web_ide) &&
+        feature_flag_enabled_for_any_actor?(:web_ide_oauth)
     end
 
     # This returns true if the extensions marketplace feature is available to the given user
@@ -16,7 +17,8 @@ module WebIde
     # @return [Boolean]
     def self.feature_enabled?(user:)
       Feature.enabled?(:web_ide_extensions_marketplace, user) &&
-        Feature.enabled?(:vscode_web_ide, user)
+        Feature.enabled?(:vscode_web_ide, user) &&
+        Feature.enabled?(:web_ide_oauth, user)
     end
 
     # This value is used when the end-user is accepting the third-party extension marketplace integration.
@@ -25,7 +27,7 @@ module WebIde
     end
 
     def self.help_preferences_url
-      ::Gitlab::Routing.url_helpers.help_page_url('user/profile/preferences.md',
+      ::Gitlab::Routing.url_helpers.help_page_url('user/profile/preferences',
         anchor: 'integrate-with-the-extension-marketplace')
     end
 
@@ -74,7 +76,7 @@ module WebIde
     # rubocop:enable Lint/UnusedMethodArgument
 
     def self.help_url
-      ::Gitlab::Routing.url_helpers.help_page_url('user/project/web_ide/index.md', anchor: 'extension-marketplace')
+      ::Gitlab::Routing.url_helpers.help_page_url('user/project/web_ide/index', anchor: 'extension-marketplace')
     end
 
     def self.user_preferences_url

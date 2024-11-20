@@ -57,8 +57,7 @@ RSpec.describe ApplicationController, feature_category: :shared do
   end
 
   describe '#set_current_organization' do
-    let_it_be(:user) { create(:user) }
-    let_it_be(:current_organization) { create(:organization, users: [user]) }
+    let_it_be(:current_organization) { create(:organization, :default) }
 
     before do
       sign_in user
@@ -69,9 +68,7 @@ RSpec.describe ApplicationController, feature_category: :shared do
     end
 
     it 'sets current organization' do
-      get :index, format: :json
-
-      expect(Current.organization).to eq(current_organization)
+      expect { get :index, format: :json }.to change { Current.organization }.from(nil).to(current_organization)
     end
 
     context 'when multiple calls in one example are done' do
@@ -1101,100 +1098,14 @@ RSpec.describe ApplicationController, feature_category: :shared do
       end
     end
 
-    it 'returns a error response with 503 status' do
-      get :index
-
-      expect(response).to have_gitlab_http_status(:service_unavailable)
-      expect(response.headers['Retry-After']).to eq(50)
-      expect(response).to render_template('errors/service_unavailable')
-    end
-  end
-
-  context 'When Regexp::TimeoutError is raised' do
-    before do
-      sign_in user
-    end
-
-    controller(described_class) do
-      def index
-        raise Regexp::TimeoutError
-      end
-    end
-
     it 'returns a plaintext error response with 503 status' do
       get :index
 
       expect(response).to have_gitlab_http_status(:service_unavailable)
-    end
-  end
-
-  describe 'cross-site request forgery protection handling' do
-    describe '#handle_unverified_request' do
-      it 'increments counter of invalid CSRF tokens detected' do
-        stub_authentication_activity_metrics do |metrics|
-          expect(metrics).to increment(:user_csrf_token_invalid_counter)
-        end
-
-        expect { described_class.new.handle_unverified_request }
-          .to raise_error(ActionController::InvalidAuthenticityToken)
-      end
-    end
-  end
-
-  describe '#after_sign_in_path_for' do
-    subject(:get_index) { get :index }
-
-    let_it_be(:user) { create(:user) }
-
-    controller(described_class) do
-      skip_before_action :authenticate_user!
-
-      def index
-        resource = User.last
-        redirect_to after_sign_in_path_for(resource)
-      end
-    end
-
-    it 'redirects to root_path by default' do
-      get_index
-
-      expect(response).to redirect_to(root_path)
-    end
-
-    context 'when resource is nil' do
-      before do
-        allow(User).to receive(:last).and_return(nil)
-      end
-
-      it 'redirects to root_path without raising error' do
-        get_index
-
-        expect(response).to redirect_to(root_path)
-      end
-    end
-
-    context 'when user has stored location to route to' do
-      before do
-        controller.send(:store_location_for, user, user_settings_profile_path)
-      end
-
-      it 'redirects to root_path by default' do
-        get_index
-
-        expect(response).to redirect_to(user_settings_profile_path)
-      end
-    end
-
-    context 'when a redirect location is stored' do
-      before do
-        controller.send(:store_location_for, :redirect, user_settings_profile_path)
-      end
-
-      it 'redirects to root_path by default' do
-        get_index
-
-        expect(response).to redirect_to(user_settings_profile_path)
-      end
+      expect(response.body).to include(
+        "Upstream Gitaly has been exhausted: maximum time in concurrency queue reached. Try again later"
+      )
+      expect(response.headers['Retry-After']).to eq(50)
     end
   end
 end

@@ -19,10 +19,6 @@ class IssuablePolicy < BasePolicy
   desc "Issuable is hidden"
   condition(:hidden, scope: :subject) { @subject.hidden? }
 
-  rule { can?(:developer_access) }.policy do
-    enable :resolve_note
-  end
-
   rule { can?(:guest_access) & assignee_or_author & ~is_incident }.policy do
     enable :read_issue
     enable :update_issue

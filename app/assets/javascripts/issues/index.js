@@ -29,14 +29,6 @@ export function initForm() {
   initTypePopover();
   initTypeSelect();
   mountMilestoneDropdown();
-
-  if (gon.features.workItemsViewPreference) {
-    import(/* webpackChunkName: 'work_items_feedback' */ '~/work_items_feedback')
-      .then(({ initWorkItemsFeedback }) => {
-        initWorkItemsFeedback();
-      })
-      .catch({});
-  }
 }
 
 export function initShow() {
@@ -57,12 +49,4 @@ export function initShow() {
   import(/* webpackChunkName: 'design_management' */ '~/design_management')
     .then((module) => module.default())
     .catch(() => {});
-
-  if (gon.features.workItemsViewPreference) {
-    import(/* webpackChunkName: 'work_items_feedback' */ '~/work_items_feedback')
-      .then(({ initWorkItemsFeedback }) => {
-        initWorkItemsFeedback();
-      })
-      .catch({});
-  }
 }

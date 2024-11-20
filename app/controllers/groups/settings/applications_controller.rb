@@ -35,8 +35,7 @@ module Groups
 
       def update
         if @application.update(application_params)
-          redirect_to group_settings_application_path(@group, @application),
-            notice: _('Application was successfully updated.')
+          redirect_to group_settings_application_path(@group, @application), notice: _('Application was successfully updated.')
         else
           render :edit
         end
@@ -54,8 +53,7 @@ module Groups
 
       def destroy
         @application.destroy
-        redirect_to group_settings_applications_url(@group), status: :found,
-          notice: _('Application was successfully destroyed.')
+        redirect_to group_settings_applications_url(@group), status: :found, notice: _('Application was successfully destroyed.')
       end
 
       private

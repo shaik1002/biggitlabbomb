@@ -1,6 +1,7 @@
 import { GlTokenSelector } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import { nextTick } from 'vue';
-import { mountExtended } from 'helpers/vue_test_utils_helper';
+import { stubComponent } from 'helpers/stub_component';
 import waitForPromises from 'helpers/wait_for_promises';
 import * as UserApi from '~/api/user_api';
 import MembersTokenSelect from '~/invite_members/components/members_token_select.vue';
@@ -14,11 +15,8 @@ const user2 = { id: 2, name: 'Jane Doe', username: 'two_2', avatar_url: '' };
 const allUsers = [user1, user2];
 const handleEnterSpy = jest.fn();
 
-/** @type {import('helpers/vue_test_utils_helper').ExtendedWrapper} */
-let wrapper;
-
-const createComponent = ({ props = {}, glFeatures = {} } = {}) => {
-  wrapper = mountExtended(MembersTokenSelect, {
+const createComponent = (props = {}, glFeatures = {}) => {
+  return shallowMount(MembersTokenSelect, {
     propsData: {
       ariaLabelledby: label,
       invalidMembers: {},
@@ -26,18 +24,25 @@ const createComponent = ({ props = {}, glFeatures = {} } = {}) => {
       ...props,
     },
     provide: { glFeatures },
+    stubs: {
+      GlTokenSelector: stubComponent(GlTokenSelector, {
+        methods: {
+          handleEnter: handleEnterSpy,
+        },
+      }),
+    },
   });
 };
 
-beforeEach(() => {
-  createComponent();
-});
-
 describe('MembersTokenSelect', () => {
+  let wrapper;
+
   const findTokenSelector = () => wrapper.findComponent(GlTokenSelector);
 
   describe('rendering the token-selector component', () => {
     it('renders with the correct props', () => {
+      wrapper = createComponent();
+
       const expectedProps = {
         ariaLabelledby: label,
         placeholder,
@@ -52,6 +57,8 @@ describe('MembersTokenSelect', () => {
       const badToken = { ...user1, class: INVALID_TOKEN_BACKGROUND };
       const goodToken = { ...user2, class: VALID_TOKEN_BACKGROUND };
 
+      wrapper = createComponent();
+
       findTokenSelector().vm.$emit('input', [user1, user2]);
 
       await waitForPromises();
@@ -65,6 +72,7 @@ describe('MembersTokenSelect', () => {
 
     it('does not change class when invalid members are cleared', async () => {
       // arrange - invalidMembers is non-empty and then tokens are added
+      wrapper = createComponent();
       await wrapper.setProps({ invalidMembers: { one_1: 'bad stuff' } });
       findTokenSelector().vm.$emit('input', [user1, user2]);
       await waitForPromises();
@@ -77,22 +85,10 @@ describe('MembersTokenSelect', () => {
     });
   });
 
-  describe('when there are users with warning', () => {
-    it('shows warning token selector', async () => {
-      createComponent({ props: { usersWithWarning: { [user1.username]: 'warning message' } } });
-      findTokenSelector().vm.$emit('input', [user1]);
-      await waitForPromises();
-
-      const warningMemberIcon = wrapper.findByTestId(`warning-icon-${user1.id}`);
-
-      expect(warningMemberIcon.props('name')).toBe('warning');
-    });
-  });
-
   describe('users', () => {
     beforeEach(() => {
       jest.spyOn(UserApi, 'getUsers').mockResolvedValue({ data: allUsers });
-      createComponent();
+      wrapper = createComponent();
     });
 
     describe('when input is manually focused', () => {
@@ -174,8 +170,6 @@ describe('MembersTokenSelect', () => {
       });
 
       it('allows tab to function as enter', () => {
-        tokenSelector.vm.handleEnter = handleEnterSpy;
-
         tokenSelector.vm.$emit('text-input', 'username');
 
         tokenSelector.vm.$emit('keydown', new KeyboardEvent('keydown', { key: 'Tab' }));
@@ -212,6 +206,8 @@ describe('MembersTokenSelect', () => {
 
   describe('when text input is blurred', () => {
     it('clears text input', async () => {
+      wrapper = createComponent();
+
       const tokenSelector = findTokenSelector();
 
       tokenSelector.vm.$emit('blur');
@@ -229,9 +225,7 @@ describe('MembersTokenSelect', () => {
     beforeEach(() => {
       jest.spyOn(UserApi, 'getUsers').mockResolvedValue({ data: allUsers });
 
-      createComponent({
-        props: { filterId: samlProviderId, usersFilter: 'saml_provider_id' },
-      });
+      wrapper = createComponent({ filterId: samlProviderId, usersFilter: 'saml_provider_id' });
 
       findTokenSelector().vm.$emit('text-input', searchParam);
     });

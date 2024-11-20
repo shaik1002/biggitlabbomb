@@ -119,10 +119,10 @@ MyModel.bulk_insert!(records, skip_duplicates: true)
 ### Requirements for safe bulk insertions
 
 Large parts of ActiveRecord's persistence API are built around the notion of callbacks. Many
-of these callbacks fire in response to model lifecycle events such as `save` or `create`.
+of these callbacks fire in response to model life cycle events such as `save` or `create`.
 These callbacks cannot be used with bulk insertions, since they are meant to be called for
 every instance that is saved or created. Since these events do not fire when
-records are inserted in bulk, we prevent their use.
+records are inserted in bulk, we currently prevent their use.
 
 The specifics around which callbacks are explicitly allowed are defined in
 [`BulkInsertSafe`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/app/models/concerns/bulk_insert_safe.rb).
