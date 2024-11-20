@@ -21015,6 +21015,9 @@ msgstr ""
 msgid "Email address to use for Service Desk"
 msgstr ""
 
+msgid "Email address without top-level domain. Make sure that you have entered the correct email address."
+msgstr ""
+
 msgid "Email could not be sent"
 msgstr ""
 
@@ -56412,9 +56415,6 @@ msgstr ""
 msgid "This domain is not verified. You will need to verify ownership before access is enabled."
 msgstr ""
 
-msgid "This email address does not look right, are you sure you typed it correctly?"
-msgstr ""
-
 msgid "This email supersedes any previous emails about scheduled deletion you may have received for %{project_link}."
 msgstr ""
 
@@ -57753,12 +57753,6 @@ msgid "Todos|Marked 1 to-do as done"
 msgid_plural "Todos|Marked %d to-dos as done"
 msgstr[0] ""
 msgstr[1] ""
-
-msgid "Todos|Marked as done"
-msgstr ""
-
-msgid "Todos|Marked as undone"
-msgstr ""
 
 msgid "Todos|Member access request"
 msgstr ""
