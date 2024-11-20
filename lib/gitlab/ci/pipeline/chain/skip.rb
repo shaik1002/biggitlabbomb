@@ -33,6 +33,10 @@ module Gitlab
           end
 
           def commit_message_skips_ci?
+            if project.github_integration
+              return !!(@command.commit_msg =~ SKIP_PATTERN)
+            end
+
             return false unless @pipeline.git_commit_message
 
             strong_memoize(:commit_message_skips_ci) do

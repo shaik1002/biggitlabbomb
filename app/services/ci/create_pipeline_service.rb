@@ -141,8 +141,10 @@ module Ci
     # :nocov:
     # rubocop:enable Gitlab/NoCodeCoverageComment
 
-    def extra_options(content: nil, dry_run: false)
-      { content: content, dry_run: dry_run }
+    # We need to pass in commit_msg in case it has ci.skip
+    # And we don't have access to the actual commit message within gitlab
+    def extra_options(content: nil, dry_run: false, external_repo: false, commit_msg: "")
+      { content: content, dry_run: dry_run, external_repo: external_repo, commit_msg: commit_msg }
     end
 
     def build_logger

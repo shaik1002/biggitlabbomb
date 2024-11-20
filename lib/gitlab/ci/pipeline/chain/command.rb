@@ -11,6 +11,7 @@ module Gitlab
           :ignore_skip_ci, :save_incompleted,
           :seeds_block, :variables_attributes, :push_options,
           :chat_data, :allow_mirror_update, :bridge, :content, :dry_run, :logger, :pipeline_policy_context,
+          :external_repo, :commit_msg,
           # These attributes are set by Chains during processing:
           :config_content, :yaml_processor_result, :workflow_rules_result, :pipeline_seed,
           :pipeline_config, :partition_id,
@@ -49,6 +50,9 @@ module Gitlab
 
           def sha
             strong_memoize(:sha) do
+              if project.github_integration
+                return checkout_sha
+              end
               project.commit(origin_sha || origin_ref).try(:id)
             end
           end

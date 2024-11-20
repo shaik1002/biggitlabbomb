@@ -49,6 +49,12 @@ module Gitlab
 
         def file_in_repository?
           return unless project
+
+          if project.github_integration
+            return project.repository.blob_at_branch(ref, ci_config_path).present? ||
+                project.repository.blob_at_branch(project.repository.root_ref, ci_config_path).present?
+          end
+
           return unless sha
 
           project.repository.blob_at(sha, ci_config_path).present?

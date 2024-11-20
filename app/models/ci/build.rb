@@ -667,7 +667,18 @@ module Ci
       end
     end
 
+    # We could make a new attribute for the runner like external_repo_url
+    # which would take precendence over regular repo_url
+    # but the following is just because I don't want to touch runner
     def repo_url
+      if project.github_integration.present?
+        auth = "x-access-token:#{project.github_integration.token}@"
+
+        return project.github_integration.repository_url.sub(%r{^https?://}) do |prefix|
+          prefix + auth
+        end
+      end
+
       return unless token
 
       auth = "#{::Gitlab::Auth::CI_JOB_USER}:#{token}@"

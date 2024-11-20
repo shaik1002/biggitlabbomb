@@ -2100,6 +2100,15 @@
   :weight: 4
   :idempotent: false
   :tags: []
+- :name: pipeline_creation:create_github_pipeline
+  :worker_name: GithubPipelineWorker
+  :feature_category: :pipeline_composition
+  :has_external_dependencies: false
+  :urgency: :high
+  :resource_boundary: :cpu
+  :weight: 4
+  :idempotent: false
+  :tags: []
 - :name: pipeline_creation:merge_requests_create_pipeline
   :worker_name: MergeRequests::CreatePipelineWorker
   :feature_category: :pipeline_composition

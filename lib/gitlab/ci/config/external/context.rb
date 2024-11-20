@@ -12,7 +12,7 @@ module Gitlab
           include ::Gitlab::Utils::StrongMemoize
 
           attr_reader :project, :sha, :user, :parent_pipeline, :variables, :pipeline_config, :parallel_requests,
-            :pipeline, :expandset, :execution_deadline, :logger, :max_includes, :max_total_yaml_size_bytes
+            :pipeline, :expandset, :execution_deadline, :logger, :max_includes, :max_total_yaml_size_bytes, :source_code_sha
 
           attr_accessor :total_file_size_in_bytes
 
@@ -23,7 +23,7 @@ module Gitlab
 
           def initialize(
             project: nil, pipeline: nil, sha: nil, user: nil, parent_pipeline: nil, variables: nil,
-            pipeline_config: nil, logger: nil
+            pipeline_config: nil, logger: nil, source_code_sha: nil
           )
             @project = project
             @pipeline = pipeline
@@ -32,6 +32,7 @@ module Gitlab
             @parent_pipeline = parent_pipeline
             @variables = variables || Ci::Variables::Collection.new
             @pipeline_config = pipeline_config
+            @source_code_sha = source_code_sha || @sha
             @expandset = []
             @parallel_requests = []
             @execution_deadline = 0

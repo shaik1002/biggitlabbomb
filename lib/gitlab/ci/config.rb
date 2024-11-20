@@ -19,15 +19,16 @@ module Gitlab
         Config::Yaml::Tags::TagError
       ].freeze
 
-      attr_reader :root, :context, :source_ref_path, :source, :logger, :inject_edge_stages, :pipeline_policy_context
+      attr_reader :root, :context, :source_ref_path, :source, :logger, :inject_edge_stages, :pipeline_policy_context, :source_code_sha
 
       # rubocop: disable Metrics/ParameterLists
-      def initialize(config, project: nil, pipeline: nil, sha: nil, ref: nil, user: nil, parent_pipeline: nil, source: nil, pipeline_config: nil, logger: nil, inject_edge_stages: true, pipeline_policy_context: nil)
+      def initialize(config, project: nil, pipeline: nil, sha: nil, ref: nil, user: nil, parent_pipeline: nil, source: nil, pipeline_config: nil, logger: nil, inject_edge_stages: true, pipeline_policy_context: nil, source_code_sha: nil)
         @logger = logger || ::Gitlab::Ci::Pipeline::Logger.new(project: project)
         @source_ref_path = pipeline&.source_ref_path
         @project = project
         @inject_edge_stages = inject_edge_stages
         @pipeline_policy_context = pipeline_policy_context
+        @source_code_sha = source_code_sha
 
         @context = self.logger.instrument(:config_build_context, once: true) do
           pipeline ||= ::Ci::Pipeline.new(project: project, sha: sha, ref: ref, user: user, source: source)
@@ -201,6 +202,7 @@ module Gitlab
           parent_pipeline: parent_pipeline,
           variables: build_variables(pipeline: pipeline),
           pipeline_config: pipeline_config,
+          source_code_sha: source_code_sha || sha || find_sha(project),
           logger: logger)
       end
 

@@ -43,7 +43,7 @@ module Gitlab
             private
 
             def yaml_processor_opts
-              {
+              opts = {
                 project: project,
                 pipeline: @pipeline,
                 sha: @pipeline.sha,
@@ -53,6 +53,16 @@ module Gitlab
                 pipeline_config: @command.pipeline_config,
                 logger: logger
               }
+
+              if project.github_integration
+                # Here we see if the branch has a valid gitlab-ci.yml file
+                # and if not, look at the root branch to find it
+                source_code_sha = project.repository.commit(@command.ref)&.sha ||
+                  project.repository.commit(project.repository.root_ref)&.sha
+                opts[:source_code_sha] = source_code_sha
+              end
+
+              opts
             end
 
             def add_warnings_to_pipeline(warnings)

@@ -47,7 +47,11 @@ module Gitlab
             private
 
             def fetch_local_content
-              BatchLoader.for([context.sha, location])
+              # The sha refers to the github sha
+              # source_code_sha refers to the gitlab branch's latest sha
+              # We can't just overwrite the sha because we need it as a source of truth
+              # also it's how we update gitHub back
+              BatchLoader.for([context.source_code_sha, location])
                          .batch(key: context.project) do |locations, loader, args|
                 context.logger.instrument(:config_file_fetch_local_content) do
                   args[:key].repository.blobs_at(locations).each do |blob|
