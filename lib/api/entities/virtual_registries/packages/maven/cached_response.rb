@@ -17,6 +17,7 @@ module API
               :file_md5,
               :file_sha1,
               :size,
+              :downloaded_at,
               :relative_path,
               :upstream_etag,
               :content_type,

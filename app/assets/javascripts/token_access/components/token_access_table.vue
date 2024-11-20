@@ -1,5 +1,5 @@
 <script>
-import { GlButton, GlIcon, GlLink, GlTable, GlLoadingIcon } from '@gitlab/ui';
+import { GlButton, GlIcon, GlLink, GlTableLite } from '@gitlab/ui';
 import { TYPENAME_GROUP } from '~/graphql_shared/constants';
 import ProjectAvatar from '~/vue_shared/components/project_avatar.vue';
 import { s__, __ } from '~/locale';
@@ -22,8 +22,7 @@ export default {
     GlButton,
     GlIcon,
     GlLink,
-    GlTable,
-    GlLoadingIcon,
+    GlTableLite,
     ProjectAvatar,
   },
   inject: {
@@ -41,11 +40,6 @@ export default {
       type: Array,
       required: true,
     },
-    loading: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
   },
   methods: {
     itemType(item) {
@@ -57,10 +51,7 @@ export default {
 </script>
 
 <template>
-  <gl-table :items="items" :fields="$options.fields" :busy="loading" class="gl-mb-0">
-    <template #table-busy>
-      <gl-loading-icon size="md" />
-    </template>
+  <gl-table-lite :items="items" :fields="$options.fields" class="gl-mb-0">
     <template #cell(fullPath)="{ item }">
       <div class="gl-inline-flex gl-items-center">
         <gl-icon
@@ -92,5 +83,5 @@ export default {
         @click="$emit('removeItem', item)"
       />
     </template>
-  </gl-table>
+  </gl-table-lite>
 </template>

@@ -83,13 +83,9 @@ module Autocomplete
       author_id.present? && current_user
     end
 
-    def project_users
-      project.authorized_users.union_with_user(author_id)
-    end
-
     def find_users
       if project
-        project_users
+        project.authorized_users.union_with_user(author_id)
       elsif group
         ::Autocomplete::GroupUsersFinder.new(group: group).execute # rubocop: disable CodeReuse/Finder
       elsif current_user
@@ -116,5 +112,3 @@ module Autocomplete
     end
   end
 end
-
-Autocomplete::UsersFinder.prepend_mod_with('Autocomplete::UsersFinder')

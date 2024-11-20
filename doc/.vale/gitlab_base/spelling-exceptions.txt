@@ -761,7 +761,6 @@ pseudonymizer
 Pulumi
 Puma
 Pumble
-Pylint
 PyPI
 pytest
 Python

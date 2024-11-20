@@ -331,19 +331,34 @@ RSpec.describe 'Merge request > User sees merge widget', :js, feature_category: 
       visit project_merge_request_path(project_only_mwps, merge_request_in_only_mwps_project)
     end
 
-    it 'is not allowed to set auto merge' do
-      # Wait for the `ci_status` and `merge_check` requests
-      wait_for_requests
+    context 'when using merge when pipeline succeeds' do
+      before do
+        stub_feature_flags(merge_when_checks_pass: false)
+      end
 
-      expect(page).to have_selector('.accept-merge-request')
+      it 'is not allowed to merge' do
+        # Wait for the `ci_status` and `merge_check` requests
+        wait_for_requests
+
+        expect(page).not_to have_selector('.accept-merge-request')
+      end
+    end
+
+    context 'when using merge when checks pass' do
+      it 'is not allowed to set auto merge' do
+        # Wait for the `ci_status` and `merge_check` requests
+        wait_for_requests
+
+        expect(page).to have_selector('.accept-merge-request')
+      end
     end
   end
 
-  context 'view merge request with auto merge enabled but automatically merge fails' do
+  context 'view merge request with MWPS enabled but automatically merge fails' do
     before do
       merge_request.update!(
         auto_merge_enabled: true,
-        auto_merge_strategy: AutoMergeService::STRATEGY_MERGE_WHEN_CHECKS_PASS,
+        auto_merge_strategy: AutoMergeService::STRATEGY_MERGE_WHEN_PIPELINE_SUCCEEDS,
         merge_user: merge_request.author,
         merge_error: 'Something went wrong'
       )
@@ -361,7 +376,7 @@ RSpec.describe 'Merge request > User sees merge widget', :js, feature_category: 
     end
   end
 
-  context 'view merge request with auto merge enabled but automatically merge fails' do
+  context 'view merge request with MWPS enabled but automatically merge fails' do
     before do
       merge_request.update!(
         merge_when_pipeline_succeeds: true,

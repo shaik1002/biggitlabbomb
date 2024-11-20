@@ -1,5 +1,8 @@
 #import "./flow_metric_item.fragment.graphql"
 
+# TODO: include/exclude fields based on permissions
+# TODO: Extend the valuestreamsmetrics component in EE to avoid permissions?
+# TODO: Use the returned metadata for all the flowmetrics, override built in
 query flowMetricsQuery($fullPath: ID!, $startDate: Time!, $endDate: Time!, $labelNames: [String!]) {
   project(fullPath: $fullPath) {
     id

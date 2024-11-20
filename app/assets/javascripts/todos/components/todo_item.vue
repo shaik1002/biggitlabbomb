@@ -1,6 +1,6 @@
 <script>
 import { GlLink } from '@gitlab/ui';
-import { INSTRUMENT_TODO_ITEM_FOLLOW, TODO_STATE_DONE } from '../constants';
+import { INSTRUMENT_TODO_ITEM_FOLLOW, TODO_STATE_DONE, TODO_STATE_PENDING } from '../constants';
 import TodoItemTitle from './todo_item_title.vue';
 import TodoItemBody from './todo_item_body.vue';
 import TodoItemTimestamp from './todo_item_timestamp.vue';
@@ -15,7 +15,6 @@ export default {
     TodoItemTimestamp,
     TodoItemActions,
   },
-  inject: ['currentTab'],
   props: {
     currentUserId: {
       type: String,
@@ -29,6 +28,9 @@ export default {
   computed: {
     isDone() {
       return this.todo.state === TODO_STATE_DONE;
+    },
+    isPending() {
+      return this.todo.state === TODO_STATE_PENDING;
     },
     targetUrl() {
       return this.todo.targetUrl;
@@ -44,7 +46,6 @@ export default {
   <li
     class="gl-border-t gl-border-b gl-relative -gl-mt-px gl-block gl-px-5 gl-py-3 hover:gl-z-1 hover:gl-cursor-pointer hover:gl-border-blue-200 hover:gl-bg-blue-50"
     :data-testid="`todo-item-${todo.id}`"
-    :class="{ 'gl-bg-subtle': isDone }"
   >
     <gl-link
       :href="targetUrl"
