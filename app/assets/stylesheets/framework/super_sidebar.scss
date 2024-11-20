@@ -342,7 +342,10 @@ $command-palette-spacing: px-to-rem(14px);
      */
     .brand-logo,
     .user-bar-button {
-      @include transition(background-color, border-color, color, box-shadow);
+      transition: color $gl-transition-duration-medium $gl-easing-out-cubic,
+                  background-color $gl-transition-duration-medium $gl-easing-out-cubic,
+                  border-color $gl-transition-duration-medium $gl-easing-out-cubic,
+                  box-shadow $gl-transition-duration-medium $gl-easing-out-cubic;
     }
 
     .btn-default-tertiary {
