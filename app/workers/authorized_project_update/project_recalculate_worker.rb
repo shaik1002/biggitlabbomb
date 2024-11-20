@@ -3,9 +3,9 @@
 module AuthorizedProjectUpdate
   class ProjectRecalculateWorker
     include ApplicationWorker
-
-    data_consistency :always # rubocop:disable SidekiqLoadBalancing/WorkerDataConsistency -- will change to sticky with feature-flag
     include Gitlab::ExclusiveLeaseHelpers
+
+    data_consistency :sticky, feature_flag: :change_data_consistency_sticky_for_permissions_workers
 
     feature_category :permissions
     urgency :high

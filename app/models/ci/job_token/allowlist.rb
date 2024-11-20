@@ -8,7 +8,7 @@ module Ci
       end
 
       def includes_project?(target_project)
-        source_links
+        project_links
           .with_target(target_project)
           .exists?
       end
@@ -53,13 +53,7 @@ module Ci
         )
       end
 
-      private
-
-      def add_policies_to_ci_job_token_enabled
-        Feature.enabled?(:add_policies_to_ci_job_token, @source_project)
-      end
-
-      def source_links
+      def project_links
         Ci::JobToken::ProjectScopeLink
           .with_source(@source_project)
           .where(direction: @direction)
@@ -70,8 +64,14 @@ module Ci
           .with_source(@source_project)
       end
 
+      private
+
+      def add_policies_to_ci_job_token_enabled
+        Feature.enabled?(:add_policies_to_ci_job_token, @source_project)
+      end
+
       def target_project_ids
-        source_links
+        project_links
           # pluck needed to avoid ci and main db join
           .pluck(:target_project_id)
       end

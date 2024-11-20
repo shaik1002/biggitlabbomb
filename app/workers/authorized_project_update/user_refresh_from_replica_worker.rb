@@ -4,10 +4,11 @@ module AuthorizedProjectUpdate
   class UserRefreshFromReplicaWorker
     include ApplicationWorker
 
+    data_consistency :sticky, feature_flag: :change_data_consistency_sticky_for_permissions_workers
+
     sidekiq_options retry: 3
     feature_category :permissions
     urgency :low
-    data_consistency :always # rubocop:disable SidekiqLoadBalancing/WorkerDataConsistency -- will change to sticky with feature-flag
     queue_namespace :authorized_project_update
 
     idempotent!
