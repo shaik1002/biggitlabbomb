@@ -10,10 +10,14 @@ module API
         urgency :low
 
         helpers do
-          def find_settings
+          def find_settings(uuid = nil)
             return [DEFAULT_MACHINE] if params[:resource_name] == DEFAULT_MACHINE[:setting_type]
 
-            SettingsFinder.new(current_user, [params[:resource_name]]).execute
+            settings_finder = SettingsFinder.new(current_user, [params[:resource_name]], params[:settings_context_hash])
+
+            return settings_finder.execute(uuid) if uuid.present?
+
+            settings_finder.execute
           end
         end
 
@@ -36,7 +40,7 @@ module API
               tags %w[vscode]
             end
             get '/v1/manifest' do
-              settings = SettingsFinder.new(current_user, SETTINGS_TYPES).execute
+              settings = SettingsFinder.new(current_user, SETTINGS_TYPES, params[:settings_context_hash]).execute
               presenter = VsCodeManifestPresenter.new(settings)
 
               present presenter, with: Entities::VsCodeManifest
@@ -56,21 +60,28 @@ module API
             params do
               requires :resource_name, type: String, desc: 'Name of the resource such as settings',
                 values: SETTINGS_TYPES
-              requires :id, type: String, desc: 'ID of the resource to retrieve'
+              requires :id, type: String, desc: 'ID of the resource to retrieve.'
             end
             get '/v1/resource/:resource_name/:id' do
-              settings = find_settings
+              is_extensions_resource = params[:resource_name] == 'extensions'
+              is_uuid = %w[latest 0].exclude?(params[:id])
+
+              # Generally, this endpoint does not use the uuid in the :id
+              # paramater because the first iteration of this API only
+              # supports storing a single record of a given setting_type.
+              # This is not the case for extensions setting_type,
+              # where we store multiple records by unique settings_context_hash.
+              # We want to support queries by uuid for this case so that the Settings Sync client
+              # can gracefully handle switching between different settings contexts.
+              uuid = is_extensions_resource && params[:settings_context_hash].present? && is_uuid ? params[:id] : nil
+
+              settings = find_settings(uuid)
 
               if settings.blank?
                 status :no_content
                 header :etag, NO_CONTENT_ETAG
                 body false
               else
-                # This endpoint does not use the :id parameter
-                # because the first iteration of this API only
-                # supports storing a single record of a given setting_type.
-                # We can rely on obtaining the first record of the setting
-                # result.
                 setting = settings.first
                 header :etag, setting[:uuid]
                 presenter = VsCodeSettingPresenter.new setting
@@ -108,11 +119,13 @@ module API
                 values: SETTINGS_TYPES
             end
             post '/v1/resource/:resource_name' do
-              response = CreateOrUpdateService.new(current_user: current_user, params: {
-                content: params[:content],
-                version: params[:version],
-                setting_type: params[:resource_name]
-              }).execute
+              response = CreateOrUpdateService.new(current_user: current_user,
+                settings_context_hash: params[:settings_context_hash],
+                params: {
+                  content: params[:content],
+                  version: params[:version],
+                  setting_type: params[:resource_name]
+                }).execute
 
               if response.success?
                 header 'Access-Control-Expose-Headers', 'etag'

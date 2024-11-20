@@ -54,6 +54,33 @@ RSpec.describe VsCode::Settings::SettingsFinder, feature_category: :web_ide do
           result = described_class.new(user, %w[settings globalState]).execute
           expect(result.length).to eq(2)
         end
+
+        it 'returns correct extensions settings when settings_context_hash is passed' do
+          settings_context_hash = '1234'
+          create(:vscode_setting, user: user, setting_type: 'extensions', settings_context_hash: settings_context_hash)
+          create(:vscode_setting, user: user, setting_type: 'extensions', settings_context_hash: '5678')
+          result = described_class.new(user, ['extensions'], settings_context_hash).execute
+          expect(result.length).to eq(1)
+          expect(result[0].user_id).to eq(user.id)
+          expect(result[0].setting_type).to eq('extensions')
+          expect(result[0].settings_context_hash).to eq(settings_context_hash)
+        end
+      end
+
+      context 'when uuid is passed' do
+        it 'returns the record with the given uuid' do
+          settings_context_hash = 'some_hash'
+          settings = [
+            create(:vscode_setting, user: user, setting_type: 'extensions'),
+            create(:vscode_setting, user: user, setting_type: 'extensions',
+              settings_context_hash: settings_context_hash)
+          ]
+
+          uuid = settings[0].uuid
+          result = described_class.new(user, ['extensions'], settings_context_hash).execute(uuid)
+          expect(result.length).to eq(1)
+          expect(result[0].uuid).to eq(uuid)
+        end
       end
     end
   end

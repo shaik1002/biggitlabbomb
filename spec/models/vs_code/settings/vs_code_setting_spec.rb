@@ -26,14 +26,50 @@ RSpec.describe VsCode::Settings::VsCodeSetting, feature_category: :web_ide do
     it { is_expected.to validate_inclusion_of(:setting_type).in_array(VsCode::Settings::SETTINGS_TYPES) }
   end
 
-  describe '.by_setting_type' do
-    subject { described_class.by_setting_type('settings') }
+  describe 'settings context hash validation' do
+    it { is_expected.to validate_length_of(:settings_context_hash).is_at_most(255) }
 
-    it { is_expected.to contain_exactly(setting) }
+    context 'when setting type is not extensions' do
+      subject { build(:vscode_setting, setting_type: 'settings') }
+
+      it { is_expected.to allow_value(nil).for(:settings_context_hash) }
+      it { is_expected.not_to allow_value('some_value').for(:settings_context_hash) }
+    end
+
+    context 'when setting type is extensions' do
+      subject { build(:vscode_setting, setting_type: 'extensions') }
+
+      it { is_expected.to allow_value(nil).for(:settings_context_hash) }
+      it { is_expected.to allow_value('some_value').for(:settings_context_hash) }
+    end
+  end
+
+  describe '.by_setting_types' do
+    context 'when setting type is not extensions' do
+      subject { described_class.by_setting_types(['settings']) }
+
+      it { is_expected.to contain_exactly(setting) }
+    end
+
+    context 'when setting type is extensions' do
+      let_it_be(:extension) { create(:vscode_setting, setting_type: 'extensions', settings_context_hash: nil) }
+      let_it_be(:extension_a) { create(:vscode_setting, setting_type: 'extensions', settings_context_hash: 'a') }
+      let_it_be(:extension_b) { create(:vscode_setting, setting_type: 'extensions', settings_context_hash: 'b') }
+
+      subject { described_class.by_setting_types(['extensions'], 'a') }
+
+      it { is_expected.to contain_exactly(extension_a) }
+    end
   end
 
   describe '.by_user' do
     subject { described_class.by_user(user) }
+
+    it { is_expected.to contain_exactly(setting) }
+  end
+
+  describe '.by_uuid' do
+    subject { described_class.by_uuid(setting.uuid) }
 
     it { is_expected.to contain_exactly(setting) }
   end
