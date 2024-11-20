@@ -213,15 +213,23 @@ class Admin::UsersController < Admin::ApplicationController
     opts = user_params.merge(reset_password: true, skip_confirmation: true)
     opts[:organization_id] ||= Current.organization&.id
 
-    @user = Users::CreateService.new(current_user, opts).execute
+    response = Users::CreateService.new(current_user, opts).execute
 
     respond_to do |format|
-      if @user.persisted?
-        format.html { redirect_to [:admin, @user], notice: _('User was successfully created.') }
-        format.json { render json: @user, status: :created, location: @user }
+      if response[:status] == :error
+        format.html { redirect_to admin_users_path, alert: response[:message] }
+        format.json { render json: { error: response[:message] } }
       else
-        format.html { render "new" }
-        format.json { render json: @user.errors, status: :unprocessable_entity }
+
+        @user = response
+
+        if @user.persisted?
+          format.html { redirect_to [:admin, @user], notice: _('User was successfully created.') }
+          format.json { render json: @user, status: :created, location: @user }
+        else
+          format.html { render "new" }
+          format.json { render json: @user.errors, status: :unprocessable_entity }
+        end
       end
     end
   end
@@ -410,7 +418,7 @@ class Admin::UsersController < Admin::ApplicationController
     Gitlab::AppLogger.info(format(_("User %{current_user_username} has started impersonating %{username}"), current_user_username: current_user.username, username: user.username))
   end
 
-  # method overriden in EE
+  # method overridden in EE
   def unlock_user
     update_user(&:unlock_access!)
   end
@@ -422,7 +430,7 @@ class Admin::UsersController < Admin::ApplicationController
     @impersonation_error_text = @can_impersonate ? nil : helpers.impersonation_error_text(user, impersonation_in_progress?)
   end
 
-  # method overriden in EE
+  # method overridden in EE
   def prepare_user_for_update(user)
     user.skip_reconfirmation!
     user.send_only_admin_changed_your_password_notification! if admin_making_changes_for_another_user?
