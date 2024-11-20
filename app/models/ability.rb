@@ -76,6 +76,10 @@ class Ability
         subject = :global
       end
 
+      if user.is_a?(::Gitlab::Auth::Identity)
+        user = user.user
+      end
+
       policy = policy_for(user, subject, **opts.slice(:cache))
 
       before_check(policy, ability.to_sym, user, subject, opts)

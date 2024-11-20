@@ -15,10 +15,16 @@ module Gitlab
           end
         end
 
-        def limit_user!(user = nil)
-          user ||= yield if block_given?
-          limit_user_id!(user.id) unless user.nil?
-          user
+        def limit_user!(identity = nil)
+          identity ||= yield if block_given?
+
+          if identity.is_a?(::Gitlab::Auth::Identity)
+            limit_user_id!(identity.id) unless identity.user.nil?
+          else
+            limit_user_id!(identity.id) unless identity.nil?
+          end
+
+          identity
         end
 
         def config

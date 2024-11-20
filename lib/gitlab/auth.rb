@@ -108,6 +108,8 @@ module Gitlab
       # different mechanisms, as in `.find_for_git_client`. This may lead to
       # unwanted access locks when the value provided for `password` was actually
       # a PAT, deploy token, etc.
+      # rubocop:disable Metrics/PerceivedComplexity
+      # rubocop:disable Metrics/CyclomaticComplexity
       def find_with_user_password(login, password, increment_failed_attempts: false)
         # Avoid resource intensive checks if login credentials are not provided
         return unless login.present? && password.present?
@@ -117,7 +119,7 @@ module Gitlab
         return unless authenticate_using_internal_or_ldap_password?
 
         Gitlab::Auth::UniqueIpsLimiter.limit_user! do
-          user = User.find_by_login(login)
+          user = ::User.find_by_login(login)
 
           break if user && !user.can_log_in_with_non_expired_password?
 
@@ -146,9 +148,15 @@ module Gitlab
 
           user_auth_attempt!(user, success: !!authenticated_user) if increment_failed_attempts
 
-          authenticated_user
+          if ::Feature.enabled?(:api_composite_identity, authenticated_user)
+            ::Gitlab::Auth::User.fabricate(authenticated_user)
+          else
+            authenticated_user
+          end
         end
       end
+      # rubocop:enable Metrics/CyclomaticComplexity
+      # rubocop:enable Metrics/PerceivedComplexity
 
       private
 
@@ -321,9 +329,9 @@ module Gitlab
 
         actor =
           if deploy_key_matches
-            DeployKey.find(deploy_key_matches[1])
+            ::DeployKey.find(deploy_key_matches[1])
           else
-            User.find_by_login(login)
+            ::User.find_by_login(login)
           end
 
         return unless actor
@@ -435,7 +443,7 @@ module Gitlab
 
       def available_scopes_for_resource(resource)
         case resource
-        when User
+        when ::User
           scopes = non_admin_available_scopes
 
           if resource.admin? # rubocop: disable Cop/UserAdmin

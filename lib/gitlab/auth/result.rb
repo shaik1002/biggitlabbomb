@@ -34,7 +34,7 @@ module Gitlab
       end
 
       def auth_user
-        actor.is_a?(User) ? actor : nil
+        actor.is_a?(::User) ? actor : nil
       end
       alias_method :user, :auth_user
 

@@ -6,7 +6,11 @@ module Namespaces
 
     condition(:can_create_personal_project, scope: :user) { @user.can_create_project? }
     condition(:bot_user_namespace) { @subject.bot_user_namespace? }
-    condition(:owner) { @subject.owner == @user }
+    condition(:owner) do
+      @subject.owner == @user.user if @user.is_a?(::Gitlab::Auth::Identity)
+
+      @subject.owner == @user
+    end
 
     rule { owner | admin }.policy do
       enable :owner_access
