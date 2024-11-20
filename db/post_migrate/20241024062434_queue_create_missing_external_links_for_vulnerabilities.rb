@@ -11,11 +11,11 @@ class QueueCreateMissingExternalLinksForVulnerabilities < Gitlab::Database::Migr
 
   def up
     # no-op
-    # will be fixed with https://gitlab.com/gitlab-org/gitlab/-/merge_requests/172843
+    # fixed with https://gitlab.com/gitlab-org/gitlab/-/merge_requests/172843
   end
 
   def down
     # no-op
-    # will be fixed with https://gitlab.com/gitlab-org/gitlab/-/merge_requests/172843
+    # fixed with https://gitlab.com/gitlab-org/gitlab/-/merge_requests/172843
   end
 end

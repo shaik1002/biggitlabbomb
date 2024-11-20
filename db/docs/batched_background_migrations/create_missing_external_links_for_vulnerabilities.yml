@@ -1,6 +1,7 @@
 ---
 migration_job_name: CreateMissingExternalLinksForVulnerabilities
-description: Creates missing ExternalIssueLinks for Vulnerabilities
+description: Creates missing ExternalIssueLinks for Vulnerabilities.
+  requeued in RequeueCreateMissingExternalLinksForVulnerabilities
 feature_category: vulnerability_management
 introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/167564
 milestone: '17.6'
