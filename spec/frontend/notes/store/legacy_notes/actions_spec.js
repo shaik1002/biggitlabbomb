@@ -853,10 +853,7 @@ describe('Actions Notes Store', () => {
 
       it('dispatches clearDrafts is command names contains submit_review', async () => {
         const spy = jest.spyOn(useBatchComments(), 'clearDrafts');
-        const response = {
-          quick_actions_status: { command_names: ['submit_review'] },
-          valid: true,
-        };
+        const response = { command_names: ['submit_review'], valid: true };
         axiosMock.onAny().reply(HTTP_STATUS_OK, response);
         await store.saveNote(payload);
 

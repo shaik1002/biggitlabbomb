@@ -93,7 +93,7 @@ export default {
           <work-item-type-icon
             :show-tooltip-on-hover="true"
             class="gl-mr-1 gl-cursor-help"
-            icon-variant="subtle"
+            color-class="gl-text-secondary"
             :work-item-type="workItem.workItemType.name"
           />
           <gl-link

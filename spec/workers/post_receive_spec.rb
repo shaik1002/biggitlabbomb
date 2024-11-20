@@ -77,9 +77,8 @@ RSpec.describe PostReceive, :clean_gitlab_redis_shared_state, feature_category: 
       end
 
       it 'schedules a cache update for commit count and size' do
-        expect(ProjectCacheWorker)
-          .to receive(:perform_async)
-          .with(empty_project.id, [], %w[repository_size commit_count], true)
+        expect(ProjectCacheWorker).to receive(:perform_async)
+                                        .with(empty_project.id, [], [:repository_size, :commit_count], true)
 
         perform
       end
@@ -173,9 +172,8 @@ RSpec.describe PostReceive, :clean_gitlab_redis_shared_state, feature_category: 
         end
 
         it 'schedules a cache update for repository size only' do
-          expect(ProjectCacheWorker)
-            .to receive(:perform_async)
-            .with(project.id, [], %w[repository_size], true)
+          expect(ProjectCacheWorker).to receive(:perform_async)
+                                          .with(project.id, [], [:repository_size], true)
 
           perform
         end
@@ -192,9 +190,8 @@ RSpec.describe PostReceive, :clean_gitlab_redis_shared_state, feature_category: 
           end
 
           it 'schedules a cache update for commit count and size' do
-            expect(ProjectCacheWorker)
-              .to receive(:perform_async)
-              .with(project.id, [], %w[repository_size commit_count], true)
+            expect(ProjectCacheWorker).to receive(:perform_async)
+                                            .with(project.id, [], [:repository_size, :commit_count], true)
 
             perform
           end
@@ -235,9 +232,8 @@ RSpec.describe PostReceive, :clean_gitlab_redis_shared_state, feature_category: 
         end
 
         it 'schedules a single ProjectCacheWorker update' do
-          expect(ProjectCacheWorker)
-            .to receive(:perform_async)
-            .with(project.id, [], %w[repository_size], true)
+          expect(ProjectCacheWorker).to receive(:perform_async)
+                                          .with(project.id, [], [:repository_size], true)
 
           perform
         end

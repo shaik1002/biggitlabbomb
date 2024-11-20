@@ -3,7 +3,6 @@
 require 'spec_helper'
 
 RSpec.describe Organizations::OrganizationAssociationCounter, feature_category: :cell do
-  let_it_be(:other_organization) { create(:organization) }
   let_it_be(:organization) { create(:organization) }
   let_it_be(:owner) { create(:organization_user, :owner, organization: organization) }
 
@@ -15,9 +14,9 @@ RSpec.describe Organizations::OrganizationAssociationCounter, feature_category: 
     create_list(:project, 3, :small_repo, organization: organization)
     create_list(:group, 3, organization: organization)
 
-    create(:organization_user, organization: other_organization)
-    create(:project, :small_repo, organization: other_organization)
-    create(:group, organization: other_organization)
+    create(:organization_user)
+    create(:project, :small_repo)
+    create(:group)
   end
 
   subject(:result) { finder.execute }

@@ -202,7 +202,7 @@ describe('Settings Panel', () => {
     it('should set the visibility level description based upon the selected visibility level', () => {
       wrapper = mountComponent({ stubs: { GlSprintf } });
 
-      findProjectVisibilityLevelInput().vm.$emit('input', VISIBILITY_LEVEL_INTERNAL_INTEGER);
+      findProjectVisibilityLevelInput().setValue(VISIBILITY_LEVEL_INTERNAL_INTEGER);
 
       expect(findProjectVisibilitySettings().text()).toContain(
         visibilityLevelDescriptions[VISIBILITY_LEVEL_INTERNAL_INTEGER],
@@ -232,7 +232,7 @@ describe('Settings Panel', () => {
 
       expect(findConfirmDangerButton().exists()).toBe(false);
 
-      await findProjectVisibilityLevelInput().vm.$emit('input', VISIBILITY_LEVEL_PRIVATE_INTEGER);
+      await findProjectVisibilityLevelInput().setValue(VISIBILITY_LEVEL_PRIVATE_INTEGER);
 
       expect(findConfirmDangerButton().exists()).toBe(false);
     });
@@ -248,7 +248,7 @@ describe('Settings Panel', () => {
       it('will render the confirmation dialog if the visibility is reduced', async () => {
         expect(findConfirmDangerButton().exists()).toBe(false);
 
-        await findProjectVisibilityLevelInput().vm.$emit('input', VISIBILITY_LEVEL_PRIVATE_INTEGER);
+        await findProjectVisibilityLevelInput().setValue(VISIBILITY_LEVEL_PRIVATE_INTEGER);
 
         expect(findConfirmDangerButton().exists()).toBe(true);
       });
@@ -256,7 +256,7 @@ describe('Settings Panel', () => {
       it('emits the `confirm` event when the reduce visibility warning is confirmed', async () => {
         expect(wrapper.emitted('confirm')).toBeUndefined();
 
-        await findProjectVisibilityLevelInput().vm.$emit('input', VISIBILITY_LEVEL_PRIVATE_INTEGER);
+        await findProjectVisibilityLevelInput().setValue(VISIBILITY_LEVEL_PRIVATE_INTEGER);
         await findConfirmDangerButton().vm.$emit('confirm');
 
         expect(wrapper.emitted('confirm')).toHaveLength(1);
@@ -626,7 +626,7 @@ describe('Settings Panel', () => {
           },
         });
 
-        await findProjectVisibilityLevelInput().vm.$emit('input', newProjectVisibilityLevel);
+        await findProjectVisibilityLevelInput().setValue(newProjectVisibilityLevel);
 
         expect(wrapper.vm.packageRegistryAccessLevel).toBe(expectedAccessLevel);
       },

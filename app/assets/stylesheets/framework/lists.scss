@@ -162,7 +162,7 @@ ul.content-list {
   }
 
   .badge-secondary {
-    @apply gl-text-subtle;
+    color: $gl-text-color-secondary;
   }
 }
 

@@ -30,17 +30,19 @@
 
 .detail-page-description {
   small {
-    @apply gl-text-subtle;
+    color: var(--gray-500, $gray-500);
   }
 }
 
 .edited-text {
-  @apply gl-text-subtle gl-text-sm;
+  color: var(--gray-500, $gray-500);
   display: block;
   margin: 16px 0 0;
+  font-size: $gl-font-size-small;
 
   .author-link {
-    @apply gl-text-default gl-text-sm;
+    color: var(--gray-700, $gray-700);
+    font-size: $gl-font-size-small;
   }
 }
 

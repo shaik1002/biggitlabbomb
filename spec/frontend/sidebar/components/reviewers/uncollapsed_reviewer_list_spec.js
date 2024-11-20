@@ -226,14 +226,14 @@ describe('UncollapsedReviewerList component', () => {
 
   describe('reviewer state icons', () => {
     it.each`
-      reviewState            | approved | icon               | iconClass
-      ${'UNREVIEWED'}        | ${false} | ${'dash-circle'}   | ${'gl-fill-icon-default'}
-      ${'REVIEWED'}          | ${true}  | ${'check-circle'}  | ${'gl-fill-icon-success'}
-      ${'REVIEWED'}          | ${false} | ${'comment-lines'} | ${'gl-fill-icon-info'}
-      ${'REQUESTED_CHANGES'} | ${false} | ${'error'}         | ${'gl-fill-icon-danger'}
+      reviewState            | approved | icon
+      ${'UNREVIEWED'}        | ${false} | ${'dash-circle'}
+      ${'REVIEWED'}          | ${true}  | ${'check-circle'}
+      ${'REVIEWED'}          | ${false} | ${'comment-lines'}
+      ${'REQUESTED_CHANGES'} | ${false} | ${'error'}
     `(
       'renders $icon for reviewState:$reviewState and approved:$approved',
-      ({ reviewState, approved, icon, iconClass }) => {
+      ({ reviewState, approved, icon }) => {
         const user = userDataMock({ approved, reviewState });
 
         createComponent({
@@ -241,7 +241,6 @@ describe('UncollapsedReviewerList component', () => {
         });
 
         expect(wrapper.find('[data-testid="reviewer-state-icon"]').props('name')).toBe(icon);
-        expect(wrapper.find('[data-testid="reviewer-state-icon"]').classes()).toEqual([iconClass]);
       },
     );
   });

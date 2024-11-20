@@ -45,8 +45,6 @@ import {
   SEARCH_SHORTCUTS_MIN_CHARACTERS,
   SEARCH_MODAL_ID,
   KEY_K,
-  KEY_N,
-  KEY_P,
   SEARCH_INPUT_SELECTOR,
   SEARCH_RESULTS_ITEM_SELECTOR,
 } from '../constants';
@@ -104,8 +102,6 @@ export default {
       nextFocusedItemIndex: null,
       commandPaletteDropdownItems,
       commandPaletteDropdownOpen: false,
-      focusIndex: -1,
-      childListItems: [],
     };
   },
   computed: {
@@ -192,21 +188,8 @@ export default {
       event.stopPropagation();
       event.preventDefault();
     },
-    getListItemsAndFocusIndex() {
-      const childItems = this.$refs.resultsList?.querySelectorAll('.gl-new-dropdown-item') || [];
-      if (childItems.length !== this.childListItems.length) {
-        this.childListItems = childItems;
-
-        Array.from(childItems).forEach((item, index) => {
-          if (item === document.activeElement) {
-            this.focusIndex = index;
-          }
-        });
-      }
-    },
     onKeydown(event) {
       const { code, target } = event;
-
       let stop = true;
       const isSearchInput = target && target?.matches(SEARCH_INPUT_SELECTOR);
       const elements = this.getFocusableOptions();
@@ -264,22 +247,7 @@ export default {
       }
     },
     onKeyComboDown(event) {
-      const { code, metaKey, ctrlKey } = event;
-
-      this.getListItemsAndFocusIndex();
-
-      if (code === KEY_P && ctrlKey) {
-        this.focusIndex =
-          this.focusIndex > 0 ? this.focusIndex - 1 : this.childListItems.length - 1;
-        this.childListItems[this.focusIndex]?.focus();
-      }
-
-      if (code === KEY_N && ctrlKey) {
-        this.focusIndex =
-          this.focusIndex < this.childListItems.length - 1 ? this.focusIndex + 1 : 0;
-        this.childListItems[this.focusIndex]?.focus();
-      }
-
+      const { code, metaKey } = event;
       if (code === KEY_K && metaKey) {
         if (!this.commandPaletteDropdownOpen) {
           this.$refs.commandDropdown.open();

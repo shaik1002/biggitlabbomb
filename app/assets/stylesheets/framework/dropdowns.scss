@@ -337,7 +337,7 @@
   .unclickable {
     cursor: not-allowed;
     padding: 5px 8px;
-    @apply gl-text-subtle;
+    color: $gl-text-color-secondary;
   }
 
   .badge.badge-pill + span:not(.badge):not(.badge-pill) {
@@ -648,7 +648,7 @@
 }
 
 .dropdown-info-note {
-  @apply gl-text-subtle;
+  color: $gl-text-color-secondary;
   text-align: center;
 }
 
@@ -737,7 +737,7 @@
 
 .dropdown-menu-inner-content {
   display: block;
-  @apply gl-text-subtle;
+  color: $gl-text-color-secondary;
 }
 
 .dropdown-toggle-text {
