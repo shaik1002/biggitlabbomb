@@ -1184,6 +1184,26 @@ RSpec.describe ApplicationSetting, feature_category: :shared, type: :model do
       end
     end
 
+    describe 'plantuml settings' do
+      context 'when plantuml is enabled' do
+        before do
+          setting.plantuml_enabled = true
+        end
+
+        it { is_expected.not_to allow_value(nil).for(:plantuml_url) }
+        it { is_expected.to allow_value('http://your-plantuml-instance:8080').for(:plantuml_url) }
+        it { is_expected.not_to allow_value('not a URL').for(:plantuml_url) }
+      end
+
+      context 'when polantuml is not enabled' do
+        before do
+          setting.plantuml_enabled = false
+        end
+
+        it { is_expected.to allow_value(nil).for(:plantuml_url) }
+      end
+    end
+
     describe 'diagrams.net settings' do
       context 'when diagrams.net is enabled' do
         before do

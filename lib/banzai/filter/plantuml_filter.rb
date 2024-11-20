@@ -9,6 +9,7 @@ module Banzai
     #
     class PlantumlFilter < HTML::Pipeline::Filter
       prepend Concerns::PipelineTimingCheck
+      include ActionView::Helpers::TagHelper
 
       def call
         return doc unless settings.plantuml_enabled? && doc.at_xpath(lang_tag)
@@ -16,11 +17,13 @@ module Banzai
         Gitlab::Plantuml.configure
 
         doc.xpath(lang_tag).each do |node|
-          img_tag = Nokogiri::HTML::DocumentFragment.parse(
-            Asciidoctor::PlantUml::Processor.plantuml_content(node.content, {})).css('img').first
+          next if node.content.blank?
 
-          next if img_tag.nil?
+          image_src = create_image_src('png', node.content)
+          img_tag = Nokogiri::HTML::DocumentFragment.parse(content_tag(:img, nil, src: image_src))
+          img_tag = img_tag.children.first
 
+          img_tag.add_class('plantuml')
           img_tag.set_attribute('data-diagram', 'plantuml')
           img_tag.set_attribute('data-diagram-src', "data:text/plain;base64,#{Base64.strict_encode64(node.content)}")
 
@@ -39,6 +42,10 @@ module Banzai
 
       def settings
         Gitlab::CurrentSettings.current_application_settings
+      end
+
+      def create_image_src(format, text)
+        Asciidoctor::PlantUml::Processor.gen_url(text, format)
       end
     end
   end

@@ -204,7 +204,10 @@ class ApplicationSetting < ApplicationRecord
     presence: true,
     if: :prometheus_metrics_enabled
 
-  validates :plantuml_url, presence: true, if: :plantuml_enabled
+  validates :plantuml_url,
+    presence: true,
+    addressable_url: ADDRESSABLE_URL_VALIDATION_OPTIONS.merge({ enforce_sanitization: true }),
+    if: :plantuml_enabled
 
   validates :sourcegraph_url, presence: true, if: :sourcegraph_enabled
 
@@ -875,10 +878,6 @@ class ApplicationSetting < ApplicationRecord
 
   def validate_kroki_url
     validate_url(parsed_kroki_url, :kroki_url, KROKI_URL_ERROR_MESSAGE)
-  end
-
-  def kroki_url_absolute?
-    parsed_kroki_url&.absolute?
   end
 
   def sourcegraph_url_is_com?
