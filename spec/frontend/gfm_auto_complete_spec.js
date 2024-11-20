@@ -978,7 +978,7 @@ describe('GfmAutoComplete', () => {
       'atwho-at': ':',
       emoji: {
         c: 'symbols',
-        d: 'AB button (blood type)',
+        d: 'negative squared ab',
         e: '🆎',
         name: 'ab',
         u: '6.0',

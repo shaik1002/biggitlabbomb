@@ -24,35 +24,53 @@ RSpec.describe WorkItems::DataSync::MoveService, feature_category: :team_plannin
     context 'when user cannot read original work item' do
       let(:current_user) { target_project_member }
 
-      it_behaves_like 'fails to transfer work item', 'Cannot move work item due to insufficient permissions'
+      it 'does not raise error' do
+        expect { service.execute }.not_to raise_error
+      end
+
+      it 'returns error response' do
+        response = service.execute
+
+        expect(response.success?).to be false
+        expect(response.error?).to be true
+        expect(response.message).to eq('Cannot move work item due to insufficient permissions!')
+      end
     end
 
     context 'when user cannot create work items in target namespace' do
       let(:current_user) { source_project_member }
 
-      it_behaves_like 'fails to transfer work item', 'Cannot move work item due to insufficient permissions'
+      it 'does not raise error' do
+        expect { service.execute }.not_to raise_error
+      end
+
+      it 'returns error response' do
+        response = service.execute
+
+        expect(response.success?).to be false
+        expect(response.error?).to be true
+        expect(response.message).to eq('Cannot move work item due to insufficient permissions!')
+      end
     end
   end
 
   context 'when user has permission to move work item' do
     let(:current_user) { projects_member }
 
-    context 'when moving a project level work item to same project' do
-      let(:target_namespace) { project }
-
-      it_behaves_like 'fails to transfer work item', 'Cannot move work item to same project or group it originates from'
-    end
-
-    context 'when moving a project level work item to same project, using project namespace' do
-      let(:target_namespace) { project.project_namespace }
-
-      it_behaves_like 'fails to transfer work item', 'Cannot move work item to same project or group it originates from'
-    end
-
     context 'when moving project level work item to a group' do
-      let(:target_namespace) { group }
+      let_it_be_with_reload(:target_namespace) { group }
 
-      it_behaves_like 'fails to transfer work item', 'Cannot move work item between Projects and Groups'
+      it 'does not raise error' do
+        expect { service.execute }.not_to raise_error
+      end
+
+      it 'returns error response' do
+        response = service.execute
+
+        expect(response.success?).to be false
+        expect(response.error?).to be true
+        expect(response.message).to eq('Cannot move work item between Projects and Groups.')
+      end
     end
 
     context 'when moving to a pending delete project' do
@@ -64,14 +82,33 @@ RSpec.describe WorkItems::DataSync::MoveService, feature_category: :team_plannin
         target_namespace.project.update!(pending_delete: false)
       end
 
-      it_behaves_like 'fails to transfer work item',
-        'Cannot move work item to target namespace as it is pending deletion'
+      it 'does not raise error' do
+        expect { service.execute }.not_to raise_error
+      end
+
+      it 'returns error response' do
+        response = service.execute
+
+        expect(response.success?).to be false
+        expect(response.error?).to be true
+        expect(response.message).to eq('Cannot move work item to target namespace as it is pending deletion.')
+      end
     end
 
     context 'when moving unsupported work item type' do
       let_it_be_with_reload(:original_work_item) { create(:work_item, :task, project: project) }
 
-      it_behaves_like 'fails to transfer work item', 'Cannot move work items of \'Task\' type'
+      it 'does not raise error' do
+        expect { service.execute }.not_to raise_error
+      end
+
+      it 'returns error response' do
+        response = service.execute
+
+        expect(response.success?).to be false
+        expect(response.error?).to be true
+        expect(response.message).to eq('Cannot move work items of \'Task\' type.')
+      end
     end
 
     context 'when moving work item raises an error' do
@@ -83,7 +120,17 @@ RSpec.describe WorkItems::DataSync::MoveService, feature_category: :team_plannin
         end
       end
 
-      it_behaves_like 'fails to transfer work item', 'Something went wrong'
+      it 'does not raise error' do
+        expect { service.execute }.not_to raise_error
+      end
+
+      it 'returns error response' do
+        response = service.execute
+
+        expect(response.success?).to be false
+        expect(response.error?).to be true
+        expect(response.message).to eq('Something went wrong')
+      end
     end
 
     context 'when moving work item with success', :freeze_time do

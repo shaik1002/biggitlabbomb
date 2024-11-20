@@ -17,7 +17,8 @@ import {
   inboundJobTokenScopeDisabledResponse,
   inboundGroupsAndProjectsWithScopeResponse,
   inboundGroupsAndProjectsWithScopeResponseWithAddedItem,
-  inboundRemoveNamespaceSuccess,
+  inboundRemoveGroupSuccess,
+  inboundRemoveProjectSuccess,
   inboundUpdateScopeSuccessResponse,
 } from './mock_data';
 
@@ -41,12 +42,10 @@ describe('TokenAccess component', () => {
   const inboundGroupsAndProjectsWithScopeResponseHandler = jest
     .fn()
     .mockResolvedValue(inboundGroupsAndProjectsWithScopeResponse);
-  const inboundRemoveGroupSuccessHandler = jest
-    .fn()
-    .mockResolvedValue(inboundRemoveNamespaceSuccess);
+  const inboundRemoveGroupSuccessHandler = jest.fn().mockResolvedValue(inboundRemoveGroupSuccess);
   const inboundRemoveProjectSuccessHandler = jest
     .fn()
-    .mockResolvedValue(inboundRemoveNamespaceSuccess);
+    .mockResolvedValue(inboundRemoveProjectSuccess);
   const inboundUpdateScopeSuccessResponseHandler = jest
     .fn()
     .mockResolvedValue(inboundUpdateScopeSuccessResponse);
@@ -334,17 +333,17 @@ describe('TokenAccess component', () => {
   });
 
   describe.each`
-    type         | index | mutation                                       | handler
-    ${'group'}   | ${0}  | ${inboundRemoveGroupCIJobTokenScopeMutation}   | ${inboundRemoveGroupSuccessHandler}
-    ${'project'} | ${2}  | ${inboundRemoveProjectCIJobTokenScopeMutation} | ${inboundRemoveProjectSuccessHandler}
-  `('remove $type', ({ type, index, mutation, handler }) => {
+    type         | index | mutation                                       | handler                               | target
+    ${'group'}   | ${0}  | ${inboundRemoveGroupCIJobTokenScopeMutation}   | ${inboundRemoveGroupSuccessHandler}   | ${'targetGroupPath'}
+    ${'project'} | ${1}  | ${inboundRemoveProjectCIJobTokenScopeMutation} | ${inboundRemoveProjectSuccessHandler} | ${'targetProjectPath'}
+  `('remove $type', ({ type, index, mutation, handler, target }) => {
     it(`calls remove ${type} mutation`, async () => {
       await createComponent(
         [
           [inboundGetCIJobTokenScopeQuery, inboundJobTokenScopeEnabledResponseHandler],
           [
             inboundGetGroupsAndProjectsWithCIJobTokenScopeQuery,
-            jest.fn().mockResolvedValue(inboundGroupsAndProjectsWithScopeResponseWithAddedItem),
+            inboundGroupsAndProjectsWithScopeResponseHandler,
           ],
           [mutation, handler],
         ],
@@ -353,7 +352,10 @@ describe('TokenAccess component', () => {
 
       findRemoveProjectBtnAt(index).trigger('click');
 
-      expect(handler).toHaveBeenCalledWith({ projectPath, targetPath: expect.any(String) });
+      expect(handler).toHaveBeenCalledWith({
+        projectPath,
+        [target]: expect.any(String),
+      });
     });
 
     it(`decrements the ${type} count`, async () => {
@@ -393,7 +395,7 @@ describe('TokenAccess component', () => {
           [inboundGetCIJobTokenScopeQuery, inboundJobTokenScopeEnabledResponseHandler],
           [
             inboundGetGroupsAndProjectsWithCIJobTokenScopeQuery,
-            jest.fn().mockResolvedValue(inboundGroupsAndProjectsWithScopeResponseWithAddedItem),
+            inboundGroupsAndProjectsWithScopeResponseHandler,
           ],
           [mutation, failureHandler],
         ],
