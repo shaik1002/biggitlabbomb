@@ -1,5 +1,5 @@
 import Vue from 'vue';
-import { parseBoolean } from '~/lib/utils/common_utils';
+import { parseBoolean, convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import apolloProvider from './graphql';
 import HeaderArea from './components/header_area.vue';
 import createRouter from './router';
@@ -28,7 +28,32 @@ export default function initHeaderApp(isReadmeView = false) {
       projectRootPath,
       comparePath,
       projectPath,
+      webIdePromoPopoverImg,
+      webIdeButtonOptions,
+      sshUrl,
+      httpUrl,
+      xcodeUrl,
+      kerberosUrl,
+      downloadLinks,
+      downloadArtifacts,
     } = headerEl.dataset;
+
+    const {
+      isFork,
+      needsToFork,
+      gitpodEnabled,
+      isBlob,
+      showEditButton,
+      showWebIdeButton,
+      showGitpodButton,
+      showPipelineEditorUrl,
+      webIdeUrl,
+      editUrl,
+      pipelineEditorUrl,
+      gitpodUrl,
+      userPreferencesGitpodPath,
+      userProfileEnableGitpodPath,
+    } = convertObjectPropsToCamelCase(JSON.parse(webIdeButtonOptions));
 
     // eslint-disable-next-line no-new
     new Vue({
@@ -50,6 +75,27 @@ export default function initHeaderApp(isReadmeView = false) {
         projectRootPath,
         comparePath,
         isReadmeView,
+        webIdePromoPopoverImg,
+        isFork: parseBoolean(isFork),
+        needsToFork: parseBoolean(needsToFork),
+        gitpodEnabled: parseBoolean(gitpodEnabled),
+        isBlob: parseBoolean(isBlob),
+        showEditButton: parseBoolean(showEditButton),
+        showWebIdeButton: parseBoolean(showWebIdeButton),
+        showGitpodButton: parseBoolean(showGitpodButton),
+        showPipelineEditorUrl: parseBoolean(showPipelineEditorUrl),
+        webIdeUrl,
+        editUrl,
+        pipelineEditorUrl,
+        gitpodUrl,
+        userPreferencesGitpodPath,
+        userProfileEnableGitpodPath,
+        httpUrl,
+        xcodeUrl,
+        sshUrl,
+        kerberosUrl,
+        downloadLinks: downloadLinks ? JSON.parse(downloadLinks) : null,
+        downloadArtifacts: downloadArtifacts ? JSON.parse(downloadArtifacts) : [],
       },
       apolloProvider,
       router: createRouter(projectPath, escapedRef),
