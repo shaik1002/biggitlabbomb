@@ -45,18 +45,6 @@ export default {
     },
   },
   methods: {
-    handleErrorResponse(error) {
-      const errorMessage = error?.message
-        ? sprintf(this.$options.i18n.updateError, { reason: error.message.toLowerCase() })
-        : this.$options.i18n.genericError;
-
-      createAlert({
-        message: errorMessage,
-        parent: this.$el,
-        captureError: true,
-      });
-    },
-
     async updateNote({ commentText }) {
       this.isSubmitting = true;
 
@@ -70,19 +58,20 @@ export default {
             },
           },
         })
-        .then(({ data }) => {
-          const { note, errors } = data.updateAbuseReportNote;
+        .then(() => {
           clearDraft(this.autosaveKey);
-          if (errors.length) {
-            this.handleErrorResponse({
-              message: errors.join('. '),
-            });
-          } else {
-            this.$emit('updateNote', note);
-          }
+          this.$emit('cancelEditing');
         })
         .catch((error) => {
-          this.handleErrorResponse(error);
+          const errorMessage = error?.message
+            ? sprintf(this.$options.i18n.updateError, { reason: error.message.toLowerCase() })
+            : this.$options.i18n.genericError;
+
+          createAlert({
+            message: errorMessage,
+            parent: this.$el,
+            captureError: true,
+          });
         })
         .finally(() => {
           this.isSubmitting = false;

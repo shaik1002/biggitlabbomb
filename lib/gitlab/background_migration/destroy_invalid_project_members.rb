@@ -2,7 +2,7 @@
 
 module Gitlab
   module BackgroundMigration
-    class DestroyInvalidProjectMembers < Gitlab::BackgroundMigration::BatchedMigrationJob
+    class DestroyInvalidProjectMembers < Gitlab::BackgroundMigration::BatchedMigrationJob # rubocop:disable Style/Documentation
       scope_to ->(relation) { relation.where(source_type: 'Project') }
       operation_name :delete_all
       feature_category :database

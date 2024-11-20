@@ -1,15 +1,12 @@
 # frozen_string_literal: true
 
 class AwardEmoji < ApplicationRecord
-  THUMBS_UP     = 'thumbsup'
-  THUMBS_DOWN   = 'thumbsdown'
-  UPVOTE_NAME   = THUMBS_UP
-  DOWNVOTE_NAME = THUMBS_DOWN
+  DOWNVOTE_NAME = "thumbsdown"
+  UPVOTE_NAME   = "thumbsup"
 
   include Participable
   include GhostUser
   include Importable
-  include EachBatch
 
   belongs_to :awardable, polymorphic: true # rubocop:disable Cop/PolymorphicAssociations
   belongs_to :user

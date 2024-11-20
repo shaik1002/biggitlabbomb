@@ -66,8 +66,7 @@ module Gitlab
                 # make sure that `when` and `exit_codes` are arrays, because we allow them to
                 # be passed as a String/Integer in config for simplicity
                 config[:when] = Array.wrap(config[:when]) if config[:when]
-
-                if config[:exit_codes]
+                if config[:exit_codes] && Feature.enabled?(:ci_retry_on_exit_codes, Feature.current_request)
                   config[:exit_codes] = Array.wrap(config[:exit_codes])
                 else
                   config.delete(:exit_codes)

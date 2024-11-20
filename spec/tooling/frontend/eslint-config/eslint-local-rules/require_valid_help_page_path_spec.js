@@ -26,7 +26,7 @@ readFileSync.mockImplementation(() => '');
 marked.parse.mockImplementation(() => VALID_ANCHOR);
 
 const ruleTester = new RuleTester({
-  languageOptions: { ecmaVersion: 2015 },
+  parserOptions: { ecmaVersion: 2015 },
 });
 
 ruleTester.run('require-valid-help-page-path', rule, {

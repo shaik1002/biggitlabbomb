@@ -21,12 +21,9 @@ To set up the GitLab for Jira Cloud app on your self-managed instance, do one of
 - [Install the GitLab for Jira Cloud app manually](#install-the-gitlab-for-jira-cloud-app-manually).
 
 <i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
-For an overview, see:
-
-- [Installing the GitLab for Jira Cloud app from the Atlassian Marketplace for a self-managed instance](https://youtu.be/RnDw4PzmdW8?list=PL05JrBw4t0Koazgli_PmMQCER2pVH7vUT)
-  <!-- Video published on 2024-10-30 -->
-- [Installing the GitLab for Jira Cloud app manually for a self-managed instance](https://youtu.be/fs02xS8BElA?list=PL05JrBw4t0Koazgli_PmMQCER2pVH7vUT)
-  <!-- Video published on 2024-10-30 -->
+For an overview, see
+[Configure the GitLab for Jira Cloud app from the Atlassian Marketplace with a self-managed instance](https://www.youtube.com/watch?v=dka9fLoGsno&t=1665s).
+<!-- Video published on 2024-06-27 -->
 
 If you [install the GitLab for Jira Cloud app from the Atlassian Marketplace](#install-the-gitlab-for-jira-cloud-app-from-the-atlassian-marketplace),
 you can use the [project toolchain](https://support.atlassian.com/jira-software-cloud/docs/what-is-the-connections-feature/) developed and maintained
@@ -164,9 +161,6 @@ to check if Jira Cloud is linked to:
   ```
 
 ## Install the GitLab for Jira Cloud app manually
-
-WARNING:
-In GitLab 17.5 and earlier, you might encounter installation issues when manually installing the GitLab for Jira Cloud app. For more details and resolution steps, see [issue 505372](https://gitlab.com/gitlab-org/gitlab/-/issues/505372#workaround). This does not affect [installations done from the Atlassian Marketplace](#install-the-gitlab-for-jira-cloud-app-from-the-atlassian-marketplace) or situations where the GitLab for Jira Cloud app is already installed and functioning.
 
 If you do not want to [use the official Atlassian Marketplace listing](#install-the-gitlab-for-jira-cloud-app-from-the-atlassian-marketplace),
 install the GitLab for Jira Cloud app manually.

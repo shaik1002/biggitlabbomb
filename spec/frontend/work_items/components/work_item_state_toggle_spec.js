@@ -1,10 +1,10 @@
-import { GlButton, GlLink } from '@gitlab/ui';
+import { GlButton, GlModal, GlLink } from '@gitlab/ui';
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
+import { shallowMount } from '@vue/test-utils';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import { mockTracking } from 'helpers/tracking_helper';
 import waitForPromises from 'helpers/wait_for_promises';
-import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
 import WorkItemStateToggle from '~/work_items/components/work_item_state_toggle.vue';
 import {
   STATE_OPEN,
@@ -16,15 +16,11 @@ import {
 import updateWorkItemMutation from '~/work_items/graphql/update_work_item.mutation.graphql';
 import workItemByIidQuery from '~/work_items/graphql/work_item_by_iid.query.graphql';
 import workItemLinkedItemsQuery from '~/work_items/graphql/work_item_linked_items.query.graphql';
-import workItemOpenChildCountQuery from '~/work_items/graphql/open_child_count.query.graphql';
 import {
   updateWorkItemMutationResponse,
   mockBlockedByLinkedItem,
   workItemByIidResponseFactory,
   workItemBlockedByLinkedItemsResponse,
-  workItemNoBlockedByLinkedItemsResponse,
-  mockOpenChildrenCount,
-  mockNoOpenChildrenCount,
 } from '../mock_data';
 
 describe('Work Item State toggle button component', () => {
@@ -38,32 +34,27 @@ describe('Work Item State toggle button component', () => {
   const querySuccessHander = jest.fn().mockResolvedValue(workItemQueryResponse);
   const workItemBlockedByItemsSuccessHandler = jest
     .fn()
-    .mockResolvedValue(workItemNoBlockedByLinkedItemsResponse);
-  const openChildCountSuccessHandler = jest.fn().mockResolvedValue(mockNoOpenChildrenCount);
+    .mockResolvedValue(workItemBlockedByLinkedItemsResponse);
 
   const findStateToggleButton = () => wrapper.findComponent(GlButton);
-  const findBlockedByModal = () => wrapper.findByTestId('blocked-by-issues-modal');
-  const findBlockedByModalLinkAt = (index) =>
-    findBlockedByModal().findAllComponents(GlLink).at(index);
-  const findOpenChildrenModal = () => wrapper.findByTestId('open-children-warning-modal');
+  const findModal = () => wrapper.findComponent(GlModal);
+  const findModalLinkAt = (index) => findModal().findAllComponents(GlLink).at(index);
 
   const { id, iid } = workItemQueryResponse.data.workspace.workItem;
 
   const createComponent = ({
     mutationHandler = mutationSuccessHandler,
     workItemLinkedItemsHandler = workItemBlockedByItemsSuccessHandler,
-    workItemOpenChildCountHandler = openChildCountSuccessHandler,
     canUpdate = true,
     workItemState = STATE_OPEN,
     workItemType = 'Task',
     hasComment = false,
   } = {}) => {
-    wrapper = shallowMountExtended(WorkItemStateToggle, {
+    wrapper = shallowMount(WorkItemStateToggle, {
       apolloProvider: createMockApollo([
         [updateWorkItemMutation, mutationHandler],
         [workItemByIidQuery, querySuccessHander],
         [workItemLinkedItemsQuery, workItemLinkedItemsHandler],
-        [workItemOpenChildCountQuery, workItemOpenChildCountHandler],
       ]),
       propsData: {
         workItemId: id,
@@ -182,22 +173,18 @@ describe('Work Item State toggle button component', () => {
     const blockers = mockBlockedByLinkedItem.linkedItems.nodes;
 
     beforeEach(async () => {
-      createComponent({
-        workItemLinkedItemsHandler: jest
-          .fn()
-          .mockResolvedValue(workItemBlockedByLinkedItemsResponse),
-      });
+      createComponent();
       await waitForPromises();
     });
 
     it('has title text', () => {
-      expect(findBlockedByModal().attributes('title')).toBe(
+      expect(findModal().attributes('title')).toBe(
         'Are you sure you want to close this blocked task?',
       );
     });
 
     it('has body text', () => {
-      expect(findBlockedByModal().text()).toContain(
+      expect(findModal().text()).toContain(
         'This task is currently blocked by the following items:',
       );
     });
@@ -208,36 +195,12 @@ describe('Work Item State toggle button component', () => {
       ${'second'} | ${1}
     `('$ordinal blocked-by issue link', ({ index }) => {
       it('has link text', () => {
-        expect(findBlockedByModalLinkAt(index).text()).toBe(`#${blockers[index].workItem.iid}`);
+        expect(findModalLinkAt(index).text()).toBe(`#${blockers[index].workItem.iid}`);
       });
 
       it('has url', () => {
-        expect(findBlockedByModalLinkAt(index).attributes('href')).toBe(
-          blockers[index].workItem.webUrl,
-        );
+        expect(findModalLinkAt(index).attributes('href')).toBe(blockers[index].workItem.webUrl);
       });
-    });
-  });
-
-  describe('with open child items', () => {
-    beforeEach(async () => {
-      createComponent({
-        workItemOpenChildCountHandler: jest.fn().mockResolvedValue(mockOpenChildrenCount),
-        workItemType: 'Epic',
-      });
-      await waitForPromises();
-    });
-
-    it('has title text', () => {
-      expect(findOpenChildrenModal().attributes('title')).toBe(
-        'Are you sure you want to close this epic?',
-      );
-    });
-
-    it('has body text', () => {
-      expect(findOpenChildrenModal().text()).toContain(
-        'This epic has open child items. If you close this epic, they will remain open.',
-      );
     });
   });
 });

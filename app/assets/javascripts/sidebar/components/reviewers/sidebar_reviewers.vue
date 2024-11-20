@@ -215,7 +215,7 @@ export default {
         size="small"
         category="tertiary"
         variant="confirm"
-        class="gl-ml-2 !gl-text-sm"
+        class="gl-ml-3"
         @click="toggleDrawerOpen()"
       >
         {{ __('Assign') }}

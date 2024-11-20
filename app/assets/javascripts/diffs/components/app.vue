@@ -25,7 +25,6 @@ import { __ } from '~/locale';
 
 import notesEventHub from '~/notes/event_hub';
 import { DynamicScroller, DynamicScrollerItem } from 'vendor/vue-virtual-scroller';
-import getMRCodequalityAndSecurityReports from 'ee_else_ce/diffs/components/graphql/get_mr_codequality_and_security_reports.query.graphql';
 import { sortFindingsByFile } from '../utils/sort_findings_by_file';
 import {
   MR_TREE_SHOW_KEY,
@@ -61,6 +60,7 @@ import NoChanges from './no_changes.vue';
 import VirtualScrollerScrollSync from './virtual_scroller_scroll_sync';
 import DiffsFileTree from './diffs_file_tree.vue';
 import DiffAppControls from './diff_app_controls.vue';
+import getMRCodequalityAndSecurityReports from './graphql/get_mr_codequality_and_security_reports.query.graphql';
 
 export const FINDINGS_STATUS_PARSED = 'PARSED';
 export const FINDINGS_STATUS_ERROR = 'ERROR';
@@ -181,13 +181,8 @@ export default {
         return !this.codequalityReportAvailable && !this.sastReportAvailable;
       },
       update(data) {
-        if (!data?.project?.mergeRequest) {
-          return;
-        }
-
-        const { codequalityReportsComparer, sastReport } = data.project.mergeRequest;
-        this.activeProject = data.project.mergeRequest.project;
-
+        const { codequalityReportsComparer, sastReport } = data?.project?.mergeRequest || {};
+        this.activeProject = data?.project?.mergeRequest?.project;
         if (
           (sastReport?.status === FINDINGS_STATUS_PARSED || !this.sastReportAvailable) &&
           (!this.codequalityReportAvailable ||
@@ -744,9 +739,6 @@ export default {
       this.toggleTreeList();
       this.adjustView();
     },
-    isDiffViewActive(item) {
-      return this.virtualScrollCurrentIndex >= 0 && this.currentDiffFileId === item.file_hash;
-    },
   },
   howToMergeDocsPath: helpPagePath('user/project/merge_requests/merge_request_troubleshooting.md', {
     anchor: 'check-out-merge-requests-locally-through-the-head-ref',
@@ -820,7 +812,6 @@ export default {
                   :item="item"
                   :active="active"
                   :class="{ active }"
-                  class="gl-mb-5"
                 >
                   <diff-file
                     :file="item"
@@ -833,7 +824,6 @@ export default {
                     :can-current-user-fork="canCurrentUserFork"
                     :view-diffs-file-by-file="viewDiffsFileByFile"
                     :active="active"
-                    :is-diff-view-active="isDiffViewActive(item)"
                   />
                 </dynamic-scroller-item>
               </template>
@@ -854,8 +844,6 @@ export default {
                 :help-page-path="helpPagePath"
                 :can-current-user-fork="canCurrentUserFork"
                 :view-diffs-file-by-file="viewDiffsFileByFile"
-                :is-diff-view-active="currentDiffFileId === file.file_hash"
-                class="gl-mb-5"
               />
             </template>
             <div

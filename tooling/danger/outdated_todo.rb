@@ -53,8 +53,7 @@ module Tooling
         File
           .foreach(todo)
           .with_index(1)
-          # Negative lookbehind to match the filename which is not preceeded by `ee/`
-          .select { |text, _line| %r{.*(?<!ee/)#{filename}.*}.match?(text) }
+          .select { |text, _line| text.match?(/.*#{filename}.*/) }
           .map { |_text, line| "#{todo}:#{line}" }
       end
 

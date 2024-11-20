@@ -30,7 +30,9 @@ initFilePickers();
 initConfirmDanger();
 initSettingsPanels();
 initTransferGroupForm();
-dirtySubmitFactory(document.querySelectorAll('.js-general-settings-form'));
+dirtySubmitFactory(
+  document.querySelectorAll('.js-general-settings-form, .js-general-permissions-form'),
+);
 mountBadgeSettings(GROUP_BADGE);
 
 // Initialize Subgroups selector

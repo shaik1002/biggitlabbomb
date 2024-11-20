@@ -13,7 +13,7 @@ instrumentation_class: CountProjectsMetric
 distribution:
   - ce
   - ee
-tiers:
+tier:
   - free
   - premium
   - ultimate

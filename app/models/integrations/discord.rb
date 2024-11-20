@@ -3,9 +3,7 @@
 require "discordrb/webhooks"
 
 module Integrations
-  class Discord < Integration
-    include Integrations::Base::ChatNotification
-
+  class Discord < BaseChatNotification
     ATTACHMENT_REGEX = Gitlab::UntrustedRegexp.new(': (?<entry>[^\n]*)\n - (?<name>[^\n]*)\n*')
 
     field :webhook,

@@ -14,6 +14,9 @@ describe('Registry Project Empty state', () => {
   const config = {
     repositoryUrl: 'foo',
     registryHostUrlWithPort: 'bar',
+    helpPagePath: 'baz',
+    twoFactorAuthHelpLink: 'barBaz',
+    personalAccessTokensHelpLink: 'fooBaz',
     noContainersImage: 'bazFoo',
   };
 

@@ -14,9 +14,7 @@ module BulkUsersByEmailLoad
         grouped_users_by_email = User.by_any_email(emails, confirmed: true).preload(:emails).group_by(&:all_emails)
 
         grouped_users_by_email.each_with_object({}) do |(found_emails, users), h|
-          found_emails.each do |e| # don't include all emails for an account, only the ones we want
-            h[e] = users.first if emails.include?(e)
-          end
+          found_emails.each { |e| h[e] = users.first if emails.include?(e) } # don't include all emails for an account, only the ones we want
         end
       end
     end

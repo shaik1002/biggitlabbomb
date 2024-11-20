@@ -154,7 +154,7 @@ export default function initValidation(customFeedbackMap = {}) {
  * @param {*} fieldValues
  * @returns formObject
  */
-export const initFormField = ({ value, required = true, skipValidation = false }) => ({
+const initFormField = ({ value, required = true, skipValidation = false }) => ({
   value,
   required,
   state: skipValidation ? true : null,

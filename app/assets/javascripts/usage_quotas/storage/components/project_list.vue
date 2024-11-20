@@ -152,7 +152,7 @@ export default {
       <template v-if="isCostFactored(project)">
         <number-to-human-size :value="project.statistics.costFactoredStorageSize" />
 
-        <div class="gl-mt-2 gl-text-sm gl-text-subtle">
+        <div class="gl-mt-2 gl-text-sm gl-text-gray-600">
           <gl-sprintf :message="s__('UsageQuotas|(of %{totalStorageSize})')">
             <template #totalStorageSize>
               <number-to-human-size :value="project.statistics.storageSize" />

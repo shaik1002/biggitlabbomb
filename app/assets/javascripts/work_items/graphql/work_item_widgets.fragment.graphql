@@ -52,7 +52,6 @@ fragment WorkItemWidgets on WorkItemWidget {
     hasParent
     rolledUpCountsByType {
       countsByState {
-        opened
         all
         closed
       }

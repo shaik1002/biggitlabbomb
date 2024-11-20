@@ -7,9 +7,8 @@ description: "Set up the GitLab agent to create and manage workspaces in a proje
 
 # Tutorial: Set up the GitLab agent for workspaces
 
-This tutorial shows you how to set up the GitLab agent
-so users can create and manage workspaces in a project.
-For this tutorial, the following hierarchy is used:
+This tutorial shows you how to set up the GitLab agent so users
+can create and manage workspaces in a project. For this tutorial, the following hierarchy is used:
 
 ```mermaid
 %%{init: {'theme':'neutral'}}%%
@@ -31,7 +30,7 @@ graph TD;
     class workspaceProject active;
 ```
 
-To set up the GitLab agent for workspaces, you're going to:
+To set up the GitLab agent, you're going to:
 
 1. [Configure the `remote_development` module in the agent project](#configure-the-remote_development-module-in-the-agent-project).
 1. [Allow the GitLab agent in a group](#allow-the-gitlab-agent-in-a-group).
@@ -39,8 +38,8 @@ To set up the GitLab agent for workspaces, you're going to:
 
 ## Prerequisites
 
-- You must install the GitLab agent.
-  For more information, see [set up workspace infrastructure](configuration.md#set-up-workspace-infrastructure).
+- GitLab agent must be [installed](../clusters/agent/install/index.md) and [configured](gitlab_agent_configuration.md).
+- You must [set up workspace infrastructure](configuration.md#set-up-workspace-infrastructure).
 - You must have administrator access to the instance or the Owner role for the group.
 
 ## Configure the `remote_development` module in the agent project

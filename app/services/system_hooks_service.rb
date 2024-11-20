@@ -35,12 +35,6 @@ class SystemHooksService
                       Gitlab::HookData::KeyBuilder
                     end
 
-    builder = builder_class.new(model)
-
-    if builder_class == Gitlab::HookData::ProjectBuilder
-      builder.build(event, include_deprecated_owner: true)
-    else
-      builder.build(event)
-    end
+    builder_class.new(model).build(event)
   end
 end

@@ -22,7 +22,6 @@
 /doc/**/*.md
 /doc/**/*.jpg
 /doc/**/*.png
-/doc/**/*.svg
 /data/deprecations/*.yml
 
 ## Technical writing files that do not need `*` rule approval,
@@ -222,7 +221,7 @@ Dangerfile
 ^[Secure] @gitlab-org/secure/dynamic-analysis-be
 /ee/app/services/app_sec/dast/
 
-^[Security Policies frontend] @gitlab-org/security-risk-management/security-policies/frontend
+^[Security Policies frontend] @gitlab-org/govern/security-policies-frontend
 /ee/app/assets/javascripts/approvals/components/license_compliance/**
 /ee/app/assets/javascripts/approvals/stores/modules/license_compliance/**
 /ee/app/assets/javascripts/license_compliance/**
@@ -250,7 +249,7 @@ Dangerfile
 /ee/spec/frontend/security_orchestration/**
 /ee/spec/views/projects/security/policies/**
 
-^[Security Policies backend] @gitlab-org/security-risk-management/security-policies/backend
+^[Security Policies backend] @gitlab-org/govern/security-policies-backend
 /app/models/clusters/applications/cilium.rb
 /ee/app/controllers/groups/security/policies_controller.rb
 /ee/app/controllers/projects/security/policies_controller.rb
@@ -302,7 +301,7 @@ Dangerfile
 /app/finders/security/license_compliance_jobs_finder.rb
 /ee/app/controllers/projects/licenses_controller.rb
 /ee/app/finders/software_license_policies_finder.rb
-/ee/app/models/sca/license_compliance.rb @gitlab-org/security-risk-management/security-policies/backend @gitlab-org/secure/composition-analysis-be
+/ee/app/models/sca/license_compliance.rb @gitlab-org/govern/security-policies-backend @gitlab-org/secure/composition-analysis-be
 /ee/app/models/sca/license_policy.rb
 /ee/app/models/software_license_policy.rb
 /ee/app/models/software_license.rb
@@ -323,7 +322,7 @@ Dangerfile
 /ee/spec/factories/spdx_license.rb
 /ee/spec/finders/software_license_policies_finder_spec.rb
 /ee/spec/lib/gitlab/ci/parsers/license_compliance/**
-/ee/spec/models/sca/license_compliance_spec.rb @gitlab-org/security-risk-management/security-policies/backend @gitlab-org/secure/composition-analysis-be
+/ee/spec/models/sca/license_compliance_spec.rb @gitlab-org/govern/security-policies-backend @gitlab-org/secure/composition-analysis-be
 /ee/spec/models/sca/license_policy_spec.rb
 /ee/spec/models/software_license_policy_spec.rb
 /ee/spec/models/software_license_spec.rb
@@ -342,7 +341,7 @@ Dangerfile
 /lib/gitlab/checks/changed_blobs.rb
 /spec/lib/gitlab/checks/changed_blobs.rb
 
-^[Code Owners] @reprazent @kerrizor @garyh @jwoodwardgl
+^[Code Owners] @reprazent @kerrizor @garyh
 /ee/lib/gitlab/code_owners.rb
 /ee/lib/gitlab/code_owners/
 /ee/spec/lib/gitlab/code_owners/
@@ -402,7 +401,6 @@ Dangerfile
 /spec/frontend/diffs/store/
 
 ^[Product Analytics] @gitlab-org/analytics-section/product-analytics/engineers/frontend
-/app/assets/javascripts/vue_shared/components/customizable_dashboard/
 /ee/app/assets/javascripts/analytics/analytics_dashboards/components/analytics_dashboard.vue
 /ee/app/assets/javascripts/analytics/analytics_dashboards/components/analytics_visualization_designer.vue
 /ee/app/assets/javascripts/analytics/analytics_dashboards/components/dashboards_list.vue
@@ -416,6 +414,10 @@ Dangerfile
 /ee/app/assets/javascripts/analytics/analytics_dashboards/router.js
 /ee/app/assets/javascripts/analytics/analytics_dashboards/constants.js
 /ee/app/assets/javascripts/analytics/analytics_dashboards/graphql/queries/get_all_customizable_dashboards.query.graphql
+/ee/app/assets/javascripts/analytics/analytics_dashboards/graphql/queries/get_customizable_dashboard.query.graphql
+/ee/app/assets/javascripts/analytics/analytics_dashboards/graphql/queries/get_all_customizable_visualizations.query.graphql
+/ee/app/assets/javascripts/vue_shared/components/customizable_dashboard/customizable_dashboard.vue
+/ee/app/assets/javascripts/vue_shared/components/customizable_dashboard/panels_base.vue
 /ee/app/assets/javascripts/product_analytics/
 
 ^[Analytics Instrumentation] @gitlab-org/analytics-section/analytics-instrumentation/engineers
@@ -474,8 +476,8 @@ Dangerfile
 /ee/spec/controllers/ee/registrations_controller_spec.rb
 /ee/app/controllers/ee/registrations/
 /ee/app/controllers/ee/confirmations_controller.rb
-/ee/app/controllers/gitlab_subscriptions/subscriptions_controller.rb
-/ee/spec/controllers/gitlab_subscriptions/subscriptions_controller_spec.rb
+/ee/app/controllers/subscriptions_controller.rb
+/ee/spec/controllers/subscriptions_controller_spec.rb
 /ee/app/controllers/subscriptions/
 /ee/spec/controllers/subscriptions/
 /app/services/users/in_product_marketing_email_records.rb
@@ -917,7 +919,7 @@ lib/gitlab/checks/**
 /doc/development/ai_features/ @gitlab-org/ai-powered
 /doc/development/ai_features/embeddings.md @gitlab-org/search-team/migration-maintainers
 /doc/development/application_limits.md @gitlab-org/distribution
-/doc/development/audit_event_guide/ @gitlab-org/security-risk-management/security-policies/frontend @gitlab-org/govern/threat-insights-frontend-team @gitlab-org/govern/threat-insights-backend-team
+/doc/development/audit_event_guide/ @gitlab-org/govern/security-policies-frontend @gitlab-org/govern/threat-insights-frontend-team @gitlab-org/govern/threat-insights-backend-team
 /doc/development/avoiding_required_stops.md @gitlab-org/distribution
 /doc/development/build_test_package.md @gitlab-org/distribution
 /doc/development/cascading_settings.md @gitlab-org/foundations/engineering
@@ -944,7 +946,7 @@ lib/gitlab/checks/**
 /doc/development/permissions.md @rlehmann1
 /doc/development/permissions/ @rlehmann1
 /doc/development/pipelines/ @gl-quality/eng-prod
-/doc/development/policies.md @gitlab-org/software-supply-chain-security/authentication/approvers
+/doc/development/policies.md @gitlab-org/govern/authentication/approvers
 /doc/development/prometheus_metrics.md @gitlab-org/analytics-section/product-analytics/engineers/frontend
 /doc/development/search/ @gitlab-org/search-team/migration-maintainers
 /doc/development/sec/ @gitlab-org/govern/threat-insights-frontend-team
@@ -983,7 +985,6 @@ lib/gitlab/checks/**
 /doc/solutions/integrations/index.md @jfullam @brianwald @Darwinjs
 /doc/solutions/integrations/servicenow.md @ashrafkhamis
 /doc/subscriptions/ @fneill
-/doc/subscriptions/gitlab_com/ @lyspin
 /doc/subscriptions/gitlab_dedicated/ @lyspin
 /doc/topics/ @msedlakjakubowski
 /doc/topics/autodevops/ @phillipwells
@@ -1045,7 +1046,6 @@ lib/gitlab/checks/**
 /doc/user/get_started/get_started_projects.md @lciutacu
 /doc/user/gitlab_duo/ @sselhorn @jglassman1 @fneill
 /doc/user/gitlab_duo_chat/ @sselhorn @jglassman1 @fneill
-/doc/user/glql/ @msedlakjakubowski
 /doc/user/group/access_and_permissions.md @lciutacu
 /doc/user/group/clusters/ @phillipwells
 /doc/user/group/compliance_frameworks.md @eread
@@ -1142,7 +1142,7 @@ lib/gitlab/checks/**
 /doc/user/project/repository/code_suggestions/ @jglassman1
 /doc/user/project/repository/files/index.md @ashrafkhamis
 /doc/user/project/repository/monorepos/ @eread
-/doc/user/project/repository/web_editor.md @brendan777
+/doc/user/project/repository/web_editor.md @ashrafkhamis
 /doc/user/project/requirements/ @msedlakjakubowski
 /doc/user/project/service_desk/ @msedlakjakubowski
 /doc/user/project/settings/import_export.md @ashrafkhamis
@@ -1167,13 +1167,13 @@ lib/gitlab/checks/**
 /doc/user/ssh.md @jglassman1
 /doc/user/ssh_troubleshooting.md @jglassman1
 /doc/user/storage_management_automation.md @fneill
-/doc/user/storage_usage_quotas.md @fneill
 /doc/user/tasks.md @msedlakjakubowski
 /doc/user/todos.md @sselhorn
+/doc/user/storage_usage_quotas.md @fneill
 /doc/user/workspace/ @ashrafkhamis
 # End rake-managed-docs-block
 
-[Authorization] @gitlab-org/software-supply-chain-security/authorization/approvers
+[Authorization] @gitlab-org/govern/authorization/approvers
 /config/initializers/declarative_policy.rb
 /config/initializers/declarative_policy_cached_attributes.rb
 /app/policies/
@@ -1192,16 +1192,11 @@ lib/gitlab/checks/**
 /ee/spec/requests/custom_roles/
 /ee/lib/api/member_roles.rb
 
-[Container registry] @gitlab-org/ci-cd/package-stage/container-registry-group
-/app/assets/javascripts/packages_and_registries/container_registry/
-/app/assets/javascripts/packages_and_registries/dependency_proxy/
-/app/assets/javascripts/packages_and_registries/harbor_registry/
-/ee/app/services/ee/auth/container_registry_authentication_service.rb
-
-[Authentication] @gitlab-org/software-supply-chain-security/authentication/approvers
+[Authentication] @gitlab-org/govern/authentication/approvers
 /app/assets/javascripts/access_tokens/
 /app/assets/javascripts/alerts_settings/graphql/mutations/reset_http_token.mutation.graphql
 /app/assets/javascripts/authentication/
+/app/assets/javascripts/packages_and_registries/package_registry/components/list/tokens/
 /app/assets/javascripts/pages/admin/impersonation_tokens/
 /app/assets/javascripts/pages/groups/settings/access_tokens/
 /app/assets/javascripts/pages/ldap/
@@ -1317,6 +1312,7 @@ lib/gitlab/checks/**
 /app/views/shared/access_tokens/
 /app/views/shared/members/_two_factor_auth_badge.html.haml
 /app/views/shared/tokens/
+/app/workers/authorized_keys_worker.rb
 /app/workers/authorized_project_update/
 /app/workers/authorized_projects_worker.rb
 /app/workers/personal_access_tokens/
@@ -1369,6 +1365,7 @@ lib/gitlab/checks/**
 /ee/app/models/ee/project_authorization.rb
 /ee/app/models/scim_oauth_access_token.rb
 /ee/app/serializers/scim_oauth_access_token_entity.rb
+/ee/app/services/ee/auth/
 /ee/app/services/ee/personal_access_tokens/
 /ee/app/services/ee/resource_access_tokens/
 /ee/app/services/ee/users/authorized_build_service.rb
@@ -1509,8 +1506,6 @@ lib/gitlab/checks/**
 /**/lib/**/ci/reports/**/ @gitlab-org/maintainers/rails-backend
 /**/lib/**/ci/parsers/**/ @gitlab-org/maintainers/rails-backend
 /**/app/views/ci/**/ @gitlab-org/maintainers/rails-backend
-/ee/**/models/ai/ai_resource/ci/ @gitlab-org/maintainers/rails-backend
-/ee/**/serializers/ci/*_ai_*.rb @gitlab-org/maintainers/rails-backend
 /ee/lib/gitlab/ci/parsers/license_compliance/ @gitlab-org/secure/composition-analysis-be
 /ee/lib/gitlab/ci/parsers/security/ @gitlab-org/govern/threat-insights-backend-team
 /ee/lib/gitlab/ci/reports/coverage_fuzzing/ @gitlab-org/secure/fuzzing-be
@@ -1607,7 +1602,7 @@ lib/api/entities/project_identity.rb
 lib/api/entities/project.rb
 ee/lib/ee/api/entities/project.rb
 
-[Compliance] @gitlab-org/software-supply-chain-security/compliance/engineering
+[Compliance] @gitlab-org/govern/compliance/engineering
 /app/services/audit_events/build_service.rb
 /ee/app/services/ee/audit_events/build_service.rb
 /app/models/audit_event.rb
@@ -1630,13 +1625,6 @@ ee/lib/gitlab/llm/chain/agents/zero_shot/
 ee/lib/gitlab/llm/chain/agents/single_action_executor.rb
 ee/lib/gitlab/llm/chain/streamed_zero_shot_answer.rb
 ee/lib/gitlab/llm/completions/chat.rb
-
-[Code Suggestions] @code-creation-team/backend-engineers
-ee/lib/api/code_suggestions.rb
-ee/lib/code_suggestions/
-ee/lib/ai/context/dependencies/
-ee/app/services/ai/repository_xray/
-ee/app/workers/ai/repository_xray/
 
 # Fulfillment::Utilization
 ^[Usage Quotas] @gitlab-org/fulfillment/utilization/fe
@@ -1743,12 +1731,10 @@ ee/app/workers/ai/repository_xray/
 [JH Technical Writer] @jihulab/maintainers/technical-writer
 /jh/doc/
 
-[Geo]
+^[Geo]
 /doc/**/geo/ @gitlab-org/geo-team/geo-backend
 /ee/**/geo/ @gitlab-org/geo-team/geo-backend
 /qa/**/geo/ @gitlab-org/geo-team/geo-backend
 geo_* @gitlab-org/geo-team/geo-backend
-
-^[Geo Frontend]
 app/assets/**/geo_* @zcuddy
 frontend/**/geo_* @zcuddy

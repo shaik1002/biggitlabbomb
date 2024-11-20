@@ -14,18 +14,18 @@ describe('ProviderRepoTableRow', () => {
   const fetchImport = jest.fn();
   const cancelImport = jest.fn();
   const setImportTarget = jest.fn();
-  const groupImportTarget = {
+  const fakeImportTarget = {
     targetNamespace: 'target',
     newName: 'newName',
   };
 
   const userNamespace = 'root';
 
-  function initStore({ importTarget = groupImportTarget } = {}) {
+  function initStore(initialState) {
     const store = new Vuex.Store({
-      state: {},
+      state: initialState,
       getters: {
-        getImportTarget: () => () => importTarget,
+        getImportTarget: () => () => fakeImportTarget,
       },
       actions: { fetchImport, cancelImport, setImportTarget },
     });
@@ -43,8 +43,7 @@ describe('ProviderRepoTableRow', () => {
   const findReimportButton = () => findButton('Re-import');
   const findImportTargetDropdown = () => wrapper.findComponent(ImportTargetDropdown);
   const findImportStatus = () => wrapper.findComponent(ImportStatus);
-  const findProviderLink = () => wrapper.findByTestId('provider-link');
-  const findMembershipsWarning = () => wrapper.findByTestId('memberships-warning');
+  const findProviderLink = () => wrapper.findByTestId('providerLink');
 
   const findCancelButton = () => {
     const buttons = wrapper
@@ -54,17 +53,14 @@ describe('ProviderRepoTableRow', () => {
     return buttons.length ? buttons.at(0) : buttons;
   };
 
-  function mountComponent(props, { storeOptions = {} } = {}) {
+  function mountComponent(props) {
     Vue.use(Vuex);
 
-    const store = initStore(storeOptions);
+    const store = initStore();
 
     wrapper = shallowMountExtended(ProviderRepoTableRow, {
       store,
-      propsData: { optionalStages: {}, ...props },
-      provide: {
-        userNamespace,
-      },
+      propsData: { userNamespace, optionalStages: {}, ...props },
     });
   }
 
@@ -94,25 +90,6 @@ describe('ProviderRepoTableRow', () => {
 
     it('renders a group namespace select', () => {
       expect(findImportTargetDropdown().exists()).toBe(true);
-    });
-
-    describe('when user namespace is selected as import target', () => {
-      beforeEach(() => {
-        mountComponent(
-          { repo },
-          { storeOptions: { importTarget: { targetNamespace: userNamespace } } },
-        );
-      });
-
-      it('shows memberships warning', () => {
-        expect(findMembershipsWarning().isVisible()).toBe(true);
-      });
-    });
-
-    describe('when group namespace is selected as import target', () => {
-      it('does not show memberships warning', () => {
-        expect(findMembershipsWarning().isVisible()).toBe(false);
-      });
     });
 
     it('renders import button', () => {

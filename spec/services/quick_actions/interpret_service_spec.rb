@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe QuickActions::InterpretService, feature_category: :text_editors do
+RSpec.describe QuickActions::InterpretService, feature_category: :team_planning do
   include AfterNextHelpers
 
   let_it_be(:group) { create(:group) }
@@ -251,7 +251,7 @@ RSpec.describe QuickActions::InterpretService, feature_category: :text_editors d
       it 'returns the todo message' do
         _, _, message = service.execute(content, issuable)
 
-        expect(message).to eq(_('Added a to-do item.'))
+        expect(message).to eq(_('Added a to do.'))
       end
     end
 
@@ -267,7 +267,7 @@ RSpec.describe QuickActions::InterpretService, feature_category: :text_editors d
         TodoService.new.mark_todo(issuable, developer)
         _, _, message = service.execute(content, issuable)
 
-        expect(message).to eq(_('Marked to-do item as done.'))
+        expect(message).to eq(_('Marked to do as done.'))
       end
     end
 

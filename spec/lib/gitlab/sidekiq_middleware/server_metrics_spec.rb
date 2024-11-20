@@ -2,6 +2,7 @@
 
 require 'spec_helper'
 
+# rubocop: disable RSpec/MultipleMemoizedHelpers
 RSpec.describe Gitlab::SidekiqMiddleware::ServerMetrics, feature_category: :shared do
   before do
     allow(Thread.current).to receive(:name=)
@@ -556,3 +557,4 @@ RSpec.describe Gitlab::SidekiqMiddleware::ServerMetrics, feature_category: :shar
     end
   end
 end
+# rubocop: enable RSpec/MultipleMemoizedHelpers

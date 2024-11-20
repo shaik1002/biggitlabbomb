@@ -18,9 +18,6 @@ module Mutations
       argument :issues_sort, Types::IssueSortEnum,
         required: false,
         description: 'Sort order for issue lists.'
-      argument :merge_requests_sort, Types::MergeRequestSortEnum,
-        required: false,
-        description: 'Sort order for issue lists.'
       argument :use_work_items_view, GraphQL::Types::Boolean,
         required: false,
         description: 'Use work item view instead of legacy issue view.'
@@ -31,12 +28,12 @@ module Mutations
       argument :organization_groups_projects_sort, Types::Organizations::GroupsProjectsSortEnum,
         required: false,
         description: 'Sort order for organization groups and projects.',
-        experiment: { milestone: '17.2' }
+        alpha: { milestone: '17.2' }
 
       argument :organization_groups_projects_display, Types::Organizations::GroupsProjectsDisplayEnum,
         required: false,
         description: 'Default list view for organization groups and projects.',
-        experiment: { milestone: '17.2' }
+        alpha: { milestone: '17.2' }
 
       field :user_preferences,
         Types::UserPreferencesType,

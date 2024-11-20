@@ -89,13 +89,12 @@ export default {
 <template>
   <div>
     <ul class="gl-m-0 gl-list-none gl-p-0 gl-pb-2" data-testid="scoped-items">
-      <gl-disclosure-dropdown-group :group="group" @action="trackingTypes">
+      <gl-disclosure-dropdown-group :group="group" bordered @action="trackingTypes">
         <template #list-item="{ item }">
           <search-result-hover-layover :text-message="$options.i18n.OVERLAY_SEARCH">
             <gl-icon
               name="search-results"
-              class="-gl-mt-2 gl-mr-2 gl-shrink-0 gl-pt-2"
-              variant="subtle"
+              class="-gl-mt-2 gl-mr-2 gl-shrink-0 gl-pt-2 gl-text-gray-500"
             />
             <span class="gl-grow">
               {{ item.scopeName }}

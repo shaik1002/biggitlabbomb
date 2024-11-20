@@ -15,18 +15,17 @@ type Ranges struct {
 	Cache      *cache
 }
 
-// Range represents a raw range with an ID, start, and end
-type Range struct {
-	ID          ID       `json:"id"`
-	Start       Position `json:"start"`
-	End         Position `json:"end"`
-	ResultSetID ID
+// RawRange represents a raw range with an ID and start position
+type RawRange struct {
+	ID   ID    `json:"id"`
+	Data Range `json:"start"`
 }
 
-// Position represents a start or end position of a definition
-type Position struct {
-	Line      int32 `json:"line"`
-	Character int32 `json:"character"`
+// Range represents a range with line and character positions
+type Range struct {
+	Line        int32 `json:"line"`
+	Character   int32 `json:"character"`
+	ResultSetID ID
 }
 
 // RawItem represents a raw item
@@ -47,8 +46,6 @@ type Item struct {
 type SerializedRange struct {
 	StartLine      int32                 `json:"start_line"`
 	StartChar      int32                 `json:"start_char"`
-	EndLine        int32                 `json:"end_line"`
-	EndChar        int32                 `json:"end_char"`
 	DefinitionPath string                `json:"definition_path,omitempty"`
 	Hover          json.RawMessage       `json:"hover"`
 	References     []SerializedReference `json:"references,omitempty"`
@@ -113,10 +110,8 @@ func (r *Ranges) Serialize(f io.Writer, rangeIDs []ID, docs map[ID]string) error
 		}
 
 		serializedRange := SerializedRange{
-			StartLine:      entry.Start.Line,
-			StartChar:      entry.Start.Character,
-			EndLine:        entry.End.Line,
-			EndChar:        entry.End.Character,
+			StartLine:      entry.Line,
+			StartChar:      entry.Character,
 			DefinitionPath: r.definitionPathFor(docs, entry.ResultSetID),
 			Hover:          r.ResultSet.Hovers.For(entry.ResultSetID),
 			References:     r.References.For(docs, entry.ResultSetID),
@@ -164,12 +159,12 @@ func (r *Ranges) definitionPathFor(docs map[ID]string, refID ID) string {
 }
 
 func (r *Ranges) addRange(line []byte) error {
-	var rg Range
+	var rg RawRange
 	if err := json.Unmarshal(line, &rg); err != nil {
 		return err
 	}
 
-	return r.Cache.SetEntry(rg.ID, &rg)
+	return r.Cache.SetEntry(rg.ID, &rg.Data)
 }
 
 func (r *Ranges) addItem(line []byte) error {
@@ -201,7 +196,7 @@ func (r *Ranges) addItem(line []byte) error {
 		}
 
 		item := Item{
-			Line:  rg.Start.Line + 1,
+			Line:  rg.Line + 1,
 			DocID: rawItem.DocID,
 		}
 

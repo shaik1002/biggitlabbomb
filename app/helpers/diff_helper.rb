@@ -222,9 +222,7 @@ module DiffHelper
   end
 
   def apply_diff_view_cookie!
-    return unless params[:view].present?
-
-    set_secure_cookie(:diff_view, params.delete(:view), type: CookiesHelper::COOKIE_TYPE_PERMANENT)
+    set_secure_cookie(:diff_view, params.delete(:view), type: CookiesHelper::COOKIE_TYPE_PERMANENT) if params[:view].present?
   end
 
   def collapsed_diff_url(diff_file)
@@ -248,11 +246,9 @@ module DiffHelper
   end
 
   def conflicts(allow_tree_conflicts: false)
-    unless merge_request.cannot_be_merged? && merge_request.source_branch_exists? && merge_request.target_branch_exists?
-      return
-    end
+    return unless merge_request.cannot_be_merged? && merge_request.source_branch_exists? && merge_request.target_branch_exists?
 
-    conflicts_service = MergeRequests::Conflicts::ListService.new(merge_request, allow_tree_conflicts: allow_tree_conflicts)
+    conflicts_service = MergeRequests::Conflicts::ListService.new(merge_request, allow_tree_conflicts: allow_tree_conflicts) # rubocop:disable CodeReuse/ServiceClass
 
     return unless allow_tree_conflicts || conflicts_service.can_be_resolved_in_ui?
 
@@ -267,13 +263,11 @@ module DiffHelper
   end
 
   def conflicts_with_types
-    unless merge_request.cannot_be_merged? && merge_request.source_branch_exists? && merge_request.target_branch_exists?
-      return
-    end
+    return unless merge_request.cannot_be_merged? && merge_request.source_branch_exists? && merge_request.target_branch_exists?
 
     cached_conflicts_with_types do
       # We set skip_content to true since we don't really need the content to list the conflicts and their types
-      conflicts_service = MergeRequests::Conflicts::ListService.new(
+      conflicts_service = MergeRequests::Conflicts::ListService.new( # rubocop:disable CodeReuse/ServiceClass
         merge_request,
         allow_tree_conflicts: true,
         skip_content: true
@@ -360,7 +354,9 @@ module DiffHelper
   end
 
   def log_overflow_limits(diff_files:, collection_overflow:)
-    Gitlab::Metrics.add_event(:diffs_overflow_single_file_limits) if diff_files.any?(&:too_large?)
+    if diff_files.any?(&:too_large?)
+      Gitlab::Metrics.add_event(:diffs_overflow_single_file_limits)
+    end
 
     Gitlab::Metrics.add_event(:diffs_overflow_collection_limits) if collection_overflow
     Gitlab::Metrics.add_event(:diffs_overflow_max_bytes_limits) if diff_files.overflow_max_bytes?

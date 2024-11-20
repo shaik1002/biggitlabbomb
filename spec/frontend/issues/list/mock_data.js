@@ -18,7 +18,6 @@ import {
   TOKEN_TYPE_WEIGHT,
   TOKEN_TYPE_HEALTH,
 } from '~/vue_shared/components/filtered_search_bar/constants';
-import { EMOJI_THUMBS_UP, EMOJI_THUMBS_DOWN } from '~/emoji/constants';
 
 export const getIssuesQueryResponse = {
   data: {
@@ -204,8 +203,8 @@ export const locationSearch = [
   'type[]=feature',
   'not[type][]=bug',
   'not[type][]=incident',
-  `my_reaction_emoji=${EMOJI_THUMBS_UP}`,
-  `not[my_reaction_emoji]=${EMOJI_THUMBS_DOWN}`,
+  'my_reaction_emoji=thumbsup',
+  'not[my_reaction_emoji]=thumbsdown',
   'confidential=yes',
   'iteration_id=4',
   'iteration_id=12',
@@ -292,8 +291,8 @@ const makeFilteredTokens = ({ grouped }) => [
   { type: TOKEN_TYPE_TYPE, value: { data: 'feature', operator: OPERATOR_IS } },
   { type: TOKEN_TYPE_TYPE, value: { data: 'bug', operator: OPERATOR_NOT } },
   { type: TOKEN_TYPE_TYPE, value: { data: 'incident', operator: OPERATOR_NOT } },
-  { type: TOKEN_TYPE_MY_REACTION, value: { data: EMOJI_THUMBS_UP, operator: OPERATOR_IS } },
-  { type: TOKEN_TYPE_MY_REACTION, value: { data: EMOJI_THUMBS_DOWN, operator: OPERATOR_NOT } },
+  { type: TOKEN_TYPE_MY_REACTION, value: { data: 'thumbsup', operator: OPERATOR_IS } },
+  { type: TOKEN_TYPE_MY_REACTION, value: { data: 'thumbsdown', operator: OPERATOR_NOT } },
   { type: TOKEN_TYPE_CONFIDENTIAL, value: { data: 'yes', operator: OPERATOR_IS } },
   { type: TOKEN_TYPE_ITERATION, value: { data: '4', operator: OPERATOR_IS } },
   { type: TOKEN_TYPE_ITERATION, value: { data: '12', operator: OPERATOR_IS } },
@@ -333,7 +332,7 @@ export const apiParams = {
   labelName: ['cartoon', 'tv'],
   releaseTag: ['v3', 'v4'],
   types: ['ISSUE', 'FEATURE'],
-  myReactionEmoji: EMOJI_THUMBS_UP,
+  myReactionEmoji: 'thumbsup',
   confidential: true,
   iterationId: ['4', '12'],
   epicId: '12',
@@ -348,7 +347,7 @@ export const apiParams = {
     labelName: ['live action', 'drama'],
     releaseTag: ['v20', 'v30'],
     types: ['BUG', 'INCIDENT'],
-    myReactionEmoji: EMOJI_THUMBS_DOWN,
+    myReactionEmoji: 'thumbsdown',
     iterationId: ['20', '42'],
     epicId: '34',
     weight: '3',
@@ -391,8 +390,8 @@ export const urlParams = {
   'not[release_tag]': ['v20', 'v30'],
   'type[]': ['issue', 'feature'],
   'not[type][]': ['bug', 'incident'],
-  my_reaction_emoji: EMOJI_THUMBS_UP,
-  'not[my_reaction_emoji]': EMOJI_THUMBS_DOWN,
+  my_reaction_emoji: 'thumbsup',
+  'not[my_reaction_emoji]': 'thumbsdown',
   confidential: 'yes',
   iteration_id: ['4', '12'],
   'not[iteration_id]': ['20', '42'],

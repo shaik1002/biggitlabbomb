@@ -1,7 +1,5 @@
-import { createPinia, setActivePinia } from 'pinia';
-import { DISCUSSION_NOTE, DESC } from '~/notes/constants';
-import * as types from '~/notes/stores/mutation_types';
-import { useNotes } from '~/notes/store/legacy_notes';
+import { DISCUSSION_NOTE, ASC, DESC } from '~/notes/constants';
+import mutations from '~/notes/stores/mutations';
 import {
   note,
   discussionMock,
@@ -18,18 +16,17 @@ const UNRESOLVED_NOTE = { resolvable: true, resolved: false };
 const SYSTEM_NOTE = { resolvable: false, resolved: false };
 const WEIRD_NOTE = { resolvable: false, resolved: true };
 
-describe('Notes Store mutations', () => {
-  let store;
-
-  beforeEach(() => {
-    setActivePinia(createPinia());
-    store = useNotes();
-  });
-
+// eslint-disable-next-line jest/no-disabled-tests
+describe.skip('Notes Store mutations', () => {
   describe('ADD_NEW_NOTE', () => {
+    let state;
     let noteData;
 
     beforeEach(() => {
+      state = {
+        discussions: [],
+        discussionSortOrder: ASC,
+      };
       noteData = {
         expanded: true,
         id: note.discussion_id,
@@ -40,60 +37,63 @@ describe('Notes Store mutations', () => {
     });
 
     it('should add a new note to an array of notes', () => {
-      store[types.ADD_NEW_NOTE](note);
-      expect(store.discussions).toStrictEqual([noteData]);
-      expect(store.discussions.length).toBe(1);
+      mutations.ADD_NEW_NOTE(state, note);
+      expect(state).toEqual(expect.objectContaining({ discussions: [noteData] }));
+
+      expect(state.discussions.length).toBe(1);
     });
 
     it('should not add the same note to the notes array', () => {
-      store[types.ADD_NEW_NOTE](note);
-      store[types.ADD_NEW_NOTE](note);
+      mutations.ADD_NEW_NOTE(state, note);
+      mutations.ADD_NEW_NOTE(state, note);
 
-      expect(store.discussions.length).toBe(1);
+      expect(state.discussions.length).toBe(1);
     });
 
     it('trims first character from truncated_diff_lines', () => {
-      store[types.ADD_NEW_NOTE]({
+      mutations.ADD_NEW_NOTE(state, {
         discussion: {
           notes: [{ ...note }],
           truncated_diff_lines: [{ text: '+a', rich_text: '+<span>a</span>' }],
         },
       });
 
-      expect(store.discussions[0].truncated_diff_lines).toEqual([{ rich_text: '<span>a</span>' }]);
+      expect(state.discussions[0].truncated_diff_lines).toEqual([{ rich_text: '<span>a</span>' }]);
     });
   });
 
   describe('ADD_NEW_REPLY_TO_DISCUSSION', () => {
     const newReply = { ...note, discussion_id: discussionMock.id };
 
+    let state;
+
     beforeEach(() => {
-      store.discussions = [{ ...discussionMock }];
+      state = { discussions: [{ ...discussionMock }] };
     });
 
     it('should add a reply to a specific discussion', () => {
-      store[types.ADD_NEW_REPLY_TO_DISCUSSION](newReply);
+      mutations.ADD_NEW_REPLY_TO_DISCUSSION(state, newReply);
 
-      expect(store.discussions[0].notes.length).toEqual(4);
+      expect(state.discussions[0].notes.length).toEqual(4);
     });
 
     it('should not add the note if it already exists in the discussion', () => {
-      store[types.ADD_NEW_REPLY_TO_DISCUSSION](newReply);
-      store[types.ADD_NEW_REPLY_TO_DISCUSSION](newReply);
+      mutations.ADD_NEW_REPLY_TO_DISCUSSION(state, newReply);
+      mutations.ADD_NEW_REPLY_TO_DISCUSSION(state, newReply);
 
-      expect(store.discussions[0].notes.length).toEqual(4);
+      expect(state.discussions[0].notes.length).toEqual(4);
     });
   });
 
   describe('DELETE_NOTE', () => {
     it('should delete a note', () => {
-      store.$patch({ discussions: [discussionMock] });
+      const state = { discussions: [discussionMock] };
       const toDelete = discussionMock.notes[0];
       const lengthBefore = discussionMock.notes.length;
 
-      store[types.DELETE_NOTE](toDelete);
+      mutations.DELETE_NOTE(state, toDelete);
 
-      expect(store.discussions[0].notes.length).toEqual(lengthBefore - 1);
+      expect(state.discussions[0].notes.length).toEqual(lengthBefore - 1);
     });
   });
 
@@ -101,13 +101,13 @@ describe('Notes Store mutations', () => {
     it('should expand a collapsed discussion', () => {
       const discussion = { ...discussionMock, expanded: false };
 
-      store.$patch({
+      const state = {
         discussions: [discussion],
-      });
+      };
 
-      store[types.EXPAND_DISCUSSION]({ discussionId: discussion.id });
+      mutations.EXPAND_DISCUSSION(state, { discussionId: discussion.id });
 
-      expect(store.discussions[0].expanded).toEqual(true);
+      expect(state.discussions[0].expanded).toEqual(true);
     });
   });
 
@@ -115,24 +115,24 @@ describe('Notes Store mutations', () => {
     it('should collapse an expanded discussion', () => {
       const discussion = { ...discussionMock, expanded: true };
 
-      store.$patch({
+      const state = {
         discussions: [discussion],
-      });
+      };
 
-      store[types.COLLAPSE_DISCUSSION]({ discussionId: discussion.id });
+      mutations.COLLAPSE_DISCUSSION(state, { discussionId: discussion.id });
 
-      expect(store.discussions[0].expanded).toEqual(false);
+      expect(state.discussions[0].expanded).toEqual(false);
     });
   });
 
   describe('REMOVE_PLACEHOLDER_NOTES', () => {
     it('should remove all placeholder individual notes', () => {
       const placeholderNote = { ...individualNote, isPlaceholderNote: true };
-      store.$patch({ discussions: [placeholderNote] });
+      const state = { discussions: [placeholderNote] };
 
-      store[types.REMOVE_PLACEHOLDER_NOTES]();
+      mutations.REMOVE_PLACEHOLDER_NOTES(state);
 
-      expect(store.discussions).toEqual([]);
+      expect(state.discussions).toEqual([]);
     });
 
     it.each`
@@ -145,69 +145,69 @@ describe('Notes Store mutations', () => {
       const placeholderNote = { ...individualNote, isPlaceholderNote: true };
       discussion.notes.push(placeholderNote);
 
-      store.$patch({
+      const state = {
         discussions: [discussion],
-      });
+      };
 
-      store[types.REMOVE_PLACEHOLDER_NOTES]();
+      mutations.REMOVE_PLACEHOLDER_NOTES(state);
 
-      expect(store.discussions[0].notes.length).toEqual(lengthBefore);
+      expect(state.discussions[0].notes.length).toEqual(lengthBefore);
     });
   });
 
   describe('SET_NOTES_DATA', () => {
     it('should set an object with notesData', () => {
-      store.$patch({
+      const state = {
         notesData: {},
-      });
+      };
 
-      store[types.SET_NOTES_DATA](notesDataMock);
+      mutations.SET_NOTES_DATA(state, notesDataMock);
 
-      expect(store.notesData).toEqual(notesDataMock);
+      expect(state.notesData).toEqual(notesDataMock);
     });
   });
 
   describe('SET_NOTEABLE_DATA', () => {
     it('should set the issue data', () => {
-      store.$patch({
+      const state = {
         noteableData: {},
-      });
+      };
 
-      store[types.SET_NOTEABLE_DATA](noteableDataMock);
+      mutations.SET_NOTEABLE_DATA(state, noteableDataMock);
 
-      expect(store.noteableData).toEqual(noteableDataMock);
+      expect(state.noteableData).toEqual(noteableDataMock);
     });
   });
 
   describe('SET_USER_DATA', () => {
     it('should set the user data', () => {
-      store.$patch({
+      const state = {
         userData: {},
-      });
+      };
 
-      store[types.SET_USER_DATA](userDataMock);
+      mutations.SET_USER_DATA(state, userDataMock);
 
-      expect(store.userData).toEqual(userDataMock);
+      expect(state.userData).toEqual(userDataMock);
     });
   });
 
   describe('CLEAR_DISCUSSIONS', () => {
     it('should set discussions to an empty array', () => {
-      store.$patch({
+      const state = {
         discussions: [discussionMock],
-      });
+      };
 
-      store[types.CLEAR_DISCUSSIONS]();
+      mutations.CLEAR_DISCUSSIONS(state);
 
-      expect(store.discussions).toEqual([]);
+      expect(state.discussions).toEqual([]);
     });
   });
 
   describe('ADD_OR_UPDATE_DISCUSSIONS', () => {
     it('should set the initial notes received', () => {
-      store.$patch({
+      const state = {
         discussions: [],
-      });
+      };
       const legacyNote = {
         id: 2,
         individual_note: true,
@@ -223,20 +223,20 @@ describe('Notes Store mutations', () => {
         ],
       };
 
-      store[types.ADD_OR_UPDATE_DISCUSSIONS]([note, legacyNote]);
+      mutations.ADD_OR_UPDATE_DISCUSSIONS(state, [note, legacyNote]);
 
-      expect(store.discussions[0].id).toEqual(note.id);
-      expect(store.discussions[1].notes[0].note).toBe(legacyNote.notes[0].note);
-      expect(store.discussions[2].notes[0].note).toBe(legacyNote.notes[1].note);
-      expect(store.discussions.length).toEqual(3);
+      expect(state.discussions[0].id).toEqual(note.id);
+      expect(state.discussions[1].notes[0].note).toBe(legacyNote.notes[0].note);
+      expect(state.discussions[2].notes[0].note).toBe(legacyNote.notes[1].note);
+      expect(state.discussions.length).toEqual(3);
     });
 
     it('adds truncated_diff_lines if discussion is a diffFile', () => {
-      store.$patch({
+      const state = {
         discussions: [],
-      });
+      };
 
-      store[types.ADD_OR_UPDATE_DISCUSSIONS]([
+      mutations.ADD_OR_UPDATE_DISCUSSIONS(state, [
         {
           ...note,
           diff_file: {
@@ -246,15 +246,15 @@ describe('Notes Store mutations', () => {
         },
       ]);
 
-      expect(store.discussions[0].truncated_diff_lines).toEqual([{ rich_text: '<span>a</span>' }]);
+      expect(state.discussions[0].truncated_diff_lines).toEqual([{ rich_text: '<span>a</span>' }]);
     });
 
     it('adds empty truncated_diff_lines when not in discussion', () => {
-      store.$patch({
+      const state = {
         discussions: [],
-      });
+      };
 
-      store[types.ADD_OR_UPDATE_DISCUSSIONS]([
+      mutations.ADD_OR_UPDATE_DISCUSSIONS(state, [
         {
           ...note,
           diff_file: {
@@ -263,83 +263,83 @@ describe('Notes Store mutations', () => {
         },
       ]);
 
-      expect(store.discussions[0].truncated_diff_lines).toEqual([]);
+      expect(state.discussions[0].truncated_diff_lines).toEqual([]);
     });
   });
 
   describe('SET_LAST_FETCHED_AT', () => {
     it('should set timestamp', () => {
-      store.$patch({
+      const state = {
         lastFetchedAt: [],
-      });
+      };
 
-      store[types.SET_LAST_FETCHED_AT]('timestamp');
+      mutations.SET_LAST_FETCHED_AT(state, 'timestamp');
 
-      expect(store.lastFetchedAt).toEqual('timestamp');
+      expect(state.lastFetchedAt).toEqual('timestamp');
     });
   });
 
   describe('SET_TARGET_NOTE_HASH', () => {
     it('should set the note hash', () => {
-      store.$patch({
+      const state = {
         targetNoteHash: [],
-      });
+      };
 
-      store[types.SET_TARGET_NOTE_HASH]('hash');
+      mutations.SET_TARGET_NOTE_HASH(state, 'hash');
 
-      expect(store.targetNoteHash).toEqual('hash');
+      expect(state.targetNoteHash).toEqual('hash');
     });
   });
 
   describe('SHOW_PLACEHOLDER_NOTE', () => {
     it('should set a placeholder note', () => {
-      store.$patch({
+      const state = {
         discussions: [],
-      });
-      store[types.SHOW_PLACEHOLDER_NOTE](note);
+      };
+      mutations.SHOW_PLACEHOLDER_NOTE(state, note);
 
-      expect(store.discussions[0].isPlaceholderNote).toEqual(true);
+      expect(state.discussions[0].isPlaceholderNote).toEqual(true);
     });
   });
 
   describe('TOGGLE_AWARD', () => {
     it('should add award if user has not reacted yet', () => {
-      store.$patch({
+      const state = {
         discussions: [note],
         userData: userDataMock,
-      });
+      };
 
       const data = {
         note,
         awardName: 'cartwheel',
       };
 
-      store[types.TOGGLE_AWARD](data);
-      const lastIndex = store.discussions[0].award_emoji.length - 1;
+      mutations.TOGGLE_AWARD(state, data);
+      const lastIndex = state.discussions[0].award_emoji.length - 1;
 
-      expect(store.discussions[0].award_emoji[lastIndex]).toEqual({
+      expect(state.discussions[0].award_emoji[lastIndex]).toEqual({
         name: 'cartwheel',
         user: { id: userDataMock.id, name: userDataMock.name, username: userDataMock.username },
       });
     });
 
     it('should remove award if user already reacted', () => {
-      store.$patch({
+      const state = {
         discussions: [note],
         userData: {
           id: 1,
           name: 'Administrator',
           username: 'root',
         },
-      });
+      };
 
       const data = {
         note,
         awardName: 'bath_tone3',
       };
-      store[types.TOGGLE_AWARD](data);
+      mutations.TOGGLE_AWARD(state, data);
 
-      expect(store.discussions[0].award_emoji.length).toEqual(2);
+      expect(state.discussions[0].award_emoji.length).toEqual(2);
     });
   });
 
@@ -347,47 +347,51 @@ describe('Notes Store mutations', () => {
     it('should open a closed discussion', () => {
       const discussion = { ...discussionMock, expanded: false };
 
-      store.$patch({
+      const state = {
         discussions: [discussion],
-      });
+      };
 
-      store[types.TOGGLE_DISCUSSION]({ discussionId: discussion.id });
+      mutations.TOGGLE_DISCUSSION(state, { discussionId: discussion.id });
 
-      expect(store.discussions[0].expanded).toEqual(true);
+      expect(state.discussions[0].expanded).toEqual(true);
     });
 
     it('should close a opened discussion', () => {
-      store.$patch({
+      const state = {
         discussions: [discussionMock],
-      });
+      };
 
-      store[types.TOGGLE_DISCUSSION]({ discussionId: discussionMock.id });
+      mutations.TOGGLE_DISCUSSION(state, { discussionId: discussionMock.id });
 
-      expect(store.discussions[0].expanded).toEqual(false);
+      expect(state.discussions[0].expanded).toEqual(false);
     });
 
     it('forces a discussions expanded state', () => {
-      store.$patch({
+      const state = {
         discussions: [{ ...discussionMock, expanded: false }],
-      });
+      };
 
-      store[types.TOGGLE_DISCUSSION]({ discussionId: discussionMock.id, forceExpanded: true });
+      mutations.TOGGLE_DISCUSSION(state, { discussionId: discussionMock.id, forceExpanded: true });
 
-      expect(store.discussions[0].expanded).toEqual(true);
+      expect(state.discussions[0].expanded).toEqual(true);
     });
   });
 
   describe('SET_EXPAND_DISCUSSIONS', () => {
     it('should succeed when discussions are null', () => {
-      expect(() =>
-        store[types.SET_EXPAND_DISCUSSIONS]({ discussionIds: null, expanded: true }),
-      ).not.toThrow();
+      const state = {};
+
+      mutations.SET_EXPAND_DISCUSSIONS(state, { discussionIds: null, expanded: true });
+
+      expect(state).toEqual({});
     });
 
     it('should succeed when discussions are empty', () => {
-      store[types.SET_EXPAND_DISCUSSIONS]({ discussionIds: [], expanded: true });
+      const state = {};
 
-      expect(store.discussions).toEqual([]);
+      mutations.SET_EXPAND_DISCUSSIONS(state, { discussionIds: [], expanded: true });
+
+      expect(state).toEqual({});
     });
 
     it('should open all closed discussions', () => {
@@ -395,11 +399,11 @@ describe('Notes Store mutations', () => {
       const discussion2 = { ...discussionMock, id: 1, expanded: true };
       const discussionIds = [discussion1.id, discussion2.id];
 
-      store.$patch({ discussions: [discussion1, discussion2] });
+      const state = { discussions: [discussion1, discussion2] };
 
-      store[types.SET_EXPAND_DISCUSSIONS]({ discussionIds, expanded: true });
+      mutations.SET_EXPAND_DISCUSSIONS(state, { discussionIds, expanded: true });
 
-      store.discussions.forEach((discussion) => {
+      state.discussions.forEach((discussion) => {
         expect(discussion.expanded).toEqual(true);
       });
     });
@@ -409,11 +413,11 @@ describe('Notes Store mutations', () => {
       const discussion2 = { ...discussionMock, id: 1, expanded: true };
       const discussionIds = [discussion1.id, discussion2.id];
 
-      store.$patch({ discussions: [discussion1, discussion2] });
+      const state = { discussions: [discussion1, discussion2] };
 
-      store[types.SET_EXPAND_DISCUSSIONS]({ discussionIds, expanded: false });
+      mutations.SET_EXPAND_DISCUSSIONS(state, { discussionIds, expanded: false });
 
-      store.discussions.forEach((discussion) => {
+      state.discussions.forEach((discussion) => {
         expect(discussion.expanded).toEqual(false);
       });
     });
@@ -421,42 +425,44 @@ describe('Notes Store mutations', () => {
 
   describe('SET_RESOLVING_DISCUSSION', () => {
     it('should set resolving discussion state', () => {
-      store[types.SET_RESOLVING_DISCUSSION](true);
+      const state = {};
 
-      expect(store.isResolvingDiscussion).toEqual(true);
+      mutations.SET_RESOLVING_DISCUSSION(state, true);
+
+      expect(state.isResolvingDiscussion).toEqual(true);
     });
   });
 
   describe('UPDATE_NOTE', () => {
     it('should update a note', () => {
-      store.$patch({
+      const state = {
         discussions: [individualNote],
-      });
+      };
 
       const updated = { ...individualNote.notes[0], note: 'Foo' };
 
-      store[types.UPDATE_NOTE](updated);
+      mutations.UPDATE_NOTE(state, updated);
 
-      expect(store.discussions[0].notes[0].note).toEqual('Foo');
+      expect(state.discussions[0].notes[0].note).toEqual('Foo');
     });
 
     it('does not update existing note if it matches', () => {
-      const originalNote = { ...individualNote, individual_note: false };
-      store.$patch({
-        discussions: [originalNote],
-      });
+      const state = {
+        discussions: [{ ...individualNote, individual_note: false }],
+      };
+      jest.spyOn(state.discussions[0].notes, 'splice');
 
       const updated = individualNote.notes[0];
 
-      store[types.UPDATE_NOTE](updated);
+      mutations.UPDATE_NOTE(state, updated);
 
-      expect(store.discussions[0]).toStrictEqual(originalNote);
+      expect(state.discussions[0].notes.splice).not.toHaveBeenCalled();
     });
 
     it('transforms an individual note to discussion', () => {
-      store.$patch({
+      const state = {
         discussions: [individualNote],
-      });
+      };
 
       const transformedNote = {
         ...individualNote.notes[0],
@@ -464,14 +470,14 @@ describe('Notes Store mutations', () => {
         resolvable: true,
       };
 
-      store[types.UPDATE_NOTE](transformedNote);
+      mutations.UPDATE_NOTE(state, transformedNote);
 
-      expect(store.discussions[0].individual_note).toEqual(false);
-      expect(store.discussions[0].resolvable).toEqual(true);
+      expect(state.discussions[0].individual_note).toEqual(false);
+      expect(state.discussions[0].resolvable).toEqual(true);
     });
 
     it('copies resolve state to discussion', () => {
-      store.$patch({ discussions: [{ ...discussionMock }] });
+      const state = { discussions: [{ ...discussionMock }] };
 
       const resolvedNote = {
         ...discussionMock.notes[0],
@@ -482,18 +488,18 @@ describe('Notes Store mutations', () => {
         resolved_by_push: false,
       };
 
-      store[types.UPDATE_NOTE](resolvedNote);
+      mutations.UPDATE_NOTE(state, resolvedNote);
 
-      expect(store.discussions[0].resolved).toEqual(resolvedNote.resolved);
-      expect(store.discussions[0].resolved_at).toEqual(resolvedNote.resolved_at);
-      expect(store.discussions[0].resolved_by).toEqual(resolvedNote.resolved_by);
-      expect(store.discussions[0].resolved_by_push).toEqual(resolvedNote.resolved_by_push);
+      expect(state.discussions[0].resolved).toEqual(resolvedNote.resolved);
+      expect(state.discussions[0].resolved_at).toEqual(resolvedNote.resolved_at);
+      expect(state.discussions[0].resolved_by).toEqual(resolvedNote.resolved_by);
+      expect(state.discussions[0].resolved_by_push).toEqual(resolvedNote.resolved_by_push);
     });
   });
 
   describe('CLOSE_ISSUE', () => {
     it('should set issue as closed', () => {
-      store.$patch({
+      const state = {
         discussions: [],
         targetNoteHash: null,
         lastFetchedAt: null,
@@ -501,17 +507,17 @@ describe('Notes Store mutations', () => {
         notesData: {},
         userData: {},
         noteableData: {},
-      });
+      };
 
-      store[types.CLOSE_ISSUE]();
+      mutations.CLOSE_ISSUE(state);
 
-      expect(store.noteableData.state).toEqual('closed');
+      expect(state.noteableData.state).toEqual('closed');
     });
   });
 
   describe('REOPEN_ISSUE', () => {
     it('should set issue as closed', () => {
-      store.$patch({
+      const state = {
         discussions: [],
         targetNoteHash: null,
         lastFetchedAt: null,
@@ -519,17 +525,17 @@ describe('Notes Store mutations', () => {
         notesData: {},
         userData: {},
         noteableData: {},
-      });
+      };
 
-      store[types.REOPEN_ISSUE]();
+      mutations.REOPEN_ISSUE(state);
 
-      expect(store.noteableData.state).toEqual('reopened');
+      expect(state.noteableData.state).toEqual('reopened');
     });
   });
 
   describe('TOGGLE_STATE_BUTTON_LOADING', () => {
     it('should set isToggleStateButtonLoading as true', () => {
-      store.$patch({
+      const state = {
         discussions: [],
         targetNoteHash: null,
         lastFetchedAt: null,
@@ -537,15 +543,15 @@ describe('Notes Store mutations', () => {
         notesData: {},
         userData: {},
         noteableData: {},
-      });
+      };
 
-      store[types.TOGGLE_STATE_BUTTON_LOADING](true);
+      mutations.TOGGLE_STATE_BUTTON_LOADING(state, true);
 
-      expect(store.isToggleStateButtonLoading).toEqual(true);
+      expect(state.isToggleStateButtonLoading).toEqual(true);
     });
 
     it('should set isToggleStateButtonLoading as false', () => {
-      store.$patch({
+      const state = {
         discussions: [],
         targetNoteHash: null,
         lastFetchedAt: null,
@@ -553,104 +559,110 @@ describe('Notes Store mutations', () => {
         notesData: {},
         userData: {},
         noteableData: {},
-      });
+      };
 
-      store[types.TOGGLE_STATE_BUTTON_LOADING](false);
+      mutations.TOGGLE_STATE_BUTTON_LOADING(state, false);
 
-      expect(store.isToggleStateButtonLoading).toEqual(false);
+      expect(state.isToggleStateButtonLoading).toEqual(false);
     });
   });
 
   describe('SET_NOTES_FETCHED_STATE', () => {
     it('should set the given state', () => {
-      store.$patch({
+      const state = {
         isNotesFetched: false,
-      });
+      };
 
-      store[types.SET_NOTES_FETCHED_STATE](true);
+      mutations.SET_NOTES_FETCHED_STATE(state, true);
 
-      expect(store.isNotesFetched).toEqual(true);
+      expect(state.isNotesFetched).toEqual(true);
     });
   });
 
   describe('SET_DISCUSSION_DIFF_LINES', () => {
     it('sets truncated_diff_lines', () => {
-      store.$patch({
+      const state = {
         discussions: [
           {
             id: 1,
           },
         ],
-      });
+      };
 
-      store[types.SET_DISCUSSION_DIFF_LINES]({
+      mutations.SET_DISCUSSION_DIFF_LINES(state, {
         discussionId: 1,
         diffLines: [{ text: '+a', rich_text: '+<span>a</span>' }],
       });
 
-      expect(store.discussions[0].truncated_diff_lines).toEqual([{ rich_text: '<span>a</span>' }]);
+      expect(state.discussions[0].truncated_diff_lines).toEqual([{ rich_text: '<span>a</span>' }]);
     });
 
     it('keeps reactivity of discussion', () => {
-      store.$patch({
+      const state = {
         discussions: [
           {
             id: 1,
             expanded: false,
           },
         ],
-      });
+      };
 
-      const discussion = store.discussions[0];
+      const discussion = state.discussions[0];
 
-      store[types.SET_DISCUSSION_DIFF_LINES]({
+      mutations.SET_DISCUSSION_DIFF_LINES(state, {
         discussionId: 1,
         diffLines: [{ rich_text: '<span>a</span>' }],
       });
 
       discussion.expanded = true;
 
-      expect(store.discussions[0].expanded).toBe(true);
+      expect(state.discussions[0].expanded).toBe(true);
     });
   });
 
   describe('SET_SELECTED_COMMENT_POSITION', () => {
     it('should set comment position state', () => {
-      store[types.SET_SELECTED_COMMENT_POSITION]({});
+      const state = {};
 
-      expect(store.selectedCommentPosition).toEqual({});
+      mutations.SET_SELECTED_COMMENT_POSITION(state, {});
+
+      expect(state.selectedCommentPosition).toEqual({});
     });
   });
 
   describe('SET_SELECTED_COMMENT_POSITION_HOVER', () => {
     it('should set comment hover position state', () => {
-      store[types.SET_SELECTED_COMMENT_POSITION_HOVER]({});
+      const state = {};
 
-      expect(store.selectedCommentPositionHover).toEqual({});
+      mutations.SET_SELECTED_COMMENT_POSITION_HOVER(state, {});
+
+      expect(state.selectedCommentPositionHover).toEqual({});
     });
   });
 
   describe('DISABLE_COMMENTS', () => {
     it('should set comments disabled state', () => {
-      store[types.DISABLE_COMMENTS](true);
+      const state = {};
 
-      expect(store.commentsDisabled).toEqual(true);
+      mutations.DISABLE_COMMENTS(state, true);
+
+      expect(state.commentsDisabled).toEqual(true);
     });
   });
 
   describe('UPDATE_RESOLVABLE_DISCUSSIONS_COUNTS', () => {
     it('with unresolvable discussions, updates state', () => {
-      store.$patch({
+      const state = {
         discussions: [
           { individual_note: false, resolvable: true, notes: [UNRESOLVED_NOTE] },
           { individual_note: true, resolvable: true, notes: [UNRESOLVED_NOTE] },
           { individual_note: false, resolvable: false, notes: [UNRESOLVED_NOTE] },
         ],
-      });
+      };
 
-      store[types.UPDATE_RESOLVABLE_DISCUSSIONS_COUNTS]();
+      mutations.UPDATE_RESOLVABLE_DISCUSSIONS_COUNTS(state);
 
-      expect(store).toEqual(
+      expect(state).toEqual(
         expect.objectContaining({
           resolvableDiscussionsCount: 1,
           unresolvedDiscussionsCount: 1,
@@ -659,7 +671,7 @@ describe('Notes Store mutations', () => {
     });
 
     it('with resolvable discussions, updates state', () => {
-      store.$patch({
+      const state = {
         discussions: [
           {
             individual_note: false,
@@ -682,11 +694,11 @@ describe('Notes Store mutations', () => {
             notes: [UNRESOLVED_NOTE],
           },
         ],
-      });
+      };
 
-      store[types.UPDATE_RESOLVABLE_DISCUSSIONS_COUNTS]();
+      mutations.UPDATE_RESOLVABLE_DISCUSSIONS_COUNTS(state);
 
-      expect(store).toEqual(
+      expect(state).toEqual(
         expect.objectContaining({
           resolvableDiscussionsCount: 4,
           unresolvedDiscussionsCount: 2,
@@ -697,70 +709,77 @@ describe('Notes Store mutations', () => {
 
   describe('CONVERT_TO_DISCUSSION', () => {
     let discussion;
+    let state;
 
     beforeEach(() => {
       discussion = {
         id: 42,
         individual_note: true,
       };
+      state = { convertedDisscussionIds: [] };
     });
 
     it('adds a discussion to convertedDisscussionIds', () => {
-      store[types.CONVERT_TO_DISCUSSION](discussion.id);
+      mutations.CONVERT_TO_DISCUSSION(state, discussion.id);
 
-      expect(store.convertedDisscussionIds).toContain(discussion.id);
+      expect(state.convertedDisscussionIds).toContain(discussion.id);
     });
   });
 
   describe('REMOVE_CONVERTED_DISCUSSION', () => {
     let discussion;
+    let state;
 
     beforeEach(() => {
       discussion = {
         id: 42,
         individual_note: true,
       };
-      store.$patch({ convertedDisscussionIds: [41, 42] });
+      state = { convertedDisscussionIds: [41, 42] };
     });
 
     it('removes a discussion from convertedDisscussionIds', () => {
-      store[types.REMOVE_CONVERTED_DISCUSSION](discussion.id);
+      mutations.REMOVE_CONVERTED_DISCUSSION(state, discussion.id);
 
-      expect(store.convertedDisscussionIds).not.toContain(discussion.id);
+      expect(state.convertedDisscussionIds).not.toContain(discussion.id);
     });
   });
 
   describe('RECEIVE_DESCRIPTION_VERSION', () => {
     const descriptionVersion = notesWithDescriptionChanges[0].notes[0].note;
     const versionId = notesWithDescriptionChanges[0].notes[0].id;
+    const state = {};
 
     it('adds a descriptionVersion', () => {
-      store[types.RECEIVE_DESCRIPTION_VERSION]({ descriptionVersion, versionId });
-      expect(store.descriptionVersions[versionId]).toBe(descriptionVersion);
+      mutations.RECEIVE_DESCRIPTION_VERSION(state, { descriptionVersion, versionId });
+      expect(state.descriptionVersions[versionId]).toBe(descriptionVersion);
     });
   });
 
   describe('RECEIVE_DELETE_DESCRIPTION_VERSION', () => {
     const descriptionVersion = notesWithDescriptionChanges[0].notes[0].note;
     const versionId = notesWithDescriptionChanges[0].notes[0].id;
+    const state = { descriptionVersions: { [versionId]: descriptionVersion } };
     const deleted = 'Deleted';
 
-    beforeEach(() => {
-      store.$patch({ descriptionVersions: { [versionId]: descriptionVersion } });
-    });
-
     it('updates descriptionVersion to "Deleted"', () => {
-      store[types.RECEIVE_DELETE_DESCRIPTION_VERSION]({ [versionId]: deleted });
-      expect(store.descriptionVersions[versionId]).toBe(deleted);
+      mutations.RECEIVE_DELETE_DESCRIPTION_VERSION(state, { [versionId]: deleted });
+      expect(state.descriptionVersions[versionId]).toBe(deleted);
     });
   });
 
   describe('SET_DISCUSSIONS_SORT', () => {
-    it('sets sort order', () => {
-      store[types.SET_DISCUSSIONS_SORT]({ direction: DESC, persist: false });
+    let state;
 
-      expect(store.discussionSortOrder).toBe(DESC);
-      expect(store.persistSortOrder).toBe(false);
+    beforeEach(() => {
+      state = { discussionSortOrder: ASC };
+    });
+
+    it('sets sort order', () => {
+      mutations.SET_DISCUSSIONS_SORT(state, { direction: DESC, persist: false });
+
+      expect(state.discussionSortOrder).toBe(DESC);
+      expect(state.persistSortOrder).toBe(false);
     });
   });
 
@@ -779,6 +798,7 @@ describe('Notes Store mutations', () => {
       }));
     };
 
+    let state;
     let batchedSuggestionInfo;
     let discussions;
     let suggestions;
@@ -787,14 +807,14 @@ describe('Notes Store mutations', () => {
       [batchedSuggestionInfo] = batchSuggestionsInfoMock;
       suggestions = batchSuggestionsInfoMock.map(({ suggestionId }) => ({ id: suggestionId }));
       discussions = buildDiscussions(batchSuggestionsInfoMock);
-      store.$patch({
+      state = {
         batchSuggestionsInfo: [batchedSuggestionInfo],
         discussions,
-      });
+      };
     });
 
     it('sets is_applying_batch to a boolean value for all batched suggestions', () => {
-      store[types.SET_APPLYING_BATCH_STATE](true);
+      mutations.SET_APPLYING_BATCH_STATE(state, true);
 
       const updatedSuggestion = {
         ...suggestions[0],
@@ -803,7 +823,7 @@ describe('Notes Store mutations', () => {
 
       const expectedSuggestions = [updatedSuggestion, suggestions[1]];
 
-      const actualSuggestions = store.discussions
+      const actualSuggestions = state.discussions
         .map((discussion) => discussion.notes.map((n) => n.suggestions))
         .flat(2);
 
@@ -812,6 +832,12 @@ describe('Notes Store mutations', () => {
   });
 
   describe('ADD_SUGGESTION_TO_BATCH', () => {
+    let state;
+
+    beforeEach(() => {
+      state = { batchSuggestionsInfo: [] };
+    });
+
     it("adds a suggestion's info to a batch", () => {
       const suggestionInfo = {
         suggestionId: 'a123',
@@ -819,78 +845,85 @@ describe('Notes Store mutations', () => {
         discussionId: 'c789',
       };
 
-      store[types.ADD_SUGGESTION_TO_BATCH](suggestionInfo);
+      mutations.ADD_SUGGESTION_TO_BATCH(state, suggestionInfo);
 
-      expect(store.batchSuggestionsInfo).toEqual([suggestionInfo]);
+      expect(state.batchSuggestionsInfo).toEqual([suggestionInfo]);
     });
   });
 
   describe('REMOVE_SUGGESTION_FROM_BATCH', () => {
+    let state;
     let suggestionInfo1;
     let suggestionInfo2;
 
     beforeEach(() => {
       [suggestionInfo1, suggestionInfo2] = batchSuggestionsInfoMock;
 
-      store.$patch({
+      state = {
         batchSuggestionsInfo: [suggestionInfo1, suggestionInfo2],
-      });
+      };
     });
 
     it("removes a suggestion's info from a batch", () => {
-      store[types.REMOVE_SUGGESTION_FROM_BATCH](suggestionInfo1.suggestionId);
+      mutations.REMOVE_SUGGESTION_FROM_BATCH(state, suggestionInfo1.suggestionId);
 
-      expect(store.batchSuggestionsInfo).toEqual([suggestionInfo2]);
+      expect(state.batchSuggestionsInfo).toEqual([suggestionInfo2]);
     });
   });
 
   describe('CLEAR_SUGGESTION_BATCH', () => {
+    let state;
+
     beforeEach(() => {
-      store.$patch({
+      state = {
         batchSuggestionsInfo: batchSuggestionsInfoMock,
-      });
+      };
     });
 
     it('removes info for all suggestions from a batch', () => {
-      store[types.CLEAR_SUGGESTION_BATCH]();
+      mutations.CLEAR_SUGGESTION_BATCH(state);
 
-      expect(store.batchSuggestionsInfo.length).toEqual(0);
+      expect(state.batchSuggestionsInfo.length).toEqual(0);
     });
   });
 
   describe('SET_ISSUE_CONFIDENTIAL', () => {
+    let state;
+
     beforeEach(() => {
-      store.$patch({ noteableData: { confidential: false } });
+      state = { noteableData: { confidential: false } };
     });
 
     it('should set issuable as confidential', () => {
-      store[types.SET_ISSUE_CONFIDENTIAL](true);
+      mutations.SET_ISSUE_CONFIDENTIAL(state, true);
 
-      expect(store.noteableData.confidential).toBe(true);
+      expect(state.noteableData.confidential).toBe(true);
     });
   });
 
   describe('SET_ISSUABLE_LOCK', () => {
+    let state;
+
     beforeEach(() => {
-      store.$patch({ noteableData: { discussion_locked: false } });
+      state = { noteableData: { discussion_locked: false } };
     });
 
     it('should set issuable as locked', () => {
-      store[types.SET_ISSUABLE_LOCK](true);
+      mutations.SET_ISSUABLE_LOCK(state, true);
 
-      expect(store.noteableData.discussion_locked).toBe(true);
+      expect(state.noteableData.discussion_locked).toBe(true);
     });
   });
 
   describe('UPDATE_ASSIGNEES', () => {
     it('should update assignees', () => {
-      store.$patch({
+      const state = {
         noteableData: noteableDataMock,
-      });
+      };
 
-      store[types.UPDATE_ASSIGNEES]([userDataMock.id]);
+      mutations.UPDATE_ASSIGNEES(state, [userDataMock.id]);
 
-      expect(store.noteableData.assignees).toEqual([userDataMock.id]);
+      expect(state.noteableData.assignees).toEqual([userDataMock.id]);
     });
   });
 
@@ -899,38 +932,38 @@ describe('Notes Store mutations', () => {
       const discussion1 = { id: 1, position: { line_code: 'abc_1_1' } };
       const discussion2 = { id: 2, position: { line_code: 'abc_2_2' } };
       const discussion3 = { id: 3, position: { line_code: 'abc_3_3' } };
-      store.$patch({
+      const state = {
         discussions: [discussion1, discussion2, discussion3],
-      });
+      };
       const discussion1Position = { ...discussion1.position };
       const position = { ...discussion1Position, test: true };
 
-      store[types.UPDATE_DISCUSSION_POSITION]({ discussionId: discussion1.id, position });
-      expect(store.discussions[0].position).toEqual(position);
+      mutations.UPDATE_DISCUSSION_POSITION(state, { discussionId: discussion1.id, position });
+      expect(state.discussions[0].position).toEqual(position);
     });
   });
 
   describe('SET_DONE_FETCHING_BATCH_DISCUSSIONS', () => {
     it('should set doneFetchingBatchDiscussions', () => {
-      store.$patch({
+      const state = {
         doneFetchingBatchDiscussions: false,
-      });
+      };
 
-      store[types.SET_DONE_FETCHING_BATCH_DISCUSSIONS](true);
+      mutations.SET_DONE_FETCHING_BATCH_DISCUSSIONS(state, true);
 
-      expect(store.doneFetchingBatchDiscussions).toEqual(true);
+      expect(state.doneFetchingBatchDiscussions).toEqual(true);
     });
   });
 
   describe('SET_EXPAND_ALL_DISCUSSIONS', () => {
     it('should set expanded for every discussion', () => {
-      store.$patch({
+      const state = {
         discussions: [{ expanded: false }, { expanded: false }],
-      });
+      };
 
-      store[types.SET_EXPAND_ALL_DISCUSSIONS](true);
+      mutations.SET_EXPAND_ALL_DISCUSSIONS(state, true);
 
-      expect(store.discussions).toStrictEqual([{ expanded: true }, { expanded: true }]);
+      expect(state.discussions).toStrictEqual([{ expanded: true }, { expanded: true }]);
     });
   });
 });

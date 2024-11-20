@@ -21,11 +21,26 @@ module QA
         true
       end
 
-      def self.visit(address, page_class, &)
-        new.visit(address, page_class, &)
+      ##
+      # Visit a page that belongs to a GitLab instance under given address.
+      #
+      # Example:
+      #
+      # visit(:gitlab, Page::Main::Login)
+      # visit('http://gitlab.example/users/sign_in')
+      #
+      # In case of an address that is a symbol we will try to guess address
+      # based on `Runtime::Scenario#something_address`.
+      #
+      def visit(address, page_class, &block)
+        Browser::Session.new(address, page_class).perform(&block)
       end
 
-      def self.configure! # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity -- TODO: Break up this method
+      def self.visit(address, page_class, &block)
+        new.visit(address, page_class, &block)
+      end
+
+      def self.configure! # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
         return if QA::Runtime::Env.dry_run
         return if @configured
 
@@ -190,7 +205,10 @@ module QA
         end
 
         Capybara::Screenshot.register_filename_prefix_formatter(:rspec) do |example|
-          ::File.join("failure_screenshots", example.full_description.downcase.parameterize(separator: "_")[0..79])
+          ::File.join(
+            QA::Runtime::Namespace.name(reset_cache: false),
+            example.full_description.downcase.parameterize(separator: "_")[0..79]
+          )
         end
 
         Capybara.configure do |config|
@@ -218,68 +236,10 @@ module QA
         ::File.expand_path('../../tmp/qa-profile', __dir__)
       end
 
-      ##
-      # Visit a page that belongs to a GitLab instance under given address.
-      #
-      # Example:
-      #
-      # visit(:gitlab, Page::Main::Login)
-      # visit('http://gitlab.example/users/sign_in')
-      #
-      # In case of an address that is a symbol we will try to guess address
-      # based on `Runtime::Scenario#something_address`.
-      #
-      def visit(address, page_class, &)
-        Browser::Session.new(address, page_class).perform(&)
-      end
-
       class Session
         include Capybara::DSL
 
         attr_reader :page_class
-
-        # To redirect the browser to a canary or non-canary web node
-        #   after loading a subject test page
-        # @param [Boolean] Send to canary true or false
-        # @example:
-        #   Runtime::Browser::Session.target_canary(true)
-        def self.target_canary(enable_canary)
-          if QA::Runtime::Env.qa_cookies.to_s.include?("gitlab_canary=true")
-            QA::Runtime::Logger.warn("WARNING: Setting cookie through QA_COOKIES var is incompatible with this method.")
-            return
-          end
-
-          browser = Capybara.current_session.driver.browser
-
-          if enable_canary
-            browser.manage.add_cookie name: "gitlab_canary", value: "true"
-          else
-            browser.manage.delete_cookie("gitlab_canary")
-          end
-
-          browser.navigate.refresh
-        end
-
-        def self.enable_interception
-          script = File.read("#{__dir__}/script_extensions/interceptor.js")
-          command = {
-            cmd: 'Page.addScriptToEvaluateOnNewDocument',
-            params: {
-              source: script
-            }
-          }
-          @interceptor_script_params = Capybara.current_session.driver.browser.send(:bridge).send_command(command)
-        end
-
-        def self.disable_interception
-          return unless @interceptor_script_params
-
-          command = {
-            cmd: 'Page.removeScriptToEvaluateOnNewDocument',
-            params: @interceptor_script_params
-          }
-          Capybara.current_session.driver.browser.send(:bridge).send_command(command)
-        end
 
         def initialize(instance, page_class)
           @session_address = Runtime::Address.new(instance, page_class)
@@ -314,6 +274,28 @@ module QA
           yield.tap { clear! } if block
         end
 
+        # To redirect the browser to a canary or non-canary web node
+        #   after loading a subject test page
+        # @param [Boolean] Send to canary true or false
+        # @example:
+        #   Runtime::Browser::Session.target_canary(true)
+        def self.target_canary(enable_canary)
+          if QA::Runtime::Env.qa_cookies.to_s.include?("gitlab_canary=true")
+            QA::Runtime::Logger.warn("WARNING: Setting cookie through QA_COOKIES var is incompatible with this method.")
+            return
+          end
+
+          browser = Capybara.current_session.driver.browser
+
+          if enable_canary
+            browser.manage.add_cookie name: "gitlab_canary", value: "true"
+          else
+            browser.manage.delete_cookie("gitlab_canary")
+          end
+
+          browser.navigate.refresh
+        end
+
         ##
         # Selenium allows to reset session cookies for current domain only.
         #
@@ -323,6 +305,27 @@ module QA
           visit(url)
           reset_session!
           @network_conditions_configured = false
+        end
+
+        def self.enable_interception
+          script = File.read("#{__dir__}/script_extensions/interceptor.js")
+          command = {
+            cmd: 'Page.addScriptToEvaluateOnNewDocument',
+            params: {
+              source: script
+            }
+          }
+          @interceptor_script_params = Capybara.current_session.driver.browser.send(:bridge).send_command(command)
+        end
+
+        def self.disable_interception
+          return unless @interceptor_script_params
+
+          command = {
+            cmd: 'Page.removeScriptToEvaluateOnNewDocument',
+            params: @interceptor_script_params
+          }
+          Capybara.current_session.driver.browser.send(:bridge).send_command(command)
         end
 
         private

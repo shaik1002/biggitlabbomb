@@ -1,7 +1,16 @@
-import { createMockMergeRequest } from '../../../../../spec/frontend/merge_request_dashboard/mock_data';
 import MergeRequest from './merge_request.vue';
 
-const mockMergeRequest = createMockMergeRequest({
+const mockMergeRequest = {
+  reference: '!123456',
+  titleHtml: 'Merge request title',
+  webUrl: '#',
+  author: {
+    name: 'John Smith',
+    webUrl: 'https://gitlab.com/root',
+  },
+  milestone: {
+    title: '17.0',
+  },
   labels: {
     nodes: [
       {
@@ -80,9 +89,10 @@ const mockMergeRequest = createMockMergeRequest({
       },
     ],
   },
+  userDiscussionsCount: 5,
   createdAt: '2024-04-22T10:13:09Z',
   updatedAt: '2024-04-19T14:34:42Z',
-});
+};
 
 const Template = (_, { argTypes }) => {
   return {

@@ -59,6 +59,7 @@ module Clusters
     def health_data(clusterable)
       {
         'clusters-path': clusterable.index_path,
+        'documentation-path': help_page_path('user/infrastructure/clusters/manage/clusters_health.md'),
         'settings-path': '',
         'project-path': '',
         'tags-path': ''

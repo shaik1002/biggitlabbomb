@@ -15,11 +15,6 @@ module MergeRequests
         merge_request.title = merge_request.draft_title
       end
 
-      if params.key?(:merge_after)
-        merge_after = params.delete(:merge_after)
-        UpdateMergeScheduleService.new(merge_request, merge_after: merge_after).execute
-      end
-
       update_merge_request_with_specialized_service(merge_request) || general_fallback(merge_request)
     end
 
@@ -77,7 +72,7 @@ module MergeRequests
     def after_update(merge_request, old_associations)
       super
 
-      merge_request.cache_merge_request_closes_issues!(current_user) unless merge_request.auto_merge_enabled?
+      merge_request.cache_merge_request_closes_issues!(current_user)
       @trigger_work_item_updated = true
     end
 

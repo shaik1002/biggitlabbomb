@@ -9,10 +9,7 @@ class Admin::TopicsController < Admin::ApplicationController
   feature_category :groups_and_projects
 
   def index
-    @topics = Projects::TopicsFinder.new(
-      params: params.permit(:search),
-      organization_id: organization_id
-    ).execute.page(pagination_params[:page]).without_count
+    @topics = Projects::TopicsFinder.new(params: params.permit(:search)).execute.page(pagination_params[:page]).without_count
   end
 
   def new
@@ -62,11 +59,11 @@ class Admin::TopicsController < Admin::ApplicationController
   private
 
   def topic
-    @topic ||= Projects::Topic.find_by_id_and_organization_id!(params.permit(:id)[:id], organization_id)
+    @topic ||= Projects::Topic.find(params.permit(:id)[:id])
   end
 
   def topic_params
-    params.require(:projects_topic).permit(allowed_topic_params).merge({ organization_id: organization_id })
+    params.require(:projects_topic).permit(allowed_topic_params).merge({ organization_id: ::Current.organization_id })
   end
 
   def allowed_topic_params
@@ -80,9 +77,5 @@ class Admin::TopicsController < Admin::ApplicationController
 
   def merge_params
     params.permit([:source_topic_id, :target_topic_id])
-  end
-
-  def organization_id
-    ::Current.organization&.id
   end
 end

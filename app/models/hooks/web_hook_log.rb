@@ -13,7 +13,7 @@ class WebHookLog < ApplicationRecord
 
   self.primary_key = :id
 
-  partitioned_by :created_at, strategy: :monthly, retain_for: 1.month
+  partitioned_by :created_at, strategy: :monthly, retain_for: 3.months
 
   belongs_to :web_hook
 
@@ -59,7 +59,8 @@ class WebHookLog < ApplicationRecord
   end
 
   def request_headers
-    return super unless self[:request_headers]['X-Gitlab-Token']
+    super unless web_hook.token?
+    super if self[:request_headers]['X-Gitlab-Token'] == _('[REDACTED]')
 
     self[:request_headers].merge('X-Gitlab-Token' => _('[REDACTED]'))
   end

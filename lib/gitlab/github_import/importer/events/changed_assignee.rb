@@ -6,15 +6,12 @@ module Gitlab
       module Events
         class ChangedAssignee < BaseImporter
           def execute(issue_event)
+            assignee_id = author_id(issue_event, author_key: :assignee)
             author_id = author_id(issue_event, author_key: :actor)
 
-            note_body = parse_body(issue_event)
+            note_body = parse_body(issue_event, assignee_id)
 
-            created_note = create_note(issue_event, note_body, author_id)
-
-            return unless mapper.user_mapping_enabled?
-
-            push_with_record(created_note, :author_id, issue_event[:actor].id, mapper.user_mapper)
+            create_note(issue_event, note_body, author_id)
           end
 
           private
@@ -41,11 +38,13 @@ module Gitlab
             )
           end
 
-          def parse_body(issue_event)
+          def parse_body(issue_event, assignee_id)
+            assignee = User.find(assignee_id).to_reference
+
             if issue_event.event == 'unassigned'
-              "#{SystemNotes::IssuablesService.issuable_events[:unassigned]} `@#{issue_event[:assignee].login}`"
+              "#{SystemNotes::IssuablesService.issuable_events[:unassigned]} #{assignee}"
             else
-              "#{SystemNotes::IssuablesService.issuable_events[:assigned]} `@#{issue_event[:assignee].login}`"
+              "#{SystemNotes::IssuablesService.issuable_events[:assigned]} #{assignee}"
             end
           end
         end

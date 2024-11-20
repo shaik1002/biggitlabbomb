@@ -378,18 +378,15 @@ following:
 bundle exec rake tanuki_emoji:aliases
 ```
 
-To import the fallback Emoji images, run the following:
-
-```shell
-bundle exec rake tanuki_emoji:import
-```
-
-To update the Emoji digests file (used for Emoji autocomplete) based on the currently
-available Emoji, run the following:
+To update the Emoji digests file (used for Emoji autocomplete), run the
+following:
 
 ```shell
 bundle exec rake tanuki_emoji:digests
 ```
+
+This updates the file `fixtures/emojis/digests.json` based on the currently
+available Emoji.
 
 To generate a sprite file containing all the Emoji, run:
 
@@ -397,7 +394,10 @@ To generate a sprite file containing all the Emoji, run:
 bundle exec rake tanuki_emoji:sprite
 ```
 
-See [How to update Emojis](fe_guide/emojis.md) for detailed instructions.
+If new emoji are added, the sprite sheet may change size. To compensate for
+such changes, first generate the `emoji.png` sprite sheet with the above Rake
+task, then check the dimensions of the new sprite sheet and update the
+`SPRITESHEET_WIDTH` and `SPRITESHEET_HEIGHT` constants accordingly.
 
 ## Update project templates
 

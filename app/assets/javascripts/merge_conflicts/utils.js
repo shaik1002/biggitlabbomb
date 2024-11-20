@@ -1,8 +1,7 @@
-import { truncate, truncateSha } from '~/lib/utils/text_utility';
 import {
-  createOriginHeaderText,
-  createHeadHeaderText,
+  ORIGIN_HEADER_TEXT,
   ORIGIN_BUTTON_TITLE,
+  HEAD_HEADER_TEXT,
   HEAD_BUTTON_TITLE,
   DEFAULT_RESOLVE_MODE,
   CONFLICT_TYPES,
@@ -33,12 +32,10 @@ export const checkLineLengths = ({ left, right }) => {
   return { left: wLeft, right: wRight };
 };
 
-export const getHeadHeaderLine = (id, data) => {
-  const commit = truncateSha(data.source_commit.sha);
-  const message = truncate(data.source_commit.message.split('\n')[0], 50);
+export const getHeadHeaderLine = (id) => {
   return {
     id,
-    richText: createHeadHeaderText({ commit, message }),
+    richText: HEAD_HEADER_TEXT,
     buttonTitle: HEAD_BUTTON_TITLE,
     type: 'new',
     section: 'head',
@@ -83,11 +80,10 @@ export const getLineForParallelView = (line, id, lineType, isHead) => {
   };
 };
 
-export const getOriginHeaderLine = (id, data) => {
-  const target = truncate(data.target_branch, 50);
+export const getOriginHeaderLine = (id) => {
   return {
     id,
-    richText: createOriginHeaderText({ target }),
+    richText: ORIGIN_HEADER_TEXT,
     buttonTitle: ORIGIN_BUTTON_TITLE,
     type: 'old',
     section: 'origin',
@@ -98,7 +94,7 @@ export const getOriginHeaderLine = (id, data) => {
   };
 };
 
-export const setInlineLine = (file, data) => {
+export const setInlineLine = (file) => {
   const inlineLines = [];
 
   file.sections.forEach((section) => {
@@ -106,7 +102,7 @@ export const setInlineLine = (file, data) => {
     const { conflict, lines, id } = section;
 
     if (conflict) {
-      inlineLines.push(getHeadHeaderLine(id, data));
+      inlineLines.push(getHeadHeaderLine(id));
     }
 
     lines.forEach((line) => {
@@ -122,14 +118,14 @@ export const setInlineLine = (file, data) => {
     });
 
     if (conflict) {
-      inlineLines.push(getOriginHeaderLine(id, data));
+      inlineLines.push(getOriginHeaderLine(id));
     }
   });
 
   return inlineLines;
 };
 
-export const setParallelLine = (file, data) => {
+export const setParallelLine = (file) => {
   const parallelLines = [];
   let linesObj = { left: [], right: [] };
 
@@ -137,8 +133,8 @@ export const setParallelLine = (file, data) => {
     const { conflict, lines, id } = section;
 
     if (conflict) {
-      linesObj.left.push(getOriginHeaderLine(id, data));
-      linesObj.right.push(getHeadHeaderLine(id, data));
+      linesObj.left.push(getOriginHeaderLine(id));
+      linesObj.right.push(getHeadHeaderLine(id));
     }
 
     lines.forEach((line) => {
@@ -167,8 +163,8 @@ export const setParallelLine = (file, data) => {
   return parallelLines;
 };
 
-export const decorateFiles = (data) => {
-  return data.files.map((file) => {
+export const decorateFiles = (files) => {
+  return files.map((file) => {
     const f = { ...file };
     f.content = '';
     f.resolutionData = {};
@@ -181,8 +177,8 @@ export const decorateFiles = (data) => {
       f.showEditor = false;
       f.loadEditor = false;
 
-      f.inlineLines = setInlineLine(file, data);
-      f.parallelLines = setParallelLine(file, data);
+      f.inlineLines = setInlineLine(file);
+      f.parallelLines = setParallelLine(file);
     } else if (f.type === CONFLICT_TYPES.TEXT_EDITOR) {
       f.showEditor = true;
       f.loadEditor = true;

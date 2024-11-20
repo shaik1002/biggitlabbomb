@@ -31,7 +31,7 @@ async function getCurrentTopLevelPatterns() {
 
     return serializeAliasedDependencyPatterns(dependencies)
       .concat(serializeAliasedDependencyPatterns(devDependencies))
-      .filter(dep => isAliasedDependency(dep));
+      .filter(isAliasedDependency);
   } catch {
     return [];
   }

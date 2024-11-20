@@ -4,25 +4,20 @@ require 'spec_helper'
 
 RSpec.describe Packages::Conan::PackageReference, type: :model, feature_category: :package_registry do
   describe 'associations' do
-    it 'belongs to package' do
+    it do
       is_expected.to belong_to(:package).class_name('Packages::Conan::Package').inverse_of(:conan_package_references)
     end
 
-    it 'belongs to recipe_revision' do
+    it do
       is_expected.to belong_to(:recipe_revision).class_name('Packages::Conan::RecipeRevision')
         .inverse_of(:conan_package_references)
     end
 
     it { is_expected.to belong_to(:project) }
 
-    it 'has many package_revisions' do
+    it do
       is_expected.to have_many(:package_revisions).inverse_of(:package_reference)
         .class_name('Packages::Conan::PackageRevision')
-    end
-
-    it 'has many file_metadata' do
-      is_expected.to have_many(:file_metadata).inverse_of(:package_reference)
-        .class_name('Packages::Conan::FileMetadatum')
     end
   end
 

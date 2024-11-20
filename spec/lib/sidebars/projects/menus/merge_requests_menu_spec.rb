@@ -16,7 +16,6 @@ RSpec.describe Sidebars::Projects::Menus::MergeRequestsMenu, feature_category: :
       {
         item_id: :project_merge_request_list,
         pill_count: menu.pill_count,
-        pill_count_field: menu.pill_count_field,
         has_pill: menu.has_pill?,
         super_sidebar_parent: Sidebars::Projects::SuperSidebarMenus::CodeMenu
       }
@@ -50,10 +49,6 @@ RSpec.describe Sidebars::Projects::Menus::MergeRequestsMenu, feature_category: :
   end
 
   describe '#pill_count' do
-    before do
-      stub_feature_flags(async_sidebar_counts: false)
-    end
-
     it 'returns zero when there are no open merge requests' do
       expect(subject.pill_count).to eq '0'
     end
@@ -80,38 +75,12 @@ RSpec.describe Sidebars::Projects::Menus::MergeRequestsMenu, feature_category: :
     describe 'formatting' do
       context 'when the count value is over 1000' do
         before do
-          allow(project).to receive(:open_merge_requests_count).and_return(1001)
+          allow(context).to receive(:project).and_return(instance_double(Project, open_merge_requests_count: 1001))
         end
 
         it 'returns truncated digits' do
           expect(subject.pill_count).to eq('1k')
         end
-      end
-    end
-
-    context 'when async_sidebar_counts feature flag is enabled' do
-      before do
-        stub_feature_flags(async_sidebar_counts: true)
-      end
-
-      it 'returns nil' do
-        expect(subject.pill_count).to be_nil
-      end
-    end
-  end
-
-  describe '#pill_count_field' do
-    it 'returns the correct GraphQL field name' do
-      expect(subject.pill_count_field).to eq('openMergeRequestsCount')
-    end
-
-    context 'when async_sidebar_counts feature flag is disabled' do
-      before do
-        stub_feature_flags(async_sidebar_counts: false)
-      end
-
-      it 'returns nil' do
-        expect(subject.pill_count_field).to be_nil
       end
     end
   end

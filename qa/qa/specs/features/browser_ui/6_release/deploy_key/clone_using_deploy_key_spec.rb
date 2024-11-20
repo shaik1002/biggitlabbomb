@@ -16,6 +16,7 @@ module QA
 
       after do
         runner.remove_via_api!
+        project.remove_via_api!
       end
 
       keys = [

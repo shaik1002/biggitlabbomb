@@ -11,15 +11,12 @@ module Namespaces
       end
 
       override :self_and_descendant_ids
-      def self_and_descendant_ids(skope: self.class)
-        # Cache only works for descendants
-        # of the same type as the caller.
-        return super unless skope == self.class
+      def self_and_descendant_ids
         return super unless attempt_to_use_cached_data?
 
         scope_with_cached_ids(
           super,
-          skope,
+          self.class,
           Namespaces::Descendants.arel_table[:self_and_descendant_group_ids]
         )
       end

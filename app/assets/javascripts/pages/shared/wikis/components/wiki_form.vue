@@ -236,6 +236,9 @@ export default {
     displayWikiSpecificMarkdownHelp() {
       return !this.isContentEditorActive;
     },
+    disableSubmitButton() {
+      return !this.title;
+    },
     drawioEnabled() {
       return typeof this.drawioUrl === 'string' && this.drawioUrl.length > 0;
     },
@@ -554,6 +557,7 @@ export default {
           variant="confirm"
           type="submit"
           data-testid="wiki-submit-button"
+          :disabled="disableSubmitButton"
           >{{ submitButtonText }}</gl-button
         >
         <gl-button

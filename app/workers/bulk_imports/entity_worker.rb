@@ -7,7 +7,7 @@ module BulkImports
 
     idempotent!
     deduplicate :until_executing
-    data_consistency :sticky
+    data_consistency :always
     feature_category :importers
     sidekiq_options retry: 3, dead: false
     worker_has_external_dependencies!

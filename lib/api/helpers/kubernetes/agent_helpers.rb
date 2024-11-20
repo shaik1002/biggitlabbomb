@@ -99,7 +99,11 @@ module API
 
             event = COUNTERS_EVENTS_MAPPING[counter]
 
-            Gitlab::InternalEvents.with_batched_redis_writes do
+            if Feature.enabled?(:batched_redis_updates_for_kubernetes_agent_events, :instance)
+              Gitlab::InternalEvents.with_batched_redis_writes do
+                incr.times { Gitlab::InternalEvents.track_event(event) }
+              end
+            else
               incr.times { Gitlab::InternalEvents.track_event(event) }
             end
           end

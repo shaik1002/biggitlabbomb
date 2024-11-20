@@ -20,11 +20,11 @@ describe('RunnerStats', () => {
       },
       stubs: {
         RunnerCount: {
-          ...RunnerCount,
-          data() {
-            return {
+          props: ['scope', 'variables', 'skip'],
+          render() {
+            return this.$scopedSlots.default({
               count,
-            };
+            });
           },
         },
       },

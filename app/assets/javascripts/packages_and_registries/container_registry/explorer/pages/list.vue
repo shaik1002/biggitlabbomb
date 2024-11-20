@@ -18,7 +18,6 @@ import PersistedPagination from '~/packages_and_registries/shared/components/per
 import PersistedSearch from '~/packages_and_registries/shared/components/persisted_search.vue';
 import MetadataDatabaseAlert from '~/packages_and_registries/shared/components/container_registry_metadata_database_alert.vue';
 import { FILTERED_SEARCH_TERM } from '~/vue_shared/components/filtered_search_bar/constants';
-import { helpPagePath } from '~/helpers/help_page_helper';
 import DeleteImage from '../components/delete_image.vue';
 import RegistryHeader from '../components/list_page/registry_header.vue';
 import DeleteModal from '../components/delete_modal.vue';
@@ -236,13 +235,6 @@ export default {
       }
     },
   },
-  containerRegistryHelpUrl: helpPagePath('user/packages/container_registry/index'),
-  dockerConnectionErrorHelpUrl: helpPagePath(
-    'user/packages/container_registry/troubleshoot_container_registry',
-    {
-      anchor: 'docker-connection-error',
-    },
-  ),
 };
 </script>
 
@@ -273,7 +265,7 @@ export default {
         <p>
           <gl-sprintf :message="$options.i18n.CONNECTION_ERROR_MESSAGE">
             <template #docLink="{ content }">
-              <gl-link :href="$options.dockerContainerErrorHelpUrl" target="_blank">
+              <gl-link :href="`${config.helpPagePath}#docker-connection-error`" target="_blank">
                 {{ content }}
               </gl-link>
             </template>
@@ -287,7 +279,7 @@ export default {
         :metadata-loading="isLoading"
         :images-count="containerRepositoriesCount"
         :expiration-policy="config.expirationPolicy"
-        :help-page-path="$options.containerRegistryHelpUrl"
+        :help-page-path="config.helpPagePath"
         :hide-expiration-policy-data="config.isGroupPage"
         :cleanup-policies-settings-path="config.cleanupPoliciesSettingsPath"
         :show-cleanup-policy-link="config.showCleanupPolicyLink"
@@ -303,7 +295,7 @@ export default {
             v-if="config.showContainerRegistrySettings"
             v-gl-tooltip="$options.i18n.SETTINGS_TEXT"
             icon="settings"
-            :href="config.settingsPath"
+            :href="config.cleanupPoliciesSettingsPath"
             :aria-label="$options.i18n.SETTINGS_TEXT"
           />
         </template>

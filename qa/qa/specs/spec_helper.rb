@@ -42,8 +42,11 @@ RSpec.configure do |config|
   config.example_status_persistence_file_path = ENV.fetch('RSPEC_LAST_RUN_RESULTS_FILE', 'tmp/examples.txt')
 
   config.prepend_before do |example|
-    QA::Runtime::Logger.info("Starting test: #{Rainbow(example.full_description).bright}")
-    QA::Runtime::UserStore.initialize_test_user
+    if QA::Runtime::Env.parallel_run?
+      QA::Runtime::Logger.info("Starting test - PID #{Process.pid}: #{Rainbow(example.full_description).bright}")
+    else
+      QA::Runtime::Logger.info("Starting test: #{Rainbow(example.full_description).bright}")
+    end
 
     QA::Runtime::Example.current = example
 
@@ -69,25 +72,33 @@ RSpec.configure do |config|
   end
 
   config.prepend_after do |example|
-    if Capybara::Session.instance_created?
-      page = Capybara.page
-      QA::Support::PageErrorChecker.log_request_errors(page)
-      QA::Support::PageErrorChecker.check_page_for_error_code(page) if example.exception
-    end
+    page = Capybara.page
+    QA::Support::PageErrorChecker.log_request_errors(page)
+
+    QA::Support::PageErrorChecker.check_page_for_error_code(page) if example.exception
   end
 
+  # Add fabrication time to spec metadata
   config.append_after do |example|
-    # Add fabrication time to spec metadata
     example.metadata[:api_fabrication] = Thread.current[:api_fabrication]
     example.metadata[:browser_ui_fabrication] = Thread.current[:browser_ui_fabrication]
+  end
 
-    # Reset unique test user after each spec unless running against live environment
-    QA::Runtime::UserStore.reset_test_user! unless QA::Runtime::Env.running_on_live_env?
+  config.after(:context) do
+    if !QA::Runtime::Browser.blank_page? && QA::Page::Main::Menu.perform(&:signed_in?)
+      QA::Page::Main::Menu.perform(&:sign_out)
+      raise(
+        <<~ERROR
+          The test left the browser signed in.
 
-    # Reset browser session between tests
-    if Capybara::Session.instance_created?
-      QA::Runtime::Logger.debug("Resetting browser session...")
-      Capybara.current_session.reset!
+          Usually, Capybara prevents this from happening but some things can
+          interfere. For example, if it has an `after(:context)` block that logs
+          in, the browser will stay logged in and this will cause the next test
+          to fail.
+
+          Please make sure the test does not leave the browser signed in.
+        ERROR
+      )
     end
   end
 

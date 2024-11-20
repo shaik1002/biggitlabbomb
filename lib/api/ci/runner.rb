@@ -80,11 +80,9 @@ module API
           requires :token, type: String, desc: "The runner's authentication token"
         end
         delete '/', urgency: :low, feature_category: :runner do
-          authenticate_runner!(ensure_runner_manager: false, update_contacted_at: false)
+          authenticate_runner!
 
-          destroy_conditionally!(current_runner) do
-            ::Ci::Runners::UnregisterRunnerService.new(current_runner, params[:token]).execute
-          end
+          destroy_conditionally!(current_runner) { ::Ci::Runners::UnregisterRunnerService.new(current_runner, params[:token]).execute }
         end
 
         desc 'Delete a registered runner manager' do

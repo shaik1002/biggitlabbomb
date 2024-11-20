@@ -56,7 +56,7 @@ export default {
 </script>
 
 <template>
-  <div>
+  <div class="issuable-note-warning">
     <gl-sprintf :message="message">
       <template #andMore>
         <gl-button variant="link" class="gl-align-baseline" @click="showMoreParticipants">

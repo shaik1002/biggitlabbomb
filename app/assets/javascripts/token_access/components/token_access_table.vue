@@ -2,20 +2,18 @@
 import { GlButton, GlIcon, GlLink, GlTableLite } from '@gitlab/ui';
 import { TYPENAME_GROUP } from '~/graphql_shared/constants';
 import ProjectAvatar from '~/vue_shared/components/project_avatar.vue';
-import { s__, __ } from '~/locale';
 
 export default {
   fields: [
     {
       key: 'fullPath',
-      label: s__('CICD|Group or project'),
+      label: '',
       tdClass: 'gl-w-3/4',
     },
     {
       key: 'actions',
-      label: __('Actions'),
-      class: 'gl-text-right',
-      tdClass: '!gl-py-0 !gl-pl-0 gl-w-0 !gl-align-middle',
+      label: '',
+      tdClass: 'gl-w-1/4 gl-text-right',
     },
   ],
   components: {
@@ -49,9 +47,15 @@ export default {
   },
 };
 </script>
-
 <template>
-  <gl-table-lite :items="items" :fields="$options.fields" class="gl-mb-0">
+  <gl-table-lite
+    :items="items"
+    :fields="$options.fields"
+    :tbody-tr-attr="{ 'data-testid': 'token-access-table-row' }"
+    thead-class="gl-hidden"
+    class="gl-mb-0"
+    fixed
+  >
     <template #cell(fullPath)="{ item }">
       <div class="gl-inline-flex gl-items-center">
         <gl-icon
@@ -68,9 +72,12 @@ export default {
           :size="24"
           :data-testid="`token-access-${itemType(item)}-avatar`"
         />
-        <gl-link :href="item.webUrl" :data-testid="`token-access-${itemType(item)}-name`">
-          {{ item.fullPath }}
-        </gl-link>
+        <gl-link
+          class="gl-text-gray-900"
+          :href="`/${item.fullPath}`"
+          :data-testid="`token-access-${itemType(item)}-name`"
+          >{{ item.fullPath }}</gl-link
+        >
       </div>
     </template>
 

@@ -61,10 +61,6 @@ $crud-header-min-height: px-to-rem(49px);
     tr:last-of-type td {
       border-bottom-width: 0;
     }
-
-    tr th, tr td {
-      border-color: var(--gl-border-color-section);
-    }
   }
 
   table.gl-table.b-table.b-table-stacked-sm {
@@ -85,14 +81,14 @@ $crud-header-min-height: px-to-rem(49px);
 
   .content-list > li {
     padding-inline: $gl-spacing-scale-5;
-    @apply gl-border-b-section #{!important};
+    border-bottom-color: var(--gl-border-color-default);
   }
 }
 
 .crud-pagination {
   margin-top: -1px;
 
-  &:not(:has(> .gl-pagination, > .crud-pagination-container)) {
+  &:not(:has(> .gl-pagination)) {
     display: none;
   }
 

@@ -11,15 +11,13 @@ import PipelineEditorEmptyState from './components/ui/pipeline_editor_empty_stat
 import PipelineEditorMessages from './components/ui/pipeline_editor_messages.vue';
 import {
   COMMIT_SHA_POLL_INTERVAL,
+  COMMIT_SUCCESS_WITH_REDIRECT,
   EDITOR_APP_STATUS_EMPTY,
   EDITOR_APP_STATUS_LOADING,
   EDITOR_APP_STATUS_LINT_UNAVAILABLE,
   EDITOR_APP_VALID_STATUSES,
   LOAD_FAILURE_UNKNOWN,
   STARTER_TEMPLATE_NAME,
-  COMMIT_SUCCESS,
-  COMMIT_SUCCESS_WITH_REDIRECT,
-  DEFAULT_SUCCESS,
 } from './constants';
 import updateAppStatus from './graphql/mutations/client/update_app_status.mutation.graphql';
 import getBlobContent from './graphql/queries/blob_content.query.graphql';
@@ -59,8 +57,10 @@ export default {
       showFailure: false,
       showResetConfirmationModal: false,
       showStartScreen: false,
+      showSuccess: false,
       starterTemplate: '',
       starterTemplateName: STARTER_TEMPLATE_NAME,
+      successType: null,
     };
   },
   apollo: {
@@ -267,13 +267,6 @@ export default {
       title: __('Discard changes'),
     },
   },
-  success: {
-    [COMMIT_SUCCESS]: __('Your changes have been successfully committed.'),
-    [COMMIT_SUCCESS_WITH_REDIRECT]: s__(
-      'Pipelines|Your changes have been successfully committed. Now redirecting to the new merge request page.',
-    ),
-    [DEFAULT_SUCCESS]: __('Your action succeeded.'),
-  },
   watch: {
     currentBranch: {
       immediate: true,
@@ -316,6 +309,9 @@ export default {
     hideFailure() {
       this.showFailure = false;
     },
+    hideSuccess() {
+      this.showSuccess = false;
+    },
     loadTemplateFromURL() {
       const templateName = queryToObject(window.location.search)?.template;
 
@@ -346,8 +342,8 @@ export default {
     },
     reportSuccess(type) {
       window.scrollTo({ top: 0, behavior: 'smooth' });
-      const { success } = this.$options;
-      this.$toast.show(success[type] ?? success[DEFAULT_SUCCESS]);
+      this.showSuccess = true;
+      this.successType = type;
     },
     resetContent() {
       this.showResetConfirmationModal = false;
@@ -413,6 +409,9 @@ export default {
         :failure-type="failureType"
         :failure-reasons="failureReasons"
         :show-failure="showFailure"
+        :show-success="showSuccess"
+        :success-type="successType"
+        @hide-success="hideSuccess"
         @hide-failure="hideFailure"
       />
       <pipeline-editor-home

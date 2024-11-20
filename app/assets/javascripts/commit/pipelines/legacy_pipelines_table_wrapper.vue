@@ -300,6 +300,7 @@ export default {
         :is-creating-pipeline="state.isRunningMergeRequestPipeline"
         :pipeline-id-type="$options.pipelineIdKey"
         :pipelines="state.pipelines"
+        :update-graph-dropdown="updateGraphDropdown"
         :view-type="viewType"
         @cancel-pipeline="onCancelPipeline"
         @refresh-pipelines-table="onRefreshPipelinesTable"

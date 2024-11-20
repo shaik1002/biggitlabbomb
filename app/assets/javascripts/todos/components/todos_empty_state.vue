@@ -4,7 +4,7 @@ import emptyTodosAllDoneSvg from '@gitlab/svgs/dist/illustrations/empty-todos-al
 import emptyTodosSvg from '@gitlab/svgs/dist/illustrations/empty-todos-md.svg';
 import { s__ } from '~/locale';
 import { helpPagePath } from '~/helpers/help_page_helper';
-import { TODO_EMPTY_TITLE_POOL, TAB_DONE } from '../constants';
+import { TODO_EMPTY_TITLE_POOL } from '../constants';
 
 export default {
   components: {
@@ -13,10 +13,6 @@ export default {
     GlSprintf,
   },
   inject: {
-    currentTab: {
-      type: Number,
-      required: true,
-    },
     issuesDashboardPath: {
       type: String,
       required: true,
@@ -34,22 +30,12 @@ export default {
   },
   computed: {
     title() {
-      if (this.isFiltered) {
-        return s__('Todos|Sorry, your filter produced no results');
-      }
-      if (this.isDoneTab) {
-        return s__('Todos|There are no done to-do items yet.');
-      }
-      return this.pickRandomTitle();
+      return this.isFiltered
+        ? s__('Todos|Sorry, your filter produced no results')
+        : this.pickRandomTitle();
     },
     illustration() {
-      if (this.isFiltered || this.isDoneTab) {
-        return this.$options.emptyTodosSvg;
-      }
-      return this.$options.emptyTodosAllDoneSvg;
-    },
-    isDoneTab() {
-      return this.currentTab === TAB_DONE;
+      return this.isFiltered ? this.$options.emptyTodosSvg : this.$options.emptyTodosAllDoneSvg;
     },
   },
   methods: {
@@ -73,7 +59,7 @@ export default {
 
 <template>
   <gl-empty-state :title="title" :svg-path="illustration">
-    <template v-if="!isFiltered && !isDoneTab" #description>
+    <template v-if="!isFiltered" #description>
       <p>
         <gl-sprintf :message="$options.i18n.whatNext">
           <template #assignedIssuesLink="{ content }">
@@ -89,9 +75,6 @@ export default {
           {{ s__('Todos| What actions create to-do items?') }}
         </a>
       </p>
-    </template>
-    <template v-else-if="!isFiltered && isDoneTab" #description>
-      <p>{{ s__('Todos|When to-do items are done, they will appear here.') }}</p>
     </template>
   </gl-empty-state>
 </template>

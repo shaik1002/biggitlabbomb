@@ -108,15 +108,15 @@ export default {
   >
     <div class="gl-flex gl-w-full gl-items-center gl-px-3">
       <gl-button
-        class="gl-mr-4"
+        class="gl-mr-4 gl-fill-current gl-text-gray-500"
         :aria-label="label"
         :icon="icons.caret"
         size="small"
         category="tertiary"
         @click="toggleCollapse"
       />
-      <gl-icon class="gl-mr-2" :name="icons.folder" variant="subtle" />
-      <div class="gl-mr-2 gl-text-subtle" :class="folderClass">
+      <gl-icon class="gl-mr-2 gl-fill-current gl-text-gray-500" :name="icons.folder" />
+      <div class="gl-mr-2 gl-text-gray-500" :class="folderClass">
         {{ nestedEnvironment.name }}
       </div>
       <gl-badge class="gl-mr-auto">{{ totalEnvironmentsCount }}</gl-badge>

@@ -47,7 +47,6 @@ module Gitlab
         # so we can compare the latest WAL location against replica
         chain.add ::Gitlab::SidekiqMiddleware::DuplicateJobs::Server
         chain.add ::Gitlab::Database::LoadBalancing::SidekiqServerMiddleware
-        chain.add ::Gitlab::SidekiqMiddleware::ResourceUsageLimit::Server
         chain.add ::Gitlab::SidekiqMiddleware::SkipJobs if skip_jobs
       end
     end

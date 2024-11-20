@@ -70,7 +70,7 @@
     border-color: currentColor;
 
     &:not(span):hover {
-      @apply gl-bg-alpha-dark-4;
+      background-color: rgba($gl-text-color-secondary, 0.07);
     }
   }
 }

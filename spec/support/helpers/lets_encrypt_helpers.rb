@@ -38,9 +38,9 @@ module LetsEncryptHelpers
     client
   end
 
-  def acme_challenge_double(attributes = {})
+  def acme_challenge_double
     challenge = instance_double('Acme::Client::Resources::Challenges::HTTP01')
-    allow(challenge).to receive_messages(ACME_CHALLENGE_METHODS.merge(attributes))
+    allow(challenge).to receive_messages(ACME_CHALLENGE_METHODS)
     challenge
   end
 

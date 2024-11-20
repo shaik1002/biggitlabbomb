@@ -5,8 +5,9 @@ require 'spec_helper'
 RSpec.describe Gitlab::GithubImport::Importer::Events::ChangedAssignee, feature_category: :importers do
   subject(:importer) { described_class.new(project, client) }
 
-  let_it_be(:project) { create(:project, :repository, :with_import_url) }
+  let_it_be(:project) { create(:project, :repository) }
   let_it_be(:author) { create(:user) }
+  let_it_be(:assignee) { create(:user) }
 
   let(:client) { instance_double('Gitlab::GithubImport::Client') }
   let(:issuable) { create(:issue, project: project) }
@@ -14,11 +15,11 @@ RSpec.describe Gitlab::GithubImport::Importer::Events::ChangedAssignee, feature_
   let(:issue_event) do
     Gitlab::GithubImport::Representation::IssueEvent.from_json_hash(
       'id' => 6501124486,
-      'actor' => { 'id' => 1000, 'login' => 'github_author' },
+      'actor' => { 'id' => author.id, 'login' => author.username },
       'event' => event_type,
       'commit_id' => nil,
       'created_at' => '2022-04-26 18:30:53 UTC',
-      'assignee' => { 'id' => 2000, 'login' => 'github_assignee' },
+      'assignee' => { 'id' => assignee.id, 'login' => assignee.username },
       'issue' => { 'number' => issuable.iid, pull_request: issuable.is_a?(MergeRequest) }
     )
   end
@@ -69,44 +70,16 @@ RSpec.describe Gitlab::GithubImport::Importer::Events::ChangedAssignee, feature_
   shared_examples 'process assigned & unassigned events' do
     context 'when importing an assigned event' do
       let(:event_type) { 'assigned' }
-      let(:expected_note_attrs) { note_attrs.merge(note: "assigned to `@github_assignee`") }
+      let(:expected_note_attrs) { note_attrs.merge(note: "assigned to @#{assignee.username}") }
 
       it_behaves_like 'create expected notes'
     end
 
     context 'when importing an unassigned event' do
       let(:event_type) { 'unassigned' }
-      let(:expected_note_attrs) { note_attrs.merge(note: "unassigned `@github_assignee`") }
+      let(:expected_note_attrs) { note_attrs.merge(note: "unassigned @#{assignee.username}") }
 
       it_behaves_like 'create expected notes'
-    end
-  end
-
-  shared_examples 'push a placeholder reference' do
-    let(:event_type) { 'assigned' }
-
-    it 'pushes the reference' do
-      expect(subject)
-      .to receive(:push_with_record)
-      .with(
-        an_instance_of(Note),
-        :author_id,
-        issue_event[:actor].id,
-        an_instance_of(Gitlab::Import::SourceUserMapper)
-      )
-
-      importer.execute(issue_event)
-    end
-  end
-
-  shared_examples 'do not push placeholder reference' do
-    let(:event_type) { 'assigned' }
-
-    it 'does not push any reference' do
-      expect(subject)
-      .not_to receive(:push_with_record)
-
-      importer.execute(issue_event)
     end
   end
 
@@ -114,58 +87,21 @@ RSpec.describe Gitlab::GithubImport::Importer::Events::ChangedAssignee, feature_
     before do
       allow_next_instance_of(Gitlab::GithubImport::IssuableFinder) do |finder|
         allow(finder).to receive(:database_id).and_return(issuable.id)
-        allow(finder).to receive(:author_id_for).with(issue_event, author_key: :actor).and_return([author.id, true])
+      end
+      allow_next_instance_of(Gitlab::GithubImport::UserFinder) do |finder|
+        allow(finder).to receive(:find).with(author.id, author.username).and_return(author.id)
+        allow(finder).to receive(:find).with(assignee.id, assignee.username).and_return(assignee.id)
       end
     end
 
-    context 'when user mapping is enabled' do
-      let_it_be(:source_user) do
-        create(
-          :import_source_user,
-          placeholder_user_id: author.id,
-          source_user_identifier: 1000,
-          source_username: 'github_author',
-          source_hostname: project.import_url,
-          namespace_id: project.root_ancestor.id
-        )
-      end
-
-      before do
-        project.build_or_assign_import_data(data: { user_contribution_mapping_enabled: true })
-      end
-
-      context 'with Issue' do
-        it_behaves_like 'process assigned & unassigned events'
-        it_behaves_like 'push a placeholder reference'
-      end
-
-      context 'with MergeRequest' do
-        let(:issuable) { create(:merge_request, source_project: project, target_project: project) }
-
-        it_behaves_like 'process assigned & unassigned events'
-        it_behaves_like 'push a placeholder reference'
-      end
+    context 'with Issue' do
+      it_behaves_like 'process assigned & unassigned events'
     end
 
-    context 'when user mapping is disabled' do
-      before do
-        project.build_or_assign_import_data(data: { user_contribution_mapping_enabled: false })
-        allow_next_instance_of(Gitlab::GithubImport::UserFinder) do |finder|
-          allow(finder).to receive(:find).with(1000, 'github_author').and_return(author.id)
-        end
-      end
+    context 'with MergeRequest' do
+      let(:issuable) { create(:merge_request, source_project: project, target_project: project) }
 
-      context 'with Issue' do
-        it_behaves_like 'process assigned & unassigned events'
-        it_behaves_like 'do not push placeholder reference'
-      end
-
-      context 'with MergeRequest' do
-        let(:issuable) { create(:merge_request, source_project: project, target_project: project) }
-
-        it_behaves_like 'process assigned & unassigned events'
-        it_behaves_like 'do not push placeholder reference'
-      end
+      it_behaves_like 'process assigned & unassigned events'
     end
   end
 end

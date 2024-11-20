@@ -2,13 +2,7 @@
 
 module TokenAuthenticatableStrategies
   class Base
-    RANDOM_BYTES_LENGTH = 16
-
     attr_reader :klass, :token_field, :expires_at_field, :options
-
-    def self.random_bytes
-      SecureRandom.random_bytes(RANDOM_BYTES_LENGTH)
-    end
 
     def initialize(klass, token_field, options)
       @klass = klass
@@ -17,15 +11,15 @@ module TokenAuthenticatableStrategies
       @options = options
     end
 
-    def find_token_authenticatable(token_owner_record, unscoped = false)
+    def find_token_authenticatable(instance, unscoped = false)
       raise NotImplementedError
     end
 
-    def get_token(token_owner_record)
+    def get_token(instance)
       raise NotImplementedError
     end
 
-    def set_token(token_owner_record, token)
+    def set_token(instance, token)
       raise NotImplementedError
     end
 
@@ -42,31 +36,40 @@ module TokenAuthenticatableStrategies
       token_fields - [@expires_at_field]
     end
 
-    def ensure_token(token_owner_record)
-      write_new_token(token_owner_record) unless token_set?(token_owner_record)
-      get_token(token_owner_record)
+    # If a `format_with_prefix` option is provided, it applies and returns the formatted token.
+    # Otherwise, default implementation returns the token as-is
+    def format_token(instance, token)
+      prefix = prefix_for(instance)
+      prefixed_token = prefix ? "#{prefix}#{token}" : token
+
+      instance.send("format_#{@token_field}", prefixed_token) # rubocop:disable GitlabSecurity/PublicSend
+    end
+
+    def ensure_token(instance)
+      write_new_token(instance) unless token_set?(instance)
+      get_token(instance)
     end
 
     # Returns a token, but only saves when the database is in read & write mode
-    def ensure_token!(token_owner_record)
-      reset_token!(token_owner_record) unless token_set?(token_owner_record)
-      get_token(token_owner_record)
+    def ensure_token!(instance)
+      reset_token!(instance) unless token_set?(instance)
+      get_token(instance)
     end
 
     # Resets the token, but only saves when the database is in read & write mode
-    def reset_token!(token_owner_record)
-      write_new_token(token_owner_record)
-      token_owner_record.save! if Gitlab::Database.read_write?
+    def reset_token!(instance)
+      write_new_token(instance)
+      instance.save! if Gitlab::Database.read_write?
     end
 
-    def expires_at(token_owner_record)
-      token_owner_record.read_attribute(@expires_at_field)
+    def expires_at(instance)
+      instance.read_attribute(@expires_at_field)
     end
 
-    def expired?(token_owner_record)
+    def expired?(instance)
       return false unless expirable? && token_expiration_enforced?
 
-      exp = expires_at(token_owner_record)
+      exp = expires_at(instance)
       !!exp && exp.past?
     end
 
@@ -74,8 +77,8 @@ module TokenAuthenticatableStrategies
       !!@options[:expires_at]
     end
 
-    def token_with_expiration(token_owner_record)
-      API::Support::TokenWithExpiration.new(self, token_owner_record)
+    def token_with_expiration(instance)
+      API::Support::TokenWithExpiration.new(self, instance)
     end
 
     def self.fabricate(model, field, options)
@@ -92,34 +95,26 @@ module TokenAuthenticatableStrategies
       end
     end
 
-    private
+    protected
 
-    def prefix_for(token_owner_record)
+    def prefix_for(instance)
       case prefix_option = options[:format_with_prefix]
       when nil
         nil
       when Symbol
-        token_owner_record.send(prefix_option) # rubocop:disable GitlabSecurity/PublicSend
+        instance.send(prefix_option) # rubocop:disable GitlabSecurity/PublicSend
       else
         raise NotImplementedError
       end
     end
 
-    # If a `format_with_prefix` option is provided, it applies and returns the formatted token.
-    # Otherwise, default implementation returns the token as-is
-    def format_token(token_owner_record, token)
-      prefix = prefix_for(token_owner_record)
-
-      prefix ? "#{prefix}#{token}" : token
-    end
-
-    def write_new_token(token_owner_record)
-      new_token = generate_available_token(token_owner_record)
-      formatted_token = format_token(token_owner_record, new_token)
-      set_token(token_owner_record, formatted_token)
+    def write_new_token(instance)
+      new_token = generate_available_token
+      formatted_token = format_token(instance, new_token)
+      set_token(instance, formatted_token)
 
       if expirable?
-        token_owner_record[@expires_at_field] = @options[:expires_at].to_proc.call(token_owner_record)
+        instance[@expires_at_field] = @options[:expires_at].to_proc.call(instance)
       end
     end
 
@@ -127,48 +122,22 @@ module TokenAuthenticatableStrategies
       @options.fetch(:unique, true)
     end
 
-    def generate_available_token(token_owner_record)
+    def generate_available_token
       loop do
-        token = generate_token(token_owner_record)
+        token = generate_token
         break token unless unique && find_token_authenticatable(token, true)
       end
     end
 
-    def generate_token(token_owner_record)
-      if @options[:token_generator]
-        @options[:token_generator].call
-      # TODO: Make all tokens routable by default: https://gitlab.com/gitlab-org/gitlab/-/issues/500016
-      elsif generate_routable_token?(token_owner_record)
-        generate_routable_payload(@options[:routable_token], token_owner_record)
-      else
-        Devise.friendly_token
-      end
-    end
-
-    def generate_routable_token?(token_owner_record)
-      @options[:routable_token] && token_owner_record.respond_to?(:user) && Feature.enabled?(:routable_token, token_owner_record.user)
-    end
-
-    def default_routing_payload_hash
-      {
-        c: Settings.cell[:id]&.to_s(36),
-        r: self.class.random_bytes
-      }
-    end
-
-    def generate_routable_payload(routable_parts, token_owner_record)
-      payload_hash = default_routing_payload_hash.merge(
-        routable_parts.transform_values { |generator| generator.call(token_owner_record) }
-      ).compact_blank
-
-      Base64.urlsafe_encode64(payload_hash.sort.map { |k, v| "#{k}:#{v}" }.join("\n"), padding: false)
+    def generate_token
+      @options[:token_generator] ? @options[:token_generator].call : Devise.friendly_token
     end
 
     def relation(unscoped)
       unscoped ? @klass.unscoped : @klass.where(not_expired)
     end
 
-    def token_set?(token_owner_record)
+    def token_set?(instance)
       raise NotImplementedError
     end
 

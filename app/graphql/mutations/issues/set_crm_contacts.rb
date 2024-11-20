@@ -38,11 +38,8 @@ module Mutations
                            :replace_ids
                          end
 
-        response = ::Issues::SetCrmContactsService.new(
-          container: project,
-          current_user: current_user,
-          params: { attribute_name => contact_ids }
-        ).execute(issue)
+        response = ::Issues::SetCrmContactsService.new(container: project, current_user: current_user, params: { attribute_name => contact_ids })
+          .execute(issue)
 
         {
           issue: issue,

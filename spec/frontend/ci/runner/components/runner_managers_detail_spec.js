@@ -23,7 +23,8 @@ describe('RunnerJobs', () => {
   let wrapper;
   let mockRunnerManagersHandler;
 
-  const findDetails = () => wrapper.findByTestId('runner-button');
+  const findShowDetails = () => wrapper.findByText('Show details');
+  const findHideDetails = () => wrapper.findByText('Hide details');
   const findSkeletonLoader = () => wrapper.findComponent(GlSkeletonLoader);
 
   const findCollapse = () => wrapper.findComponent(GlCollapse);
@@ -78,8 +79,8 @@ describe('RunnerJobs', () => {
     });
 
     it('shows link to expand', () => {
-      expect(findDetails().exists()).toBe(true);
-      expect(findDetails().text()).toBe('Show details');
+      expect(findShowDetails().exists()).toBe(true);
+      expect(findHideDetails().exists()).toBe(false);
     });
 
     it('is collapsed', () => {
@@ -88,12 +89,12 @@ describe('RunnerJobs', () => {
 
     describe('when expanded', () => {
       beforeEach(() => {
-        findDetails().vm.$emit('click');
+        findShowDetails().vm.$emit('click');
       });
 
       it('shows link to collapse', () => {
-        expect(findDetails().exists()).toBe(true);
-        expect(findDetails().text()).toBe('Hide details');
+        expect(findShowDetails().exists()).toBe(false);
+        expect(findHideDetails().exists()).toBe(true);
       });
 
       it('shows loading state', () => {
@@ -122,7 +123,7 @@ describe('RunnerJobs', () => {
 
     describe.each(['focus', 'mouseover'])('fetches data after %s', (event) => {
       beforeEach(() => {
-        findDetails().vm.$emit(event);
+        findShowDetails().vm.$emit(event);
       });
 
       it('fetches data', () => {
@@ -133,7 +134,7 @@ describe('RunnerJobs', () => {
       });
 
       it('fetches data only once', async () => {
-        findDetails().vm.$emit(event);
+        findShowDetails().vm.$emit(event);
         await waitForPromises();
 
         expect(mockRunnerManagersHandler).toHaveBeenCalledTimes(1);
@@ -150,7 +151,7 @@ describe('RunnerJobs', () => {
 
       createComponent({ mountFn: mountExtended });
 
-      await findDetails().trigger('click');
+      await findShowDetails().trigger('click');
     });
 
     it('shows rows', () => {
@@ -159,7 +160,7 @@ describe('RunnerJobs', () => {
     });
 
     it('collapses when clicked', async () => {
-      await findDetails().trigger('click');
+      await findHideDetails().trigger('click');
 
       expect(findCollapse().props('visible')).toBe(false);
     });

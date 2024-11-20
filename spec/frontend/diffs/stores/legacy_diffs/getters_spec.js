@@ -12,7 +12,6 @@ import setWindowLocation from 'helpers/set_window_location_helper';
 import { createCustomGetters } from 'helpers/pinia_helpers';
 import { useMrNotes } from '~/mr_notes/store/legacy_mr_notes';
 import { useNotes } from '~/notes/store/legacy_notes';
-import { globalAccessorPlugin } from '~/pinia';
 import discussion from '../../mock_data/diff_discussions';
 import diffsMockData from '../../mock_data/merge_request_diffs';
 
@@ -25,9 +24,7 @@ describe('Diffs Module Getters', () => {
       createCustomGetters(() => ({
         legacyDiffs: getters,
         legacyNotes: notesGetters,
-        batchComments: {},
       })),
-      globalAccessorPlugin,
     ],
   });
 
@@ -43,7 +40,6 @@ describe('Diffs Module Getters', () => {
     getters = {};
     notesGetters = {};
     store = useLegacyDiffs();
-    useNotes().$reset();
     store.$reset();
     discussionMock = { ...discussion };
     discussionMock.diff_file.file_hash = diffFileMock.fileHash;

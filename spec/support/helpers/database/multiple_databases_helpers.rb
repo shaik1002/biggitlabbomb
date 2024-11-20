@@ -90,6 +90,7 @@ module Database
     #
     # The execution within a block ensures safe cleanup of all allocated resources.
     #
+    # rubocop:disable Database/MultipleDatabases
     def with_reestablished_active_record_base(reconnect: true)
       connection_classes = ActiveRecord::Base
         .connection_handler
@@ -111,9 +112,10 @@ module Database
       ActiveRecord::Base.connection_handler = original_handler
       new_handler&.clear_all_connections!
     end
+    # rubocop:enable Database/MultipleDatabases
 
     def with_db_configs(test: test_config)
-      current_configurations = ActiveRecord::Base.configurations
+      current_configurations = ActiveRecord::Base.configurations # rubocop:disable Database/MultipleDatabases
       ActiveRecord::Base.configurations = { test: test_config }
       yield
     ensure

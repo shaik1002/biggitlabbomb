@@ -10,33 +10,31 @@ export default {
   directives: {
     GlModalDirective,
   },
-  props: {
-    modelVersion: {
-      type: Object,
-      required: true,
-    },
+  inject: ['versionName'],
+  data() {
+    return {
+      isDeleteModalVisible: false,
+    };
   },
   computed: {
-    versionName() {
-      return this.modelVersion.version;
-    },
-    modalId() {
-      return `ml-model-version-delete-modal-${this.modelVersion.id}`;
-    },
-    modalTitle() {
-      return sprintf(s__('MlModelRegistry|Delete version %{versionName}'), {
-        versionName: this.versionName,
-      });
+    deleteConfirmationText() {
+      return sprintf(
+        s__('MlModelRegistry|Are you sure you want to delete model version %{versionName}?'),
+        {
+          versionName: this.versionName,
+        },
+      );
     },
   },
   methods: {
     deleteModelVersion() {
-      this.$emit('delete-model-version', this.modelVersion.id);
+      this.$emit('delete-model-version');
     },
   },
   modal: {
+    id: 'ml-model-version-delete-modal',
     actionPrimary: {
-      text: s__('MlModelRegistry|Delete version'),
+      text: s__('MlModelRegistry|Delete model version'),
       attributes: { variant: 'danger' },
     },
     actionCancel: {
@@ -44,19 +42,14 @@ export default {
     },
   },
   i18n: {
-    deleteConfirmationText: s__(
-      'MlModelRegistry|Are you sure you want to delete this model version?',
-    ),
-    deleteConfirmationNote: s__(
-      'MlModelRegistry|Deleting this version also deletes all of its imported or uploaded artifacts and its settings.',
-    ),
+    modalTitle: s__('MlModelRegistry|Delete model version?'),
   },
 };
 </script>
 
 <template>
   <gl-disclosure-dropdown-item
-    v-gl-modal-directive="modalId"
+    v-gl-modal-directive="$options.modal.id"
     :aria-label="$options.modal.actionPrimary.text"
     variant="danger"
   >
@@ -66,18 +59,14 @@ export default {
       </span>
 
       <gl-modal
-        :modal-id="modalId"
-        :title="modalTitle"
+        :modal-id="$options.modal.id"
+        :title="$options.i18n.modalTitle"
         :action-primary="$options.modal.actionPrimary"
         :action-cancel="$options.modal.actionCancel"
         @primary="deleteModelVersion"
       >
         <p>
-          {{ $options.i18n.deleteConfirmationText }}
-        </p>
-        <p>
-          <b>{{ __('Note:') }}</b>
-          {{ $options.i18n.deleteConfirmationNote }}
+          {{ deleteConfirmationText }}
         </p>
       </gl-modal>
     </template>

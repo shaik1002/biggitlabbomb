@@ -114,19 +114,16 @@ module.exports = nextConfig
 An example `.gitlab-ci.yml` can be as minimal as:
 
 ```yaml
-deploy-pages:
+pages:
   before_script:
     - npm install
   script:
     - npm run build
     - mv out/* public
-  pages: true  # specifies that this is a Pages job
   artifacts:
     paths:
       - public
 ```
-
-The previous YAML example uses [user-defined job names](index.md#user-defined-job-names).
 
 ## Nuxt.js
 

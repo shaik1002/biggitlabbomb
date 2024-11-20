@@ -3,7 +3,7 @@
 class AuthorizedKeysWorker
   include ApplicationWorker
 
-  data_consistency :sticky
+  data_consistency :always
 
   sidekiq_options retry: 3
 
@@ -16,10 +16,13 @@ class AuthorizedKeysWorker
   def perform(action, *args)
     return unless Gitlab::CurrentSettings.authorized_keys_enabled?
 
-    case action
-    when 'add_key' then authorized_keys.add_key(*args)
-    when 'remove_key' then authorized_keys.remove_key(*args)
-    else raise "Unknown action: #{action.inspect}"
+    case action.to_s
+    when 'add_key'
+      authorized_keys.add_key(*args)
+    when 'remove_key'
+      authorized_keys.remove_key(*args)
+    else
+      raise "Unknown action: #{action.inspect}"
     end
   end
 

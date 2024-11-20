@@ -39,11 +39,6 @@ module MergeRequests
           .success(payload: default_payload(args))
       end
 
-      def checking(**args)
-        Gitlab::MergeRequests::Mergeability::CheckResult
-          .checking(payload: default_payload(args))
-      end
-
       def failure(**args)
         Gitlab::MergeRequests::Mergeability::CheckResult
           .failed(payload: default_payload(args))

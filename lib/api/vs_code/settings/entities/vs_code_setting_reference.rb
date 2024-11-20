@@ -8,10 +8,10 @@ module API
           include ::API::Helpers::RelatedResourcesHelpers
 
           expose :url do |setting|
-            resource_name = setting[:setting_type]
-            id = setting[:uuid]
-            path = "/api/v4/vscode/settings_sync/v1/resource/#{resource_name}/#{id}"
-            expose_path(path)
+            expose_path(api_v4_vscode_settings_sync_v1_resource_path(
+              resource_name: setting[:setting_type],
+              id: setting[:uuid]
+            ))
           end
           expose :created do |setting|
             setting[:updated_at]&.to_i

@@ -3,13 +3,25 @@
 class QueueDeletePackagesComposerCacheFileRecords < Gitlab::Database::Migration[2.2]
   milestone '17.3'
 
-  # The migration was finalized in 17.4
-  # https://gitlab.com/gitlab-org/gitlab/-/merge_requests/159861#note_2067062639
+  restrict_gitlab_migration gitlab_schema: :gitlab_main
+
+  MIGRATION = 'DeletePackagesComposerCacheFileRecords'
+  DELAY_INTERVAL = 2.minutes
+  BATCH_SIZE = 500
+  SUB_BATCH_SIZE = 100
+
   def up
-    # no-op
+    queue_batched_background_migration(
+      MIGRATION,
+      :packages_composer_cache_files,
+      :id,
+      job_interval: DELAY_INTERVAL,
+      batch_size: BATCH_SIZE,
+      sub_batch_size: SUB_BATCH_SIZE
+    )
   end
 
   def down
-    # no-op
+    delete_batched_background_migration(MIGRATION, :packages_composer_cache_files, :id, [])
   end
 end

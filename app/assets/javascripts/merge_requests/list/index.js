@@ -36,11 +36,6 @@ export async function mountMergeRequestListsApp() {
     environmentNamesPath,
     mergeTrainsPath,
     defaultBranch,
-    initialEmail,
-    emailsHelpPagePath,
-    quickActionsHelpPath,
-    markdownHelpPath,
-    resetPath,
   } = el.dataset;
 
   return new Vue({
@@ -74,11 +69,6 @@ export async function mountMergeRequestListsApp() {
       environmentNamesPath,
       mergeTrainsPath,
       defaultBranch,
-      initialEmail,
-      emailsHelpPagePath,
-      quickActionsHelpPath,
-      markdownHelpPath,
-      resetPath,
     },
     render: (createComponent) => createComponent(MergeRequestsListApp),
   });

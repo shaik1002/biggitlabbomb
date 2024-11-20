@@ -35,8 +35,6 @@ Get all Dockerfile templates.
 GET /templates/dockerfiles
 ```
 
-Example request:
-
 ```shell
 curl "https://gitlab.example.com/api/v4/templates/dockerfiles"
 ```
@@ -128,11 +126,9 @@ Get a single Dockerfile template.
 GET /templates/dockerfiles/:key
 ```
 
-| Attribute | Type   | Required | Description |
-|-----------|--------|----------|-------------|
-| `key`     | string | yes      | The key of the Dockerfile template |
-
-Example request:
+| Attribute  | Type   | Required | Description |
+| ---------- | ------ | -------- | ----------- |
+| `key`      | string | yes      | The key of the Dockerfile template |
 
 ```shell
 curl "https://gitlab.example.com/api/v4/templates/dockerfiles/Binary"

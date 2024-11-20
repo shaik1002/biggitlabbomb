@@ -40,8 +40,8 @@ import { mergeRequestListTabs } from '~/vue_shared/issuable/list/constants';
 import { getSortOptions } from '~/issues/list/utils';
 import MergeRequestsListApp from '~/merge_requests/list/components/merge_requests_list_app.vue';
 import { BRANCH_LIST_REFRESH_INTERVAL } from '~/merge_requests/list/constants';
-import getMergeRequestsQuery from 'ee_else_ce/merge_requests/list/queries/get_merge_requests.query.graphql';
-import getMergeRequestsCountQuery from 'ee_else_ce/merge_requests/list/queries/get_merge_requests_counts.query.graphql';
+import getMergeRequestsQuery from '~/merge_requests/list/queries/get_merge_requests.query.graphql';
+import getMergeRequestsCountQuery from '~/merge_requests/list/queries/get_merge_requests_counts.query.graphql';
 import IssuableList from '~/vue_shared/issuable/list/components/issuable_list_root.vue';
 import MergeRequestReviewers from '~/issuable/components/merge_request_reviewers.vue';
 import issuableEventHub from '~/issues/list/eventhub';
@@ -283,22 +283,22 @@ describe('Merge requests list app', () => {
 
       it('does not have preloaded users when gon.current_user_id does not exist', () => {
         expect(findIssuableList().props('searchTokens')).toMatchObject([
-          { type: TOKEN_TYPE_AUTHOR, preloadedUsers: [] },
+          { type: TOKEN_TYPE_APPROVED_BY, preloadedUsers: [] },
+          { type: TOKEN_TYPE_APPROVER, preloadedUsers: [] },
           { type: TOKEN_TYPE_ASSIGNEE },
           { type: TOKEN_TYPE_REVIEWER, preloadedUsers: [] },
-          { type: TOKEN_TYPE_MERGE_USER, preloadedUsers: [] },
-          { type: TOKEN_TYPE_APPROVER, preloadedUsers: [] },
-          { type: TOKEN_TYPE_APPROVED_BY, preloadedUsers: [] },
-          { type: TOKEN_TYPE_MILESTONE },
-          { type: TOKEN_TYPE_LABEL },
-          { type: TOKEN_TYPE_RELEASE },
-          { type: TOKEN_TYPE_MY_REACTION },
+          { type: TOKEN_TYPE_AUTHOR, preloadedUsers: [] },
           { type: TOKEN_TYPE_DRAFT },
+          { type: TOKEN_TYPE_MERGE_USER, preloadedUsers: [] },
+          { type: TOKEN_TYPE_MILESTONE },
           { type: TOKEN_TYPE_TARGET_BRANCH },
           { type: TOKEN_TYPE_SOURCE_BRANCH },
+          { type: TOKEN_TYPE_LABEL },
+          { type: TOKEN_TYPE_RELEASE },
           { type: TOKEN_TYPE_ENVIRONMENT },
           { type: TOKEN_TYPE_DEPLOYED_BEFORE },
           { type: TOKEN_TYPE_DEPLOYED_AFTER },
+          { type: TOKEN_TYPE_MY_REACTION },
         ]);
       });
     });
@@ -343,22 +343,22 @@ describe('Merge requests list app', () => {
         ];
 
         expect(findIssuableList().props('searchTokens')).toMatchObject([
-          { type: TOKEN_TYPE_AUTHOR, preloadedUsers },
+          { type: TOKEN_TYPE_APPROVED_BY, preloadedUsers },
+          { type: TOKEN_TYPE_APPROVER, preloadedUsers },
           { type: TOKEN_TYPE_ASSIGNEE },
           { type: TOKEN_TYPE_REVIEWER, preloadedUsers },
-          { type: TOKEN_TYPE_MERGE_USER, preloadedUsers },
-          { type: TOKEN_TYPE_APPROVER, preloadedUsers },
-          { type: TOKEN_TYPE_APPROVED_BY, preloadedUsers },
-          { type: TOKEN_TYPE_MILESTONE },
-          { type: TOKEN_TYPE_LABEL },
-          { type: TOKEN_TYPE_RELEASE },
-          { type: TOKEN_TYPE_MY_REACTION },
+          { type: TOKEN_TYPE_AUTHOR, preloadedUsers },
           { type: TOKEN_TYPE_DRAFT },
+          { type: TOKEN_TYPE_MERGE_USER, preloadedUsers },
+          { type: TOKEN_TYPE_MILESTONE },
           { type: TOKEN_TYPE_TARGET_BRANCH },
           { type: TOKEN_TYPE_SOURCE_BRANCH },
+          { type: TOKEN_TYPE_LABEL },
+          { type: TOKEN_TYPE_RELEASE },
           { type: TOKEN_TYPE_ENVIRONMENT },
           { type: TOKEN_TYPE_DEPLOYED_BEFORE },
           { type: TOKEN_TYPE_DEPLOYED_AFTER },
+          { type: TOKEN_TYPE_MY_REACTION },
         ]);
       });
 
@@ -417,37 +417,19 @@ describe('Merge requests list app', () => {
             type: 'reviewer',
             value: { data: 'root', operator: OPERATOR_NOT },
           },
-          {
-            type: 'source-branch',
-            value: { data: ['branch_name'], operator: OPERATOR_NOT },
-          },
-          {
-            type: 'target-branch',
-            value: { data: ['branch_name'], operator: OPERATOR_NOT },
-          },
         ]);
 
         await nextTick();
 
         expect(getQueryResponseMock).toHaveBeenCalledWith(
           expect.objectContaining({
-            not: {
-              assigneeUsernames: ['root'],
-              reviewerUsername: 'root',
-              sourceBranches: ['branch_name'],
-              targetBranches: ['branch_name'],
-            },
+            not: { assigneeUsernames: ['root'], reviewerUsername: 'root' },
           }),
         );
 
         expect(getCountsQueryResponseMock).toHaveBeenCalledWith(
           expect.objectContaining({
-            not: {
-              assigneeUsernames: ['root'],
-              reviewerUsername: 'root',
-              sourceBranches: ['branch_name'],
-              targetBranches: ['branch_name'],
-            },
+            not: { assigneeUsernames: ['root'], reviewerUsername: 'root' },
           }),
         );
       });
@@ -464,14 +446,6 @@ describe('Merge requests list app', () => {
             type: 'reviewer',
             value: { data: 'root', operator: OPERATOR_NOT },
           },
-          {
-            type: 'source-branch',
-            value: { data: ['branch_name'], operator: OPERATOR_NOT },
-          },
-          {
-            type: 'target-branch',
-            value: { data: ['branch_name'], operator: OPERATOR_NOT },
-          },
         ]);
 
         await nextTick();
@@ -480,8 +454,6 @@ describe('Merge requests list app', () => {
           query: expect.objectContaining({
             'not[assignee_username][]': ['root'],
             'not[reviewer_username]': 'root',
-            'not[source_branches][]': ['branch_name'],
-            'not[target_branches][]': ['branch_name'],
           }),
         });
       });
@@ -640,21 +612,5 @@ describe('Merge requests list app', () => {
         expect(wrapper.findByTestId('target-branch').exists()).toBe(exists);
       },
     );
-  });
-
-  describe('route watcher', () => {
-    it('refetches query when route changes', async () => {
-      createComponent();
-
-      router.replace('?assignee_username[]=test-username');
-
-      await waitForPromises();
-
-      expect(getQueryResponseMock).toHaveBeenCalledWith(
-        expect.objectContaining({
-          assigneeUsernames: 'test-username',
-        }),
-      );
-    });
   });
 });

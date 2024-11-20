@@ -202,10 +202,6 @@ describe('WorkItemActions component', () => {
         text: '',
       },
       {
-        testId: TEST_ID_NEW_RELATED_WORK_ITEM,
-        text: 'New related task',
-      },
-      {
         testId: TEST_ID_LOCK_ACTION,
         text: 'Lock discussion',
       },
@@ -235,14 +231,14 @@ describe('WorkItemActions component', () => {
     ]);
   });
 
-  it('includes a new related item option', () => {
-    createComponent({ workItemType: 'Task' });
+  it('includes a new related item option when the work item is the correct type', () => {
+    createComponent({ workItemType: 'Epic' });
 
     expect(findDropdownItemsActual()).toEqual(
       expect.arrayContaining([
         {
           testId: TEST_ID_NEW_RELATED_WORK_ITEM,
-          text: 'New related task',
+          text: 'New related Epic',
         },
       ]),
     );
@@ -325,16 +321,14 @@ describe('WorkItemActions component', () => {
       expect(wrapper.emitted('toggleWorkItemConfidentiality')[0]).toEqual([true]);
     });
 
-    it('does not render when canUpdate is false', () => {
-      createComponent({ canUpdate: false });
-      expect(findConfidentialityToggleButton().exists()).toBe(false);
-    });
+    it.each`
+      props                             | propName                  | value
+      ${{ isParentConfidential: true }} | ${'isParentConfidential'} | ${true}
+      ${{ canUpdate: false }}           | ${'canUpdate'}            | ${false}
+    `('does not render when $propName is $value', ({ props }) => {
+      createComponent(props);
 
-    it('is disabled when item has confidential parent', () => {
-      createComponent({ isParentConfidential: true });
-      expect(findConfidentialityToggleButton().props('item')).toMatchObject({
-        extraAttrs: { disabled: true },
-      });
+      expect(findConfidentialityToggleButton().exists()).toBe(false);
     });
   });
 
@@ -549,36 +543,12 @@ describe('WorkItemActions component', () => {
 
   describe('new related item', () => {
     it('opens the create work item modal', async () => {
-      createComponent({ workItemType: 'Task' });
+      createComponent({ workItemType: 'Epic' });
 
       findNewRelatedItemButton().vm.$emit('action');
       await nextTick();
 
       expect(findCreateWorkItemModal().props('visible')).toBe(true);
-    });
-
-    it.each`
-      isProjectSelectorVisible | workItemType
-      ${false}                 | ${'Epic'}
-      ${true}                  | ${'Issue'}
-      ${true}                  | ${'Task'}
-    `(
-      'when workItemType is $workItemType, sets `CreateWorkItemModal` `showProjectSelector` prop to $isProjectSelectorVisible',
-      ({ isProjectSelectorVisible, workItemType }) => {
-        createComponent({ workItemType });
-
-        expect(findCreateWorkItemModal().props('showProjectSelector')).toBe(
-          isProjectSelectorVisible,
-        );
-      },
-    );
-
-    it('emits `workItemCreated` when `CreateWorkItemModal` emits `workItemCreated`', () => {
-      createComponent();
-
-      findCreateWorkItemModal().vm.$emit('workItemCreated');
-
-      expect(wrapper.emitted('workItemCreated')).toHaveLength(1);
     });
   });
 });

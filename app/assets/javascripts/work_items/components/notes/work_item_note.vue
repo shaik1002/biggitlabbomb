@@ -131,9 +131,6 @@ export default {
     authorId() {
       return getIdFromGraphQLId(this.author.id);
     },
-    externalAuthor() {
-      return this.note?.externalAuthor;
-    },
     entryClass() {
       return {
         'note note-wrapper note-comment': true,
@@ -348,7 +345,28 @@ export default {
       </gl-avatar-link>
     </div>
     <div class="timeline-content">
-      <div data-testid="note-wrapper">
+      <work-item-comment-form
+        v-if="isEditing"
+        :work-item-type="workItemType"
+        :aria-label="__('Edit comment')"
+        :autosave-key="autosaveKey"
+        :initial-value="note.body"
+        :comment-button-text="__('Save comment')"
+        :autocomplete-data-sources="autocompleteDataSources"
+        :markdown-preview-path="markdownPreviewPath"
+        :work-item-id="workItemId"
+        :autofocus="isEditing"
+        :is-work-item-confidential="isWorkItemConfidential"
+        :is-discussion-resolved="isDiscussionResolved"
+        :is-discussion-resolvable="isDiscussionResolvable"
+        :has-replies="hasReplies"
+        :full-path="fullPath"
+        class="gl-mt-3 gl-pl-3"
+        @cancelEditing="isEditing = false"
+        @toggleResolveDiscussion="$emit('resolve')"
+        @submitForm="updateNote"
+      />
+      <div v-else data-testid="note-wrapper">
         <div :class="noteHeaderClass">
           <note-header
             :author="author"
@@ -356,13 +374,11 @@ export default {
             :note-id="note.id"
             :note-url="noteUrl"
             :is-internal-note="note.internal"
-            :email-participant="externalAuthor"
           >
             <span v-if="note.createdAt" class="gl-hidden sm:gl-inline">&middot;</span>
           </note-header>
           <div class="gl-inline-flex">
             <note-actions
-              v-if="!isEditing"
               :full-path="fullPath"
               :show-award-emoji="hasAwardEmojiPermission"
               :work-item-iid="workItemIid"
@@ -395,49 +411,24 @@ export default {
             />
           </div>
         </div>
-        <div class="note-body">
-          <work-item-comment-form
-            v-if="isEditing"
-            :work-item-type="workItemType"
-            :aria-label="__('Edit comment')"
-            :autosave-key="autosaveKey"
-            :initial-value="note.body"
-            :comment-button-text="__('Save comment')"
-            :autocomplete-data-sources="autocompleteDataSources"
-            :markdown-preview-path="markdownPreviewPath"
-            :work-item-id="workItemId"
-            :autofocus="isEditing"
-            :is-work-item-confidential="isWorkItemConfidential"
-            :is-discussion-resolved="isDiscussionResolved"
-            :is-discussion-resolvable="isDiscussionResolvable"
-            :has-replies="hasReplies"
-            :full-path="fullPath"
-            class="gl-mt-3"
-            @cancelEditing="isEditing = false"
-            @toggleResolveDiscussion="$emit('resolve')"
-            @submitForm="updateNote"
-          />
-          <div v-else class="timeline-discussion-body">
-            <note-body ref="noteBody" :note="note" :has-replies="hasReplies" />
-          </div>
-          <edited-at
-            v-if="note.lastEditedBy && !isEditing"
-            :updated-at="note.lastEditedAt"
-            :updated-by-name="lastEditedBy.name"
-            :updated-by-path="lastEditedBy.webPath"
-            class="gl-mt-5"
-            :class="isFirstNote ? '' : 'gl-pl-7'"
-          />
-
-          <div class="note-awards" :class="isFirstNote ? '' : 'gl-pl-7'">
-            <work-item-note-awards-list
-              :full-path="fullPath"
-              :note="note"
-              :work-item-iid="workItemIid"
-              :is-modal="isModal"
-            />
-          </div>
+        <div class="timeline-discussion-body">
+          <note-body ref="noteBody" :note="note" :has-replies="hasReplies" />
         </div>
+        <edited-at
+          v-if="note.lastEditedBy"
+          :updated-at="note.lastEditedAt"
+          :updated-by-name="lastEditedBy.name"
+          :updated-by-path="lastEditedBy.webPath"
+          :class="isFirstNote ? 'gl-pl-3' : 'gl-pl-8'"
+        />
+      </div>
+      <div class="note-awards" :class="isFirstNote ? '' : 'gl-pl-7'">
+        <work-item-note-awards-list
+          :full-path="fullPath"
+          :note="note"
+          :work-item-iid="workItemIid"
+          :is-modal="isModal"
+        />
       </div>
     </div>
   </timeline-entry-item>

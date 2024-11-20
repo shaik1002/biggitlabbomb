@@ -95,7 +95,9 @@ export default {
           };
         },
         skip() {
-          return !todoQueries[this.issuableType].subscription;
+          return (
+            !this.glFeatures.realtimeIssuableTodo || !todoQueries[this.issuableType].subscription
+          );
         },
       },
     },

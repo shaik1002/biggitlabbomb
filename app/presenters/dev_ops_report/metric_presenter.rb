@@ -74,7 +74,8 @@ module DevOpsReport
           title: 'Monitoring',
           description: 'fraction of all projects',
           feature: 'projects_prometheus_active',
-          blog: 'https://prometheus.io/docs/introduction/overview/'
+          blog: 'https://prometheus.io/docs/introduction/overview/',
+          docs: help_page_path('user/project/integrations/prometheus.md')
         ),
         Card.new(
           metric: metric,
@@ -142,8 +143,10 @@ module DevOpsReport
       ]
     end
 
+    # rubocop: disable CodeReuse/ActiveRecord
     def average_percentage_score
       cards.sum(&:percentage_score) / cards.size.to_f
     end
+    # rubocop: enable CodeReuse/ActiveRecord
   end
 end

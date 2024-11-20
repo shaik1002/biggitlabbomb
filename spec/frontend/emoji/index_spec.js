@@ -29,13 +29,7 @@ import isEmojiUnicodeSupported, {
   isHorceRacingSkinToneComboEmoji,
   isPersonZwjEmoji,
 } from '~/emoji/support/is_emoji_unicode_supported';
-import {
-  CACHE_KEY,
-  CACHE_VERSION_KEY,
-  EMOJI_THUMBS_UP,
-  EMOJI_THUMBS_DOWN,
-  NEUTRAL_INTENT_MULTIPLIER,
-} from '~/emoji/constants';
+import { CACHE_KEY, CACHE_VERSION_KEY, NEUTRAL_INTENT_MULTIPLIER } from '~/emoji/constants';
 import customEmojiQuery from '~/emoji/queries/custom_emoji.query.graphql';
 import axios from '~/lib/utils/axios_utils';
 import { HTTP_STATUS_OK } from '~/lib/utils/http_status';
@@ -527,10 +521,6 @@ describe('emoji', () => {
   });
 
   describe('isEmojiUnicodeSupported', () => {
-    beforeEach(() => {
-      gon.emoji_backend_version = EMOJI_VERSION;
-    });
-
     it('should gracefully handle empty string with unicode support', () => {
       const isSupported = isEmojiUnicodeSupported({ '1.0': true }, '', '1.0');
 
@@ -540,7 +530,7 @@ describe('emoji', () => {
     it('should gracefully handle empty string without unicode support', () => {
       const isSupported = isEmojiUnicodeSupported({}, '', '1.0');
 
-      expect(isSupported).toBe(false);
+      expect(isSupported).toBeUndefined();
     });
 
     it('bomb(6.0) with 6.0 support', () => {
@@ -570,32 +560,6 @@ describe('emoji', () => {
     it('bomb(6.0) without 6.0 but with 9.0 support', () => {
       const emojiKey = 'bomb';
       const unicodeSupportMap = { ...emptySupportMap, '9.0': true };
-      const isSupported = isEmojiUnicodeSupported(
-        unicodeSupportMap,
-        emojiFixtureMap[emojiKey].moji,
-        emojiFixtureMap[emojiKey].unicodeVersion,
-      );
-
-      expect(isSupported).toBe(false);
-    });
-
-    it('bomb(6.0) without 6.0 but with backend support', () => {
-      gon.emoji_backend_version = EMOJI_VERSION + 1;
-      const emojiKey = 'bomb';
-      const unicodeSupportMap = emptySupportMap;
-      const isSupported = isEmojiUnicodeSupported(
-        unicodeSupportMap,
-        emojiFixtureMap[emojiKey].moji,
-        emojiFixtureMap[emojiKey].unicodeVersion,
-      );
-
-      expect(isSupported).toBe(true);
-    });
-
-    it('bomb(6.0) without 6.0 with empty backend version', () => {
-      gon.emoji_backend_version = null;
-      const emojiKey = 'bomb';
-      const unicodeSupportMap = emptySupportMap;
       const isSupported = isEmojiUnicodeSupported(
         unicodeSupportMap,
         emojiFixtureMap[emojiKey].moji,
@@ -704,12 +668,12 @@ describe('emoji', () => {
           let score = NEUTRAL_INTENT_MULTIPLIER;
 
           // Positive intent value retrieved from ~/emoji/intents.json
-          if (name === EMOJI_THUMBS_UP) {
+          if (name === 'thumbsup') {
             score = 0.5;
           }
 
           // Negative intent value retrieved from ~/emoji/intents.json
-          if (name === EMOJI_THUMBS_DOWN) {
+          if (name === 'thumbsdown') {
             score = 1.5;
           }
 
@@ -878,12 +842,12 @@ describe('emoji', () => {
         'thumbs',
         [
           {
-            name: EMOJI_THUMBS_UP,
+            name: 'thumbsup',
             field: 'd',
             score: 0.5,
           },
           {
-            name: EMOJI_THUMBS_DOWN,
+            name: 'thumbsdown',
             field: 'd',
             score: 1.5,
           },
@@ -961,9 +925,9 @@ describe('emoji', () => {
     });
 
     it.each`
-      emoji              | src
-      ${EMOJI_THUMBS_UP} | ${`/-/emojis/${EMOJI_VERSION}/${EMOJI_THUMBS_UP}.png`}
-      ${'parrot'}        | ${'parrot.gif'}
+      emoji         | src
+      ${'thumbsup'} | ${'/-/emojis/3/thumbsup.png'}
+      ${'parrot'}   | ${'parrot.gif'}
     `('returns $src for emoji with name $emoji', ({ emoji, src }) => {
       expect(emojiFallbackImageSrc(emoji)).toBe(src);
     });

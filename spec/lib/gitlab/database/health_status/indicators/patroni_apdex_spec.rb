@@ -2,8 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::Database::HealthStatus::Indicators::PatroniApdex, :aggregate_failures,
-  feature_category: :database do
+RSpec.describe Gitlab::Database::HealthStatus::Indicators::PatroniApdex, :aggregate_failures, feature_category: :database do # rubocop:disable Layout/LineLength
   it_behaves_like 'Prometheus Alert based health indicator' do
     let(:feature_flag) { :batched_migrations_health_status_patroni_apdex }
     let(:sli_query_main) { 'Apdex query for main' }

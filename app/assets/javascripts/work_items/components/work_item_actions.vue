@@ -36,7 +36,6 @@ import {
   I18N_WORK_ITEM_COPY_CREATE_NOTE_EMAIL,
   I18N_WORK_ITEM_ERROR_COPY_REFERENCE,
   I18N_WORK_ITEM_ERROR_COPY_EMAIL,
-  I18N_WORK_ITEM_NEW_RELATED_ITEM,
   TEST_ID_LOCK_ACTION,
   TEST_ID_REPORT_ABUSE,
   TEST_ID_NEW_RELATED_WORK_ITEM,
@@ -54,9 +53,6 @@ export default {
   i18n: {
     enableConfidentiality: s__('WorkItem|Turn on confidentiality'),
     disableConfidentiality: s__('WorkItem|Turn off confidentiality'),
-    confidentialParentTooltip: s__(
-      'WorkItem|Child items of a confidential parent must be confidential. Turn off confidentiality on the parent item first.',
-    ),
     notifications: s__('WorkItem|Notifications'),
     notificationOn: s__('WorkItem|Notifications turned on.'),
     notificationOff: s__('WorkItem|Notifications turned off.'),
@@ -227,7 +223,6 @@ export default {
           I18N_WORK_ITEM_ERROR_COPY_EMAIL,
           this.workItemType,
         ),
-        newRelatedItemLabel: sprintfWorkItem(I18N_WORK_ITEM_NEW_RELATED_ITEM, this.workItemType),
       };
     },
     areYouSureDeleteMessage() {
@@ -241,18 +236,10 @@ export default {
     canPromoteToObjective() {
       return this.canUpdate && this.workItemType === WORK_ITEM_TYPE_VALUE_KEY_RESULT;
     },
-    confidentialItem() {
-      return {
-        text: this.isConfidential
-          ? this.$options.i18n.disableConfidentiality
-          : this.$options.i18n.enableConfidentiality,
-        extraAttrs: {
-          disabled: this.isParentConfidential,
-        },
-      };
-    },
-    confidentialTooltip() {
-      return this.isParentConfidential ? this.$options.i18n.confidentialParentTooltip : '';
+    confidentialItemText() {
+      return this.isConfidential
+        ? this.$options.i18n.disableConfidentiality
+        : this.$options.i18n.enableConfidentiality;
     },
     lockDiscussionText() {
       return this.isDiscussionLocked ? __('Unlock discussion') : __('Lock discussion');
@@ -460,11 +447,11 @@ export default {
       />
 
       <gl-disclosure-dropdown-item
-        v-if="canCreateRelatedItem && canUpdate"
+        v-if="canCreateRelatedItem && canUpdate && isEpic"
         :data-testid="$options.newRelatedItemTestId"
         @action="isCreateWorkItemModalVisible = true"
       >
-        <template #list-item>{{ i18n.newRelatedItemLabel }}</template>
+        <template #list-item>{{ __('New related Epic') }}</template>
       </gl-disclosure-dropdown-item>
 
       <gl-disclosure-dropdown-item
@@ -487,12 +474,12 @@ export default {
       </gl-disclosure-dropdown-item>
 
       <gl-disclosure-dropdown-item
-        v-if="canUpdate"
-        v-gl-tooltip.left.viewport.d0="confidentialTooltip"
-        :item="confidentialItem"
+        v-if="canUpdate && !isParentConfidential"
         :data-testid="$options.confidentialityTestId"
         @action="handleToggleWorkItemConfidentiality"
-      />
+      >
+        <template #list-item>{{ confidentialItemText }}</template>
+      </gl-disclosure-dropdown-item>
 
       <gl-disclosure-dropdown-item
         :data-testid="$options.copyReferenceTestId"
@@ -549,10 +536,8 @@ export default {
     <create-work-item-modal
       :visible="isCreateWorkItemModalVisible"
       :related-item="relatedItemData"
-      :work-item-type-name="workItemType.toUpperCase()"
-      :show-project-selector="!isEpic"
+      :work-item-type-name="$options.WORK_ITEM_TYPE_ENUM_EPIC"
       hide-button
-      @workItemCreated="$emit('workItemCreated')"
       @hideModal="isCreateWorkItemModalVisible = false"
     />
   </div>

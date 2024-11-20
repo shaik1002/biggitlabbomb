@@ -6,7 +6,6 @@ const glob = require('glob');
 const sass = require('sass');
 const webpack = require('webpack');
 const { red } = require('chalk');
-const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
 const IS_EE = require('../../config/helpers/is_ee_env');
 const IS_JH = require('../../config/helpers/is_jh_env');
 const gitlabWebpackConfig = require('../../config/webpack.config');
@@ -179,34 +178,10 @@ module.exports = function storybookWebpackConfig({ config }) {
       include: /node_modules/,
       type: 'javascript/auto',
     },
-    {
-      test: /\.(js|cjs)$/,
-      include: (modulePath) =>
-        /node_modules\/(jsonc-parser|monaco-editor|monaco-worker-manager|monaco-marker-data-provider)/.test(
-          modulePath,
-        ) || /node_modules\/yaml/.test(modulePath),
-      use: transpileDependencyConfig,
-    },
   ];
 
   // Silence webpack warnings about moment/pikaday not being able to resolve.
   config.plugins.push(new webpack.IgnorePlugin(/moment/, /pikaday/));
-
-  config.plugins.push(
-    new MonacoWebpackPlugin({
-      filename: '[name].[contenthash:8].worker.js',
-      customLanguages: [
-        {
-          label: 'yaml',
-          entry: 'monaco-yaml',
-          worker: {
-            id: 'monaco-yaml/yamlWorker',
-            entry: 'monaco-yaml/yaml.worker',
-          },
-        },
-      ],
-    }),
-  );
 
   if (!IS_EE) {
     config.plugins.push(
@@ -219,14 +194,6 @@ module.exports = function storybookWebpackConfig({ config }) {
   if (!IS_JH) {
     config.plugins.push(
       new webpack.NormalModuleReplacementPlugin(/^jh_component\/(.*)\.vue/, (resource) => {
-        resource.request = EMPTY_VUE_COMPONENT_PATH;
-      }),
-    );
-  }
-
-  if (!IS_EE && !IS_JH) {
-    config.plugins.push(
-      new webpack.NormalModuleReplacementPlugin(/^jh_else_ee\/(.*)\.vue/, (resource) => {
         resource.request = EMPTY_VUE_COMPONENT_PATH;
       }),
     );

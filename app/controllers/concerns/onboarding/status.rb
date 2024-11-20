@@ -6,9 +6,9 @@ module Onboarding
       {}
     end
 
-    def initialize(params, user_return_to, user)
+    def initialize(params, session, user)
       @params = params
-      @user_return_to = user_return_to
+      @session = session
       @user = user
     end
 

@@ -46,7 +46,7 @@
     &:focus:active {
       position: relative;
       z-index: 1;
-      @apply gl-focus;
+      @include gl-focus;
     }
   }
 

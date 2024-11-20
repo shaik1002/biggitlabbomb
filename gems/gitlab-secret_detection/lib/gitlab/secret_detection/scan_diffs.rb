@@ -72,8 +72,7 @@ module Gitlab
       # Returns an instance of SecretDetection::Response by following below structure:
       # {
       #     status: One of the SecretDetection::Status values
-      #     results: [SecretDetection::Finding],
-      #     applied_exclusions: [Security::ProjectSecurityExclusion]
+      #     results: [SecretDetection::Finding]
       # }
       #
       def secrets_scan(
@@ -91,20 +90,16 @@ module Gitlab
 
           next SecretDetection::Response.new(SecretDetection::Status::NOT_FOUND) if matched_diffs.empty?
 
-          scan_result =
+          secrets =
             if subprocess
               run_scan_within_subprocess(matched_diffs, payload_timeout, exclusions)
             else
               run_scan(matched_diffs, payload_timeout, exclusions)
             end
 
-          scan_status = overall_scan_status(scan_result[:secrets])
+          scan_status = overall_scan_status(secrets)
 
-          SecretDetection::Response.new(
-            scan_status,
-            scan_result[:secrets],
-            scan_result[:applied_exclusions]
-          )
+          SecretDetection::Response.new(scan_status, secrets)
         end
       rescue Timeout::Error => e
         logger.error "Secret detection operation timed out: #{e}"
@@ -114,7 +109,7 @@ module Gitlab
 
       private
 
-      attr_reader :logger, :rules, :keywords, :pattern_matcher, :applied_exclusions
+      attr_reader :logger, :rules, :keywords, :pattern_matcher
 
       # parses given ruleset file and returns the parsed rules
       def parse_ruleset(ruleset_file_path)
@@ -167,65 +162,46 @@ module Gitlab
       end
 
       def run_scan(diffs, payload_timeout, exclusions)
-        results = diffs.flat_map do |diff|
+        diffs.flat_map do |diff|
           Timeout.timeout(payload_timeout) do
             find_secrets(diff, exclusions)
           end
         rescue Timeout::Error => e
           logger.error "Secret Detection scan timed out on the diff(id:#{diff.right_blob_id}): #{e}"
-
-          # This mimics the structure returned from `find_secrets(...)`.
-          {
-            secrets: [SecretDetection::Finding.new(diff.right_blob_id, SecretDetection::Status::PAYLOAD_TIMEOUT)],
-            applied_exclusions: []
-          }
+          SecretDetection::Finding.new(diff.right_blob_id,
+            SecretDetection::Status::PAYLOAD_TIMEOUT)
         end
-
-        {
-          secrets: results.flat_map { |result| result[:secrets] },
-          applied_exclusions: results.flat_map { |result| result[:applied_exclusions] }
-        }
       end
 
       def run_scan_within_subprocess(diffs, payload_timeout, exclusions)
         diff_sizes = diffs.map { |diff| diff.patch.bytesize }
-
         grouped_diff_indicies = group_by_chunk_size(diff_sizes)
+
         grouped_diffs = grouped_diff_indicies.map { |idx_arr| idx_arr.map { |i| diffs[i] } }
 
-        results = Parallel.flat_map(
+        Parallel.flat_map(
           grouped_diffs,
           in_processes: MAX_PROCS_PER_REQUEST,
           isolation: true # do not reuse sub-processes
         ) do |grouped_diff|
-          grouped_diff.map do |diff|
+          grouped_diff.flat_map do |diff|
             Timeout.timeout(payload_timeout) do
               find_secrets(diff, exclusions)
             end
           rescue Timeout::Error => e
             logger.error "Secret Detection scan timed out on the diff(id:#{diff.right_blob_id}): #{e}"
-
-            # This mimics the structure returned from `find_secrets(...)`.
-            {
-              secrets: [SecretDetection::Finding.new(diff.right_blob_id, SecretDetection::Status::PAYLOAD_TIMEOUT)],
-              applied_exclusions: []
-            }
+            SecretDetection::Finding.new(diff.right_blob_id,
+              SecretDetection::Status::PAYLOAD_TIMEOUT)
           end
         end
-
-        {
-          secrets: results.flat_map { |result| result[:secrets] },
-          applied_exclusions: results.flat_map { |result| result[:applied_exclusions] }
-        }
       end
 
       # finds secrets in the given diff with a timeout circuit breaker
       def find_secrets(diff, exclusions)
-        secrets = []
-        applied_exclusions = []
         line_number_offset = 0
+        secrets = []
 
-        # The following section parses a single line in a diff patch.
+        # The following section parses the diff patch.
         #
         # If the line starts with @@, it is the hunk header, used to calculate the line number.
         # If the line starts with +, it is newly added in this diff, and we
@@ -245,10 +221,6 @@ module Gitlab
         #  -this context line has a - but starts with a space so isnt a removal
         diff.patch.each_line do |line|
           exclusions[:raw_value]&.each do |exclusion|
-            next unless line.include?(exclusion.value)
-
-            applied_exclusions << exclusion
-
             line.gsub!(exclusion.value, '') # remove excluded raw value from the line.
           end
 
@@ -264,15 +236,13 @@ module Gitlab
             line_content = line[1..]
 
             patterns = pattern_matcher.match(line_content, exception: false)
-
             next unless patterns.any?
 
             patterns.each do |pattern|
               type = rules[pattern]["id"]
               description = rules[pattern]["description"]
 
-              # Check if rule type is excluded and if so, skip this rule and count this as an applied exclusion
-              next if applied_rule_exclusion?(type, exclusions[:rule], applied_exclusions)
+              next if exclusions[:rule]&.any? { |exclusion| exclusion.value == type }
 
               secrets << SecretDetection::Finding.new(
                 diff.right_blob_id,
@@ -291,19 +261,11 @@ module Gitlab
           end
         end
 
-        { secrets:, applied_exclusions: }
+        secrets
       rescue StandardError => e
         logger.error "Secret Detection scan failed on the diff(id:#{diff.right_blob_id}): #{e}"
 
-        {
-          secrets: [SecretDetection::Finding.new(diff.right_blob_id, SecretDetection::Status::SCAN_ERROR)],
-          applied_exclusions: []
-        }
-      end
-
-      def applied_rule_exclusion?(type, rule_exclusions, applied_exclusions)
-        applied_exclusion = rule_exclusions&.find { |rule_exclusion| rule_exclusion.value == type }
-        applied_exclusion && (applied_exclusions << applied_exclusion)
+        SecretDetection::Finding.new(diff.right_blob_id, SecretDetection::Status::SCAN_ERROR)
       end
 
       def validate_scan_input(diffs)

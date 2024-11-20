@@ -9,10 +9,7 @@ import PackagesListRow from '~/packages_and_registries/package_registry/componen
 import PackageTags from '~/packages_and_registries/shared/components/package_tags.vue';
 import PublishMessage from '~/packages_and_registries/shared/components/publish_message.vue';
 import PublishMethod from '~/packages_and_registries/package_registry/components/list/publish_method.vue';
-import {
-  PACKAGE_ERROR_STATUS,
-  PACKAGE_DEPRECATED_STATUS,
-} from '~/packages_and_registries/package_registry/constants';
+import { PACKAGE_ERROR_STATUS } from '~/packages_and_registries/package_registry/constants';
 
 import ListItem from '~/vue_shared/components/registry/list_item.vue';
 import {
@@ -37,7 +34,6 @@ describe('packages_list_row', () => {
   const packageWithTags = { ...packageWithoutTags, tags: { nodes: packageTags() } };
 
   const findPackageTags = () => wrapper.findComponent(PackageTags);
-  const findDeprecatedBadge = () => wrapper.findComponent(GlBadge);
   const findDeleteDropdown = () => wrapper.findByTestId('delete-dropdown');
   const findDeleteButton = () => wrapper.findByTestId('action-delete');
   const findErrorMessage = () => wrapper.findByTestId('error-message');
@@ -347,7 +343,10 @@ describe('packages_list_row', () => {
   });
 
   describe('badge "protected"', () => {
-    const mountComponentForBadgeProtected = ({ packageEntityProtectionRuleExists = true } = {}) =>
+    const mountComponentForBadgeProtected = ({
+      packageEntityProtectionRuleExists = true,
+      glFeaturesPackagesProtectedPackages = true,
+    } = {}) =>
       mountComponent({
         packageEntity: {
           ...packageWithoutTags,
@@ -355,6 +354,7 @@ describe('packages_list_row', () => {
         },
         provide: {
           ...defaultProvide,
+          glFeatures: { packagesProtectedPackages: glFeaturesPackagesProtectedPackages },
         },
       });
 
@@ -378,31 +378,12 @@ describe('packages_list_row', () => {
         expect(findProtectedBadge().exists()).toBe(false);
       });
     });
-  });
 
-  describe('deprecated badge', () => {
-    it('is not rendered by default', () => {
-      mountComponent();
+    describe('when feature flag ":packages_protected_packages" disabled', () => {
+      it('does not show badge', () => {
+        mountComponentForBadgeProtected({ glFeaturesPackagesProtectedPackages: false });
 
-      expect(findDeprecatedBadge().exists()).toBe(false);
-    });
-
-    describe('when package has deprecated status', () => {
-      beforeEach(() => {
-        mountComponent({
-          packageEntity: {
-            ...packageWithoutTags,
-            status: PACKAGE_DEPRECATED_STATUS,
-          },
-        });
-      });
-
-      it('renders GlBadge component', () => {
-        expect(findDeprecatedBadge().props('variant')).toBe('warning');
-      });
-
-      it('renders the text `deprecated`', () => {
-        expect(findDeprecatedBadge().text()).toBe('deprecated');
+        expect(findProtectedBadge().exists()).toBe(false);
       });
     });
   });

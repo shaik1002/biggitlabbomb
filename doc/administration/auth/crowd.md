@@ -1,14 +1,17 @@
 ---
-stage: Software Supply Chain Security
+stage: Govern
 group: Authentication
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
 
-# Use Atlassian Crowd as an authentication provider
+# Use Atlassian Crowd as an authentication provider (deprecated)
 
 DETAILS:
 **Tier:** Free, Premium, Ultimate
 **Offering:** Self-managed
+
+WARNING:
+This feature was [deprecated](https://gitlab.com/gitlab-org/gitlab/-/issues/369117) in GitLab 15.3 and is [planned for removal in 18.0](https://gitlab.com/gitlab-org/gitlab/-/issues/457241).
 
 Authenticate to GitLab using the Atlassian Crowd OmniAuth provider. Enabling
 this provider also allows Crowd authentication for Git-over-https requests.
@@ -19,7 +22,7 @@ this provider also allows Crowd authentication for Git-over-https requests.
 1. Go through the 'Add application' steps, entering the appropriate details.
    The screenshot below shows an example configuration.
 
-   ![Final confirmation page in Crowd for application configuration](img/crowd_application_v9_0.png)
+   ![Final confirmation page in Crowd for application configuration](img/crowd_application.png)
 
 ## Configure GitLab
 
@@ -51,6 +54,7 @@ this provider also allows Crowd authentication for Git-over-https requests.
        gitlab_rails['omniauth_providers'] = [
          {
            name: "crowd",
+           # label: "Provider name", # optional label for login button, defaults to "Crowd"
            args: {
              crowd_server_url: "CROWD_SERVER_URL",
              application_name: "YOUR_APP_NAME",
@@ -64,6 +68,7 @@ this provider also allows Crowd authentication for Git-over-https requests.
 
      ```yaml
         - { name: 'crowd',
+            # label: 'Provider name', # optional label for login button, defaults to "Crowd"
             args: {
               crowd_server_url: 'CROWD_SERVER_URL',
               application_name: 'YOUR_APP_NAME',
@@ -91,4 +96,4 @@ Ensure the Crowd users who must sign in to GitLab are authorized to the
 [application](#configure-a-new-crowd-application) in the **Authorization** step.
 This could be verified by trying "Authentication test" for Crowd (as of 2.11).
 
-![Authorization stage settings in Crowd](img/crowd_application_authorisation_v10_4.png)
+![Authorization stage settings in Crowd](img/crowd_application_authorisation.png)

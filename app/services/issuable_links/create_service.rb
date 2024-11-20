@@ -116,7 +116,7 @@ module IssuableLinks
     end
 
     def references(extractor)
-      extractor.issues + extractor.work_items
+      extractor.issues
     end
 
     def extractor_context
@@ -124,19 +124,15 @@ module IssuableLinks
     end
 
     def issuables_already_assigned_message
-      error_message.already_assigned
+      _('%{issuable}(s) already assigned' % { issuable: target_issuable_type.capitalize })
     end
 
     def issuables_no_permission_error_message
-      error_message.no_permission_error
+      _("Couldn't link %{issuable}. You must have at least the Reporter role in both projects." % { issuable: target_issuable_type })
     end
 
     def issuables_not_found_message
-      error_message.not_found
-    end
-
-    def error_message
-      ::Gitlab::WorkItems::IssuableLinks::ErrorMessage.new(target_type: target_issuable_type, container_type: 'project')
+      _('No matching %{issuable} found. Make sure that you are adding a valid %{issuable} URL.' % { issuable: target_issuable_type })
     end
 
     def target_issuable_type

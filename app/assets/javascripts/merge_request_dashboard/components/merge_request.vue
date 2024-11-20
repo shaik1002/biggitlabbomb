@@ -70,13 +70,12 @@ export default {
       <approval-count :merge-request="mergeRequest" />
     </td>
     <td class="gl-px-3 gl-py-4 gl-align-top">
-      <gl-link
-        :href="mergeRequest.webUrl"
-        class="gl-font-bold gl-text-primary hover:gl-text-gray-900"
-      >
-        {{ mergeRequest.title }}
-      </gl-link>
-      <div class="gl-mb-2 gl-mt-2 gl-text-sm gl-text-subtle">
+      <h4 class="gl-mb-0 gl-mt-0 gl-text-base">
+        <gl-link :href="mergeRequest.webUrl" class="gl-text-primary hover:gl-text-gray-900">
+          {{ mergeRequest.title }}
+        </gl-link>
+      </h4>
+      <div class="gl-mb-2 gl-mt-2 gl-text-sm gl-text-secondary">
         <gl-sprintf
           :message="__('%{reference} %{divider} created %{createdAt} by %{author} %{milestone}')"
         >
@@ -84,7 +83,7 @@ export default {
           <template #divider>&middot;</template>
           <template #createdAt><time-ago-tooltip :time="mergeRequest.createdAt" /></template>
           <template #author>
-            <gl-link :href="mergeRequest.author.webUrl" class="gl-text-subtle">
+            <gl-link :href="mergeRequest.author.webUrl" class="gl-text-secondary">
               {{ mergeRequest.author.name }}
             </gl-link>
           </template>
@@ -105,11 +104,7 @@ export default {
       <assigned-users :users="mergeRequest.reviewers.nodes" type="REVIEWERS" />
     </td>
     <td class="gl-py-4 gl-pl-3 gl-pr-5 gl-align-top">
-      <div
-        class="gl-flex gl-justify-end gl-gap-3"
-        :aria-label="statsAriaLabel"
-        :title="statsAriaLabel"
-      >
+      <div class="gl-flex gl-justify-end gl-gap-3" :aria-label="statsAriaLabel">
         <div class="gl-whitespace-nowrap">
           <gl-icon name="comments" class="!gl-align-middle" />
           {{ mergeRequest.userNotesCount }}
@@ -127,7 +122,7 @@ export default {
           <span>{{ mergeRequest.diffStatsSummary.deletions }}</span>
         </div>
       </div>
-      <div class="gl-mt-1 gl-text-right gl-text-sm gl-text-subtle">
+      <div class="gl-mt-1 gl-text-right gl-text-sm gl-text-secondary">
         <gl-sprintf :message="__('Updated %{updatedAt}')">
           <template #updatedAt>
             <time-ago-tooltip :time="mergeRequest.updatedAt" />

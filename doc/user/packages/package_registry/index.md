@@ -64,11 +64,11 @@ For most package types, the following credential types are valid:
   allows access to packages in the project running the job for the users running the pipeline.
   Access to other external projects can be configured.
 - If your organization uses two factor authentication (2FA), you must use a personal access token with the scope set to `api`.
-- If you are publishing a package by using CI/CD pipelines, you must use a CI job token.
+- If you are publishing a package via CI/CD pipelines, you must use a CI job token.
 
 NOTE:
 If the "Package registry" feature is turned off for your project at **Settings > General > Visibility, project features, permissions**, you will receive a 403 Forbidden response.
-Accessing the package registry with a deploy token is not available when external authorization is enabled.
+Accessing package registry via deploy token is not available when external authorization is enabled.
 
 ## Use GitLab CI/CD
 
@@ -85,7 +85,7 @@ For more information about using the GitLab package registry with CI/CD, see:
 
 - [Generic](../generic_packages/index.md#publish-a-generic-package-by-using-cicd)
 - [Maven](../maven_repository/index.md#create-maven-packages-with-gitlab-cicd)
-- [npm](../npm_registry/index.md#publish-a-package-with-a-cicd-pipeline)
+- [npm](../npm_registry/index.md#publishing-a-package-by-using-a-cicd-pipeline)
 - [NuGet](../nuget_repository/index.md#publish-a-nuget-package-by-using-cicd)
 - [PyPI](../pypi_repository/index.md#authenticate-with-a-ci-job-token)
 - [Terraform](../terraform_module_registry/index.md#authenticate-to-the-terraform-module-registry)

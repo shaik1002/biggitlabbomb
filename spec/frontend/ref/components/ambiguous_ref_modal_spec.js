@@ -29,8 +29,9 @@ describe('AmbiguousRefModal component', () => {
   beforeEach(() => createComponent());
 
   const findModal = () => wrapper.findComponent(GlModal);
-  const findViewTagButton = () => wrapper.findByTestId('view-tag-btn');
-  const findViewBranchButton = () => wrapper.findByTestId('view-branch-btn');
+  const findByText = (text) => wrapper.findByText(text);
+  const findViewTagButton = () => findByText('View tag');
+  const findViewBranchButton = () => findByText('View branch');
 
   it('renders a GlModal component with the correct props', () => {
     expect(showModalSpy).toHaveBeenCalled();

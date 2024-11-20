@@ -1,17 +1,19 @@
-import { debounce } from 'lodash';
 import Tracking from '~/tracking';
-import { DEFAULT_DEBOUNCE_AND_THROTTLE_MS } from '~/lib/utils/constants';
 import { convertToSnakeCase } from '~/lib/utils/text_utility';
 
 export default class FormErrorTracker {
   constructor() {
-    this.elements = document.querySelectorAll('.js-track-error');
-    this.trackErrorOnEmptyField = FormErrorTracker.trackErrorOnEmptyField.bind(this);
+    this.elements = [
+      ...document.querySelectorAll('.js-track-error'),
+      // https://gitlab.com/gitlab-org/gitlab/-/issues/494329 to revert this additional
+      // class when blocker is implemented
+      ...Array.from(document.querySelectorAll('.js-track-error-gl-select')).map(
+        (select) => select.firstElementChild,
+      ),
+    ];
 
-    this.trackErrorOnChange = debounce(
-      FormErrorTracker.trackErrorOnChange.bind(this),
-      DEFAULT_DEBOUNCE_AND_THROTTLE_MS,
-    );
+    this.trackErrorOnChange = FormErrorTracker.trackErrorOnChange.bind(this);
+    this.trackErrorOnEmptyField = FormErrorTracker.trackErrorOnEmptyField.bind(this);
 
     this.elements.forEach((element) => {
       // on item change
@@ -45,10 +47,7 @@ export default class FormErrorTracker {
   static trackErrorOnEmptyField(event) {
     const inputDomElement = event.target;
 
-    const uncheckedRadio =
-      !inputDomElement.checked && FormErrorTracker.isRadio(inputDomElement.type);
-
-    if (inputDomElement.value === '' || uncheckedRadio) {
+    if (inputDomElement.value === '' || !inputDomElement.checked) {
       const message = FormErrorTracker.inputErrorMessage(inputDomElement);
 
       Tracking.event(undefined, FormErrorTracker.action(inputDomElement), {
@@ -78,15 +77,11 @@ export default class FormErrorTracker {
   }
 
   static label(element, message) {
-    if (FormErrorTracker.isRadio(element.type)) {
+    if (element.type === 'radio') {
       const labelText = element.closest('.form-group').querySelector('label').textContent;
       return `missing_${convertToSnakeCase(labelText)}`;
     }
 
     return `${element.id}_${message}`;
-  }
-
-  static isRadio(type) {
-    return type === 'radio';
   }
 }

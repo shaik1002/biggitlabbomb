@@ -18,6 +18,70 @@ Vue.use(GlToast);
 Vue.use(VueApollo);
 
 const getTrialStatusWidgetData = (sidebarData) => {
+  if (sidebarData.trial_status_widget_data_attrs && sidebarData.trial_status_popover_data_attrs) {
+    const {
+      trialDaysUsed,
+      trialDuration,
+      navIconImagePath,
+      percentageComplete,
+      planName,
+      plansHref,
+      trialDiscoverPagePath,
+    } = convertObjectPropsToCamelCase(sidebarData.trial_status_widget_data_attrs);
+
+    const { daysRemaining, trialEndDate } = convertObjectPropsToCamelCase(
+      sidebarData.trial_status_popover_data_attrs,
+    );
+
+    return {
+      showTrialStatusWidget: true,
+      showDuoProTrialStatusWidget: false,
+      showTrialWidget: false,
+      trialDaysUsed: Number(trialDaysUsed),
+      trialDuration: Number(trialDuration),
+      navIconImagePath,
+      percentageComplete: Number(percentageComplete),
+      planName,
+      plansHref,
+      daysRemaining,
+      trialEndDate: new Date(trialEndDate),
+      trialDiscoverPagePath,
+    };
+  }
+
+  if (
+    sidebarData.duo_pro_trial_status_widget_data_attrs &&
+    sidebarData.duo_pro_trial_status_popover_data_attrs
+  ) {
+    const {
+      trialDaysUsed,
+      trialDuration,
+      percentageComplete,
+      groupId,
+      featureId,
+      dismissEndpoint,
+    } = convertObjectPropsToCamelCase(sidebarData.duo_pro_trial_status_widget_data_attrs);
+
+    const { daysRemaining, trialEndDate, purchaseNowUrl, learnAboutButtonUrl } =
+      convertObjectPropsToCamelCase(sidebarData.duo_pro_trial_status_popover_data_attrs);
+
+    return {
+      showDuoProTrialStatusWidget: true,
+      showTrialStatusWidget: false,
+      showTrialWidget: false,
+      trialDaysUsed: Number(trialDaysUsed),
+      trialDuration: Number(trialDuration),
+      percentageComplete: Number(percentageComplete),
+      groupId,
+      featureId,
+      dismissEndpoint,
+      daysRemaining,
+      trialEndDate: new Date(trialEndDate),
+      purchaseNowUrl,
+      learnAboutButtonUrl,
+    };
+  }
+
   if (sidebarData.trial_widget_data_attrs) {
     const {
       trialType,
@@ -32,6 +96,8 @@ const getTrialStatusWidgetData = (sidebarData) => {
 
     return {
       showTrialWidget: true,
+      showTrialStatusWidget: false,
+      showDuoProTrialStatusWidget: false,
       trialType,
       daysRemaining: Number(daysRemaining),
       percentageComplete: Number(percentageComplete),
@@ -45,6 +111,8 @@ const getTrialStatusWidgetData = (sidebarData) => {
 
   return {
     showTrialWidget: false,
+    showTrialStatusWidget: false,
+    showDuoProTrialStatusWidget: false,
   };
 };
 
@@ -57,7 +125,6 @@ export const getSuperSidebarData = () => {
   const searchData = convertObjectPropsToCamelCase(sidebarData.search);
   const { searchPath, issuesPath, mrPath, autocompletePath, settingsPath, searchContext } =
     searchData;
-  const currentPath = sidebarData?.current_context?.item?.fullPath;
   const projectsPath = sidebarData.projects_path;
   const groupsPath = sidebarData.groups_path;
   const commandPaletteData = JSON.parse(commandPalette);
@@ -72,7 +139,6 @@ export const getSuperSidebarData = () => {
   return {
     el,
     rootPath,
-    currentPath,
     forceDesktopExpandedSidebar,
     isSaas,
     sidebarData,
@@ -97,7 +163,6 @@ export const getSuperSidebarData = () => {
 export const initSuperSidebar = ({
   el,
   rootPath,
-  currentPath,
   forceDesktopExpandedSidebar,
   isSaas,
   sidebarData,
@@ -128,7 +193,6 @@ export const initSuperSidebar = ({
     apolloProvider,
     provide: {
       rootPath,
-      currentPath,
       isImpersonating,
       ...getTrialStatusWidgetData(sidebarData),
       commandPaletteCommands,

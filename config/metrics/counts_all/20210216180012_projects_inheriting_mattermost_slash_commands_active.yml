@@ -4,8 +4,6 @@ key_path: counts.projects_inheriting_mattermost_slash_commands_active
 description: Count of active projects inheriting integrations for Mattermost (slash
   commands)
 product_group: import_and_integrate
-product_categories:
-- integrations
 value_type: number
 status: active
 time_frame: all
@@ -13,7 +11,7 @@ data_source: database
 distribution:
 - ce
 - ee
-tiers:
+tier:
 - free
 - premium
 - ultimate

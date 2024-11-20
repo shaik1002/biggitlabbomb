@@ -7,7 +7,6 @@ RSpec.describe 'Broadcast Messages', feature_category: :notifications do
 
   let_it_be(:user) { create(:user) }
   let(:path) { explore_projects_path }
-  let(:sign_in_user) { ->(user) { gitlab_sign_in(user) } }
 
   shared_examples 'a Broadcast Messages' do |type|
     it 'shows broadcast message' do
@@ -56,7 +55,7 @@ RSpec.describe 'Broadcast Messages', feature_category: :notifications do
     end
 
     it 'broadcast message is still hidden after logout and log back in', :js do
-      sign_in_user.call(user)
+      gitlab_sign_in(user)
 
       visit path
 
@@ -68,9 +67,9 @@ RSpec.describe 'Broadcast Messages', feature_category: :notifications do
 
       expect_message_dismissed
 
-      gitlab_sign_out(user)
+      gitlab_sign_out
 
-      sign_in_user.call(user)
+      gitlab_sign_in(user)
 
       visit path
 
@@ -168,18 +167,6 @@ RSpec.describe 'Broadcast Messages', feature_category: :notifications do
       page.refresh
 
       expect_no_broadcast_message(message.id)
-    end
-  end
-
-  context 'with omniauth' do
-    it_behaves_like 'a dismissible Broadcast Messages' do
-      let_it_be(:broadcast_message) { create(:broadcast_message, :notification, message: 'SampleMessage') }
-      let_it_be(:user) { create(:omniauth_user, extern_uid: 'example-uid', provider: 'saml') }
-      let(:sign_in_user) { ->(user) { gitlab_sign_in_via('saml', user, 'example-uid') } }
-
-      before do
-        stub_omniauth_saml_config(enabled: true, auto_link_saml_user: true)
-      end
     end
   end
 

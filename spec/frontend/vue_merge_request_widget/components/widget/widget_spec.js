@@ -423,8 +423,7 @@ describe('~/vue_merge_request_widget/components/widget/widget.vue', () => {
 
     it('when full report is clicked it should call the respective telemetry event', async () => {
       expect(wrapper.vm.telemetryHub.fullReportClicked).not.toHaveBeenCalled();
-
-      wrapper.findByTestId('extension-actions-button').vm.$emit('click');
+      wrapper.findByText('Full report').vm.$emit('click');
       await nextTick();
       expect(wrapper.vm.telemetryHub.fullReportClicked).toHaveBeenCalledTimes(1);
     });

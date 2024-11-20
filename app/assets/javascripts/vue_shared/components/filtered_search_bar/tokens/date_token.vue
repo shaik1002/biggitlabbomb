@@ -1,6 +1,6 @@
 <script>
 import { GlDatepicker, GlFilteredSearchToken } from '@gitlab/ui';
-import { toISODateFormat } from '~/lib/utils/datetime_utility';
+import { formatDate } from '~/lib/utils/datetime_utility';
 
 export default {
   components: {
@@ -28,7 +28,7 @@ export default {
   },
   methods: {
     selectValue(value) {
-      this.selectedDate = toISODateFormat(value);
+      this.selectedDate = formatDate(value, 'yyyy-mm-dd');
     },
     close(submitValue) {
       if (this.selectedDate == null) {

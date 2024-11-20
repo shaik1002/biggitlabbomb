@@ -102,6 +102,7 @@ For example:
 ### Configure file exports as an import source
 
 DETAILS:
+**Tier:** Free, Premium, Ultimate
 **Offering:** Self-managed, GitLab Dedicated
 
 Before you can migrate projects on a self-managed GitLab instance using file exports, GitLab administrators must:
@@ -272,6 +273,7 @@ Deploy keys aren't imported. To use deploy keys, you must enable them in your im
 #### Import large projects
 
 DETAILS:
+**Tier:** Free, Premium, Ultimate
 **Offering:** Self-managed, GitLab Dedicated
 
 If you have a larger project, consider [using a Rake task](../../../administration/raketasks/project_import_export.md#import-large-projects).
@@ -279,6 +281,7 @@ If you have a larger project, consider [using a Rake task](../../../administrati
 ### Set maximum import file size
 
 DETAILS:
+**Tier:** Free, Premium, Ultimate
 **Offering:** Self-managed, GitLab Dedicated
 
 Administrators can set the maximum import file size one of two ways:

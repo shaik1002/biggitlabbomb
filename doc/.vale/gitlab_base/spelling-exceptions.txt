@@ -183,7 +183,6 @@ colocate
 colocated
 colocating
 commit's
-Command Palette
 CommonMark
 compilable
 composable
@@ -507,7 +506,6 @@ kanban
 kanbans
 kaniko
 Karma
-Kata
 KCachegrind
 Kerberos
 Keycloak
@@ -761,7 +759,6 @@ pseudonymizer
 Pulumi
 Puma
 Pumble
-Pylint
 PyPI
 pytest
 Python
@@ -1012,7 +1009,6 @@ swimlane
 swimlanes
 syncable
 Sysbench
-Sysbox
 syscall
 syscalls
 syslog

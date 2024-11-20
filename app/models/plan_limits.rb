@@ -1,10 +1,7 @@
 # frozen_string_literal: true
 
 class PlanLimits < ApplicationRecord
-  include SafelyChangeColumnDefault
-
-  columns_changing_default :repository_size
-
+  include IgnorableColumns
   ALLOWED_LIMITS_HISTORY_ATTRIBUTES = %i[notification_limit enforcement_limit storage_size_limit
     dashboard_limit_enabled_at].freeze
 

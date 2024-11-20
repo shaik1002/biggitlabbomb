@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module IncidentManagement
-  class ProcessAlertWorkerV2
+  class ProcessAlertWorkerV2 # rubocop:disable Scalability/IdempotentWorker
     include ApplicationWorker
 
     data_consistency :always

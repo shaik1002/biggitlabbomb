@@ -6,7 +6,7 @@ module Pages
     include CronjobQueue # rubocop: disable Scalability/CronWorkerContext
 
     idempotent!
-    data_consistency :always
+    data_consistency :always # rubocop: disable SidekiqLoadBalancing/WorkerDataConsistency
 
     feature_category :pages
 

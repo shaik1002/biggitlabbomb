@@ -228,57 +228,34 @@ RSpec.describe 'GraphQL', feature_category: :shared do
       expect(graphql_data['echo']).to eq('nil says: Hello world')
     end
 
-    describe 'request forgery protection' do
-      it 'does not authenticate a user with an invalid CSRF' do
-        login_as(user)
+    it 'does not authenticate a user with an invalid CSRF' do
+      login_as(user)
 
-        stub_authentication_activity_metrics do |metrics|
-          expect(metrics)
-            .to increment(:user_authenticated_counter)
-            .and increment(:user_session_destroyed_counter)
+      post_graphql(query, headers: { 'X-CSRF-Token' => 'invalid' })
 
-          expect(metrics.user_csrf_token_invalid_counter)
-            .to receive(:increment).with(controller: 'GraphqlController', auth: 'session')
-        end
+      expect(graphql_data['echo']).to eq('nil says: Hello world')
+    end
 
-        post_graphql(query, headers: { 'X-CSRF-Token' => 'invalid' })
+    it 'authenticates a user with a valid session token' do
+      # Create a session to get a CSRF token from
+      login_as(user)
+      get('/')
 
-        expect(graphql_data['echo']).to eq('nil says: Hello world')
-      end
+      post '/api/graphql', params: { query: query }, headers: { 'X-CSRF-Token' => session['_csrf_token'] }
 
-      it 'authenticates a user with a valid session token' do
-        # Create a session to get a CSRF token from
-        login_as(user)
-        get('/')
-
-        stub_authentication_activity_metrics do |metrics|
-          expect(metrics.user_csrf_token_invalid_counter).not_to receive(:increment)
-        end
-
-        post '/api/graphql', params: { query: query }, headers: { 'X-CSRF-Token' => session['_csrf_token'] }
-
-        expect(graphql_data['echo']).to eq("\"#{user.username}\" says: Hello world")
-      end
+      expect(graphql_data['echo']).to eq("\"#{user.username}\" says: Hello world")
     end
 
     context 'with token authentication' do
       let(:token) { create(:personal_access_token, user: user) }
 
       it 'authenticates users with a PAT' do
-        stub_authentication_activity_metrics(debug: false) do |metrics|
-          expect(metrics)
-            .to increment(:user_authenticated_counter)
-            .and increment(:user_session_override_counter)
-            .and increment(:user_sessionless_authentication_counter)
+        stub_authentication_activity_metrics(debug: false)
 
-          ##
-          # TODO: PAT authentication should not trigger `handle_unverified_request` on CSRF token mismatch.
-          #
-          # `auth` type is 'other' here, becase we `handle_unverified_request` before we call sessionless sign in hooks.
-          #
-          expect(metrics.user_csrf_token_invalid_counter)
-            .to receive(:increment).with(controller: 'GraphqlController', auth: 'other')
-        end
+        expect(authentication_metrics)
+          .to increment(:user_authenticated_counter)
+          .and increment(:user_session_override_counter)
+          .and increment(:user_sessionless_authentication_counter)
 
         post_graphql(query, headers: { 'PRIVATE-TOKEN' => token.token })
 

@@ -4,7 +4,6 @@ import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import AbuseCategorySelector from '~/abuse_reports/components/abuse_category_selector.vue';
 import CiResourceHeader from '~/ci/catalog/components/details/ci_resource_header.vue';
 import CiVerificationBadge from '~/ci/catalog/components/shared/ci_verification_badge.vue';
-import ProjectVisibilityIcon from '~/ci/catalog/components/shared/project_visibility_icon.vue';
 import { catalogSharedDataMock } from '../../mock';
 
 describe('CiResourceHeader', () => {
@@ -23,7 +22,6 @@ describe('CiResourceHeader', () => {
   const findAvatarLink = () => wrapper.findComponent(GlAvatarLink);
   const findVerificationBadge = () => wrapper.findComponent(CiVerificationBadge);
   const findVersionBadge = () => wrapper.findComponent(GlBadge);
-  const findVisibilityIcon = () => wrapper.findComponent(ProjectVisibilityIcon);
 
   const createComponent = ({ props = {} } = {}) => {
     wrapper = shallowMountExtended(CiResourceHeader, {
@@ -82,28 +80,6 @@ describe('CiResourceHeader', () => {
 
       it('renders', () => {
         expect(findVersionBadge().exists()).toBe(true);
-      });
-    });
-  });
-
-  describe('Visibility level', () => {
-    describe('as a public project', () => {
-      beforeEach(() => {
-        createComponent();
-      });
-
-      it('does not render a lock icon', () => {
-        expect(findVisibilityIcon().exists()).toBe(false);
-      });
-    });
-
-    describe('as a private project', () => {
-      beforeEach(() => {
-        createComponent({ props: { resource: { ...resource, visibilityLevel: 'private' } } });
-      });
-
-      it('renders a lock icon', () => {
-        expect(findVisibilityIcon().exists()).toBe(true);
       });
     });
   });

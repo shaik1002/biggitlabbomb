@@ -60,7 +60,7 @@ module QA
       end
 
       def use_default_identity
-        configure_identity(default_user.name, default_user.email)
+        configure_identity('GitLab QA', 'root@gitlab.com')
       end
 
       def clone(opts = '')
@@ -110,8 +110,8 @@ module QA
         run_git("git tag #{tag_name}").to_s
       end
 
-      def delete_tag(tag_name, max_attempts: 3)
-        run_git(%(git push origin --delete #{tag_name}), max_attempts: max_attempts).to_s
+      def delete_tag(tag_name)
+        run_git(%(git push origin --delete #{tag_name}), max_attempts: 3).to_s
       end
 
       def commit(message)
@@ -254,10 +254,6 @@ module QA
 
       alias_method :use_lfs?, :use_lfs
 
-      def default_user
-        @default_user ||= Runtime::UserStore.test_user || Runtime::UserStore.admin_user
-      end
-
       def add_credentials?
         return false if !username || !password
         return true unless ssh_key_set?
@@ -281,10 +277,10 @@ module QA
       end
 
       def default_credentials
-        if Runtime::User.ldap_user?
+        if ::QA::Runtime::User.ldap_user?
           [Runtime::User.ldap_username, Runtime::User.ldap_password]
         else
-          [default_user.username, default_user.password]
+          [Runtime::User.username, Runtime::User.password]
         end
       end
 
