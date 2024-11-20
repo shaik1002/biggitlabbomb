@@ -1,13 +1,7 @@
 <script>
 import FILTERED_SVG_URL from '@gitlab/svgs/dist/illustrations/empty-state/empty-search-md.svg?url';
 
-import {
-  GlAvatarLabeled,
-  GlButton,
-  GlEmptyState,
-  GlKeysetPagination,
-  GlLoadingIcon,
-} from '@gitlab/ui';
+import { GlAvatar, GlButton, GlEmptyState, GlKeysetPagination, GlLoadingIcon } from '@gitlab/ui';
 import { uniqBy } from 'lodash';
 import { s__ } from '~/locale';
 import PageHeading from '~/vue_shared/components/page_heading.vue';
@@ -22,7 +16,7 @@ export default {
   components: {
     PageHeading,
     CrudComponent,
-    GlAvatarLabeled,
+    GlAvatar,
     GlButton,
     GlEmptyState,
     GlKeysetPagination,
@@ -155,13 +149,21 @@ export default {
         :class="{ 'gl-mt-5': index !== 0 }"
       >
         <template #description>
-          <gl-avatar-labeled
-            shape="rect"
-            :size="48"
-            :src="achievement.avatarUrl || gitlabLogoPath"
-            :label="achievement.name"
-            :sub-label="achievement.description"
-          />
+          <div class="gl-flex gl-gap-5">
+            <gl-avatar
+              :src="achievement.avatarUrl || gitlabLogoPath"
+              :label="achievement.name"
+              :size="48"
+              shape="rect"
+              class="gl-outline-none"
+            />
+            <div class="gl-grow">
+              <h2 class="gl-mb-2 gl-mt-0 gl-text-base gl-font-bold gl-leading-20 gl-text-default">
+                {{ achievement.name }}
+              </h2>
+              <p class="gl-text-base gl-text-subtle">{{ achievement.description }}</p>
+            </div>
+          </div>
         </template>
 
         <user-avatar-list
