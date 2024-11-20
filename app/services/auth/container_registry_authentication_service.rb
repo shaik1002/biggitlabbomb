@@ -88,7 +88,7 @@ module Auth
           type: type,
           name: name,
           actions: actions,
-          meta: access_metadata(path: name, use_key_as_project_path: use_key_as_project_path)
+          meta: access_metadata(path: name, use_key_as_project_path: use_key_as_project_path, actions: actions)
         }.compact
       end
 
@@ -99,7 +99,7 @@ module Auth
       Time.current + Gitlab::CurrentSettings.container_registry_token_expire_delay.minutes
     end
 
-    def self.access_metadata(project: nil, path: nil, use_key_as_project_path: false)
+    def self.access_metadata(project: nil, path: nil, use_key_as_project_path: false, actions: [])
       return { project_path: path.chomp('/*').downcase } if use_key_as_project_path
 
       # If the project is not given, try to infer it from the provided path
@@ -122,11 +122,40 @@ module Auth
       {
         project_path: project&.full_path&.downcase,
         project_id: project&.id,
-        root_namespace_id: project&.root_ancestor&.id
-      }
+        root_namespace_id: project&.root_ancestor&.id,
+        tag_deny_access_patterns: tag_deny_access_patterns(project, path, actions)
+      }.compact
     end
 
     private
+
+    def self.tag_deny_access_patterns(project, path, actions)
+      return if project.nil?
+
+      # TODO: replace hardcoded logic once https://gitlab.com/gitlab-org/gitlab/-/issues/499869 is done
+      semver_pattern = '^v[0-9]+\.[0-9]+\.[0-9]+$'
+      latest_pattern = '^latest$'
+
+      patterns_by_path = {
+        "/empty" => { push: [], delete: [] },
+        "/push" => { push: [latest_pattern, semver_pattern], delete: [] },
+        "/delete" => { push: [], delete: [latest_pattern, semver_pattern] },
+        "/push-and-delete" => {
+          push: [latest_pattern, semver_pattern],
+          delete: [latest_pattern, semver_pattern]
+        },
+        "/invalid" => {
+          push: ["^[a-z"],
+          delete: ["^[a-z"]
+        }
+      }
+
+      patterns = patterns_by_path.find { |suffix, _| path.to_s.end_with?(suffix) }&.last || {}
+      patterns.delete(:push) unless actions.include?('push')
+      patterns.delete(:delete) unless actions.include?('delete')
+
+      patterns
+    end
 
     def authorized_token(*accesses)
       JSONWebToken::RSAToken.new(registry.key).tap do |token|
@@ -213,7 +242,7 @@ module Auth
         type: type,
         name: path.to_s,
         actions: authorized_actions,
-        meta: self.class.access_metadata(project: requested_project)
+        meta: self.class.access_metadata(project: requested_project, path: path, actions: authorized_actions)
       }
     end
 
