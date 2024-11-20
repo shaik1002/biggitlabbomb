@@ -16023,6 +16023,9 @@ msgstr ""
 msgid "Copy source branch name"
 msgstr ""
 
+msgid "Copy template"
+msgstr ""
+
 msgid "Copy to clipboard"
 msgstr ""
 

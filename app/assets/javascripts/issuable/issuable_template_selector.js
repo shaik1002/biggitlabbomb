@@ -12,6 +12,7 @@ export default class IssuableTemplateSelector extends LegacyTemplateSelector {
     this.titleInput = $(`#${this.issuableType}_title`);
     this.templateWarningEl = $('.js-issuable-template-warning');
     this.warnTemplateOverride = args[0].warnTemplateOverride;
+    this.copyTemplateLinkButton = $('.js-issuable-template-copy-button');
 
     const initialQuery = {
       name: this.dropdown.data('selected'),
@@ -25,6 +26,7 @@ export default class IssuableTemplateSelector extends LegacyTemplateSelector {
     if (initialQuery.name) {
       this.requestFile(initialQuery);
       this.setToggleText(initialQuery.name);
+      this.copyTemplateLinkButton.removeClass('gl-hidden');
     }
 
     $('.reset-template', this.dropdown.parent()).on('click', () => {
@@ -33,6 +35,14 @@ export default class IssuableTemplateSelector extends LegacyTemplateSelector {
 
     $('.no-template', this.dropdown.parent()).on('click', () => {
       this.reset();
+    });
+
+    this.copyTemplateLinkButton.on('click', () => {
+      if (!this.currentTemplate.name) {
+        return;
+      }
+
+      navigator.clipboard.writeText(this.currentTemplate.name);
     });
 
     this.templateWarningEl.find('.js-close-btn').on('click', () => {
@@ -87,6 +97,7 @@ export default class IssuableTemplateSelector extends LegacyTemplateSelector {
 
     this.overridingTemplate = query.selectedObj;
     this.templateWarningEl.removeClass('hidden');
+    this.copyTemplateLinkButton.removeClass('gl-hidden');
   }
 
   requestFile(query) {

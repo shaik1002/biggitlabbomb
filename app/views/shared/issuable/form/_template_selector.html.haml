@@ -2,7 +2,7 @@
 
 - return unless issuable && issuable_templates(ref_project, issuable.to_ability_name).any?
 
-.issuable-form-select-holder.selectbox.form-group
+.issuable-form-select-holder.selectbox.form-group.gl-flex
   .js-issuable-selector-wrap{ data: { issuable_type: issuable.to_ability_name.pluralize, testid: 'template-dropdown' } }
     = template_dropdown_tag(issuable) do
       %ul.dropdown-footer-list
@@ -11,3 +11,8 @@
             No template
           %a.reset-template
             Reset template
+  = render Pajamas::ButtonComponent.new(category: :tertiary,
+    icon: 'copy-to-clipboard',
+    button_options: { title: _('Copy template'),
+      'aria-label' => _('Copy'),
+      class: 'js-issuable-template-copy-button has-tooltip gl-ml-3 gl-hidden' })
