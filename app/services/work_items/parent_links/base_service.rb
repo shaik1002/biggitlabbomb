@@ -18,7 +18,7 @@ module WorkItems
       end
 
       def linkable_issuables(work_items)
-        @linkable_issuables ||= if can_admin_link?(issuable)
+        @linkable_issuables ||= if can?(current_user, :read_work_item, issuable)
                                   work_items.select { |work_item| linkable?(work_item) }
                                 else
                                   []
@@ -26,7 +26,12 @@ module WorkItems
       end
 
       def linkable?(work_item)
-        can_admin_link?(work_item) && previous_related_issuables.exclude?(work_item)
+        can_create_link?(WorkItems::ParentLink.new(work_item_parent: issuable, work_item: work_item)) &&
+          previous_related_issuables.exclude?(work_item)
+      end
+
+      def can_create_link?(work_item_link)
+        can?(current_user, :create_parent_link, work_item_link)
       end
 
       def can_admin_link?(work_item)

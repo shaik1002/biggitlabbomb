@@ -261,7 +261,7 @@ RSpec.describe WorkItems::ParentLinks::CreateService, feature_category: :portfol
       end
 
       context 'when params include invalid ids' do
-        let(:invalid_task) { create(:work_item, :task, project: project, confidential: true) }
+        let(:invalid_task) { build_stubbed(:work_item, :task, id: non_existing_record_id) }
         let(:params) { { issuable_references: [task1, invalid_task] } }
 
         it 'creates links only for valid IDs' do
