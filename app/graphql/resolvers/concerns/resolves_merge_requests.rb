@@ -22,6 +22,10 @@ module ResolvesMergeRequests
     end
 
     args.delete(:subscribed) if Feature.disabled?(:filter_subscriptions, current_user)
+    args.delete(:blob_path) if Feature.disabled?(:filter_blob_path, current_user)
+
+    validate_blob_path!(args)
+
     rewrite_param_name(args, :reviewer_wildcard_id, :reviewer_id)
     rewrite_param_name(args, :assignee_wildcard_id, :assignee_id)
 
@@ -88,6 +92,13 @@ module ResolvesMergeRequests
       diff_stats: [latest_merge_request_diff: [:merge_request_diff_commits]],
       source_branch_exists: [:source_project, { source_project: [:route] }]
     }
+  end
+
+  def validate_blob_path!(args)
+    return if args[:blob_path].blank?
+    return if args[:target_branch].present? && args[:state].present?
+
+    raise Gitlab::Graphql::Errors::ArgumentError, 'You must set targetBranches and state to filter by blobPath'
   end
 
   def non_stable_cursor_sort?(sort)

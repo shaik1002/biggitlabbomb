@@ -86,11 +86,14 @@ module Resolvers
                Available only when the feature flag `mr_approved_filter` is enabled.
       DESC
 
-    argument :subscribed, Types::Issuables::SubscriptionStatusEnum,
-      description: 'Merge requests the current user is subscribed to. Is ignored if ' \
-        '`filter_subscriptions` feature flag is disabled.',
-      experiment: { milestone: '17.5' },
-      required: false
+    argument :blob_path, GraphQL::Types::String,
+      required: false,
+      experiment: { milestone: '17.7' },
+      description: <<~DESC
+               Path of the blob changed in merge request.
+               Requires state and targetBranches arguments.
+               Available only when the feature flag `filter_blob_path` is enabled.
+      DESC
 
     argument :created_after, Types::TimeType,
       required: false,
@@ -150,6 +153,11 @@ module Resolvers
       description: 'Sort merge requests by the criteria.',
       required: false,
       default_value: :created_desc
+    argument :subscribed, Types::Issuables::SubscriptionStatusEnum,
+      description: 'Merge requests the current user is subscribed to. Is ignored if ' \
+        '`filter_subscriptions` feature flag is disabled.',
+      experiment: { milestone: '17.5' },
+      required: false
 
     negated do
       argument :approved_by, [GraphQL::Types::String],

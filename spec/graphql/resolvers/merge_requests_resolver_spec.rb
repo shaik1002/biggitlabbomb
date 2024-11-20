@@ -550,6 +550,56 @@ RSpec.describe Resolvers::MergeRequestsResolver, feature_category: :code_review_
       end
     end
 
+    context 'with blob path argument' do
+      subject(:resolve_query) { resolve_mr(project, blob_path: blob_path, target_branches: target_branches, state: state) }
+
+      let(:blob_path) { 'files/ruby/feature.rb' }
+      let(:state) { 'opened' }
+      let(:target_branches) { ['master'] }
+
+      it 'filters merge requests by blob path' do
+        is_expected.to contain_exactly(merge_request_1)
+      end
+
+      context 'when state is not provided' do
+        let(:state) { nil }
+
+        it 'raises an ArgumentError' do
+          expect_graphql_error_to_be_created(Gitlab::Graphql::Errors::ArgumentError, 'You must set targetBranches and state to filter by blobPath') do
+            resolve_query
+          end
+        end
+      end
+
+      context 'when target_branches are not provided' do
+        let(:target_branches) { nil }
+
+        it 'raises an ArgumentError' do
+          expect_graphql_error_to_be_created(Gitlab::Graphql::Errors::ArgumentError, 'You must set targetBranches and state to filter by blobPath') do
+            resolve_query
+          end
+        end
+      end
+
+      context 'when there are no merge requests that changed requested blob' do
+        let(:blob_path) { 'unknown' }
+
+        it 'does not find anything' do
+          is_expected.to be_empty
+        end
+
+        context 'when feature flag "filter_blob_path" is disabled' do
+          before do
+            stub_feature_flags(filter_blob_path: false)
+          end
+
+          it 'ignores requested blob path' do
+            is_expected.to contain_exactly(merge_request_1)
+          end
+        end
+      end
+    end
+
     # subscribed filtering handled in request spec, spec/requests/api/graphql/merge_requests/merge_requests_spec.rb
 
     describe 'combinations' do
