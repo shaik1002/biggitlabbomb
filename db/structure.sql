@@ -7393,6 +7393,7 @@ CREATE TABLE audit_events_amazon_s3_configurations (
     aws_region text NOT NULL,
     encrypted_secret_access_key bytea NOT NULL,
     encrypted_secret_access_key_iv bytea NOT NULL,
+    stream_destination_ref bigint,
     CONSTRAINT check_3a41f4ea06 CHECK ((char_length(bucket_name) <= 63)),
     CONSTRAINT check_72b5aaa71b CHECK ((char_length(aws_region) <= 50)),
     CONSTRAINT check_90505816db CHECK ((char_length(name) <= 72)),
@@ -7416,6 +7417,7 @@ CREATE TABLE audit_events_external_audit_event_destinations (
     updated_at timestamp with time zone NOT NULL,
     verification_token text,
     name text NOT NULL,
+    stream_destination_ref bigint,
     CONSTRAINT check_2feafb9daf CHECK ((char_length(destination_url) <= 255)),
     CONSTRAINT check_8ec80a7d06 CHECK ((char_length(verification_token) <= 24)),
     CONSTRAINT check_c52ff8e90e CHECK ((char_length(name) <= 72))
@@ -7441,6 +7443,7 @@ CREATE TABLE audit_events_google_cloud_logging_configurations (
     encrypted_private_key bytea NOT NULL,
     encrypted_private_key_iv bytea NOT NULL,
     name text NOT NULL,
+    stream_destination_ref bigint,
     CONSTRAINT check_0ef835c61e CHECK ((char_length(client_email) <= 254)),
     CONSTRAINT check_55783c7c19 CHECK ((char_length(google_project_id_name) <= 30)),
     CONSTRAINT check_898a76b005 CHECK ((char_length(log_id_name) <= 511)),
@@ -7466,6 +7469,7 @@ CREATE TABLE audit_events_group_external_streaming_destinations (
     config jsonb NOT NULL,
     encrypted_secret_token bytea NOT NULL,
     encrypted_secret_token_iv bytea NOT NULL,
+    legacy_destination_ref bigint,
     CONSTRAINT check_97d157fbd0 CHECK ((char_length(name) <= 72))
 );
 
@@ -7516,6 +7520,7 @@ CREATE TABLE audit_events_instance_amazon_s3_configurations (
     aws_region text NOT NULL,
     encrypted_secret_access_key bytea NOT NULL,
     encrypted_secret_access_key_iv bytea NOT NULL,
+    stream_destination_ref bigint,
     CONSTRAINT check_1a908bd36f CHECK ((char_length(name) <= 72)),
     CONSTRAINT check_8083750c42 CHECK ((char_length(bucket_name) <= 63)),
     CONSTRAINT check_d2ca3eb90e CHECK ((char_length(aws_region) <= 50)),
@@ -7539,6 +7544,7 @@ CREATE TABLE audit_events_instance_external_audit_event_destinations (
     encrypted_verification_token bytea NOT NULL,
     encrypted_verification_token_iv bytea NOT NULL,
     name text NOT NULL,
+    stream_destination_ref bigint,
     CONSTRAINT check_433fbb3305 CHECK ((char_length(name) <= 72)),
     CONSTRAINT check_4dc67167ce CHECK ((char_length(destination_url) <= 255))
 );
@@ -7561,6 +7567,7 @@ CREATE TABLE audit_events_instance_external_streaming_destinations (
     config jsonb NOT NULL,
     encrypted_secret_token bytea NOT NULL,
     encrypted_secret_token_iv bytea NOT NULL,
+    legacy_destination_ref bigint,
     CONSTRAINT check_219decfb51 CHECK ((char_length(name) <= 72))
 );
 
@@ -7583,6 +7590,7 @@ CREATE TABLE audit_events_instance_google_cloud_logging_configurations (
     name text NOT NULL,
     encrypted_private_key bytea NOT NULL,
     encrypted_private_key_iv bytea NOT NULL,
+    stream_destination_ref bigint,
     CONSTRAINT check_0da5c76c49 CHECK ((char_length(client_email) <= 254)),
     CONSTRAINT check_74fd943192 CHECK ((char_length(log_id_name) <= 511)),
     CONSTRAINT check_ab65f57721 CHECK ((char_length(google_project_id_name) <= 30)),
@@ -33072,6 +33080,18 @@ CREATE UNIQUE INDEX uniq_audit_group_event_filters_destination_id_and_event_type
 CREATE UNIQUE INDEX uniq_audit_instance_event_filters_destination_id_and_event_type ON audit_events_instance_streaming_event_type_filters USING btree (external_streaming_destination_id, audit_event_type);
 
 CREATE UNIQUE INDEX uniq_google_cloud_logging_configuration_namespace_id_and_name ON audit_events_google_cloud_logging_configurations USING btree (namespace_id, name);
+
+CREATE UNIQUE INDEX uniq_idx_audit_events_aws_s3_configs_stream_dest_ref ON audit_events_amazon_s3_configurations USING btree (stream_destination_ref);
+
+CREATE UNIQUE INDEX uniq_idx_audit_events_gcp_configs_stream_dest_ref ON audit_events_google_cloud_logging_configurations USING btree (stream_destination_ref);
+
+CREATE UNIQUE INDEX uniq_idx_audit_events_instance_aws_s3_configs_stream_dest_ref ON audit_events_instance_amazon_s3_configurations USING btree (stream_destination_ref);
+
+CREATE UNIQUE INDEX uniq_idx_audit_events_instance_gcp_configs_stream_dest_ref ON audit_events_instance_google_cloud_logging_configurations USING btree (stream_destination_ref);
+
+CREATE UNIQUE INDEX uniq_idx_ext_audit_event_destinations_stream_dest_ref ON audit_events_external_audit_event_destinations USING btree (stream_destination_ref);
+
+CREATE UNIQUE INDEX uniq_idx_instance_ext_audit_event_destinations_stream_dest_ref ON audit_events_instance_external_audit_event_destinations USING btree (stream_destination_ref);
 
 CREATE UNIQUE INDEX uniq_idx_on_packages_conan_package_references_package_reference ON packages_conan_package_references USING btree (package_id, recipe_revision_id, reference);
 
