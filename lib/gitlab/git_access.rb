@@ -22,6 +22,7 @@ module Gitlab
       auth_download: 'You are not allowed to download code.',
       deploy_key_upload: 'This deploy key does not have write access to this project.',
       no_repo: 'A repository for this project does not exist yet.',
+      no_repo_at_url: 'repository at given URL not found',
       project_not_found: "The project you were looking for could not be found or you don't have permission to view it.",
       auth_by_job_token_forbidden: 'Insufficient permissions to pull from the repository of project %{target_project_path}.',
       auth_by_job_token_project_not_in_allowlist: 'Authentication by CI/CD job token not allowed from %{source_project_path} to %{target_project_path}.',
@@ -315,6 +316,10 @@ module Gitlab
 
     def no_repo_message
       error_message(:no_repo)
+    end
+
+    def no_repo_at_url_message
+      error_message(:no_repo_at_url)
     end
 
     def check_download_access!

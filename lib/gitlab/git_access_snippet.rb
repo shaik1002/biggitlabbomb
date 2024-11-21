@@ -9,7 +9,8 @@ module Gitlab
       read_snippet: 'You are not allowed to read this snippet.',
       update_snippet: 'You are not allowed to update this snippet.',
       snippet_not_found: 'The snippet you were looking for could not be found.',
-      no_repo: 'The snippet repository you were looking for could not be found.'
+      no_repo: 'The snippet repository you were looking for could not be found.',
+      no_repo_at_url: 'repository at given URL not found'
     }.freeze
 
     alias_method :snippet, :container

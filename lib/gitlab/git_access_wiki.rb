@@ -8,6 +8,7 @@ module Gitlab
       download: 'You are not allowed to download files from this wiki.',
       not_found: 'The wiki you were looking for could not be found.',
       no_repo: 'A repository for this wiki does not exist yet.',
+      no_repo_at_url: 'repository at given URL not found',
       read_only: "You can't push code to a read-only GitLab instance.",
       write_to_wiki: "You are not allowed to write to this project's wiki."
     }.freeze
