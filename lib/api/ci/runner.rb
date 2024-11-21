@@ -242,7 +242,14 @@ module API
           optional :exit_code, type: Integer, desc: "Job's exit code"
         end
         put '/:id', urgency: :low, feature_category: :continuous_integration do
-          job = authenticate_job!(heartbeat_runner: true)
+          begin
+            job = authenticate_job!(heartbeat_runner: true)
+          rescue ::Ci::AuthJobFinder::NotRunningJobError
+            header 'Job-Status', job.status
+            forbidden!
+          rescue ::Ci::AuthJobFinder::AuthError
+            forbidden!
+          end
 
           Gitlab::Metrics.add_event(:update_build)
 

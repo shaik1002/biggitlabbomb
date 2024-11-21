@@ -70,19 +70,13 @@ module API
         # HTTP status codes to terminate the job on GitLab Runner:
         # - 403
         def authenticate_job!(heartbeat_runner: false)
-          job = current_job
-
           # 404 is not returned here because we want to terminate the job if it's
           # running. A 404 can be returned from anywhere in the networking stack which is why
           # we are explicit about a 403, we should improve this in
           # https://gitlab.com/gitlab-org/gitlab/-/issues/327703
+          job = ::Ci::AuthJobFinder.new(token: job_token, target_job: current_job).execute!
+
           forbidden! unless job
-
-          forbidden! unless job.valid_token?(job_token)
-
-          forbidden!('Project has been deleted!') if job.project.nil? || job.project.pending_delete?
-          forbidden!('Job has been erased!') if job.erased?
-          job_forbidden!(job, 'Job is not processing on runner') unless processing_on_runner?(job)
 
           # Only some requests (like updating the job or patching the trace) should trigger
           # runner heartbeat. Operations like artifacts uploading are executed in context of
@@ -129,11 +123,6 @@ module API
           @job_token ||= (params[JOB_TOKEN_PARAM] || env[JOB_TOKEN_HEADER]).to_s
         end
 
-        def job_forbidden!(job, reason)
-          header 'Job-Status', job.status
-          forbidden!(reason)
-        end
-
         def set_application_context
           return unless current_job
 
@@ -155,10 +144,6 @@ module API
         end
 
         private
-
-        def processing_on_runner?(job)
-          job.running? || job.canceling?
-        end
 
         def get_runner_config_from_request
           { config: attributes_for_keys(%w[gpus], params.dig('info', 'config')) }
