@@ -8940,10 +8940,16 @@ msgstr ""
 msgid "Billings|In a seat"
 msgstr ""
 
+msgid "Billings|Open source Plan Seats used"
+msgstr ""
+
 msgid "Billings|Seats in use / Seats available"
 msgstr ""
 
 msgid "Billings|Seats in use / Seats in subscription"
+msgstr ""
+
+msgid "Billings|You have unlimited seat count."
 msgstr ""
 
 msgid "Billing|%d user has been successfully assigned a seat."
@@ -14161,6 +14167,9 @@ msgid "Compliance framework settings have moved."
 msgstr ""
 
 msgid "Compliance frameworks"
+msgstr ""
+
+msgid "Compliance requirement successfully deleted"
 msgstr ""
 
 msgid "ComplianceChainOfCustody| Chain of custody export"
@@ -23135,6 +23144,9 @@ msgid "Failed to delete custom emoji. Please try again."
 msgstr ""
 
 msgid "Failed to deploy to"
+msgstr ""
+
+msgid "Failed to destroy compliance requirement"
 msgstr ""
 
 msgid "Failed to enqueue the rebase operation, possibly due to a long-lived transaction. Try again later."
@@ -36803,6 +36815,9 @@ msgstr ""
 msgid "Not permitted to destroy framework"
 msgstr ""
 
+msgid "Not permitted to destroy requirement"
+msgstr ""
+
 msgid "Not permitted to reset user feed token"
 msgstr ""
 
@@ -39863,6 +39878,9 @@ msgid "Password|To be satisfied"
 msgstr ""
 
 msgid "Password|cannot use common phrases (e.g. \"password\")"
+msgstr ""
+
+msgid "Password|must be between 8-128 characters"
 msgstr ""
 
 msgid "Password|requires at least one lowercase letter"
@@ -64957,9 +64975,6 @@ msgid "banned user already exists"
 msgstr ""
 
 msgid "before"
-msgstr ""
-
-msgid "beta"
 msgstr ""
 
 msgid "blocks"
