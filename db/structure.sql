@@ -33091,6 +33091,8 @@ CREATE UNIQUE INDEX uniq_idx_subscription_seat_assignments_on_namespace_and_user
 
 CREATE UNIQUE INDEX uniq_idx_user_add_on_assignments_on_add_on_purchase_and_user ON subscription_user_add_on_assignments USING btree (add_on_purchase_id, user_id);
 
+CREATE UNIQUE INDEX uniq_index_pkg_refs_on_ref_and_pkg_id_when_rev_is_null ON packages_conan_package_references USING btree (package_id, reference) WHERE (recipe_revision_id IS NULL);
+
 CREATE UNIQUE INDEX uniq_pkgs_deb_grp_architectures_on_distribution_id_and_name ON packages_debian_group_architectures USING btree (distribution_id, name);
 
 CREATE UNIQUE INDEX uniq_pkgs_deb_grp_components_on_distribution_id_and_name ON packages_debian_group_components USING btree (distribution_id, name);

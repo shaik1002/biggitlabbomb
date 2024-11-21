@@ -69,6 +69,42 @@ RSpec.describe Packages::Conan::FileMetadatum, type: :model do
       end
     end
 
+    describe '#package_reference' do
+      let(:package_reference) { build(:conan_package_reference) }
+
+      context 'recipe file' do
+        let(:conan_file_metadatum) { build(:conan_file_metadatum, :recipe_file, package_file: package_file) }
+
+        it 'is valid when package_reference is absent' do
+          conan_file_metadatum.package_reference = nil
+
+          expect(conan_file_metadatum).to be_valid
+        end
+
+        it 'is invalid when package_reference is present' do
+          conan_file_metadatum.package_reference = package_reference
+
+          expect(conan_file_metadatum).to be_invalid
+        end
+      end
+
+      context 'package file' do
+        let(:conan_file_metadatum) { build(:conan_file_metadatum, :package_file, package_file: package_file) }
+
+        it 'is valid when package_reference is present' do
+          conan_file_metadatum.package_reference = package_reference
+
+          expect(conan_file_metadatum).to be_valid
+        end
+
+        it 'is invalid when package_reference is absent' do
+          conan_file_metadatum.package_reference = nil
+
+          expect(conan_file_metadatum).to be_invalid
+        end
+      end
+    end
+
     describe '#conan_package_type' do
       it 'validates package of type conan' do
         package = build('package')

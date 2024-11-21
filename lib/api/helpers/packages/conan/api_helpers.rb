@@ -230,7 +230,12 @@ module API
 
             track_push_package_event unless params[:file].empty_size?
 
-            create_package_file_with_type(file_type, current_package)
+            service_response = create_package_file_with_type(file_type, current_package)
+            if service_response&.error?
+              render_structured_api_error!({ message: service_response.message, error: service_response.message }, service_response.reason)
+            else
+              service_response&.payload
+            end
           rescue ObjectStorage::RemoteStoreError => e
             Gitlab::ErrorTracking.track_exception(e, file_name: params[:file_name], project_id: project.id)
 

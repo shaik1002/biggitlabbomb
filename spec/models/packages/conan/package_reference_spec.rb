@@ -33,10 +33,40 @@ RSpec.describe Packages::Conan::PackageReference, type: :model, feature_category
     it { is_expected.to validate_presence_of(:project) }
     it { is_expected.to validate_presence_of(:reference) }
 
-    it do
-      # ignore case, same revision string with different case are converted to same hexa binary
-      is_expected.to validate_uniqueness_of(:reference).scoped_to([:package_id,
-        :recipe_revision_id]).case_insensitive
+    describe 'uniqueness of reference' do
+      let_it_be(:conan_package) { create(:conan_package, without_package_files: true) }
+      let_it_be(:existing_reference) { create(:conan_package_reference, package: conan_package) }
+
+      context 'when recipe_revision_id is not nil' do
+        it 'validates uniqueness scoped to package_id and recipe_revision_id', :aggregate_failures do
+          duplicate_reference = build(:conan_package_reference, package_id: existing_reference.package_id,
+            recipe_revision_id: existing_reference.recipe_revision_id, reference: existing_reference.reference)
+
+          expect(duplicate_reference).not_to be_valid
+          expect(duplicate_reference.errors[:reference]).to include('has already been taken')
+        end
+      end
+
+      context 'when recipe_revision_id is nil' do
+        let_it_be(:existing_nil_revision_reference) do
+          create(:conan_package_reference, package: conan_package, recipe_revision_id: nil)
+        end
+
+        it 'validates uniqueness scoped to package_id when both have nil recipe_revision_id', :aggregate_failures do
+          duplicate_reference = build(:conan_package_reference, package_id: existing_nil_revision_reference.package_id,
+            recipe_revision_id: nil, reference: existing_nil_revision_reference.reference)
+
+          expect(duplicate_reference).not_to be_valid
+          expect(duplicate_reference.errors[:reference]).to include('has already been taken')
+        end
+
+        it 'is valid if existing reference has a non-nil recipe_revision_id' do
+          duplicate_reference = build(:conan_package_reference, package_id: existing_reference.package_id,
+            recipe_revision_id: nil, reference: existing_reference.reference)
+
+          expect(duplicate_reference).to be_valid
+        end
+      end
     end
 
     context 'on reference' do
@@ -107,6 +137,28 @@ RSpec.describe Packages::Conan::PackageReference, type: :model, feature_category
           )
         end
       end
+    end
+  end
+
+  describe '.find_by_package_id_and_reference' do
+    let_it_be(:package_reference) { create(:conan_package_reference) }
+
+    it 'returns the correct package reference' do
+      result = described_class.find_by_package_id_and_reference(
+        package_reference.package_id,
+        package_reference.reference
+      )
+
+      expect(result).to include(package_reference)
+    end
+
+    it 'returns an empty result when no match is found' do
+      result = described_class.find_by_package_id_and_reference(
+        package_reference.package_id,
+        'non_existent_reference'
+      )
+
+      expect(result).to be_empty
     end
   end
 end
