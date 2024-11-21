@@ -332,6 +332,7 @@ RSpec.describe API::Ci::JobArtifacts, feature_category: :job_artifacts do
 
                 it_behaves_like 'downloads artifact'
 
+                # https://gitlab.com/gitlab-org/gitlab/-/issues/459908
                 it 'logs context data about the job and route' do
                   expect(::Gitlab::AppLogger).to receive(:info).with a_hash_including({
                     job_id: other_job.id,
