@@ -1,5 +1,6 @@
-import Vue from 'vue';
+import Vue, { nextTick } from 'vue';
 import VueApollo from 'vue-apollo';
+import Visibility from 'visibilityjs';
 import { GlLoadingIcon } from '@gitlab/ui';
 
 import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
@@ -7,12 +8,12 @@ import { createAlert } from '~/alert';
 import waitForPromises from 'helpers/wait_for_promises';
 import createMockApollo from 'helpers/mock_apollo_helper';
 
+import { PIPELINE_POLL_INTERVAL_DEFAULT } from '~/ci/constants';
 import getPipelineMiniGraphQuery from '~/ci/pipeline_mini_graph/graphql/queries/get_pipeline_mini_graph.query.graphql';
 import PipelineMiniGraph from '~/ci/pipeline_mini_graph/pipeline_mini_graph.vue';
 import CiIcon from '~/vue_shared/components/ci_icon/ci_icon.vue';
 import DownstreamPipelines from '~/ci/pipeline_mini_graph/downstream_pipelines.vue';
 import PipelineStages from '~/ci/pipeline_mini_graph/pipeline_stages.vue';
-import * as sharedGraphQlUtils from '~/graphql_shared/utils';
 
 import {
   pipelineMiniGraphFetchError,
@@ -23,6 +24,7 @@ import {
 
 Vue.use(VueApollo);
 jest.mock('~/alert');
+jest.mock('visibilityjs');
 
 describe('PipelineMiniGraph', () => {
   let wrapper;
@@ -56,7 +58,6 @@ describe('PipelineMiniGraph', () => {
 
   beforeEach(() => {
     pipelineMiniGraphResponse = jest.fn();
-    pipelineMiniGraphResponse.mockResolvedValue(mockPipelineMiniGraphQueryResponse);
   });
 
   describe('when initial query is loading', () => {
@@ -75,6 +76,7 @@ describe('PipelineMiniGraph', () => {
 
   describe('when query has loaded', () => {
     beforeEach(async () => {
+      pipelineMiniGraphResponse.mockResolvedValue(mockPipelineMiniGraphQueryResponse);
       await createComponent();
     });
 
@@ -91,65 +93,71 @@ describe('PipelineMiniGraph', () => {
 
       expect(pipelineMiniGraphResponse).toHaveBeenCalledWith({ iid, fullPath });
     });
+  });
 
-    describe('stages', () => {
-      it('renders stages', () => {
-        expect(findStages().exists()).toBe(true);
-      });
+  describe('stages', () => {
+    beforeEach(async () => {
+      pipelineMiniGraphResponse.mockResolvedValue(mockPipelineMiniGraphQueryResponse);
+      await createComponent();
+    });
 
-      it('sends the necessary props', () => {
-        expect(findStages().props()).toMatchObject({
-          isMergeTrain: expect.any(Boolean),
-          stages: expect.any(Array),
-        });
+    it('renders stages', () => {
+      expect(findStages().exists()).toBe(true);
+    });
+
+    it('sends the necessary props', () => {
+      expect(findStages().props()).toMatchObject({
+        isMergeTrain: expect.any(Boolean),
+        stages: expect.any(Array),
       });
     });
 
-    describe('upstream', () => {
-      it('renders upstream if available', () => {
-        expect(findUpstream().exists()).toBe(true);
-      });
-
-      it('does not render upstream if not available', () => {
-        pipelineMiniGraphResponse.mockResolvedValue(mockPMGQueryNoUpstreamResponse);
-        createComponent();
-        expect(findUpstream().exists()).toBe(false);
-      });
-    });
-
-    describe('downstream', () => {
-      it('renders downstream if available', () => {
-        expect(findDownstream().exists()).toBe(true);
-      });
-
-      it('sends the necessary props', () => {
-        expect(findDownstream().props()).toMatchObject({
-          pipelines: expect.any(Array),
-          pipelinePath: expect.any(String),
-        });
-      });
-
-      it('keeps the latest downstream pipelines', () => {
-        expect(findDownstream().props('pipelines')).toHaveLength(2);
-      });
-
-      it('does not render downstream if not available', () => {
-        pipelineMiniGraphResponse.mockResolvedValue(mockPMGQueryNoDownstreamResponse);
-        createComponent();
-        expect(findDownstream().exists()).toBe(false);
-      });
+    it('emits miniGraphStageClick', () => {
+      findStages().vm.$emit('miniGraphStageClick');
+      expect(wrapper.emitted('miniGraphStageClick')).toHaveLength(1);
     });
   });
 
-  describe('polling', () => {
-    it('toggles query polling with visibility check', async () => {
-      jest.spyOn(sharedGraphQlUtils, 'toggleQueryPollingByVisibility');
+  describe('upstream', () => {
+    it('renders upstream if available', async () => {
+      pipelineMiniGraphResponse.mockResolvedValue(mockPipelineMiniGraphQueryResponse);
+      await createComponent();
+      expect(findUpstream().exists()).toBe(true);
+    });
 
+    it('does not render upstream if not available', () => {
+      pipelineMiniGraphResponse.mockResolvedValue(mockPMGQueryNoUpstreamResponse);
       createComponent();
+      expect(findUpstream().exists()).toBe(false);
+    });
+  });
 
-      await waitForPromises();
+  describe('downstream', () => {
+    it('renders downstream if available', async () => {
+      pipelineMiniGraphResponse.mockResolvedValue(mockPipelineMiniGraphQueryResponse);
+      await createComponent();
+      expect(findDownstream().exists()).toBe(true);
+    });
 
-      expect(sharedGraphQlUtils.toggleQueryPollingByVisibility).toHaveBeenCalledTimes(1);
+    it('sends the necessary props', async () => {
+      pipelineMiniGraphResponse.mockResolvedValue(mockPipelineMiniGraphQueryResponse);
+      await createComponent();
+      expect(findDownstream().props()).toMatchObject({
+        pipelines: expect.any(Array),
+        pipelinePath: expect.any(String),
+      });
+    });
+
+    it('keeps the latest downstream pipelines', async () => {
+      pipelineMiniGraphResponse.mockResolvedValue(mockPipelineMiniGraphQueryResponse);
+      await createComponent();
+      expect(findDownstream().props('pipelines')).toHaveLength(2);
+    });
+
+    it('does not render downstream if not available', () => {
+      pipelineMiniGraphResponse.mockResolvedValue(mockPMGQueryNoDownstreamResponse);
+      createComponent();
+      expect(findDownstream().exists()).toBe(false);
     });
   });
 
@@ -162,6 +170,44 @@ describe('PipelineMiniGraph', () => {
       await waitForPromises();
 
       expect(createAlert).toHaveBeenCalledWith({ message: pipelineMiniGraphFetchError });
+    });
+  });
+
+  describe('polling', () => {
+    beforeEach(async () => {
+      Visibility.hidden.mockReturnValue(true);
+      pipelineMiniGraphResponse.mockResolvedValue(mockPipelineMiniGraphQueryResponse);
+      await createComponent();
+    });
+
+    it('increases the poll interval after each query call', () => {
+      expect(pipelineMiniGraphResponse).toHaveBeenCalled();
+      expect(wrapper.vm.$apollo.queries.pipeline.pollInterval).not.toBe(
+        PIPELINE_POLL_INTERVAL_DEFAULT,
+      );
+    });
+
+    it('handles visibility change for polling correctly', async () => {
+      expect(wrapper.vm.$apollo.queries.pipeline.pollInterval).not.toBe(
+        PIPELINE_POLL_INTERVAL_DEFAULT,
+      );
+
+      Visibility.hidden.mockReturnValue(false);
+      wrapper.vm.handlePolling();
+      await nextTick();
+
+      expect(wrapper.vm.$apollo.queries.pipeline.pollInterval).toBe(PIPELINE_POLL_INTERVAL_DEFAULT);
+    });
+
+    it('resets poll interval on job action executed', async () => {
+      expect(wrapper.vm.$apollo.queries.pipeline.pollInterval).not.toBe(
+        PIPELINE_POLL_INTERVAL_DEFAULT,
+      );
+
+      findStages().vm.$emit('jobActionExecuted');
+      await nextTick();
+
+      expect(wrapper.vm.$apollo.queries.pipeline.pollInterval).toBe(PIPELINE_POLL_INTERVAL_DEFAULT);
     });
   });
 });

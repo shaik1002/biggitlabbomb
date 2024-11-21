@@ -3,11 +3,11 @@ import { GlButton, GlDisclosureDropdown, GlLoadingIcon, GlTooltipDirective } fro
 import { createAlert } from '~/alert';
 import { s__, __, sprintf } from '~/locale';
 import { reportToSentry } from '~/ci/utils';
-import { PIPELINE_MINI_GRAPH_POLL_INTERVAL } from '~/ci/pipeline_details/constants';
 import CiIcon from '~/vue_shared/components/ci_icon/ci_icon.vue';
 import { getQueryHeaders, toggleQueryPollingByVisibility } from '~/ci/pipeline_details/graph/utils';
 import { graphqlEtagStagePath } from '~/ci/pipeline_details/utils';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
+import { PIPELINE_POLL_INTERVAL_DEFAULT } from '~/ci/constants';
 import getPipelineStageJobsQuery from './graphql/queries/get_pipeline_stage_jobs.query.graphql';
 import JobItem from './job_item.vue';
 
@@ -39,14 +39,14 @@ export default {
     pollInterval: {
       type: Number,
       required: false,
-      default: PIPELINE_MINI_GRAPH_POLL_INTERVAL,
+      default: PIPELINE_POLL_INTERVAL_DEFAULT,
     },
     stage: {
       type: Object,
       required: true,
     },
   },
-  emits: ['miniGraphStageClick'],
+  emits: ['jobActionExecuted', 'miniGraphStageClick'],
   data() {
     return {
       isDropdownOpen: false,
@@ -159,6 +159,7 @@ export default {
         :key="job.id"
         :dropdown-length="stageJobs.length"
         :job="job"
+        @jobActionExecuted="$emit('jobActionExecuted')"
       />
     </ul>
 
