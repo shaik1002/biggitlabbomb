@@ -19,8 +19,8 @@ import { fetchPolicies } from '~/lib/graphql';
 import SafeHtml from '~/vue_shared/directives/safe_html';
 import { visitUrl } from '~/lib/utils/url_utility';
 import { s__, __, n__ } from '~/locale';
-import { helpPagePath } from '~/helpers/help_page_helper';
 import {
+  CC_VALIDATION_REQUIRED_ERROR,
   IDENTITY_VERIFICATION_REQUIRED_ERROR,
   CONFIG_VARIABLES_TIMEOUT,
   FILE_TYPE,
@@ -48,7 +48,6 @@ const i18n = {
   warningTitle: __('The form contains the following warning:'),
   maxWarningsSummary: __('%{total} warnings found: showing first %{warningsDisplayed}'),
   removeVariableLabel: s__('CiVariables|Remove variable'),
-  learnMore: __('Learn more'),
 };
 
 export default {
@@ -71,6 +70,8 @@ export default {
     GlLoadingIcon,
     RefsDropdown,
     VariableValuesListbox,
+    CcValidationRequiredAlert: () =>
+      import('ee_component/billings/components/cc_validation_required_alert.vue'),
     PipelineAccountVerificationAlert: () =>
       import('ee_component/vue_shared/components/pipeline_account_verification_alert.vue'),
   },
@@ -123,10 +124,6 @@ export default {
       type: Number,
       required: true,
     },
-    isMaintainer: {
-      type: Boolean,
-      required: true,
-    },
   },
   data() {
     return {
@@ -146,6 +143,7 @@ export default {
       totalWarnings: 0,
       isWarningDismissed: false,
       submitted: false,
+      ccAlertDismissed: false,
     };
   },
   apollo: {
@@ -231,6 +229,9 @@ export default {
     },
     descriptions() {
       return this.form[this.refFullName]?.descriptions ?? {};
+    },
+    ccRequiredError() {
+      return this.error === CC_VALIDATION_REQUIRED_ERROR && !this.ccAlertDismissed;
     },
     identityVerificationRequiredError() {
       return this.error === IDENTITY_VERIFICATION_REQUIRED_ERROR;
@@ -347,6 +348,7 @@ export default {
     },
     async createPipeline() {
       this.submitted = true;
+      this.ccAlertDismissed = false;
 
       const { data } = await this.$apollo.mutate({
         mutation: createPipelineMutation,
@@ -389,6 +391,7 @@ export default {
       this.totalWarnings = totalWarnings;
     },
     dismissError() {
+      this.ccAlertDismissed = true;
       this.error = null;
     },
     createListItemsFromVariableOptions(key) {
@@ -398,15 +401,16 @@ export default {
       }));
     },
   },
-  learnMorePath: helpPagePath('ci/variables/index', {
-    anchor: 'cicd-variable-precedence',
-  }),
 };
 </script>
 
 <template>
   <gl-form @submit.prevent="createPipeline">
-    <pipeline-account-verification-alert v-if="identityVerificationRequiredError" class="gl-mb-4" />
+    <cc-validation-required-alert v-if="ccRequiredError" class="gl-pb-5" @dismiss="dismissError" />
+    <pipeline-account-verification-alert
+      v-else-if="identityVerificationRequiredError"
+      class="gl-mb-4"
+    />
     <gl-alert
       v-else-if="error"
       :title="errorTitle"
@@ -516,7 +520,7 @@ export default {
               :aria-label="$options.i18n.removeVariableLabel"
               @click="removeVariable(index)"
             >
-              <gl-icon class="!gl-mr-0" name="remove" />
+              <gl-icon class="!gl-mr-0 !gl-text-gray-500" name="remove" />
               <span class="gl-ml-2 md:gl-hidden">{{ $options.i18n.removeVariableLabel }}</span>
             </gl-button>
             <gl-button
@@ -532,19 +536,13 @@ export default {
         </div>
       </div>
 
-      <template #description>
-        <gl-sprintf :message="$options.i18n.variablesDescription">
+      <template #description
+        ><gl-sprintf :message="$options.i18n.variablesDescription">
           <template #link="{ content }">
-            <gl-link v-if="isMaintainer" :href="settingsLink" data-testid="ci-cd-settings-link">{{
-              content
-            }}</gl-link>
-            <template v-else>{{ content }}</template>
+            <gl-link :href="settingsLink">{{ content }}</gl-link>
           </template>
-        </gl-sprintf>
-        <gl-link :href="$options.learnMorePath" target="_blank">{{
-          $options.i18n.learnMore
-        }}</gl-link>
-      </template>
+        </gl-sprintf></template
+      >
     </gl-form-group>
     <div class="gl-mb-4 gl-text-gray-500">
       <gl-sprintf :message="$options.i18n.overrideNoteText">

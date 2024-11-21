@@ -2,7 +2,7 @@
 data_category: optional
 key_path: gitaly.filesystems
 description: Filesystem data for Gitaly installations
-product_group: gitaly
+product_group: gitaly_cluster
 value_type: string
 status: active
 time_frame: all
@@ -10,7 +10,7 @@ data_source: system
 distribution:
 - ce
 - ee
-tiers:
+tier:
 - free
 - premium
 - ultimate

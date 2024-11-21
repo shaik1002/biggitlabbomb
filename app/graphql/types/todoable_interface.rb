@@ -34,8 +34,6 @@ module Types
         Types::ProjectType
       when Group
         Types::GroupType
-      when Key # SSH key
-        Types::KeyType
       else
         raise "Unknown GraphQL type for #{object}"
       end

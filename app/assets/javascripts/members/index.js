@@ -8,7 +8,6 @@ import { TABS } from 'ee_else_ce/members/tabs_metadata';
 import MembersTabs from './components/members_tabs.vue';
 import membersStore from './store';
 import { graphqlClient } from './graphql_client';
-import { CONTEXT_TYPE } from './constants';
 
 /**
  * @param {HTMLElement} el
@@ -59,9 +58,6 @@ export const initMembersApp = (el, context, options) => {
 
   const store = new Vuex.Store({ modules });
 
-  const isGroup = context === CONTEXT_TYPE.GROUP;
-  const isProject = context === CONTEXT_TYPE.PROJECT;
-
   return new Vue({
     el,
     name: 'MembersRoot',
@@ -85,12 +81,10 @@ export const initMembersApp = (el, context, options) => {
       context,
       reassignmentCsvPath,
       group: {
-        id: isGroup ? sourceId : null,
         name: groupName,
         path: groupPath,
       },
       project: {
-        id: isProject ? sourceId : null,
         path: projectPath,
       },
     },

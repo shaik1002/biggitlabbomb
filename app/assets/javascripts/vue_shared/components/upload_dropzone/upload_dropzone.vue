@@ -1,14 +1,14 @@
 <script>
-import { GlLink, GlSprintf, GlAnimatedUploadIcon } from '@gitlab/ui';
+import { GlIcon, GlLink, GlSprintf } from '@gitlab/ui';
 import { __ } from '~/locale';
 import { VALID_DATA_TRANSFER_TYPE, VALID_IMAGE_FILE_MIMETYPE } from './constants';
 import { isValidImage } from './utils';
 
 export default {
   components: {
+    GlIcon,
     GlLink,
     GlSprintf,
-    GlAnimatedUploadIcon,
   },
   props: {
     displayAsCard: {
@@ -66,7 +66,6 @@ export default {
     return {
       dragCounter: 0,
       isDragDataValid: true,
-      animateUploadIcon: false,
     };
   },
   computed: {
@@ -75,7 +74,8 @@ export default {
     },
     iconStyles() {
       return {
-        class: this.displayAsCard ? 'gl-mb-3' : 'gl-mr-3',
+        size: this.displayAsCard ? 24 : 16,
+        class: this.displayAsCard ? 'gl-mb-2' : 'gl-mr-3',
       };
     },
     validMimeTypeString() {
@@ -143,12 +143,6 @@ export default {
     onFileInputChange(e) {
       this.$emit('change', this.singleFileSelection ? e.target.files[0] : e.target.files);
     },
-    onMouseEnter() {
-      this.animateUploadIcon = true;
-    },
-    onMouseLeave() {
-      this.animateUploadIcon = false;
-    },
   },
 };
 </script>
@@ -168,15 +162,13 @@ export default {
         class="card upload-dropzone-card upload-dropzone-border gl-mb-0 gl-h-full gl-w-full gl-items-center gl-justify-center gl-px-5 gl-py-4"
         type="button"
         @click="openFileUpload"
-        @mouseenter="onMouseEnter"
-        @mouseleave="onMouseLeave"
       >
         <div
           :class="{ 'gl-flex-col': displayAsCard }"
           class="gl-flex gl-items-center gl-justify-center gl-text-center"
           data-testid="dropzone-area"
         >
-          <gl-animated-upload-icon :is-on="animateUploadIcon" :class="iconStyles.class" />
+          <gl-icon name="upload" :size="iconStyles.size" :class="iconStyles.class" />
           <p class="gl-mb-0" data-testid="upload-text">
             <slot name="upload-text" :open-file-upload="openFileUpload">
               <gl-sprintf
@@ -206,7 +198,7 @@ export default {
         v-show="dragging && !enableDragBehavior"
         class="card upload-dropzone-border upload-dropzone-overlay gl-absolute gl-flex gl-h-full gl-w-full gl-items-center gl-justify-center gl-p-4"
       >
-        <div v-show="!isDragDataValid" class="gl-max-w-1/2 gl-text-center">
+        <div v-show="!isDragDataValid" class="mw-50 gl-text-center">
           <slot name="invalid-drag-data-slot">
             <h3 :class="{ 'gl-inline gl-text-base': !displayAsCard }">
               {{ __('Oh no!') }}
@@ -218,7 +210,7 @@ export default {
             }}</span>
           </slot>
         </div>
-        <div v-show="isDragDataValid" class="gl-max-w-1/2 gl-text-center">
+        <div v-show="isDragDataValid" class="mw-50 gl-text-center">
           <slot name="valid-drag-data-slot">
             <h3 :class="{ 'gl-inline gl-text-base': !displayAsCard }">
               {{ __('Incoming!') }}

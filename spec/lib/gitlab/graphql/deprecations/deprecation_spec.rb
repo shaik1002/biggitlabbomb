@@ -37,25 +37,25 @@ RSpec.describe ::Gitlab::Graphql::Deprecations::Deprecation, feature_category: :
       end
     end
 
-    context 'with an `experiment` argument' do
-      let(:options) { { experiment: { milestone: '10.10' } } }
+    context 'with an `alpha` argument' do
+      let(:options) { { alpha: { milestone: '10.10' } } }
 
-      it 'parses as an experiment' do
+      it 'parses as an alpha' do
         expect(parsed_deprecation).to be_valid
         expect(parsed_deprecation).to eq(
-          described_class.new(reason: :experiment, milestone: '10.10')
+          described_class.new(reason: :alpha, milestone: '10.10')
         )
       end
     end
 
-    context 'with both `deprecated` and `experiment` arguments' do
+    context 'with both `deprecated` and `alpha` arguments' do
       let(:options) do
-        { experiment: { milestone: '10.10' }, deprecated: { reason: :renamed, milestone: '10.10' } }
+        { alpha: { milestone: '10.10' }, deprecated: { reason: :renamed, milestone: '10.10' } }
       end
 
       it 'raises an error' do
         expect { parsed_deprecation }.to raise_error(ArgumentError,
-          '`experiment` and `deprecated` arguments cannot be passed at the same time'
+          '`alpha` and `deprecated` arguments cannot be passed at the same time'
         )
       end
     end
@@ -255,19 +255,19 @@ RSpec.describe ::Gitlab::Graphql::Deprecations::Deprecation, feature_category: :
     end
   end
 
-  describe '#experiment?' do
+  describe '#alpha?' do
     let(:options) { { milestone: '10.10', reason: reason } }
 
-    context 'when `reason` is `:experiment`' do
-      let(:reason) { described_class::REASON_EXPERIMENT }
+    context 'when `reason` is `:alpha`' do
+      let(:reason) { described_class::REASON_ALPHA }
 
-      it { is_expected.to be_experiment }
+      it { is_expected.to be_alpha }
     end
 
-    context 'when `reason` is not `:experiment`' do
+    context 'when `reason` is not `:alpha`' do
       let(:reason) { described_class::REASON_RENAMED }
 
-      it { is_expected.not_to be_experiment }
+      it { is_expected.not_to be_alpha }
     end
   end
 end

@@ -39,10 +39,6 @@ RSpec.describe API::MavenPackages, feature_category: :package_registry do
   let(:version) { '1.0-SNAPSHOT' }
   let(:param_path) { "#{package_name}/#{version}" }
 
-  before do
-    Gitlab::Database::LoadBalancing::SessionMap.clear_session
-  end
-
   shared_examples 'handling groups and subgroups for' do |shared_example_name, shared_example_args = {}, visibilities: { public: :redirect }|
     context 'within a group' do
       visibilities.each do |visibility, not_found_response|
@@ -757,6 +753,15 @@ RSpec.describe API::MavenPackages, feature_category: :package_registry do
         end
 
         it_behaves_like 'successfully returning the file'
+
+        context 'when the FF allow_anyone_to_pull_public_maven_packages_on_group_level disabled' do
+          before do
+            stub_feature_flags(allow_anyone_to_pull_public_maven_packages_on_group_level: false)
+            stub_feature_flags(maven_central_request_forwarding: false)
+          end
+
+          it_behaves_like 'returning response status', :not_found
+        end
       end
     end
 
@@ -1321,11 +1326,11 @@ RSpec.describe API::MavenPackages, feature_category: :package_registry do
       end
 
       def expect_use_primary
-        lb_session = ::Gitlab::Database::LoadBalancing::SessionMap.current(ApplicationRecord.load_balancer)
+        lb_session = ::Gitlab::Database::LoadBalancing::Session.current
 
         expect(lb_session).to receive(:use_primary).and_call_original
 
-        allow(::Gitlab::Database::LoadBalancing::SessionMap).to receive(:current).and_return(lb_session)
+        allow(::Gitlab::Database::LoadBalancing::Session).to receive(:current).and_return(lb_session)
       end
     end
 

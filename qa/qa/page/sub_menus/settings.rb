@@ -34,10 +34,6 @@ module QA
           open_settings_submenu('Packages and registries')
         end
 
-        def go_to_workspaces_settings
-          open_settings_submenu('Workspaces')
-        end
-
         private
 
         def open_settings_submenu(sub_menu)

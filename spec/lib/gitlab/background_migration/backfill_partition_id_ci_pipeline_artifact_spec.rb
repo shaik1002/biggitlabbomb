@@ -3,7 +3,6 @@
 require 'spec_helper'
 
 RSpec.describe Gitlab::BackgroundMigration::BackfillPartitionIdCiPipelineArtifact,
-  :suppress_partitioning_routing_analyzer,
   feature_category: :continuous_integration do
   let(:ci_pipelines_table) { table(:ci_pipelines, primary_key: :id, database: :ci) }
   let(:ci_pipeline_artifacts_table) { table(:ci_pipeline_artifacts, database: :ci) }

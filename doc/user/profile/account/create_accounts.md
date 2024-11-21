@@ -1,5 +1,5 @@
 ---
-stage: Software Supply Chain Security
+stage: Govern
 group: Authentication
 description: Passwords, user moderation, broadcast messages.
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
@@ -76,29 +76,15 @@ Users are:
 
 WARNING:
 Commands that change data can cause damage if not run correctly or under the right conditions. Always run commands in a test environment first and have a backup instance ready to restore.
-You can create a user through the Rails console.
-
-If you want to automate user creation, you should use [the users API endpoint](../../../api/users.md#create-a-user) instead. This is because GitLab source code is subject to change at any time.
 
 To create a user through the Rails console:
 
 1. [Start a Rails console session](../../../administration/operations/rails_console.md#starting-a-rails-console-session).
-1. The command you run to create a user differs depending on your version of GitLab.
-
-   For GitLab 16.10 and earlier, run:
-
-   ```ruby
-   u = User.new(username: 'test_user', email: 'test@example.com', name: 'Test User', password: 'password', password_confirmation: 'password')
-   # u.assign_personal_namespace
-   u.skip_confirmation! # Use only if you want the user to be automatically confirmed. If you do not use this, the user receives a confirmation email.
-   u.save!
-   ```
-
-   For GitLab 16.11 and later, run:
+1. Run the following commands:
 
    ```ruby
    u = User.new(username: 'test_user', email: 'test@example.com', name: 'Test User', password: 'password', password_confirmation: 'password')
    u.assign_personal_namespace(Organizations::Organization.default_organization)
-   u.skip_confirmation! # Use only if you want the user to be automatically confirmed. If you do not use this, the user receives a confirmation email.
+   u.skip_confirmation! # Use it only if you wish user to be automatically confirmed. If skipped, user receives confirmation e-mail
    u.save!
    ```

@@ -20,31 +20,9 @@ RSpec.describe Ci::JobArtifacts::CreateService, :clean_gitlab_redis_shared_state
     shared_examples_for 'handling lsif artifact' do
       context 'when artifact is lsif' do
         let(:artifact_type) { 'lsif' }
-        let(:max_artifact_size) { 100.megabytes.to_i }
-
-        before do
-          allow(Ci::JobArtifact)
-            .to receive(:max_artifact_size)
-            .with(type: artifact_type, project: project)
-            .and_return(max_artifact_size)
-        end
 
         it 'includes ProcessLsif in the headers' do
           expect(authorize[:headers][:ProcessLsif]).to eq(true)
-        end
-
-        it 'returns 200MB in bytes as maximum size' do
-          expect(authorize[:headers][:MaximumSize]).to eq(200.megabytes.to_i)
-        end
-
-        context 'when increase_lsif_artifacts_limit is disabled' do
-          before do
-            stub_feature_flags(increase_lsif_artifacts_limit: false)
-          end
-
-          it 'returns maximum_size based on Ci::JobArtifact.max_artifact_size' do
-            expect(authorize[:headers][:MaximumSize]).to eq(max_artifact_size)
-          end
         end
       end
     end
@@ -489,8 +467,8 @@ RSpec.describe Ci::JobArtifacts::CreateService, :clean_gitlab_redis_shared_state
     end
 
     shared_examples_for 'handling partitioning' do
-      context 'with job partitioned' do
-        let(:partition_id) { ci_testing_partition_id }
+      context 'with job partitioned', :ci_partitionable do
+        let(:partition_id) { ci_testing_partition_id_for_check_constraints }
         let(:pipeline) { create(:ci_pipeline, project: project, partition_id: partition_id) }
         let(:job) { create(:ci_build, pipeline: pipeline) }
 

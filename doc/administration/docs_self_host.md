@@ -52,7 +52,7 @@ To run the GitLab product documentation website in a Docker container:
      ```
 
    - If you host your GitLab instance using
-     [Docker compose](../install/docker/installation.md#install-gitlab-by-using-docker-compose),
+     [Docker compose](../install/docker/installation.md#install-gitlab-using-docker-compose),
      add the following to your existing `docker-compose.yaml`:
 
      ```yaml
@@ -93,8 +93,8 @@ To host the product documentation site with GitLab Pages:
    `pages` job, while ensuring the version is the same as your GitLab installation:
 
    ```yaml
+   image: registry.gitlab.com/gitlab-org/gitlab-docs/archives:16.0
    pages:
-     image: registry.gitlab.com/gitlab-org/gitlab-docs/archives:16.0
      script:
        - mkdir public
        - cp -a /usr/share/nginx/html/* public/

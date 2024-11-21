@@ -2,7 +2,6 @@
 
 require 'rspec/core'
 require 'rspec/expectations'
-require 'tempfile'
 
 module QA
   module Specs
@@ -48,68 +47,51 @@ module QA
       end
 
       def perform
-        args = build_initial_args
-        # use options from default .rspec file for metadata only runs
-        configure_default_formatters!(args) unless metadata_run?
-        args.push(DEFAULT_TEST_PATH_ARGS) unless custom_test_paths?
+        args = []
+        args.push('--tty') if tty
+        args.push(rspec_tags)
+        args.push(options)
 
-        run_rspec(args)
-      end
-
-      private
-
-      delegate :rspec_retried?, :parallel_run?, to: Runtime::Env
-
-      def build_initial_args
-        [].tap do |args|
-          args.push('--tty') if tty
-          args.push(rspec_tags)
-          args.push(options)
+        unless Runtime::Env.knapsack? || options.any? { |opt| opt.include?('features') }
+          args.push(DEFAULT_TEST_PATH_ARGS)
         end
-      end
 
-      def run_rspec(args)
-        if Runtime::Scenario.attributes[:count_examples_only]
-          count_examples_only(args)
-        elsif Runtime::Scenario.attributes[:test_metadata_only]
-          test_metadata_only(args)
-        elsif Runtime::Env.knapsack?
-          KnapsackRunner.run(args.flatten, parallel: run_in_parallel?) { |status| abort if status.nonzero? }
-        elsif run_in_parallel?
+        if Runtime::Env.knapsack?
+          KnapsackRunner.run(args.flatten) { |status| abort if status.nonzero? }
+        elsif Runtime::Scenario.attributes[:parallel]
           ParallelRunner.run(args.flatten)
         elsif Runtime::Scenario.attributes[:loop]
           LoopRunner.run(args.flatten)
+        elsif Runtime::Scenario.attributes[:count_examples_only]
+          count_examples_only(args)
+        elsif Runtime::Scenario.attributes[:test_metadata_only]
+          test_metadata_only(args)
         else
           RSpec::Core::Runner.run(args.flatten, *DEFAULT_STD_ARGS).tap { |status| abort if status.nonzero? }
         end
       end
 
+      private
+
       def count_examples_only(args)
         args.unshift('--dry-run')
         out = StringIO.new
-        err = StringIO.new
 
-        total_examples = Tempfile.open('test-metadata.json') do |file|
-          RSpec.configure { |config| config.add_formatter(QA::Support::JsonFormatter, file.path) }
-          RSpec::Core::Runner.run(args.flatten, err, out).tap { |status| abort if status.nonzero? }
-
-          JSON.load_file(file, symbolize_names: true).dig(:summary, :example_count)
+        RSpec::Core::Runner.run(args.flatten, $stderr, out).tap do |status|
+          abort if status.nonzero?
         end
 
-        puts total_examples
-      rescue StandardError => e
-        raise e, "Failed to detect example count, error: '#{e}'.\nOut: '#{out.string}'\nErr: #{err.string}"
-      end
+        begin
+          total_examples = out.string.match(/(\d+) examples?,/)[1]
+        rescue StandardError
+          raise RegexMismatchError, 'Rspec output did not match regex'
+        end
 
-      # Trigger tests using parallel runner
-      #
-      # @return [Boolean]
-      def run_in_parallel?
-        return @parallel if defined?(@parallel)
+        filename = build_filename
 
-        # Do not use parallel with retry as parallel_tests is not capable to correctly detect
-        # groups of tests when `--only-failures` parameter is used
-        @parallel = (Runtime::Scenario.attributes[:parallel] || Runtime::Env.run_in_parallel?) && !rspec_retried?
+        File.open(filename, 'w') { |f| f.write(total_examples) } if total_examples.to_i > 0
+
+        $stdout.puts total_examples
       end
 
       def test_metadata_only(args)
@@ -129,28 +111,23 @@ module QA
         $stdout.puts "Saved to file: #{output_file}"
       end
 
-      def configure_default_formatters!(args)
-        default_formatter_file_name = "tmp/rspec-#{ENV['CI_JOB_ID'] || 'local'}-retried-#{rspec_retried?}"
-        filename = if run_in_parallel?
-                     rspec_retried? ? default_formatter_file_name : "#{default_formatter_file_name}-$TEST_ENV_NUMBER"
-                   else
-                     default_formatter_file_name
-                   end
+      def build_filename
+        filename = Runtime::Scenario.klass.split('::').last(3).join('_').downcase
 
-        args.push("--format", "documentation") unless args.flatten.include?("documentation")
-        { "QA::Support::JsonFormatter" => "json", "RspecJunitFormatter" => "xml" }.each do |formatter, extension|
-          next if args.flatten.include?(formatter)
-
-          args.push("--format", formatter, "--out", "#{filename}.#{extension}")
+        tags = []
+        tag_opts = %w[--tag -t]
+        options.reduce do |before, after|
+          tags << after if tag_opts.include?(before)
+          after
         end
-      end
+        tags = tags.compact.join('_')
 
-      def custom_test_paths?
-        Runtime::Env.knapsack? || options.any? { |opt| opt.include?('features') }
-      end
+        filename.concat("_#{tags}") unless tags.empty?
 
-      def metadata_run?
-        Runtime::Scenario.attributes[:count_examples_only] || Runtime::Scenario.attributes[:test_metadata_only]
+        filename.concat('.txt')
+
+        FileUtils.mkdir_p('no_of_examples')
+        File.join('no_of_examples', filename)
       end
     end
   end

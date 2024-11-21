@@ -14,27 +14,22 @@ import {
   WORK_ITEM_TYPE_ENUM_EPIC,
   CHILD_ITEMS_ANCHOR,
   WORKITEM_TREE_SHOWLABELS_LOCALSTORAGEKEY,
-  WORKITEM_TREE_SHOWCLOSED_LOCALSTORAGEKEY,
   WORK_ITEM_TYPE_VALUE_EPIC,
   WIDGET_TYPE_HIERARCHY,
-  INJECTION_LINK_CHILD_PREVENT_ROUTER_NAVIGATION,
 } from '../../constants';
 import {
   findHierarchyWidgets,
   getDefaultHierarchyChildrenCount,
-  saveToggleToLocalStorage,
-  getToggleFromLocalStorage,
-  getItems,
+  saveShowLabelsToLocalStorage,
+  getShowLabelsFromLocalStorage,
 } from '../../utils';
 import getWorkItemTreeQuery from '../../graphql/work_item_tree.query.graphql';
-import namespaceWorkItemTypesQuery from '../../graphql/namespace_work_item_types.query.graphql';
 import WorkItemChildrenLoadMore from '../shared/work_item_children_load_more.vue';
 import WorkItemMoreActions from '../shared/work_item_more_actions.vue';
 import WorkItemActionsSplitButton from './work_item_actions_split_button.vue';
 import WorkItemLinksForm from './work_item_links_form.vue';
 import WorkItemChildrenWrapper from './work_item_children_wrapper.vue';
 import WorkItemRolledUpData from './work_item_rolled_up_data.vue';
-import WorkItemRolledUpCount from './work_item_rolled_up_count.vue';
 
 export default {
   FORM_TYPES,
@@ -50,14 +45,8 @@ export default {
     WorkItemChildrenLoadMore,
     WorkItemMoreActions,
     WorkItemRolledUpData,
-    WorkItemRolledUpCount,
   },
   inject: ['hasSubepicsFeature'],
-  provide() {
-    return {
-      [INJECTION_LINK_CHILD_PREVENT_ROUTER_NAVIGATION]: !this.isDrawer,
-    };
-  },
   props: {
     fullPath: {
       type: String,
@@ -106,11 +95,6 @@ export default {
       required: false,
       default: () => [],
     },
-    isDrawer: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
   },
   data() {
     return {
@@ -118,19 +102,16 @@ export default {
       formType: null,
       childType: null,
       widgetName: CHILD_ITEMS_ANCHOR,
+      defaultShowLabels: true,
       showLabels: true,
-      showClosed: true,
       fetchNextPageInProgress: false,
       workItem: {},
       disableContent: false,
-      workItemTypes: [],
-      hierarchyWidget: null,
-      draggedItemType: null,
       showLabelsLocalStorageKey: WORKITEM_TREE_SHOWLABELS_LOCALSTORAGEKEY,
-      showClosedLocalStorageKey: WORKITEM_TREE_SHOWCLOSED_LOCALSTORAGEKEY,
     };
   },
   apollo: {
+    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     hierarchyWidget: {
       query: getWorkItemTreeQuery,
       variables() {
@@ -158,20 +139,6 @@ export default {
         }
       },
     },
-    workItemTypes: {
-      query: namespaceWorkItemTypesQuery,
-      variables() {
-        return {
-          fullPath: this.fullPath,
-        };
-      },
-      update(data) {
-        return data.workspace?.workItemTypes?.nodes;
-      },
-      skip() {
-        return !this.canUpdate;
-      },
-    },
   },
   computed: {
     workItemHierarchy() {
@@ -179,9 +146,6 @@ export default {
     },
     rolledUpCountsByType() {
       return this.workItemHierarchy?.rolledUpCountsByType || [];
-    },
-    depthLimitReachedByType() {
-      return this.workItemHierarchy?.depthLimitReachedByType || [];
     },
     childrenIds() {
       return this.children.map((c) => c.id);
@@ -201,20 +165,11 @@ export default {
       const reorderedChildTypes = childTypes.slice().sort((a, b) => a.id.localeCompare(b.id));
       return reorderedChildTypes.map((type) => {
         const enumType = WORK_ITEM_TYPE_VALUE_MAP[type.name];
-        const depthLimitByType =
-          this.depthLimitReachedByType?.find(
-            (item) => item.workItemType?.name.toUpperCase() === enumType,
-          ) || {};
-
         return {
           name: WORK_ITEMS_TYPE_MAP[enumType].name,
-          atDepthLimit: depthLimitByType.depthLimitReached,
           items: this.genericActionItems(type.name).map((item) => ({
             text: item.title,
             action: item.action,
-            extraAttrs: {
-              disabled: depthLimitByType.depthLimitReached,
-            },
           })),
         };
       });
@@ -251,25 +206,12 @@ export default {
     showTaskWeight() {
       return this.workItemType !== WORK_ITEM_TYPE_VALUE_EPIC;
     },
-    allowedChildrenByType() {
-      return this.workItemTypes.reduce((acc, type) => {
-        const definition = type.widgetDefinitions?.find(
-          (widgetDefinition) => widgetDefinition.type === WIDGET_TYPE_HIERARCHY,
-        );
-        if (definition?.allowedChildTypes?.nodes?.length > 0) {
-          acc[type.name] = definition.allowedChildTypes.nodes.map((a) => a.name);
-        }
-        return acc;
-      }, {});
-    },
-    hasAllChildItemsHidden() {
-      const filterClosed = getItems(this.showClosed);
-      return filterClosed(this.children).length === 0;
-    },
   },
   mounted() {
-    this.showLabels = getToggleFromLocalStorage(this.showLabelsLocalStorageKey);
-    this.showClosed = getToggleFromLocalStorage(this.showClosedLocalStorageKey);
+    this.showLabels = getShowLabelsFromLocalStorage(
+      this.showLabelsLocalStorageKey,
+      this.defaultShowLabels,
+    );
   },
   methods: {
     genericActionItems(workItem) {
@@ -302,11 +244,7 @@ export default {
     },
     toggleShowLabels() {
       this.showLabels = !this.showLabels;
-      saveToggleToLocalStorage(this.showLabelsLocalStorageKey, this.showLabels);
-    },
-    toggleShowClosed() {
-      this.showClosed = !this.showClosed;
-      saveToggleToLocalStorage(this.showClosedLocalStorageKey, this.showClosed);
+      saveShowLabelsToLocalStorage(this.showLabelsLocalStorageKey, this.showLabels);
     },
     async fetchNextPage() {
       if (this.hasNextPage && !this.fetchNextPageInProgress) {
@@ -329,9 +267,6 @@ export default {
       }
     },
   },
-  i18n: {
-    noChildItemsOpen: s__('WorkItem|No child items are currently open.'),
-  },
 };
 </script>
 
@@ -342,32 +277,15 @@ export default {
     :anchor-id="widgetName"
     :is-loading="isLoadingChildren && !fetchNextPageInProgress"
     is-collapsible
-    persist-collapsed-state
     data-testid="work-item-tree"
   >
     <template #count>
-      <work-item-rolled-up-count
+      <work-item-rolled-up-data
         v-if="!isLoadingChildren"
-        class="gl-ml-2 sm:gl-ml-0"
+        :work-item-id="workItemId"
+        :work-item-iid="workItemIid"
+        :work-item-type="workItemType"
         :rolled-up-counts-by-type="rolledUpCountsByType"
-      />
-      <work-item-rolled-up-data
-        v-if="!isLoadingChildren"
-        class="gl-hidden sm:gl-flex"
-        :work-item-id="workItemId"
-        :work-item-iid="workItemIid"
-        :work-item-type="workItemType"
-        :full-path="fullPath"
-      />
-    </template>
-
-    <template #description>
-      <work-item-rolled-up-data
-        v-if="!isLoadingChildren"
-        class="gl-mt-2 sm:gl-hidden"
-        :work-item-id="workItemId"
-        :work-item-iid="workItemIid"
-        :work-item-type="workItemType"
         :full-path="fullPath"
       />
     </template>
@@ -379,10 +297,8 @@ export default {
         :full-path="fullPath"
         :work-item-type="workItemType"
         :show-labels="showLabels"
-        :show-closed="showClosed"
         show-view-roadmap-action
         @toggle-show-labels="toggleShowLabels"
-        @toggle-show-closed="toggleShowClosed"
       />
     </template>
 
@@ -415,7 +331,7 @@ export default {
       <gl-alert v-if="error" variant="danger" @dismiss="error = undefined">
         {{ error }}
       </gl-alert>
-      <div v-if="!hasAllChildItemsHidden" class="!gl-px-3 gl-pb-3 gl-pt-2">
+      <div class="!gl-px-3 gl-pb-3 gl-pt-2">
         <work-item-children-wrapper
           :children="children"
           :parent="workItem"
@@ -425,14 +341,10 @@ export default {
           :work-item-iid="workItemIid"
           :work-item-type="workItemType"
           :show-labels="showLabels"
-          :show-closed="showClosed"
           :disable-content="disableContent"
+          :allowed-child-types="allowedChildTypes"
           :show-task-weight="showTaskWeight"
           :has-indirect-children="hasIndirectChildren"
-          :allowed-children-by-type="allowedChildrenByType"
-          :dragged-item-type="draggedItemType"
-          @drag="draggedItemType = $event"
-          @drop="draggedItemType = null"
           @error="error = $event"
           @show-modal="showModal"
         />
@@ -444,14 +356,6 @@ export default {
           :fetch-next-page-in-progress="fetchNextPageInProgress"
           @fetch-next-page="fetchNextPage"
         />
-      </div>
-
-      <div
-        v-if="hasAllChildItemsHidden"
-        class="gl-text-subtle"
-        data-testid="work-item-no-child-items-open"
-      >
-        {{ $options.i18n.noChildItemsOpen }}
       </div>
     </template>
   </crud-component>

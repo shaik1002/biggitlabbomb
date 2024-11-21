@@ -66,10 +66,7 @@ RSpec.describe 'Merge Requests > User filters by deployments', :js, feature_cate
 
   describe 'filtering by deployed-before' do
     it 'applies the filter' do
-      select_tokens 'Deployed-before'
-      find_by_testid('filtered-search-token-segment-input').send_keys '2020-10-02'
-
-      send_keys :enter
+      input_filtered_search('deployed-before:=2020-10-02')
 
       expect(page).to have_issuable_counts(open: 0, merged: 1, all: 1)
       expect(page).to have_content mr1.title
@@ -78,10 +75,7 @@ RSpec.describe 'Merge Requests > User filters by deployments', :js, feature_cate
 
   describe 'filtering by deployed-after' do
     it 'applies the filter' do
-      select_tokens 'Deployed-after'
-      find_by_testid('filtered-search-token-segment-input').send_keys '2020-10-01'
-
-      send_keys :enter
+      input_filtered_search('deployed-after:=2020-10-01')
 
       expect(page).to have_issuable_counts(open: 0, merged: 1, all: 1)
       expect(page).to have_content mr2.title
@@ -90,7 +84,7 @@ RSpec.describe 'Merge Requests > User filters by deployments', :js, feature_cate
 
   describe 'filtering by environment' do
     it 'applies the filter' do
-      select_tokens 'Environment', 'gstg', submit: true
+      input_filtered_search('environment:=gstg')
 
       expect(page).to have_issuable_counts(open: 0, merged: 1, all: 1)
       expect(page).to have_content mr1.title

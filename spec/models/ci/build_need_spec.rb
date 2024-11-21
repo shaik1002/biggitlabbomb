@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Ci::BuildNeed, :model, feature_category: :continuous_integration do
+RSpec.describe Ci::BuildNeed, model: true, feature_category: :continuous_integration do
   let(:build_need) { build(:ci_build_need) }
 
   it { is_expected.to belong_to(:build).class_name('Ci::Processable') }
@@ -82,10 +82,10 @@ RSpec.describe Ci::BuildNeed, :model, feature_category: :continuous_integration 
       let(:ci_build) { build(:ci_build, pipeline: new_pipeline) }
 
       before do
-        stub_current_partition_id(ci_testing_partition_id)
+        stub_current_partition_id(ci_testing_partition_id_for_check_constraints)
       end
 
-      it 'creates build needs successfully', :aggregate_failures do
+      it 'creates build needs successfully', :aggregate_failures, :ci_partitionable do
         ci_build.needs_attributes = [
           { name: "build", artifacts: true },
           { name: "build2", artifacts: true },
@@ -99,8 +99,8 @@ RSpec.describe Ci::BuildNeed, :model, feature_category: :continuous_integration 
         end
 
         expect(described_class.count).to eq(3)
-        expect(described_class.first.partition_id).to eq(ci_testing_partition_id)
-        expect(described_class.second.partition_id).to eq(ci_testing_partition_id)
+        expect(described_class.first.partition_id).to eq(ci_testing_partition_id_for_check_constraints)
+        expect(described_class.second.partition_id).to eq(ci_testing_partition_id_for_check_constraints)
       end
     end
   end

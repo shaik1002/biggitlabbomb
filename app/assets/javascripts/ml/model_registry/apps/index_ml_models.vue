@@ -1,37 +1,31 @@
 <script>
-import {
-  GlIcon,
-  GlDisclosureDropdown,
-  GlDisclosureDropdownItem,
-  GlDisclosureDropdownGroup,
-  GlModalDirective,
-} from '@gitlab/ui';
+import { GlExperimentBadge } from '@gitlab/ui';
+import MetadataItem from '~/vue_shared/components/registry/metadata_item.vue';
 import TitleArea from '~/vue_shared/components/registry/title_area.vue';
 import { helpPagePath } from '~/helpers/help_page_helper';
 import * as Sentry from '~/sentry/sentry_browser_wrapper';
 import { s__ } from '~/locale';
 import EmptyState from '../components/model_list_empty_state.vue';
 import * as i18n from '../translations';
-import { BASE_SORT_FIELDS, MLFLOW_USAGE_MODAL_ID } from '../constants';
+import { BASE_SORT_FIELDS, MODEL_CREATION_MODAL_ID } from '../constants';
+import ModelRow from '../components/model_row.vue';
+import ModelCreate from '../components/model_create.vue';
+import ActionsDropdown from '../components/actions_dropdown.vue';
 import getModelsQuery from '../graphql/queries/get_models.query.graphql';
 import { makeLoadModelErrorMessage } from '../translations';
-import SearchableTable from '../components/searchable_table.vue';
-import MlflowUsageModal from '../components/mlflow_usage_modal.vue';
+import SearchableList from '../components/searchable_list.vue';
 
 export default {
   name: 'IndexMlModels',
   components: {
-    GlIcon,
+    ModelRow,
+    ModelCreate,
+    MetadataItem,
     TitleArea,
+    GlExperimentBadge,
     EmptyState,
-    SearchableTable,
-    GlDisclosureDropdownGroup,
-    GlDisclosureDropdownItem,
-    GlDisclosureDropdown,
-    MlflowUsageModal,
-  },
-  directives: {
-    GlModal: GlModalDirective,
+    ActionsDropdown,
+    SearchableList,
   },
   provide() {
     return {
@@ -58,10 +52,6 @@ export default {
     },
     maxAllowedFileSize: {
       type: Number,
-      required: true,
-    },
-    createModelPath: {
-      type: String,
       required: true,
     },
     markdownPreviewPath: {
@@ -107,17 +97,6 @@ export default {
     isLoading() {
       return this.$apollo.queries.models.loading;
     },
-    createModelItem() {
-      return {
-        text: this.$options.i18n.create_new_model,
-        href: this.createModelPath,
-      };
-    },
-    mlflowUsageModalItem() {
-      return {
-        text: this.$options.i18n.import_mlflow,
-      };
-    },
   },
   methods: {
     fetchPage(variables) {
@@ -139,12 +118,7 @@ export default {
       Sentry.captureException(error);
     },
   },
-  i18n: {
-    create_import_title: s__('MlModelRegistry|Create/Import'),
-    create_new_model: s__('MlModelRegistry|Create new model'),
-    import_mlflow: s__('MlModelRegistry|Import model using MLflow'),
-    ...i18n,
-  },
+  i18n,
   sortableFields: BASE_SORT_FIELDS,
   docHref: helpPagePath('user/project/ml/model_registry/index.md'),
   emptyState: {
@@ -153,8 +127,8 @@ export default {
       'MlModelRegistry|Create your machine learning using GitLab directly or using the MLflow client',
     ),
     primaryText: s__('MlModelRegistry|Create model'),
+    modalId: MODEL_CREATION_MODAL_ID,
   },
-  modalId: MLFLOW_USAGE_MODAL_ID,
 };
 </script>
 
@@ -164,43 +138,25 @@ export default {
       <template #title>
         <div class="gl-flex gl-grow gl-items-center">
           <span>{{ $options.i18n.TITLE_LABEL }}</span>
+          <gl-experiment-badge :help-page-url="$options.docHref" type="beta" />
         </div>
       </template>
       <template #metadata-models-count>
-        <div class="detail-page-header-body gl-flex-wrap gl-gap-x-2" data-testid="metadata-item">
-          <gl-icon name="machine-learning" />
-          {{ $options.i18n.modelsCountLabel(count) }}
-        </div>
+        <metadata-item icon="machine-learning" :text="$options.i18n.modelsCountLabel(count)" />
       </template>
       <template #right-actions>
-        <gl-disclosure-dropdown
-          v-if="canWriteModelRegistry"
-          :toggle-text="$options.i18n.create_import_title"
-          toggle-class="gl-w-full"
-          data-testid="create-model-button"
-          variant="confirm"
-          category="primary"
-          placement="bottom-end"
-        >
-          <gl-disclosure-dropdown-item data-testid="create-model-button" :item="createModelItem" />
-          <gl-disclosure-dropdown-group bordered>
-            <gl-disclosure-dropdown-item
-              v-gl-modal="$options.modalId"
-              :item="mlflowUsageModalItem"
-            />
-          </gl-disclosure-dropdown-group>
-          <mlflow-usage-modal />
-        </gl-disclosure-dropdown>
+        <model-create v-if="canWriteModelRegistry" />
+
+        <actions-dropdown />
       </template>
     </title-area>
-    <searchable-table
+    <searchable-list
       show-search
       :page-info="pageInfo"
-      :models="items"
+      :items="items"
       :error-message="errorMessage"
       :is-loading="isLoading"
       :sortable-fields="$options.sortableFields"
-      can-write-model-registry
       @fetch-page="fetchPage"
     >
       <template #empty-state>
@@ -208,9 +164,13 @@ export default {
           :title="$options.emptyState.title"
           :description="$options.emptyState.description"
           :primary-text="$options.emptyState.primaryText"
-          :primary-link="createModelPath"
+          :modal-id="$options.emptyState.modalId"
         />
       </template>
-    </searchable-table>
+
+      <template #item="{ item }">
+        <model-row :model="item" />
+      </template>
+    </searchable-list>
   </div>
 </template>

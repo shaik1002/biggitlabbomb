@@ -9,8 +9,6 @@ class OmniauthCallbacksController < Devise::OmniauthCallbacksController
   include AcceptsPendingInvitations
   include Onboarding::Redirectable
   include InternalRedirect
-  include SafeFormatHelper
-  include SynchronizeBroadcastMessageDismissals
 
   ACTIVE_SINCE_KEY = 'active_since'
 
@@ -156,8 +154,6 @@ class OmniauthCallbacksController < Devise::OmniauthCallbacksController
 
       current_auth_user = build_auth_user(auth_module::User)
       set_remember_me(current_user, current_auth_user)
-      # We are also calling this here in the case that devise re-logins and current_user is set
-      synchronize_broadcast_message_dismissals(current_user)
 
       store_idp_two_factor_status(current_auth_user.bypass_two_factor?)
 
@@ -200,16 +196,11 @@ class OmniauthCallbacksController < Devise::OmniauthCallbacksController
 
   def build_auth_user(auth_user_class)
     strong_memoize_with(:build_auth_user, auth_user_class) do
-      auth_user_class.new(oauth, build_auth_user_params)
+      auth_user_class.new(oauth, { organization_id: Current.organization_id })
     end
   end
 
-  # Overridden in EE
-  def build_auth_user_params
-    { organization_id: Current.organization_id }
-  end
-
-  # Overridden in EE
+  # Overrided in EE
   def set_session_active_since(id); end
 
   def sign_in_user_flow(auth_user_class)
@@ -241,7 +232,6 @@ class OmniauthCallbacksController < Devise::OmniauthCallbacksController
         store_idp_two_factor_status(true)
 
         accept_pending_invitations(user: @user) if new_user
-        synchronize_broadcast_message_dismissals(@user) unless new_user
         persist_accepted_terms_if_required(@user) if new_user
 
         perform_registration_tasks(@user, oauth['provider']) if new_user
@@ -259,20 +249,15 @@ class OmniauthCallbacksController < Devise::OmniauthCallbacksController
   end
 
   def handle_signup_error
-    redirect_path = new_user_session_path
     label = Gitlab::Auth::OAuth::Provider.label_for(oauth['provider'])
-    simple_url = Settings.gitlab.url.sub(%r{^https?://(www\.)?}i, '')
-    message = [_("Signing in using your %{label} account without a pre-existing account in %{simple_url} is not allowed.") % { label: label, simple_url: simple_url }]
+    message = [_("Signing in using your %{label} account without a pre-existing GitLab account is not allowed.") % { label: label }]
 
     if Gitlab::CurrentSettings.allow_signup?
-      redirect_path = new_user_registration_path
-      doc_pair = tag_pair(view_context.link_to('', help_page_path('user/profile/index.md', anchor: 'sign-in-services')), :doc_start, :doc_end)
-      message << safe_format(_("Create an account in %{simple_url} first, and then %{doc_start}connect it to your %{label} account%{doc_end}."), doc_pair, label: label, simple_url: simple_url)
+      message << (_("Create a GitLab account first, and then connect it to your %{label} account.") % { label: label })
     end
 
-    flash[:alert] = message.join(' ').html_safe # rubocop:disable Rails/OutputSafety -- Generated message is safe
-
-    redirect_to redirect_path
+    flash[:alert] = message.join(' ')
+    redirect_to new_user_session_path
   end
 
   def oauth
@@ -385,11 +370,10 @@ class OmniauthCallbacksController < Devise::OmniauthCallbacksController
     store_location_for(:user, after_sign_up_path)
   end
 
-  def onboarding_status_presenter
-    Onboarding::StatusPresenter
-      .new(request.env.fetch('omniauth.params', {}).deep_symbolize_keys, session['user_return_to'], @user)
+  def onboarding_status
+    Onboarding::Status.new(request.env.fetch('omniauth.params', {}).deep_symbolize_keys, session, @user)
   end
-  strong_memoize_attr :onboarding_status_presenter
+  strong_memoize_attr :onboarding_status
 
   # overridden in EE
   def sign_in_and_redirect_or_verify_identity(user, _, _)

@@ -85,7 +85,6 @@ export default {
           ...data.project.mergeRequest,
           mergeRequestsFfOnlyEnabled: data.project.mergeRequestsFfOnlyEnabled,
           onlyAllowMergeIfPipelineSucceeds: data.project.onlyAllowMergeIfPipelineSucceeds,
-          mergeTrainsCount: data.project?.mergeTrains?.nodes[0]?.cars?.count,
         };
         this.loading = false;
 
@@ -291,9 +290,6 @@ export default {
     isNotClosed() {
       return this.mr.state !== STATUS_CLOSED;
     },
-    isMerged() {
-      return this.mr.state === STATUS_MERGED;
-    },
     isNeitherClosedNorMerged() {
       return this.mr.state !== STATUS_CLOSED && this.mr.state !== STATUS_MERGED;
     },
@@ -328,12 +324,15 @@ export default {
         this.mr.state === 'readyToMerge'
       );
     },
-    sourceBranchPreMergeText() {
-      return this.removeSourceBranch
-        ? __('Source branch will be deleted.')
-        : __('Source branch will not be deleted.');
-    },
-    sourceBranchMergedText() {
+    sourceBranchDeletedText() {
+      const isPreMerge = this.mr.state !== STATUS_MERGED;
+
+      if (isPreMerge) {
+        return this.mr.shouldRemoveSourceBranch
+          ? __('Source branch will be deleted.')
+          : __('Source branch will not be deleted.');
+      }
+
       return this.mr.sourceBranchRemoved
         ? __('Deleted the source branch.')
         : __('Did not delete the source branch.');
@@ -535,10 +534,6 @@ export default {
       this.commitMessage = `${this.commitMessage}\n\n${val}`;
       this.commitMessageIsTouched = true;
     },
-    updateRemoveSourceBranchSettings(checked) {
-      this.removeSourceBranch = checked;
-      this.mr.setRemoveSourceBranch(checked);
-    },
   },
   i18n: {
     mergeCommitTemplateHintText: s__(
@@ -560,9 +555,9 @@ export default {
 
 <template>
   <div
-    :class="{ 'gl-bg-subtle': isNeitherClosedNorMerged }"
+    :class="{ 'gl-bg-gray-10': isNeitherClosedNorMerged }"
     data-testid="ready_to_merge_state"
-    class="gl-border-t gl-border-t-section gl-bg-subtle gl-pl-7"
+    class="gl-border-t-1 gl-border-gray-100 gl-pl-7 gl-border-t-solid"
   >
     <div v-if="loading" class="mr-widget-body">
       <div class="mr-ready-to-merge-loader gl-w-full">
@@ -587,11 +582,10 @@ export default {
                 <gl-form-checkbox
                   v-if="canRemoveSourceBranch"
                   id="remove-source-branch-input"
+                  v-model="removeSourceBranch"
                   :disabled="isRemoveSourceBranchButtonDisabled"
-                  :checked="removeSourceBranch"
                   class="js-remove-source-branch-checkbox gl-mr-5 gl-flex gl-items-center"
                   data-testid="delete-source-branch-checkbox"
-                  @change="updateRemoveSourceBranchSettings"
                 >
                   {{ __('Delete source branch') }}
                 </gl-form-checkbox>
@@ -617,10 +611,11 @@ export default {
                 <ul class="border-top commits-list flex-list gl-list-none gl-p-0 gl-pt-4">
                   <commit-edit
                     v-if="shouldShowSquashEdit"
+                    v-model="squashCommitMessage"
                     :label="__('Squash commit message')"
-                    :value="squashCommitMessage"
                     input-id="squash-message-edit"
                     class="!gl-m-0 !gl-p-0"
+                    data-testid="squash-commit-message"
                     @input="setSquashCommitMessage"
                   >
                     <template #header>
@@ -645,7 +640,7 @@ export default {
                     </template>
                   </commit-edit>
                   <li class="!gl-m-0 !gl-p-0">
-                    <p class="form-text gl-text-subtle">
+                    <p class="form-text text-muted">
                       <gl-sprintf :message="commitTemplateHintText">
                         <template #link="{ content }">
                           <gl-link
@@ -660,7 +655,7 @@ export default {
                   </li>
                 </ul>
               </div>
-              <div class="mr-widget-merge-details gl-mb-3 gl-w-full gl-text-subtle">
+              <div class="mr-widget-merge-details gl-mb-3 gl-w-full gl-text-gray-500">
                 <template v-if="sourceHasDivergedFromTarget">
                   <gl-sprintf :message="$options.i18n.sourceDivergedFromTargetText">
                     <template #link>
@@ -750,7 +745,10 @@ export default {
                 </gl-disclosure-dropdown>
               </gl-button-group>
               <template v-if="showAutoMergeHelperText">
-                <div class="gl-ml-4 gl-text-sm gl-text-subtle" data-testid="auto-merge-helper-text">
+                <div
+                  class="gl-ml-4 gl-text-sm gl-text-gray-500"
+                  data-testid="auto-merge-helper-text"
+                >
                   {{ autoMergeHelperText }}
                 </div>
                 <help-popover
@@ -780,7 +778,7 @@ export default {
               <p v-if="showMergeDetailsHeader" class="gl-mb-2 gl-text-gray-900">
                 {{ __('Merge details') }}
               </p>
-              <ul class="gl-mb-0 gl-ml-3 gl-pl-4 gl-text-subtle">
+              <ul class="gl-mb-0 gl-ml-3 gl-pl-4 gl-text-gray-600">
                 <li v-if="sourceHasDivergedFromTarget" class="gl-leading-normal">
                   <gl-sprintf :message="$options.i18n.sourceDivergedFromTargetText">
                     <template #link>
@@ -806,7 +804,7 @@ export default {
                   class="gl-leading-normal"
                   data-testid="source-branch-deleted-text"
                 >
-                  {{ isMerged ? sourceBranchMergedText : sourceBranchPreMergeText }}
+                  {{ sourceBranchDeletedText }}
                 </li>
                 <li v-if="mr.relatedLinks" class="gl-leading-normal">
                   <related-links

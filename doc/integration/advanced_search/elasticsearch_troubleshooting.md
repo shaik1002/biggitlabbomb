@@ -1,5 +1,5 @@
 ---
-stage: Foundations
+stage: Data Stores
 group: Global Search
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
@@ -185,50 +185,6 @@ encounter the following error:
 To fix this, you need
 to [map the roles to users](https://docs.aws.amazon.com/opensearch-service/latest/developerguide/fgac.html#fgac-mapping)
 in the AWS OpenSearch Dashboards.
-
-### Create additional master users in AWS OpenSearch Service
-
-You can set a master user when you create a domain.
-With this user, you can create additional master users.
-For more information, see the
-[AWS documentation](https://docs.aws.amazon.com/opensearch-service/latest/developerguide/fgac.html#fgac-more-masters).
-
-To create users and roles with permissions and map users to roles,
-see the [OpenSearch documentation](https://opensearch.org/docs/latest/security/access-control/users-roles/).
-You must include the following permissions in the role:
-
-```json
-{
-  "cluster_permissions": [
-    "cluster_composite_ops",
-    "cluster_monitor"
-  ],
-  "index_permissions": [
-    {
-      "index_patterns": [
-        "gitlab*"
-      ],
-      "allowed_actions": [
-        "data_access",
-        "manage_aliases",
-        "search",
-        "create_index",
-        "delete",
-        "manage"
-      ]
-    },
-    {
-      "index_patterns": [
-        "*"
-      ],
-      "allowed_actions": [
-        "indices:admin/aliases/get",
-        "indices:monitor/stats"
-      ]
-    }
-  ]
-}
-```
 
 ## Troubleshooting indexing
 
@@ -505,7 +461,7 @@ Ensure you've read about [Elasticsearch Migrations](../advanced_search/elasticse
 
 If there is a halted migration and your [`elasticsearch.log`](../../administration/logs/index.md#elasticsearchlog) file contain errors, this could potentially be a bug/issue. Escalate to GitLab support if retrying migrations does not succeed.
 
-## Error: `Can't specify parent if no parent field has been configured`
+## `Can't specify parent if no parent field has been configured` error
 
 If you enabled Elasticsearch before GitLab 8.12 and have not rebuilt indices, you get
 exceptions in lots of different cases:
@@ -527,12 +483,12 @@ Elasticsearch::Transport::Transport::Errors::BadRequest([400] {
 This is because we changed the index mapping in GitLab 8.12 and the old indices should be removed and built from scratch again,
 see details in the [update guide](../../update/upgrading_from_source.md).
 
-## Error: `Elasticsearch::Transport::Transport::Errors::BadRequest`
+## `Elasticsearch::Transport::Transport::Errors::BadRequest`
 
 If you have this exception (just like in the case above but the actual message is different), check that you have the correct Elasticsearch version and you met the other [requirements](elasticsearch.md#system-requirements).
 There is also an easy way to check it automatically with `sudo gitlab-rake gitlab:check` command.
 
-## Error: `Elasticsearch::Transport::Transport::Errors::RequestEntityTooLarge`
+## `Elasticsearch::Transport::Transport::Errors::RequestEntityTooLarge`
 
 ```plaintext
 [413] {"Message":"Request size exceeded 10485760 bytes"}
@@ -542,11 +498,9 @@ This exception is seen when your Elasticsearch cluster is configured to reject r
 
 AWS has [network limits](https://docs.aws.amazon.com/opensearch-service/latest/developerguide/limits.html#network-limits) on the maximum size of HTTP request payloads based on the size of the underlying instance. Set the maximum bulk request size to a value lower than 10 MiB.
 
-## Error: `Faraday::TimeoutError (execution expired)`
+## `Faraday::TimeoutError (execution expired)` error when using a proxy
 
-When you use a proxy, set a custom `gitlab_rails['env']` environment variable
-named [`no_proxy`](https://docs.gitlab.com/omnibus/settings/environment-variables.html)
-with the IP address of your Elasticsearch host.
+Set a custom `gitlab_rails['env']` environment variable, called [`no_proxy`](https://docs.gitlab.com/omnibus/settings/environment-variables.html) with the IP address of your Elasticsearch host.
 
 ## My single node Elasticsearch cluster status never goes from `yellow` to `green`
 
@@ -566,7 +520,7 @@ curl --request PUT localhost:9200/gitlab-production/_settings --header 'Content-
      }'
 ```
 
-## Error: `health check timeout: no Elasticsearch node available`
+## `health check timeout: no Elasticsearch node available` error in Sidekiq
 
 If you're getting a `health check timeout: no Elasticsearch node available` error in Sidekiq during the indexing process:
 
@@ -639,7 +593,7 @@ $ jq '.class' sidekiq/current | sort | uniq -c | sort -nr
 In this case, `free -m` on the overloaded GitLab node would also show
 unexpectedly high `buff/cache` usage.
 
-## Error: `Couldn't load task status`
+## `Couldn't load task status` error when reindexing
 
 When you reindex, you might get a `Couldn't load task status` error. A `sliceId must be greater than 0 but was [-1]` error might also appear on the Elasticsearch host. As a workaround, consider [reindexing from scratch](../../integration/advanced_search/elasticsearch_troubleshooting.md#last-resort-to-recreate-an-index) or upgrading to GitLab 16.3.
 

@@ -40,6 +40,9 @@ export default {
     onDeletePod(pod) {
       this.$emit('delete-pod', pod);
     },
+    onFluxReconcile() {
+      this.$emit('flux-reconcile');
+    },
     toggle(item) {
       if (!isEqual(item, this.selectedItem)) {
         this.open(item);
@@ -87,9 +90,7 @@ export default {
         :item="selectedItem"
         :configuration="configuration"
         @delete-pod="onDeletePod"
-        @flux-reconcile="$emit('flux-reconcile')"
-        @flux-suspend="$emit('flux-suspend')"
-        @flux-resume="$emit('flux-resume')"
+        @flux-reconcile="onFluxReconcile"
       />
     </template>
   </gl-drawer>

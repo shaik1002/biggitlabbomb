@@ -1,20 +1,17 @@
 import { produce } from 'immer';
 import VueApollo from 'vue-apollo';
-import { isEmpty, map, pick, isEqual } from 'lodash';
 import { apolloProvider } from '~/graphql_shared/issuable_client';
 import { issuesListClient } from '~/issues/list';
 import { TYPENAME_USER } from '~/graphql_shared/constants';
 import { convertToGraphQLId } from '~/graphql_shared/utils';
 import { getBaseURL } from '~/lib/utils/url_utility';
 import { convertEachWordToTitleCase } from '~/lib/utils/text_utility';
-import { getDraft, clearDraft } from '~/lib/utils/autosave';
 import {
   findHierarchyWidgets,
   findHierarchyWidgetChildren,
   isNotesWidget,
   newWorkItemFullPath,
   newWorkItemId,
-  getNewWorkItemAutoSaveKey,
 } from '../utils';
 import {
   WIDGET_TYPE_ASSIGNEES,
@@ -22,6 +19,7 @@ import {
   WIDGET_TYPE_HIERARCHY,
   WIDGET_TYPE_PARTICIPANTS,
   WIDGET_TYPE_PROGRESS,
+  WIDGET_TYPE_ROLLEDUP_DATES,
   WIDGET_TYPE_START_AND_DUE_DATE,
   WIDGET_TYPE_TIME_TRACKING,
   WIDGET_TYPE_LABELS,
@@ -32,9 +30,6 @@ import {
   WIDGET_TYPE_DESCRIPTION,
   WIDGET_TYPE_CRM_CONTACTS,
   NEW_WORK_ITEM_IID,
-  WIDGET_TYPE_CURRENT_USER_TODOS,
-  WIDGET_TYPE_LINKED_ITEMS,
-  STATE_CLOSED,
 } from '../constants';
 import workItemByIidQuery from './work_item_by_iid.query.graphql';
 import getWorkItemTreeQuery from './work_item_tree.query.graphql';
@@ -192,7 +187,7 @@ export const addHierarchyChild = ({ cache, id, workItem, atIndex = null }) => {
   });
 };
 
-export const addHierarchyChildren = ({ cache, id, workItem, childrenIds }) => {
+export const addHierarchyChildren = ({ cache, id, workItem, newItemsToAddCount }) => {
   const queryArgs = {
     query: getWorkItemTreeQuery,
     variables: {
@@ -212,14 +207,10 @@ export const addHierarchyChildren = ({ cache, id, workItem, childrenIds }) => {
 
       const existingChildren = findHierarchyWidgetChildren(draftState?.workItem);
 
-      const childrenToAdd = newChildren.filter((item) => {
-        return childrenIds.includes(item.id);
-      });
+      const childrenToAdd = newChildren.slice(0, newItemsToAddCount);
 
       for (const item of childrenToAdd) {
-        if (item.state === STATE_CLOSED) {
-          existingChildren.push(item);
-        } else {
+        if (item) {
           existingChildren.unshift(item);
         }
       }
@@ -272,48 +263,23 @@ export const updateParent = ({ cache, fullPath, iid, workItem }) => {
   });
 };
 
-export const updateWorkItemCurrentTodosWidget = ({ cache, fullPath, iid, todos }) => {
-  const query = {
-    query: workItemByIidQuery,
-    variables: { fullPath, iid },
-  };
-
-  const sourceData = cache.readQuery(query);
-
-  if (!sourceData) {
-    return;
-  }
-
-  const newData = produce(sourceData, (draftState) => {
-    const { widgets } = draftState.workspace.workItem;
-    const widgetCurrentUserTodos = widgets.find(
-      (widget) => widget.type === WIDGET_TYPE_CURRENT_USER_TODOS,
-    );
-
-    widgetCurrentUserTodos.currentUserTodos.nodes = todos;
-  });
-
-  cache.writeQuery({ ...query, data: newData });
-};
-
 export const setNewWorkItemCache = async (
   fullPath,
   widgetDefinitions,
   workItemType,
   workItemTypeId,
-  workItemTypeIconName,
   // eslint-disable-next-line max-params
 ) => {
   const workItemAttributesWrapperOrder = [
     WIDGET_TYPE_ASSIGNEES,
     WIDGET_TYPE_LABELS,
     WIDGET_TYPE_WEIGHT,
+    WIDGET_TYPE_ROLLEDUP_DATES,
     WIDGET_TYPE_MILESTONE,
     WIDGET_TYPE_ITERATION,
     WIDGET_TYPE_START_AND_DUE_DATE,
     WIDGET_TYPE_PROGRESS,
     WIDGET_TYPE_HEALTH_STATUS,
-    WIDGET_TYPE_LINKED_ITEMS,
     WIDGET_TYPE_COLOR,
     WIDGET_TYPE_HIERARCHY,
     WIDGET_TYPE_TIME_TRACKING,
@@ -326,7 +292,7 @@ export const setNewWorkItemCache = async (
   }
 
   const workItemTitleCase = convertEachWordToTitleCase(workItemType.split('_').join(' '));
-  const availableWidgets = widgetDefinitions?.flatMap((i) => i.type) || [];
+  const availableWidgets = widgetDefinitions?.flatMap((i) => i.type);
   const currentUserId = convertToGraphQLId(TYPENAME_USER, gon?.current_user_id);
   const baseURL = getBaseURL();
 
@@ -340,6 +306,25 @@ export const setNewWorkItemCache = async (
     lastEditedBy: null,
     taskCompletionStatus: null,
     __typename: 'WorkItemWidgetDescription',
+  });
+
+  widgets.push({
+    type: WIDGET_TYPE_PARTICIPANTS,
+    participants: {
+      nodes: [
+        {
+          id: currentUserId,
+          avatarUrl: gon?.current_user_avatar_url,
+          username: gon?.current_username,
+          name: gon?.current_user_fullname,
+          webUrl: `${baseURL}/${gon?.current_username}`,
+          webPath: `/${gon?.current_username}`,
+          __typename: 'UserCore',
+        },
+      ],
+      __typename: 'UserCoreConnection',
+    },
+    __typename: 'WorkItemWidgetParticipants',
   });
 
   workItemAttributesWrapperOrder.forEach((widgetName) => {
@@ -357,16 +342,6 @@ export const setNewWorkItemCache = async (
             __typename: 'UserCoreConnection',
           },
           __typename: 'WorkItemWidgetAssignees',
-        });
-      }
-
-      if (widgetName === WIDGET_TYPE_LINKED_ITEMS) {
-        widgets.push({
-          type: WIDGET_TYPE_LINKED_ITEMS,
-          linkedItems: {
-            nodes: [],
-          },
-          __typename: 'WorkItemWidgetLinkedItems',
         });
       }
 
@@ -414,6 +389,19 @@ export const setNewWorkItemCache = async (
         });
       }
 
+      if (widgetName === WIDGET_TYPE_ROLLEDUP_DATES) {
+        widgets.push({
+          type: 'ROLLEDUP_DATES',
+          dueDate: null,
+          dueDateFixed: null,
+          dueDateIsFixed: null,
+          startDate: null,
+          startDateFixed: null,
+          startDateIsFixed: null,
+          __typename: 'WorkItemWidgetRolledupDates',
+        });
+      }
+
       if (widgetName === WIDGET_TYPE_MILESTONE) {
         widgets.push({
           type: 'MILESTONE',
@@ -435,8 +423,6 @@ export const setNewWorkItemCache = async (
           type: 'START_AND_DUE_DATE',
           dueDate: null,
           startDate: null,
-          isFixed: false,
-          rollUp: false,
           __typename: 'WorkItemWidgetStartAndDueDate',
         });
       }
@@ -474,7 +460,6 @@ export const setNewWorkItemCache = async (
           hasChildren: false,
           hasParent: false,
           parent: null,
-          depthLimitReachedByType: [],
           rolledUpCountsByType: [],
           children: {
             nodes: [],
@@ -509,95 +494,65 @@ export const setNewWorkItemCache = async (
 
   const newWorkItemPath = newWorkItemFullPath(fullPath, workItemType);
 
-  const autosaveKey = getNewWorkItemAutoSaveKey(fullPath, workItemType);
-
-  const getStorageDraftString = getDraft(autosaveKey);
-
-  const draftData = JSON.parse(getDraft(autosaveKey));
-
-  // get the widgets stored in draft data
-  const draftDataWidgets = map(draftData?.workspace?.workItem?.widgets, pick('type')) || [];
-
-  // this is to fix errors when we are introducing a new widget and the cache always updates from the old widgets
-  // Like if we we introduce a new widget , the user might always see the cached data until hits cancel
-  const draftWidgetsAreSameAsCacheDigits = isEqual(
-    draftDataWidgets.sort(),
-    availableWidgets.sort(),
-  );
-
-  const isValidDraftData =
-    draftData?.workspace?.workItem &&
-    getStorageDraftString &&
-    draftData?.workspace?.workItem &&
-    isEmpty(draftWidgetsAreSameAsCacheDigits);
-
-  /** check in case of someone plays with the localstorage, we need to be sure */
-  if (!isValidDraftData) {
-    clearDraft(autosaveKey);
-  }
-
   cacheProvider.clients.defaultClient.cache.writeQuery({
     query: workItemByIidQuery,
     variables: {
       fullPath: newWorkItemPath,
       iid: NEW_WORK_ITEM_IID,
     },
-    data: isValidDraftData
-      ? { ...draftData }
-      : {
-          workspace: {
+    data: {
+      workspace: {
+        id: newWorkItemPath,
+        workItem: {
+          id: newWorkItemId(workItemType),
+          iid: NEW_WORK_ITEM_IID,
+          archived: false,
+          title: '',
+          state: 'OPEN',
+          description: null,
+          confidential: false,
+          createdAt: null,
+          updatedAt: null,
+          closedAt: null,
+          webUrl: `${baseURL}/groups/gitlab-org/-/work_items/new`,
+          reference: '',
+          createNoteEmail: null,
+          namespace: {
             id: newWorkItemPath,
-            workItem: {
-              id: newWorkItemId(workItemType),
-              iid: NEW_WORK_ITEM_IID,
-              archived: false,
-              title: '',
-              state: 'OPEN',
-              description: null,
-              confidential: false,
-              createdAt: null,
-              updatedAt: null,
-              closedAt: null,
-              webUrl: `${baseURL}/groups/gitlab-org/-/work_items/new`,
-              reference: '',
-              createNoteEmail: null,
-              namespace: {
-                id: newWorkItemPath,
-                fullPath,
-                name: newWorkItemPath,
-                __typename: 'Namespace',
-              },
-              author: {
-                id: currentUserId,
-                avatarUrl: gon?.current_user_avatar_url,
-                username: gon?.current_username,
-                name: gon?.current_user_fullname,
-                webUrl: `${baseURL}/${gon?.current_username}`,
-                webPath: `/${gon?.current_username}`,
-                __typename: 'UserCore',
-              },
-              workItemType: {
-                id: workItemTypeId || 'mock-work-item-type-id',
-                name: workItemTitleCase,
-                iconName: workItemTypeIconName,
-                __typename: 'WorkItemType',
-              },
-              userPermissions: {
-                deleteWorkItem: true,
-                updateWorkItem: true,
-                adminParentLink: true,
-                setWorkItemMetadata: true,
-                createNote: true,
-                adminWorkItemLink: true,
-                markNoteAsInternal: true,
-                __typename: 'WorkItemPermissions',
-              },
-              widgets,
-              __typename: 'WorkItem',
-            },
-            __typename: 'Namespace',
+            fullPath,
+            name: newWorkItemPath,
+            __typename: 'Namespace', // eslint-disable-line @gitlab/require-i18n-strings
           },
+          author: {
+            id: currentUserId,
+            avatarUrl: gon?.current_user_avatar_url,
+            username: gon?.current_username,
+            name: gon?.current_user_fullname,
+            webUrl: `${baseURL}/${gon?.current_username}`,
+            webPath: `/${gon?.current_username}`,
+            __typename: 'UserCore',
+          },
+          workItemType: {
+            id: workItemTypeId || 'mock-work-item-type-id',
+            name: workItemTitleCase,
+            iconName: 'issue-type-epic',
+            __typename: 'WorkItemType',
+          },
+          userPermissions: {
+            deleteWorkItem: true,
+            updateWorkItem: true,
+            adminParentLink: true,
+            setWorkItemMetadata: true,
+            createNote: true,
+            adminWorkItemLink: true,
+            __typename: 'WorkItemPermissions',
+          },
+          widgets,
+          __typename: 'WorkItem',
         },
+        __typename: 'Namespace', // eslint-disable-line @gitlab/require-i18n-strings
+      },
+    },
   });
 };
 

@@ -137,6 +137,13 @@ export default {
     jobConfirmationMessage() {
       return this.job.status?.action?.confirmation_message;
     },
+    jobFailed() {
+      const { status } = this.job;
+
+      const failedGroups = ['failed', 'failed-with-warnings'];
+
+      return failedGroups.includes(status.group);
+    },
   },
   watch: {
     // Once the job log is loaded,
@@ -234,14 +241,16 @@ export default {
       <div class="build-page" data-testid="job-content">
         <!-- Header Section -->
         <header>
-          <job-header
-            :status="job.status"
-            :time="headerTime"
-            :user="job.user"
-            :should-render-triggered-label="shouldRenderTriggeredLabel"
-            :name="jobName"
-            @clickedSidebarButton="toggleSidebar"
-          />
+          <div class="build-header gl-flex">
+            <job-header
+              :status="job.status"
+              :time="headerTime"
+              :user="job.user"
+              :should-render-triggered-label="shouldRenderTriggeredLabel"
+              :name="jobName"
+              @clickedSidebarButton="toggleSidebar"
+            />
+          </div>
           <gl-alert
             v-if="shouldRenderHeaderCallout"
             variant="danger"
@@ -319,14 +328,8 @@ export default {
             @enterFullscreen="enterFullscreen"
             @exitFullscreen="exitFullscreen"
           />
-
           <log :search-results="searchResults" />
-
-          <root-cause-analysis-button
-            :job-id="job.id"
-            :job-status-group="job.status.group"
-            :can-troubleshoot-job="glAbilities.troubleshootJobWithAi"
-          />
+          <root-cause-analysis-button :job-failed="jobFailed" />
         </div>
         <!-- EO job log -->
 

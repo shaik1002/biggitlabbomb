@@ -47,41 +47,19 @@ supporting custom domains a secondary IP is not needed.
 
 ## Prerequisites
 
-This section describes the prerequisites for configuring GitLab Pages.
-
-### Wildcard domains
-
-Before configuring Pages for wildcard domains, you must:
+Before proceeding with the Pages configuration, you must:
 
 1. Have a domain for Pages that is not a subdomain of your GitLab instance domain.
 
-   | GitLab domain        | Pages domain        | Does it work? |
-   | -------------------- | ------------------- | ------------- |
-   | `example.com`        | `example.io`        | **{check-circle}** Yes |
-   | `example.com`        | `pages.example.com` | **{dotted-circle}** No |
+   | GitLab domain | Pages domain | Does it work? |
+   | :---: | :---: | :---: |
+   | `example.com` | `example.io` | **{check-circle}** Yes |
+   | `example.com` | `pages.example.com` | **{dotted-circle}** No |
    | `gitlab.example.com` | `pages.example.com` | **{check-circle}** Yes |
 
 1. Configure a **wildcard DNS record**.
 1. Optional. Have a **wildcard certificate** for that domain if you decide to
    serve Pages under HTTPS.
-1. Optional but recommended. Enable [instance runners](../../ci/runners/index.md)
-   so that your users don't have to bring their own.
-1. For custom domains, have a **secondary IP**.
-
-### Single-domain sites
-
-Before configuring Pages for single-domain sites, you must:
-
-1. Have a domain for Pages that is not a subdomain of your GitLab instance domain.
-
-   | GitLab domain        | Pages domain        | Supported |
-   | -------------------- | ------------------- | ------------- |
-   | `example.com`        | `example.io`        | **{check-circle}** Yes |
-   | `example.com`        | `pages.example.com` | **{dotted-circle}** No |
-   | `gitlab.example.com` | `pages.example.com` | **{check-circle}** Yes |
-
-1. Configure a **DNS record**.
-1. Optional. If you decide to serve Pages under HTTPS, have a **TLS certificate** for that domain.
 1. Optional but recommended. Enable [instance runners](../../ci/runners/index.md)
    so that your users don't have to bring their own.
 1. For custom domains, have a **secondary IP**.
@@ -99,8 +77,8 @@ Suffix List prevents browsers from accepting
 [supercookies](https://en.wikipedia.org/wiki/HTTP_cookie#Supercookie),
 among other things.
 
-To submit your GitLab Pages subdomain, follow [Submit amendments to the Public Suffix List](https://publicsuffix.org/submit/).
-For example, if your domain is `example.io`, you should
+Follow [these instructions](https://publicsuffix.org/submit/) to submit your
+GitLab Pages subdomain. For instance, if your domain is `example.io`, you should
 request that `example.io` is added to the Public Suffix List. GitLab.com
 added `gitlab.io` [in 2016](https://gitlab.com/gitlab-com/gl-infra/reliability/-/issues/230).
 
@@ -119,14 +97,19 @@ Where `example.io` is the domain GitLab Pages is served from,
 `192.0.2.1` is the IPv4 address of your GitLab instance, and `2001:db8::1` is the
 IPv6 address. If you don't have IPv6, you can omit the `AAAA` record.
 
-#### DNS configuration for single-domain sites
+#### For namespace in URL path, without wildcard DNS
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/17584) as an [experiment](../../policy/experiment-beta-support.md) in GitLab 16.7.
 > - [Moved](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/148621) to [beta](../../policy/experiment-beta-support.md) in GitLab 16.11.
 > - [Changed](https://gitlab.com/gitlab-org/gitlab-pages/-/issues/1111) implementation from NGINX to the GitLab Pages codebase in GitLab 17.2.
 > - [Generally available](https://gitlab.com/gitlab-org/gitlab/-/issues/483365) in GitLab 17.4.
 
-To configure GitLab Pages DNS for single-domain sites without wildcard DNS:
+Prerequisites:
+
+- Your instance must use the Linux package installation method.
+- Your installation must use the default `auth_redirect_uri`.
+
+If you need support for namespace in the URL path to remove the requirement for wildcard DNS:
 
 1. Enable the GitLab Pages flag for this feature by adding
    `gitlab_pages["namespace_in_path"] = true` to `/etc/gitlab/gitlab.rb`.
@@ -178,22 +161,22 @@ You should not use the GitLab domain to serve user pages. For more information s
 Depending on your needs, you can set up GitLab Pages in 4 different ways.
 
 The following examples are listed from the easiest setup to the most
-advanced one.
+advanced one. The absolute minimum requirement is to set up the wildcard DNS
+because that is needed in all configurations.
 
 ### Wildcard domains
-
-The following configuration is the minimum setup to use GitLab Pages.
-It is the foundation for all other setups described here.
-In this configuration:
-
-- NGINX proxies all requests to the GitLab Pages daemon.
-- The GitLab Pages daemon doesn't listen directly to the public internet.
 
 Prerequisites:
 
 - [Wildcard DNS setup](#dns-configuration)
 
-To configure GitLab Pages to use wildcard domains:
+---
+
+URL scheme: `http://<namespace>.example.io/<project_slug>`
+
+The following is the minimum setup that you can use Pages with. It is the base for all
+other setups as described below. NGINX proxies all requests to the daemon.
+The Pages daemon doesn't listen to the outside world.
 
 1. Set the external URL for GitLab Pages in `/etc/gitlab/gitlab.rb`:
 
@@ -204,38 +187,31 @@ To configure GitLab Pages to use wildcard domains:
 
 1. [Reconfigure GitLab](../restart_gitlab.md#reconfigure-a-linux-package-installation).
 
-The resulting URL scheme is `http://<namespace>.example.io/<project_slug>`.
+Watch the [video tutorial](https://youtu.be/dD8c7WNcc6s) for this configuration.
 
-<i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
-For an overview, see [How to Enable GitLab Pages for GitLab CE and EE](https://youtu.be/dD8c7WNcc6s).
-<!-- Video published on 2017-02-22 -->
-
-### Single-domain sites
+### Pages domain without wildcard DNS
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/17584) as an [experiment](../../policy/experiment-beta-support.md) in GitLab 16.7.
 > - [Moved](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/148621) to [beta](../../policy/experiment-beta-support.md) in GitLab 16.11.
 > - [Changed](https://gitlab.com/gitlab-org/gitlab-pages/-/issues/1111) implementation from NGINX to the GitLab Pages codebase in GitLab 17.2.
 > - [Generally available](https://gitlab.com/gitlab-org/gitlab/-/issues/483365) in GitLab 17.4.
 
-The following configuration is the minimum setup to use GitLab Pages.
-It is the foundation for all other setups described here.
-In this configuration:
-
-- NGINX proxies all requests to the GitLab Pages daemon.
-- The GitLab Pages daemon doesn't listen directly to the public internet.
+This configuration is the minimum setup for GitLab Pages. It is the base for all
+other configurations. In this configuration, NGINX proxies all requests to the daemon,
+because the GitLab Pages daemon doesn't listen to the outside world.
 
 Prerequisites:
 
-- You have configured DNS for
-  [single-domain sites](#dns-configuration-for-single-domain-sites).
-
-To configure GitLab Pages to use single-domain sites:
+- Your instance must use the Linux package installation method.
+- You have configured DNS setup
+  [without a wildcard](#for-namespace-in-url-path-without-wildcard-dns).
 
 1. In `/etc/gitlab/gitlab.rb`, set the external URL for GitLab Pages, and enable the feature:
 
    ```ruby
-   external_url "http://example.com" # Swap out this URL for your own
-   pages_external_url 'http://example.io' # Important: not a subdomain of external_url, so cannot be http://pages.example.com
+   # External_url here is only for reference
+   external_url "http://example.com"
+   pages_external_url 'http://example.io'
 
    # Set this flag to enable this feature
    gitlab_pages["namespace_in_path"] = true
@@ -247,9 +223,9 @@ The resulting URL scheme is `http://example.io/<namespace>/<project_slug>`.
 
 WARNING:
 GitLab Pages supports only one URL scheme at a time:
-wildcard domains or single-domain sites.
+with wildcard DNS, or without wildcard DNS.
 If you enable `namespace_in_path`, existing GitLab Pages websites
-are accessible only on single-domain.
+are accessible only on domains without wildcard DNS.
 
 ### Wildcard domains with TLS support
 
@@ -258,8 +234,12 @@ Prerequisites:
 - [Wildcard DNS setup](#dns-configuration)
 - TLS certificate. Can be either Wildcard, or any other type meeting the [requirements](../../user/project/pages/custom_domains_ssl_tls_certification/index.md#manual-addition-of-ssltls-certificates).
 
+---
+
+URL scheme: `https://<namespace>.example.io/<project_slug>`
+
 NGINX proxies all requests to the daemon. Pages daemon doesn't listen to the
-public internet.
+outside world.
 
 1. Place the wildcard TLS certificate for `*.example.io` and the key inside `/etc/gitlab/ssl`.
 1. In `/etc/gitlab/gitlab.rb` specify the following configuration:
@@ -284,8 +264,6 @@ public internet.
    [System OAuth application](../../integration/oauth_provider.md#create-an-instance-wide-application)
    to use the HTTPS protocol.
 
-The resulting URL scheme is `https://<namespace>.example.io/<project_slug>`.
-
 WARNING:
 Multiple wildcards for one instance is not supported. Only one wildcard per instance can be assigned.
 
@@ -295,7 +273,7 @@ Before you reconfigure, remove the `gitlab_pages` section from `/etc/gitlab/gitl
 then run `gitlab-ctl reconfigure`. For more information, read
 [GitLab Pages does not regenerate OAuth](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/3947).
 
-### Single-domain sites with TLS support
+### Pages domain with TLS support, without wildcard DNS
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/17584) as an [experiment](../../policy/experiment-beta-support.md) in GitLab 16.7.
 > - [Moved](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/148621) to [beta](../../policy/experiment-beta-support.md) in GitLab 16.11.
@@ -304,19 +282,21 @@ then run `gitlab-ctl reconfigure`. For more information, read
 
 Prerequisites:
 
-- You have configured DNS for
-  [single-domain sites](#dns-configuration-for-single-domain-sites).
+- Your instance must use the Linux package installation method.
+- You have configured DNS setup
+  [without a wildcard](#for-namespace-in-url-path-without-wildcard-dns).
 - You have a TLS certificate that covers your domain (like `example.io`).
 
 In this configuration, NGINX proxies all requests to the daemon. The GitLab Pages
-daemon doesn't listen to the public internet:
+daemon doesn't listen to the outside world:
 
 1. Add your TLS certificate and key as mentioned in the prerequisites into `/etc/gitlab/ssl`.
 1. In `/etc/gitlab/gitlab.rb`, set the external URL for GitLab Pages, and enable the feature:
 
    ```ruby
-   external_url "https://example.com" # Swap out this URL for your own
-   pages_external_url 'https://example.io' # Important: not a subdomain of external_url, so cannot be https://pages.example.com
+   # The external_url field is here only for reference.
+   external_url "https://example.com"
+   pages_external_url 'https://example.io'
 
    pages_nginx['redirect_http_to_https'] = true
 
@@ -350,9 +330,9 @@ The resulting URL scheme is `https://example.io/<namespace>/<project_slug>`.
 
 WARNING:
 GitLab Pages supports only one URL scheme at a time:
-wildcard domains or single-domain sites.
+with wildcard DNS, or without wildcard DNS.
 If you enable `namespace_in_path`, existing GitLab Pages websites
-are accessible only as single-domain sites.
+are accessible only on domains without wildcard DNS.
 
 ### Wildcard domains with TLS-terminating Load Balancer
 
@@ -360,6 +340,10 @@ Prerequisites:
 
 - [Wildcard DNS setup](#dns-configuration)
 - [TLS-terminating load balancer](../../install/aws/index.md#load-balancer)
+
+---
+
+URL scheme: `https://<namespace>.example.io/<project_slug>`
 
 This setup is primarily intended to be used when [installing a GitLab POC on Amazon Web Services](../../install/aws/index.md). This includes a TLS-terminating [classic load balancer](../../install/aws/index.md#load-balancer) that listens for HTTPS connections, manages TLS certificates, and forwards HTTP traffic to the instance.
 
@@ -377,8 +361,6 @@ This setup is primarily intended to be used when [installing a GitLab POC on Ama
 
 1. [Reconfigure GitLab](../restart_gitlab.md#reconfigure-a-linux-package-installation).
 
-The resulting URL scheme is `https://<namespace>.example.io/<project_slug>`.
-
 ### Global settings
 
 Below is a table of all configuration settings known to Pages in a Linux package installation,
@@ -393,10 +375,10 @@ control over how the Pages daemon runs and serves content in your environment.
 | **`gitlab_pages[]`**                    |                                                                                                                                                                                                                                                                                                            |
 | `access_control`                        | Whether to enable [access control](index.md#access-control).                                                                                                                                                                                                                                               |
 | `api_secret_key`                        | Full path to file with secret key used to authenticate with the GitLab API. Auto-generated when left unset.                                                                                                                                                                                                |
-| `artifacts_server`                      | Enable viewing [artifacts](../cicd/job_artifacts.md) in GitLab Pages.                                                                                                                                                                                                                                           |
+| `artifacts_server`                      | Enable viewing [artifacts](../job_artifacts.md) in GitLab Pages.                                                                                                                                                                                                                                           |
 | `artifacts_server_timeout`              | Timeout (in seconds) for a proxied request to the artifacts server.                                                                                                                                                                                                                                        |
 | `artifacts_server_url`                  | API URL to proxy artifact requests to. Defaults to GitLab `external URL` + `/api/v4`, for example `https://gitlab.com/api/v4`. When running a [separate Pages server](#running-gitlab-pages-on-a-separate-server), this URL must point to the main GitLab server's API.                                    |
-| `auth_redirect_uri`                     | Callback URL for authenticating with GitLab. URL should be subdomain of `pages_external_url` + `/auth`. Defaults to project's subdomain of `pages_external_url` + `/auth`, for example `https://projects.example.io/auth`. When `namespace_in_path` is enabled, defaults to `pages_external_url` + `/projects/auth`, for example `https://example.io/projects/auth`.  |
+| `auth_redirect_uri`                     | Callback URL for authenticating with GitLab. Defaults to project's subdomain of `pages_external_url` + `/auth`, for example `https://projects.example.io/auth`. When `namespace_in_path` is enabled, defaults to `pages_external_url` + `/projects/auth`, for example `https://example.io/projects/auth`.  |
 | `auth_secret`                           | Secret key for signing authentication requests. Leave blank to pull automatically from GitLab during OAuth registration.                                                                                                                                                                                   |
 | `client_cert`                           | Client certificate used for mutual TLS with the GitLab API. See [Support mutual TLS when calling the GitLab API](#support-mutual-tls-when-calling-the-gitlab-api) for details.                                                                                                                             |
 | `client_key`                            | Client key used for mutual TLS with the GitLab API. See [Support mutual TLS when calling the GitLab API](#support-mutual-tls-when-calling-the-gitlab-api) for details.                                                                                                                                     |
@@ -429,7 +411,7 @@ control over how the Pages daemon runs and serves content in your environment.
 | `log_directory`                         | Absolute path to a log directory.                                                                                                                                                                                                                                                                          |
 | `log_format`                            | The log output format: `text` or `json`.                                                                                                                                                                                                                                                                   |
 | `log_verbose`                           | Verbose logging, true/false.                                                                                                                                                                                                                                                                               |
-| `namespace_in_path`                     | Enable or disable namespace in the URL path to support [single-domain sites DNS setup](#dns-configuration-for-single-domain-sites). Default: `false`.                                                                                                                                             |
+| `namespace_in_path`                     | (Beta) Enable or disable namespace in the URL path to support [without wildcard DNS setup](#for-namespace-in-url-path-without-wildcard-dns). Default: `false`.                                                                                                                                             |
 | `propagate_correlation_id`              | Set to true (false by default) to re-use existing Correlation ID from the incoming request header `X-Request-ID` if present. If a reverse proxy sets this header, the value is propagated in the request chain.                                                                                            |
 | `max_connections`                       | Limit on the number of concurrent connections to the HTTP, HTTPS or proxy listeners.                                                                                                                                                                                                                       |
 | `max_uri_length`                        | The maximum length of URIs accepted by GitLab Pages. Set to 0 for unlimited length.                                                                                                                                                                                                                        |
@@ -485,6 +467,10 @@ Prerequisites:
 - [Wildcard DNS setup](#dns-configuration)
 - Secondary IP
 
+---
+
+URL scheme: `http://<namespace>.example.io/<project_slug>` and `http://custom-domain.com`
+
 In that case, the Pages daemon is running, NGINX still proxies requests to
 the daemon but the daemon is also able to receive requests from the outside
 world. Custom domains are supported, but no TLS.
@@ -503,8 +489,6 @@ world. Custom domains are supported, but no TLS.
 
 1. [Reconfigure GitLab](../restart_gitlab.md#reconfigure-a-linux-package-installation).
 
-The resulting URL schemes are `http://<namespace>.example.io/<project_slug>` and `http://custom-domain.com`.
-
 ### Custom domains with TLS support
 
 Prerequisites:
@@ -513,11 +497,15 @@ Prerequisites:
 - TLS certificate. Can be either Wildcard, or any other type meeting the [requirements](../../user/project/pages/custom_domains_ssl_tls_certification/index.md#manual-addition-of-ssltls-certificates).
 - Secondary IP
 
+---
+
+URL scheme: `https://<namespace>.example.io/<project_slug>` and `https://custom-domain.com`
+
 In that case, the Pages daemon is running, NGINX still proxies requests to
 the daemon but the daemon is also able to receive requests from the outside
 world. Custom domains and TLS are supported.
 
-1. Place the wildcard TLS certificate for `*.example.io` and the key inside `/etc/gitlab/ssl`.
+1. Place the wildcard LTS certificate for `*.example.io` and the key inside `/etc/gitlab/ssl`.
 1. In `/etc/gitlab/gitlab.rb` specify the following configuration:
 
    ```ruby
@@ -545,8 +533,6 @@ world. Custom domains and TLS are supported.
 1. If you're using [Pages Access Control](#access-control), update the redirect URI in the GitLab Pages
    [System OAuth application](../../integration/oauth_provider.md#create-an-instance-wide-application)
    to use the HTTPS protocol.
-
-The resulting URL schemes are `https://<namespace>.example.io/<project_slug>` and `https://custom-domain.com`.
 
 ### Custom domain verification
 
@@ -582,7 +568,7 @@ To enable it:
 1. On the left sidebar, at the bottom, select **Admin**.
 1. Select **Settings > Preferences**.
 1. Expand **Pages**.
-1. Enter the email address for receiving notifications and accept the Terms of Service for Let's Encrypt.
+1. Enter the email address for receiving notifications and accept Let's Encrypt's Terms of Service.
 1. Select **Save changes**.
 
 ### Access control
@@ -765,7 +751,7 @@ opened) it's refreshed. This extends the time the archive remains in memory from
 After an archive reaches `zip_cache_expiration`, it's marked as expired and removed on the next
 `zip_cache_cleanup` interval.
 
-![A timeline shows the ZIP cache refresh extends the ZIP cache expiration time.](img/zip_cache_configuration_v13_7.png)
+![ZIP cache configuration](img/zip_cache_configuration.png)
 
 ### HTTP Strict Transport Security (HSTS) support
 
@@ -984,17 +970,6 @@ The following procedure includes steps to back up and edit the
 `gitlab-secrets.json` file. This file contains secrets that control
 database encryption. Proceed with caution.
 
-1. Optionally, to enable [access control](#access-control), add the following to `/etc/gitlab/gitlab.rb` and [reconfigure the **GitLab server**](../restart_gitlab.md#reconfigure-a-linux-package-installation):
-
-   ```ruby
-   gitlab_pages['access_control'] = true
-   ```
-
-   WARNING:
-   If you plan to use GitLab Pages with access control, you must enable it on the first GitLab server before copying `gitlab-secrets.json`.
-   Enabling access control generates a new OAuth application, and information about it propagates to `gitlab-secrets.json`. If it's not done
-   in the correct order, you may face issues with access control.
-
 1. Create a backup of the secrets file on the **GitLab server**:
 
    ```shell
@@ -1005,6 +980,12 @@ database encryption. Proceed with caution.
 
    ```ruby
    pages_external_url "http://<pages_server_URL>"
+   ```
+
+1. Optionally, to enable [access control](#access-control), add the following to `/etc/gitlab/gitlab.rb`:
+
+   ```ruby
+   gitlab_pages['access_control'] = true
    ```
 
 1. Set up object storage by either:

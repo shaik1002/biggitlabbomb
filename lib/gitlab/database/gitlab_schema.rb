@@ -39,6 +39,7 @@ module Gitlab
         'pg_' => :gitlab_internal
       }.freeze
 
+      # rubocop:disable Metrics/CyclomaticComplexity
       def self.table_schema(name)
         schema_name, table_name = name.split('.', 2) # Strip schema name like: `public.`
 
@@ -75,6 +76,7 @@ module Gitlab
 
         nil
       end
+      # rubocop:enable Metrics/CyclomaticComplexity
 
       def self.table_schema!(name)
         # rubocop:disable Gitlab/DocUrl
@@ -86,8 +88,8 @@ module Gitlab
         # rubocop:enable Gitlab/DocUrl
       end
 
-      def self.require_sharding_key?(schema)
-        Gitlab::Database.all_gitlab_schemas[schema.to_s].require_sharding_key
+      def self.cell_local?(schema)
+        Gitlab::Database.all_gitlab_schemas[schema.to_s].cell_local
       end
 
       def self.cross_joins_allowed?(table_schemas, all_tables)

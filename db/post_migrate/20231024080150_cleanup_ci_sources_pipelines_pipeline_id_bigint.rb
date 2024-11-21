@@ -10,7 +10,7 @@ class CleanupCiSourcesPipelinesPipelineIdBigint < Gitlab::Database::Migration[2.
   def up
     with_lock_retries(raise_on_exhaustion: true) do
       lock_tables(:ci_pipelines, TABLE)
-      cleanup_conversion_of_integer_to_bigint(TABLE, COLUMNS)
+      cleanup_conversion_of_integer_to_bigint(TABLE, COLUMNS) # rubocop:disable Migration/WithLockRetriesDisallowedMethod
     end
   end
 

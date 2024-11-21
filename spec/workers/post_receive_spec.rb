@@ -58,6 +58,16 @@ RSpec.describe PostReceive, :clean_gitlab_redis_shared_state, feature_category: 
         perform
       end
     end
+
+    context 'with ProjectSnippet' do
+      let(:gl_repository) { "snippet-#{snippet.id}" }
+      let(:snippet) { create(:snippet, type: 'ProjectSnippet', project: nil, author: project.first_owner) }
+
+      it 'returns false and logs an error' do
+        expect(Gitlab::GitLogger).to receive(:error).with("POST-RECEIVE: #{error_message}")
+        expect(perform).to be(false)
+      end
+    end
   end
 
   describe '#process_project_changes' do
@@ -77,9 +87,8 @@ RSpec.describe PostReceive, :clean_gitlab_redis_shared_state, feature_category: 
       end
 
       it 'schedules a cache update for commit count and size' do
-        expect(ProjectCacheWorker)
-          .to receive(:perform_async)
-          .with(empty_project.id, [], %w[repository_size commit_count], true)
+        expect(ProjectCacheWorker).to receive(:perform_async)
+                                        .with(empty_project.id, [], [:repository_size, :commit_count], true)
 
         perform
       end
@@ -173,9 +182,8 @@ RSpec.describe PostReceive, :clean_gitlab_redis_shared_state, feature_category: 
         end
 
         it 'schedules a cache update for repository size only' do
-          expect(ProjectCacheWorker)
-            .to receive(:perform_async)
-            .with(project.id, [], %w[repository_size], true)
+          expect(ProjectCacheWorker).to receive(:perform_async)
+                                          .with(project.id, [], [:repository_size], true)
 
           perform
         end
@@ -192,9 +200,8 @@ RSpec.describe PostReceive, :clean_gitlab_redis_shared_state, feature_category: 
           end
 
           it 'schedules a cache update for commit count and size' do
-            expect(ProjectCacheWorker)
-              .to receive(:perform_async)
-              .with(project.id, [], %w[repository_size commit_count], true)
+            expect(ProjectCacheWorker).to receive(:perform_async)
+                                            .with(project.id, [], [:repository_size, :commit_count], true)
 
             perform
           end
@@ -235,9 +242,8 @@ RSpec.describe PostReceive, :clean_gitlab_redis_shared_state, feature_category: 
         end
 
         it 'schedules a single ProjectCacheWorker update' do
-          expect(ProjectCacheWorker)
-            .to receive(:perform_async)
-            .with(project.id, [], %w[repository_size], true)
+          expect(ProjectCacheWorker).to receive(:perform_async)
+                                          .with(project.id, [], [:repository_size], true)
 
           perform
         end

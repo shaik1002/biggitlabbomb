@@ -18,6 +18,7 @@ class Namespace < ApplicationRecord
   include Ci::NamespaceSettings
   include Referable
   include CrossDatabaseIgnoredTables
+  include IgnorableColumns
   include UseSqlFunctionForPrimaryKeyLookups
   include Todoable
 
@@ -76,6 +77,7 @@ class Namespace < ApplicationRecord
   has_many :runner_namespaces, inverse_of: :namespace, class_name: 'Ci::RunnerNamespace'
   has_many :runners, through: :runner_namespaces, source: :runner, class_name: 'Ci::Runner'
   has_many :pending_builds, class_name: 'Ci::PendingBuild'
+  has_one :onboarding_progress, class_name: 'Onboarding::Progress'
 
   # This should _not_ be `inverse_of: :namespace`, because that would also set
   # `user.namespace` when this user creates a group with themselves as `owner`.
@@ -112,9 +114,6 @@ class Namespace < ApplicationRecord
   has_many :import_source_users, class_name: 'Import::SourceUser', foreign_key: :namespace_id, inverse_of: :namespace
   has_one :namespace_import_user, class_name: 'Import::NamespaceImportUser', foreign_key: :namespace_id, inverse_of: :namespace
   has_one :import_user, class_name: 'User', through: :namespace_import_user, foreign_key: :user_id
-
-  has_many :bot_user_details, class_name: 'UserDetail', foreign_key: 'bot_namespace_id', inverse_of: :bot_namespace
-  has_many :bot_users, through: :bot_user_details, source: :user
 
   validates :owner, presence: true, if: ->(n) { n.owner_required? }
   validates :organization, presence: true, if: :require_organization?
@@ -160,12 +159,6 @@ class Namespace < ApplicationRecord
   validate :changing_allow_descendants_override_disabled_shared_runners_is_allowed, unless: -> { project_namespace? }
   validate :parent_organization_match, if: :require_organization?
 
-  attribute :organization_id, :integer, default: -> do
-    return 1 if Feature.enabled?(:namespace_model_default_org, Feature.current_request)
-
-    columns_hash['organization_id'].default
-  end
-
   delegate :name, to: :owner, allow_nil: true, prefix: true
   delegate :avatar_url, to: :owner, allow_nil: true
   delegate :prevent_sharing_groups_outside_hierarchy, :prevent_sharing_groups_outside_hierarchy=,
@@ -176,7 +169,6 @@ class Namespace < ApplicationRecord
     to: :namespace_settings
   delegate :emails_enabled, :emails_enabled=,
     to: :namespace_settings, allow_nil: true
-  delegate :token_expiry_notify_inherited, :token_expiry_notify_inherited=, to: :namespace_settings
   delegate :allow_runner_registration_token,
     :allow_runner_registration_token=,
     to: :namespace_settings
@@ -191,7 +183,7 @@ class Namespace < ApplicationRecord
   delegate :math_rendering_limits_enabled?,
     :lock_math_rendering_limits_enabled?,
     to: :namespace_settings
-  delegate :add_creator, :pending_delete, :pending_delete=, :deleted_at, :deleted_at=,
+  delegate :add_creator, :pending_delete, :pending_delete=,
     to: :namespace_details
 
   before_create :sync_share_with_group_lock_with_parent
@@ -210,7 +202,7 @@ class Namespace < ApplicationRecord
       saved_change_to_name?) || saved_change_to_path? || saved_change_to_parent_id?
   }
 
-  scope :without_deleted, -> { joins(:namespace_details).where(namespace_details: { deleted_at: nil }) }
+  scope :without_deleted, -> { joins(:namespace_details).where(namespace_details: { pending_delete: false }) }
   scope :user_namespaces, -> { where(type: Namespaces::UserNamespace.sti_name) }
   scope :group_namespaces, -> { where(type: Group.sti_name) }
   scope :without_project_namespaces, -> { where(Namespace.arel_table[:type].not_eq(Namespaces::ProjectNamespace.sti_name)) }
@@ -223,7 +215,6 @@ class Namespace < ApplicationRecord
   scope :in_organization, ->(organization) { where(organization: organization) }
   scope :by_name, ->(name) { where('name LIKE ?', "#{sanitize_sql_like(name)}%") }
   scope :ordered_by_name, -> { order(:name) }
-  scope :top_level, -> { by_parent(nil) }
 
   scope :with_statistics, -> do
     namespace_statistic_columns = STATISTICS_COLUMNS.map { |column| sum_project_statistics_column(column) }
@@ -256,6 +247,9 @@ class Namespace < ApplicationRecord
 
   scope :with_shared_runners_enabled, -> { where(shared_runners_enabled: true) }
 
+  scope :by_contains_all_traversal_ids, ->(traversal_ids) { where('traversal_ids::bigint[] @> ARRAY[?]::bigint[]', traversal_ids) }
+  scope :by_traversal_ids, ->(traversal_ids) { where('traversal_ids::bigint[] = ARRAY[?]::bigint[]', traversal_ids) }
+
   # Make sure that the name is same as strong_memoize name in root_ancestor
   # method
   attr_writer :root_ancestor, :emails_enabled_memoized
@@ -281,10 +275,6 @@ class Namespace < ApplicationRecord
     # Case insensitive search for namespace by path or name
     def find_by_path_or_name(path)
       find_by("lower(path) = :path OR lower(name) = :path", path: path.downcase)
-    end
-
-    def find_top_level
-      top_level.take
     end
 
     # Searches for namespaces matching the given query.
@@ -321,14 +311,9 @@ class Namespace < ApplicationRecord
     # https://gitlab.com/gitlab-org/gitlab/-/blob/5d34e3488faa3982d30d7207773991c1e0b6368a/app/assets/javascripts/gfm_auto_complete.js#L68 and
     # https://gitlab.com/gitlab-org/gitlab/-/blob/5d34e3488faa3982d30d7207773991c1e0b6368a/app/assets/javascripts/gfm_auto_complete.js#L1053
     def gfm_autocomplete_search(query)
-      namespaces_cte = Gitlab::SQL::CTE.new(table_name, without_order)
-
       # This scope does not work with `ProjectNamespace` records because they don't have a corresponding `route` association.
       # We do not chain the `without_project_namespaces` scope because it results in an expensive query plan in certain cases
-      unscoped
-        .with(namespaces_cte.to_arel)
-        .from(namespaces_cte.table)
-        .joins(:route)
+      joins(:route)
         .where(
           "REPLACE(routes.name, ' ', '') ILIKE :pattern OR routes.path ILIKE :pattern",
           pattern: "%#{sanitize_sql_like(query)}%"
@@ -354,6 +339,10 @@ class Namespace < ApplicationRecord
       value.scan(Gitlab::Regex.group_name_regex_chars).join(' ')
     end
 
+    def top_most
+      by_parent(nil)
+    end
+
     def reference_prefix
       User.reference_prefix
     end
@@ -369,8 +358,17 @@ class Namespace < ApplicationRecord
       coalesce.as(column.to_s)
     end
 
+    def with_disabled_organization_validation
+      current_value = Gitlab::SafeRequestStore[:require_organization]
+      Gitlab::SafeRequestStore[:require_organization] = false
+
+      yield
+    ensure
+      Gitlab::SafeRequestStore[:require_organization] = current_value
+    end
+
     def username_reserved?(username)
-      without_project_namespaces.top_level.find_by_path_or_name(username).present?
+      without_project_namespaces.where(parent_id: nil).find_by_path_or_name(username).present?
     end
   end
 
@@ -623,14 +621,6 @@ class Namespace < ApplicationRecord
       .try(name)
   end
 
-  def can_modify_token_expiry_notify_inherited?
-    ancestors.all?(&:token_expiry_notify_inherited)
-  end
-
-  def token_expiry_notify_inherited?
-    self_and_ancestors.all?(&:token_expiry_notify_inherited)
-  end
-
   def actual_plan
     Plan.default
   end
@@ -745,22 +735,7 @@ class Namespace < ApplicationRecord
     Gitlab::UrlBuilder.build(self, only_path: only_path)
   end
 
-  # there is no service desk feature for group level items
-  def service_desk_alias_address
-    nil
-  end
-
-  def deleted?
-    !!deleted_at
-  end
-
   private
-
-  def require_organization?
-    return false unless Feature.enabled?(:require_organization, Feature.current_request)
-
-    Gitlab::SafeRequestStore.fetch(:require_organization) { true } # rubocop:disable Style/RedundantFetchBlock -- This fetch has a different interface
-  end
 
   def parent_organization_match
     return unless parent
@@ -827,7 +802,7 @@ class Namespace < ApplicationRecord
   end
 
   def refresh_access_of_projects_invited_groups
-    if Feature.enabled?(:specialized_worker_for_group_lock_update_auth_recalculation, self)
+    if Feature.enabled?(:specialized_worker_for_group_lock_update_auth_recalculation)
       Project
         .where(namespace_id: id)
         .joins(:project_group_links)

@@ -4,7 +4,7 @@ module Chaos
   class DbSpinWorker # rubocop:disable Scalability/IdempotentWorker
     include ApplicationWorker
 
-    data_consistency :sticky
+    data_consistency :always
 
     sidekiq_options retry: 3
     include ChaosQueue

@@ -146,27 +146,27 @@ module Organizations
     def organization_activity_event_types
       [
         {
-          title: _('Comment'),
+          title: _('Comments'),
           value: EventFilter::COMMENTS
         },
         {
-          title: _('Design'),
+          title: _('Designs'),
           value: EventFilter::DESIGNS
         },
         {
-          title: _('Issue'),
+          title: _('Issue events'),
           value: EventFilter::ISSUE
         },
         {
-          title: _('Merge'),
+          title: _('Merge events'),
           value: EventFilter::MERGED
         },
         {
-          title: _('Repository'),
+          title: _('Push events'),
           value: EventFilter::PUSH
         },
         {
-          title: _('Membership'),
+          title: _('Team'),
           value: EventFilter::TEAM
         },
         {

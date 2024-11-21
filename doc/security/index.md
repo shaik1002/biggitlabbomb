@@ -1,11 +1,11 @@
 ---
-stage: Software Supply Chain Security
+stage: Govern
 group: Authentication
 description: SSH key limits, 2FA, tokens, hardening.
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
 
-# Secure GitLab
+# Secure your installation
 
 DETAILS:
 **Tier:** Free, Premium, Ultimate
@@ -22,7 +22,7 @@ This section covers some general information and recommendations regarding the p
 
 ## Recommendations
 
-For more information about improving the security posture of your GitLab environment, see the [hardening recommendations](hardening.md).
+The [Hardening Guide](hardening.md) contains additional general recommendations that can be implemented for hardening an install.
 
 ### Antivirus software
 
@@ -76,7 +76,7 @@ Self-managed GitLab customers and administrators are responsible for the securit
 ### Logs
 
 - [Review the log types and contents produced by GitLab](../administration/logs/index.md).
-- [Review Runner job logs information](../administration/cicd/job_logs.md).
+- [Review Runner job logs information](../administration/job_logs.md).
 - [How to use correlation ID to trace logs](../administration/logs/tracing_correlation_id.md).
 - [Logging configuration and access](https://docs.gitlab.com/omnibus/settings/logs.html).
 - [How to configure audit event streaming](../administration/audit_event_streaming/index.md).

@@ -42,7 +42,7 @@
     @include clearfix;
 
     padding: 10px 0;
-    @apply gl-border-b gl-border-b-subtle;
+    border-bottom: 1px solid $gray-100;
     display: block;
     margin: 0;
 
@@ -51,10 +51,10 @@
     }
 
     &.active {
-      @apply gl-bg-subtle;
+      background: $gray-10;
 
       a {
-        @apply gl-font-bold;
+        font-weight: $gl-font-weight-bold;
       }
     }
 
@@ -70,9 +70,33 @@
   }
 }
 
+@mixin basic-list-stats {
+  .stats {
+    float: right;
+    line-height: $list-text-height;
+    color: $gl-text-color-secondary;
+
+    @include media-breakpoint-down(xs) {
+      padding-top: $gl-padding-6;
+    }
+
+    span {
+      margin-right: 15px;
+    }
+  }
+}
+
 @mixin webkit-prefix($property, $value) {
   #{'-webkit-' + $property}: $value;
   #{$property}: $value;
+}
+
+/* http://phrappe.com/css/conditional-css-for-webkit-based-browsers/ */
+@mixin on-webkit-only {
+  /* stylelint-disable-next-line media-feature-name-no-vendor-prefix */
+  @media screen and (-webkit-min-device-pixel-ratio: 0) {
+    @content;
+  }
 }
 
 @mixin keyframes($animation-name) {
@@ -102,6 +126,14 @@
   }
 }
 
+@mixin green-status-color {
+  @include status-color(
+    var(--green-100, $green-100),
+    var(--green-500, $green-500),
+    var(--green-700, $green-700)
+  );
+}
+
 @mixin fade($gradient-direction, $gradient-color) {
   visibility: hidden;
   opacity: 0;
@@ -119,7 +151,7 @@
   padding: 0;
 
   &:hover {
-    @apply gl-focus;
+    @include gl-focus;
   }
 
   &.scrolling {
@@ -207,11 +239,12 @@
 
 // Used in EE for Web Terminal
 @mixin build-log-bar($height) {
-  height: auto;
+  height: $height;
   min-height: $height;
+  background: var(--white, $white);
+  border: 1px solid var(--gl-border-color-default);
+  color: var(--gl-text-color-default);
   padding: $grid-size;
-  @apply gl-bg-section gl-border gl-border-section gl-text-default;
-  box-shadow: 0 -6px 0 0 var(--gl-background-color-default);
 }
 
 @mixin job-log-top-bar {
@@ -219,7 +252,12 @@
   z-index: 2;
   position: sticky;
   top: calc(#{$calc-application-header-height} - 1px);
-  @apply gl-rounded-t-lg;
+  border-radius: $gl-border-radius-base $gl-border-radius-base 0 0;
+  box-shadow: 0 -4px 0 0 var(--white);
+
+  .gl-dark & {
+    box-shadow: 0 -4px 0 0 var(--gray-10);
+  }
 }
 
 /*
@@ -279,6 +317,8 @@
   line-height: 1;
   padding: 0;
   min-width: 16px;
+  color: $gray-500;
+  fill: $gray-500;
 
   .award-control-icon-positive,
   .award-control-icon-super-positive {
@@ -347,7 +387,7 @@
 
       // Rouge `Comment` token (quoted text in email body)
       .c {
-        color: $gl-text-color-subtle;
+        color: $gl-grayish-blue;
         font-style: italic;
       }
     }
@@ -378,6 +418,22 @@
     &::after {
       display: none;
     }
+  }
+}
+
+@mixin side-panel-toggle {
+  @apply gl-transition-width;
+  height: $toggle-sidebar-height;
+  padding: 0 $gl-padding;
+  background-color: $gray-10;
+  border: 0;
+  color: $gl-text-color-secondary;
+  display: flex;
+  align-items: center;
+
+  &:hover {
+    background-color: $border-color;
+    color: $gl-text-color;
   }
 }
 
@@ -427,13 +483,4 @@
   left: $left;
   top: $top;
   height: calc(100% - #{$top});
-}
-
-/**
- * Deprecated mixin for dark mode
- */
-@mixin gl-dark-invert-keep-hue {
-  .gl-dark & {
-    filter: invert(0.8) hue-rotate(180deg);
-  }
 }

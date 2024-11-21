@@ -51,7 +51,15 @@ module API
       end
 
       def required_permission
-        :read_package_within_public_registries
+        if allow_anyone_to_pull_public_packages?
+          :read_package_within_public_registries
+        else
+          :read_group
+        end
+      end
+
+      def allow_anyone_to_pull_public_packages?
+        ::Feature.enabled?(:allow_anyone_to_pull_public_nuget_packages_on_group_level, project_or_group_without_auth)
       end
     end
 

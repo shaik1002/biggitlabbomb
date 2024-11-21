@@ -15,8 +15,15 @@ DETAILS:
 > - [Enabled on self-managed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/138969) in GitLab 16.7.
 > - [Generally available](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/) in GitLab 16.9. Feature flag `custom_emoji` removed.
 
-To use [custom emoji](../../user/emoji_reactions.md) in comments and descriptions,
-you can add them to a top-level group by using the GraphQL API.
+To use [custom emoji](../../user/emoji_reactions.md) in comments and descriptions, you can add them to a top-level group using the GraphQL API.
+
+Parameters:
+
+| Attribute    | Type           | Required               | Description                                                               |
+| :----------- | :------------- | :--------------------- | :------------------------------------------------------------------------ |
+| `group_path` | integer/string | Yes | ID or [URL-encoded path of the top-level group](../rest/index.md#namespaced-path-encoding) |
+| `name`       | string         | Yes | Name of the custom emoji.                                                 |
+| `file`       | string         | Yes | URL of the custom emoji image.                                            |
 
 ## Create a custom emoji
 
@@ -32,27 +39,32 @@ mutation CreateCustomEmoji($groupPath: ID!) {
 }
 ```
 
-After you add a custom emoji to the group, members can use it in the same way as other emoji in the comments.
+After adding a custom emoji to the group, members can use it in the same way as other emoji in the comments.
 
-### Attributes
+## Get custom emoji for a group
 
-The query accepts these attributes:
+```graphql
+query GetCustomEmoji($groupPath: ID!) {
+  group(fullPath: $groupPath) {
+    id
+    customEmoji {
+      nodes {
+        name
+      }
+    }
+  }
+}
+```
 
-| Attribute    | Type           | Required               | Description |
-| :----------- | :------------- | :--------------------- | :---------- |
-| `group_path` | integer/string | Yes | ID or [URL-encoded path of the top-level group](../rest/index.md#namespaced-paths). |
-| `name`       | string         | Yes | Name of the custom emoji. |
-| `file`       | string         | Yes | URL of the custom emoji image. |
+## Set up the GraphiQL explorer
 
-## Use GraphiQL
+This procedure presents a substantive example that you can copy and paste into GraphiQL
+explorer. GraphiQL explorer is available for:
 
-You can use GraphiQL to query the emoji for a group.
+- GitLab.com users at [https://gitlab.com/-/graphql-explorer](https://gitlab.com/-/graphql-explorer).
+- Self-managed users at `https://gitlab.example.com/-/graphql-explorer`.
 
-1. Open GraphiQL:
-   - For GitLab.com, use: `https://gitlab.com/-/graphql-explorer`
-   - For self-managed GitLab, use: `https://gitlab.example.com/-/graphql-explorer`
-1. Copy the following text and paste it in the left window.
-   In this query, `gitlab-org` is the group path.
+1. Copy the following code excerpt:
 
    ```graphql
        query GetCustomEmoji {
@@ -68,9 +80,14 @@ You can use GraphiQL to query the emoji for a group.
        }
    ```
 
-1. Select **Play**.
+1. Open the [GraphiQL explorer tool](https://gitlab.com/-/graphql-explorer).
+1. Paste the `query` listed above into the left window of your GraphiQL explorer tool.
+1. Select **Play** to get the result shown here:
 
-## Related topics
+![GraphiQL explore custom emoji query](img/custom_emoji_query_example.png)
 
-- [GraphQL API reference](reference/index.md)
-- [GraphQL-specific entities, like fragments and interfaces](https://graphql.org/learn/)
+For more information on:
+
+- GraphQL specific entities, such as Fragments and Interfaces, see the official
+  [GraphQL documentation](https://graphql.org/learn/).
+- Individual attributes, see the [GraphQL API Resources](reference/index.md).

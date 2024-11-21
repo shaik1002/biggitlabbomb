@@ -34,8 +34,7 @@ RSpec.describe Gitlab::Auth::OAuth::IdentityLinker do
     end
 
     it 'exposes error message' do
-      expect(subject.error_message).to eq "Extern uid has already been taken. " \
-        "Please contact your administrator to generate a unique extern_uid / NameID"
+      expect(subject.error_message).to eq 'Extern uid has already been taken'
     end
   end
 

@@ -15,7 +15,7 @@ module Gitlab
           #   end
           # end
 
-          UnimplementedOperationError = Class.new(StandardError)
+          UnimplementedOperationError = Class.new(StandardError) # rubocop:disable UsageData/InstrumentationSuperclass
 
           class << self
             IMPLEMENTED_OPERATIONS = %i[count distinct_count estimate_batch_distinct_count sum average].freeze

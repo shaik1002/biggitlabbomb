@@ -285,27 +285,6 @@ module Issuable
       fuzzy_search(query, [:title])
     end
 
-    def gfm_autocomplete_search(query)
-      issuables_cte = Gitlab::SQL::CTE.new(table_name, self.without_order)
-
-      search_conditions = unscoped.where(
-        'title ILIKE :pattern',
-        pattern: "%#{sanitize_sql_like(query)}%"
-      )
-
-      if query.match?(/\A\d+\z/)
-        search_conditions = search_conditions.or(
-          unscoped.where('iid::text LIKE :pattern', pattern: "#{query}%")
-        )
-      end
-
-      unscoped
-        .with(issuables_cte.to_arel)
-        .from(issuables_cte.table)
-        .merge(search_conditions)
-        .order(issuables_cte.table[:id].desc)
-    end
-
     def available_states
       @available_states ||= STATE_ID_MAP.slice(*available_state_names)
     end
@@ -710,15 +689,15 @@ module Issuable
   end
 
   def old_escalation_status(assoc)
-    @_old_escalation_status ||= assoc.fetch(:escalation_status, escalation_status.status_name)
+    @_old_escalation_status ||= assoc.fetch(:escalation_status, escalation_status.status_name) # rubocop:disable Gitlab/ModuleWithInstanceVariables -- This is only used here
   end
 
   def old_total_time_spent(assoc)
-    @_old_total_time_spent ||= assoc.fetch(:total_time_spent, total_time_spent)
+    @_old_total_time_spent ||= assoc.fetch(:total_time_spent, total_time_spent) # rubocop:disable Gitlab/ModuleWithInstanceVariables -- This is only used here
   end
 
   def old_time_change(assoc)
-    @_old_time_change ||= assoc.fetch(:time_change, time_change)
+    @_old_time_change ||= assoc.fetch(:time_change, time_change) # rubocop:disable Gitlab/ModuleWithInstanceVariables -- This is only used here
   end
 end
 

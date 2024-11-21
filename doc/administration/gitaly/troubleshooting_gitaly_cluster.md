@@ -21,12 +21,6 @@ The `check` Praefect sub-command runs a series of checks to determine the health
 gitlab-ctl praefect check
 ```
 
-If Praefect is deployed by using the Praefect chart, run the binary directly.
-
-```shell
-/usr/local/bin/praefect check
-```
-
 The following sections describe the checks that are run.
 
 ### Praefect migrations
@@ -79,6 +73,28 @@ If this check fails:
 1. See if any Gitaly nodes are down. Run `praefect ping-nodes` to check.
 1. Check if there is a high load on the Praefect database. If the Praefect database is slow to respond, it can lead health checks failing to persist
    to the database, leading Praefect to think nodes are unhealthy.
+
+### Check clock synchronization
+
+Authentication between Praefect and the Gitaly servers requires the server times to be
+within 60 seconds of each other, so that the token check succeeds.
+
+This check helps identify the root cause of `permission denied`
+[errors being logged by Praefect](troubleshooting.md#permission-denied-errors-appearing-in-gitaly-or-praefect-logs-when-accessing-repositories).
+
+For offline environments where access to public `pool.ntp.org` servers is not possible, the Praefect `check` sub-command fails this
+check with an error message similar to:
+
+```plaintext
+checking with NTP service at  and allowed clock drift 60000ms [correlation_id: <XXX>]
+Failed (fatal) error: gitaly node at tcp://[gitlab.example-instance.com]:8075: rpc error: code = DeadlineExceeded desc = context deadline exceeded
+```
+
+To resolve this issue, set an environment variable on all Praefect servers to point to an accessible internal [Network Time Protocol](https://en.wikipedia.org/wiki/Network_Time_Protocol) (NTP) server. For example:
+
+```shell
+export NTP_HOST=ntp.example.com
+```
 
 ## Praefect errors in logs
 

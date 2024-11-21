@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.shared_examples 'a field with obfuscated email address' do
-  let(:resource_parent) { note.project }
-
+RSpec.shared_examples 'a note content field with obfuscated email address' do
   context 'when anonymous' do
     let(:user) { nil }
 
@@ -11,7 +9,7 @@ RSpec.shared_examples 'a field with obfuscated email address' do
 
   context 'with signed in user' do
     before do
-      stub_member_access_level(resource_parent, access_level => user) if access_level
+      stub_member_access_level(note.project, access_level => user) if access_level
     end
 
     context 'when user has no role in project' do

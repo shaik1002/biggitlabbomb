@@ -25,11 +25,10 @@ export default {
 </script>
 
 <template>
-  <settings-block
-    id="incident-management-settings"
-    :title="$options.i18n.headerText"
-    data-testid="incidents-settings-content"
-  >
+  <settings-block id="incident-management-settings" data-testid="incidents-settings-content">
+    <template #title>
+      <span ref="sectionHeader">{{ $options.i18n.headerText }}</span>
+    </template>
     <template #description>
       <span ref="sectionSubHeader">{{ $options.i18n.subHeaderText }}</span>
     </template>

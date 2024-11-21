@@ -124,7 +124,13 @@ describe('ProjectsExploreFilteredSearchAndSort', () => {
     it('tracks event', () => {
       const { trackEventSpy } = bindInternalEventDocument(wrapper.element);
 
-      expect(trackEventSpy).toHaveBeenCalledWith(defaultProvide.filterEventName, {}, undefined);
+      expect(trackEventSpy).toHaveBeenCalledWith(
+        defaultProvide.filterEventName,
+        {
+          label: JSON.stringify({ search: searchTerm, language: 'CSS' }),
+        },
+        undefined,
+      );
     });
   });
 

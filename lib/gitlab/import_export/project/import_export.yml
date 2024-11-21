@@ -751,8 +751,6 @@ included_attributes:
     - :security_and_compliance_enabled
     - :allow_merge_on_skipped_pipeline
     - :squash_option
-    - :merge_commit_template
-    - :squash_commit_template
   resource_milestone_events:
     - :user_id
     - :action
@@ -1057,12 +1055,10 @@ excluded_attributes:
     - :start_date_sourcing_epic_id
     - :due_date_sourcing_epic_id
     - :issue_id
-    - :work_item_parent_link_id
   epic_issue:
     - :epic_id
     - :issue_id
     - :namespace_id
-    - :work_item_parent_link_id
   system_note_metadata:
     - :description_version_id
     - :note_id
@@ -1126,8 +1122,6 @@ methods:
   project:
     - :allow_merge_on_skipped_pipeline
     - :squash_option
-    - :merge_commit_template
-    - :squash_commit_template
   notes:
     - :type
   commit_notes:
@@ -1230,6 +1224,8 @@ ee:
       - :issue
       - :due_at
     push_rule:
+      - :force_push_regex
+      - :delete_branch_regex
       - :commit_message_regex
       - :author_email_regex
       - :file_name_regex

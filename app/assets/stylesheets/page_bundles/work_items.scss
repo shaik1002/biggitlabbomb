@@ -20,9 +20,6 @@ $work-item-overview-gap-width: 2rem;
   }
 }
 
-
-// stylelint-disable-next-line gitlab/no-gl-class
-.gl-modal .work-item-view,
 .work-item-drawer .work-item-view:not(:has(.design-detail)) {
   container-name: work-item-view;
   container-type: inline-size;
@@ -87,6 +84,10 @@ $work-item-overview-gap-width: 2rem;
     overflow-x: hidden;
   }
 
+  .work-item-date-picker {
+    max-width: 175px;
+  }
+
   .work-item-overview-right-sidebar {
     margin-top: 0;
     grid-row-start: 1;
@@ -121,11 +122,6 @@ $work-item-overview-gap-width: 2rem;
   // stylelint-disable-next-line gitlab/no-gl-class
   .gl-toggle-label {
     font-weight: normal;
-  }
-
-  a, a:hover {
-    color: $gl-text-color;
-    text-decoration: none;
   }
 }
 
@@ -185,7 +181,6 @@ $disclosure-hierarchy-chevron-dimension: 1.2rem;
   line-height: $gl-line-height-16;
   padding-right: $grid-size;
   background: var(--gl-background-color-default);
-  color: var(--gl-action-neutral-foreground-color-default);
 
   &::before,
   &::after {
@@ -238,14 +233,14 @@ $disclosure-hierarchy-chevron-dimension: 1.2rem;
   }
 
   &[disabled] {
-    @apply gl-text-disabled;
+    color: $gl-text-color-disabled;
     cursor: not-allowed;
   }
 
   &:not([disabled]):hover {
     border-color: var(--gray-400, $gray-400);
     @include hierarchy-active-item-color;
-    color: var(--gl-action-neutral-foreground-color-hover);
+    color: var(--gray-900, $gray-900);
 
     &::after {
       border-left: 1px solid var(--gray-50, $gray-50);
@@ -265,7 +260,6 @@ $disclosure-hierarchy-chevron-dimension: 1.2rem;
     @include hierarchy-active-item-color;
     z-index: 2;
     border-radius: $gl-border-radius-small;
-    color: var(--gl-action-neutral-foreground-color-focus);
 
     &::before, &::after {
       box-shadow: 2px -2px 0 1px $blue-400;
@@ -341,10 +335,4 @@ $disclosure-hierarchy-chevron-dimension: 1.2rem;
   bottom: 0;
   left: 50%;
   transform: translateX(-50%);
-}
-
-.create-work-item-modal {
-  .note-textarea {
-    overflow-y: scroll !important;
-  }
 }

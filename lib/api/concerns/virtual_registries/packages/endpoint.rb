@@ -11,7 +11,6 @@ module API
           MAJOR_BROWSERS = %i[webkit firefox ie edge opera chrome].freeze
           WEB_BROWSER_ERROR_MESSAGE = 'This endpoint is not meant to be accessed by a web browser.'
           UPSTREAM_GID_HEADER = 'X-Gitlab-Virtual-Registry-Upstream-Global-Id'
-          MAX_FILE_SIZE = 5.gigabytes
 
           included do
             helpers do
@@ -31,10 +30,6 @@ module API
                     content_type: action_params[:content_type],
                     content_disposition: 'inline'
                   )
-                when :download_digest
-                  content_type 'text/plain'
-                  env['api.format'] = :binary # to return data as-is
-                  body action_params[:digest]
                 end
               end
 
@@ -42,7 +37,7 @@ module API
                 case service_response.reason
                 when :unauthorized
                   unauthorized!
-                when :file_not_found_on_upstreams, :digest_not_found_in_cached_responses
+                when :file_not_found_on_upstreams
                   not_found!(service_response.message)
                 else
                   bad_request!(service_response.message)
@@ -50,31 +45,13 @@ module API
               end
 
               def workhorse_upload_url(url:, upstream:)
-                allow_localhost = Gitlab.dev_or_test_env? ||
-                  Gitlab::CurrentSettings.allow_local_requests_from_web_hooks_and_services?
-                allowed_uris = ObjectStoreSettings.enabled_endpoint_uris
                 send_workhorse_headers(
                   Gitlab::Workhorse.send_dependency(
                     upstream.headers,
                     url,
                     response_headers: NO_BROWSER_EXECUTION_RESPONSE_HEADERS,
-                    allow_localhost: allow_localhost,
-                    allowed_uris: allowed_uris,
-                    ssrf_filter: true,
-                    upload_config: {
-                      headers: { UPSTREAM_GID_HEADER => upstream.to_global_id.to_s },
-                      authorized_upload_response: authorized_upload_response
-                    }
+                    upload_config: { headers: { UPSTREAM_GID_HEADER => upstream.to_global_id.to_s } }
                   )
-                )
-              end
-
-              def authorized_upload_response
-                ::VirtualRegistries::CachedResponseUploader.workhorse_authorize(
-                  has_length: true,
-                  maximum_size: MAX_FILE_SIZE,
-                  use_final_store_path: true,
-                  final_store_path_root_id: registry.id
                 )
               end
 
@@ -83,12 +60,6 @@ module API
                 env['api.format'] = :binary
                 content_type 'application/octet-stream'
                 status :ok
-                body ''
-              end
-
-              def ok_empty_response
-                status :ok
-                env['api.format'] = :binary # to return data as-is
                 body ''
               end
             end

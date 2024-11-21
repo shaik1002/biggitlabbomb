@@ -36,7 +36,7 @@ describe('ExclusionsList component', () => {
   const findPagination = () => wrapper.findComponent(GlKeysetPagination);
   const findConfirmRemoveModal = () => wrapper.findComponent(ConfirmRemovalModal);
   const findByText = (text) => wrapper.findByText(text);
-  const findAddExclusionsButton = () => wrapper.findByTestId('add-exclusions-btn');
+  const findAddExclusionsButton = () => findByText('Add exclusions');
   const findEmptyState = () => wrapper.findComponent(GlEmptyState);
   const findDrawer = () => wrapper.findComponent(AddExclusionsDrawer);
 

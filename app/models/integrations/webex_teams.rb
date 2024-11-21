@@ -1,9 +1,7 @@
 # frozen_string_literal: true
 
 module Integrations
-  class WebexTeams < Integration
-    include Base::ChatNotification
-
+  class WebexTeams < BaseChatNotification
     field :webhook,
       section: SECTION_TYPE_CONNECTION,
       help: 'https://api.ciscospark.com/v1/webhooks/incoming/...',
@@ -36,12 +34,13 @@ module Integrations
 
     def self.help
       build_help_page_url(
-        'user/project/integrations/webex_teams.md',
+        'user/project/integrations/webex_teams',
         s_("WebexTeamsService|Send notifications about project events to Webex Teams.")
       )
     end
 
-    def default_channel_placeholder; end
+    def default_channel_placeholder
+    end
 
     def self.supported_events
       %w[push issue confidential_issue merge_request note confidential_note tag_push pipeline wiki_page]

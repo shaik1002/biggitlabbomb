@@ -13,9 +13,6 @@ module Gitlab
 
         def find(timeout: nil)
           if ignore_alternate_directories?
-            return oversized_blobs(timeout: timeout) if Feature.enabled?(
-              :check_oversized_blobs_without_blob_stitcher, project)
-
             blobs = repository.list_all_blobs(bytes_limit: 0, dynamic_timeout: timeout,
               ignore_alternate_object_directories: true).to_a
 
@@ -32,12 +29,6 @@ module Gitlab
 
         attr_reader :project, :repository, :changes, :file_size_limit_megabytes
 
-        def oversized_blobs(timeout: nil)
-          oversized_blobs = repository.list_oversized_blobs(bytes_limit: 0, dynamic_timeout: timeout,
-            ignore_alternate_object_directories: true, file_size_limit_megabytes: file_size_limit_megabytes).to_a
-          filter_existing(oversized_blobs)
-        end
-
         def filter_existing(blobs)
           gitaly_repo = repository.gitaly_repository.dup.tap { |repo| repo.git_object_directory = "" }
 
@@ -48,6 +39,8 @@ module Gitlab
         end
 
         def ignore_alternate_directories?
+          return false if Feature.enabled?(:dont_ignore_alternate_directories, project)
+
           git_env = ::Gitlab::Git::HookEnv.all(repository.gl_repository)
 
           git_env['GIT_OBJECT_DIRECTORY_RELATIVE'].present?

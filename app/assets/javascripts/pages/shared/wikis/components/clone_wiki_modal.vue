@@ -94,7 +94,7 @@ export default {
       :item="listItem"
     >
       <template #list-item>
-        <gl-icon name="branch" class="gl-mr-2" variant="subtle" />
+        <gl-icon name="branch" class="gl-mr-2 gl-text-secondary" />
         {{ listItem.text }}
       </template>
     </gl-disclosure-dropdown-item>
@@ -132,6 +132,7 @@ export default {
               <clipboard-button
                 :text="cloneSshUrlDisplay"
                 :title="$options.i18n.copyToClipboard"
+                data-clipboard-text
                 data-clipboard-target="#clone-ssh-url"
               />
             </template>
@@ -150,6 +151,7 @@ export default {
               <clipboard-button
                 :text="cloneHttpUrlDisplay"
                 :title="$options.i18n.copyToClipboard"
+                data-clipboard-text
                 data-clipboard-target="#clone-http-url"
               />
             </template>
@@ -173,6 +175,7 @@ export default {
               <clipboard-button
                 :text="directoryCommand"
                 :title="$options.i18n.copyToClipboard"
+                data-clipboard-text
                 data-clipboard-target="#go-to-directory"
               />
             </template>
@@ -191,6 +194,7 @@ export default {
               <clipboard-button
                 :text="installCommand"
                 :title="$options.i18n.copyToClipboard"
+                data-clipboard-text
                 data-clipboard-target="#install-gollum"
               />
             </template>
@@ -209,6 +213,7 @@ export default {
               <clipboard-button
                 :text="gollumCommand"
                 :title="$options.i18n.copyToClipboard"
+                data-clipboard-text
                 data-clipboard-target="#run-gollum"
               />
             </template>

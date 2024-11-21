@@ -10,15 +10,6 @@ RSpec.describe WikiPage::Meta, feature_category: :wiki do
     it { is_expected.to belong_to(:project) }
     it { is_expected.to have_many(:slugs) }
     it { is_expected.to have_many(:events) }
-    it { is_expected.to have_many(:notes) }
-
-    it do
-      is_expected
-        .to have_many(:user_mentions)
-        .class_name('Wikis::UserMention')
-        .with_foreign_key('wiki_page_meta_id')
-        .inverse_of('wiki_page_meta')
-    end
 
     it 'can find slugs' do
       meta = create(:wiki_page_meta)
@@ -49,22 +40,6 @@ RSpec.describe WikiPage::Meta, feature_category: :wiki do
       in_violation = build(:wiki_page_meta, namespace: nil, project: nil)
 
       expect(in_violation).not_to be_valid
-    end
-  end
-
-  describe '#resource_parent' do
-    subject { described_class.new(title: 'some title', project: project) }
-
-    it 'returns container' do
-      expect(subject.resource_parent).to eq(project)
-    end
-  end
-
-  describe '#to_reference' do
-    it 'returns a canonical slug as reference to the object' do
-      meta = create(:wiki_page_meta, canonical_slug: 'foo')
-
-      expect(meta.to_reference).to eq('foo')
     end
   end
 

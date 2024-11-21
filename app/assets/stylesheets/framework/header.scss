@@ -32,6 +32,12 @@
     max-width: unset;
   }
 
+  .no-emoji-placeholder {
+    svg {
+      fill: var(--gray-500, $gray-500);
+    }
+  }
+
   .emoji-menu-toggle-button {
     @include emoji-menu-toggle-button;
     padding: $gl-vert-padding $gl-btn-padding;
@@ -61,7 +67,7 @@
   top: $calc-system-headers-height;
   left: 0;
   right: 0;
-  background-color: var(--gl-color-brand-charcoal);
+  background-color: $brand-charcoal;
 
   @media (forced-colors: active) {
     border-bottom: 1px solid;
@@ -84,16 +90,16 @@
 
   &:hover,
   &:focus {
-    background-color: var(--gl-color-brand-gray-04);
+    background-color: $brand-gray-04;
   }
 
   &:focus,
   &:active {
-    @apply gl-focus;
+    @include gl-focus;
   }
 
   &:active {
-    background-color: var(--gl-color-brand-gray-03);
+    background-color: $brand-gray-03;
   }
 
   img {
@@ -126,29 +132,29 @@
     padding: 6px 8px;
     height: 32px;
     border-radius: $gl-border-radius-base;
-    color: var(--gl-color-neutral-100);
+    color: $gray-100;
     font-weight: $gl-font-weight-normal;
     font-size: $gl-font-size;
 
     &:hover,
     &:focus,
     &:active {
-      color: var(--gl-color-neutral-0);
+      color: $white;
     }
 
     &:hover,
     &:focus {
-      background-color: var(--gl-color-brand-gray-04);
+      background-color: $brand-gray-04;
       text-decoration: none;
     }
 
     &:focus,
     &:active {
-      @apply gl-focus;
+      @include gl-focus;
     }
 
     &:active {
-      background-color: var(--gl-color-brand-gray-03);
+      background-color: $brand-gray-03;
     }
   }
 }

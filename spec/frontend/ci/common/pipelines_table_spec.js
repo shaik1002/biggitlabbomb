@@ -1,9 +1,5 @@
-import Vue from 'vue';
-import VueApollo from 'vue-apollo';
 import { GlTableLite, GlSkeletonLoader } from '@gitlab/ui';
-// fixture located in spec/frontend/fixtures/pipelines.rb
 import fixture from 'test_fixtures/pipelines/pipelines.json';
-import createMockApollo from 'helpers/mock_apollo_helper';
 import { mockTracking, unmockTracking } from 'helpers/tracking_helper';
 import { mountExtended } from 'helpers/vue_test_utils_helper';
 import LegacyPipelineMiniGraph from '~/ci/pipeline_mini_graph/legacy_pipeline_mini_graph/legacy_pipeline_mini_graph.vue';
@@ -22,8 +18,6 @@ import {
 
 import CiIcon from '~/vue_shared/components/ci_icon/ci_icon.vue';
 
-Vue.use(VueApollo);
-
 describe('Pipelines Table', () => {
   let wrapper;
   let trackingSpy;
@@ -35,7 +29,6 @@ describe('Pipelines Table', () => {
 
   const provideWithFailedJobsWidget = {
     useFailedJobsWidget: true,
-    graphqlPath: 'api/graphql',
   };
 
   const { pipelines } = fixture;
@@ -61,7 +54,6 @@ describe('Pipelines Table', () => {
         PipelineOperations: true,
         ...stubs,
       },
-      apolloProvider: createMockApollo(),
     });
   };
 
@@ -196,31 +188,20 @@ describe('Pipelines Table', () => {
           createComponent({ provide: provideWithFailedJobsWidget });
         });
 
-        it('adds extra rows if pipelines have failed jobs', () => {
-          const pipelinesWithFailedJobs = pipelines.filter((p) => p.failed_builds_count > 0).length;
-
+        it('renders', () => {
+          // We have 2 rows per pipeline with the widget
+          expect(findTableRows()).toHaveLength(pipelines.length * 2);
           expect(findPipelineFailureWidget().exists()).toBe(true);
-          // We add a row to each pipeline with failed jobs
-          expect(findTableRows()).toHaveLength(pipelines.length + pipelinesWithFailedJobs);
         });
 
         it('passes the expected props', () => {
           expect(findPipelineFailureWidget().props()).toStrictEqual({
+            failedJobsCount: firstPipeline.failed_builds_count,
             isPipelineActive: firstPipeline.active,
             pipelineIid: firstPipeline.iid,
             pipelinePath: firstPipeline.path,
             // Make sure the forward slash was removed
             projectPath: 'frontend-fixtures/pipelines-project',
-          });
-        });
-
-        it('applies correct class to row', () => {
-          findTableRows().wrappers.forEach((row) => {
-            if (row.attributes('class').includes('details')) {
-              expect(row.attributes('class')).not.toContain('!gl-border-b');
-            } else {
-              expect(row.attributes('class')).toContain('!gl-border-b');
-            }
           });
         });
       });

@@ -34,6 +34,7 @@ class Profiles::NotificationsController < Profiles::ApplicationController
     GroupsFinder.new(current_user, all_available: false).execute.order_name_asc.page(pagination_params[:page])
   end
 
+  # rubocop: disable CodeReuse/ActiveRecord
   def project_notifications_with_preloaded_associations
     project_notifications = current_user
       .notification_settings
@@ -50,6 +51,7 @@ class Profiles::NotificationsController < Profiles::ApplicationController
 
     project_notifications.select { |notification| current_user.can?(:read_project, notification.source) }
   end
+  # rubocop: enable CodeReuse/ActiveRecord
 
   def project_associations
     { namespace: [:route, :owner], group: [], creator: [], project_setting: [] }

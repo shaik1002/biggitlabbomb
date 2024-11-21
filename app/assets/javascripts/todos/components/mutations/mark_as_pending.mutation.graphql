@@ -1,8 +1,9 @@
+#import "../queries/todo.fragment.graphql"
+
 mutation markAsPending($todoId: TodoID!) {
   toggleStatus: todoRestore(input: { id: $todoId }) {
     todo {
-      id
-      state
+      ...Todo
     }
     errors
   }

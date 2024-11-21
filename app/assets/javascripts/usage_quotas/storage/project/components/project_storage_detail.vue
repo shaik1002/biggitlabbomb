@@ -1,7 +1,12 @@
 <script>
 import { GlIcon, GlLink, GlSprintf, GlTableLite, GlPopover } from '@gitlab/ui';
 import NumberToHumanSize from '~/vue_shared/components/number_to_human_size/number_to_human_size.vue';
-import { sprintf, s__ } from '~/locale';
+import { sprintf } from '~/locale';
+import {
+  HELP_LINK_ARIA_LABEL,
+  PROJECT_TABLE_LABEL_STORAGE_TYPE,
+  PROJECT_TABLE_LABEL_USAGE,
+} from '../../constants';
 import StorageTypeIcon from './storage_type_icon.vue';
 
 export default {
@@ -23,7 +28,7 @@ export default {
   },
   methods: {
     helpLinkAriaLabel(linkTitle) {
-      return sprintf(s__('UsageQuota|%{linkTitle} help link'), {
+      return sprintf(HELP_LINK_ARIA_LABEL, {
         linkTitle,
       });
     },
@@ -31,12 +36,12 @@ export default {
   projectTableFields: [
     {
       key: 'storageType',
-      label: s__('UsageQuota|Storage type'),
+      label: PROJECT_TABLE_LABEL_STORAGE_TYPE,
       thClass: 'gl-w-9/10',
     },
     {
       key: 'value',
-      label: s__('UsageQuota|Usage'),
+      label: PROJECT_TABLE_LABEL_USAGE,
       thClass: 'gl-w-1/10',
     },
   ],

@@ -15,10 +15,7 @@ module Projects
     end
 
     def execute
-      unless can?(current_user, :remove_project, project)
-        project.update_attribute(:pending_delete, false) if project.pending_delete?
-        return false
-      end
+      return false unless can?(current_user, :remove_project, project)
 
       project.update_attribute(:pending_delete, true)
 
@@ -41,7 +38,7 @@ module Projects
 
       attempt_destroy(project)
 
-      execute_hooks(project)
+      system_hook_service.execute_hooks_for(project, :destroy)
       log_info("Project \"#{project.full_path}\" was deleted")
 
       publish_project_deleted_event_for(project)
@@ -154,10 +151,6 @@ module Projects
       destroy_project_related_records(project)
     end
 
-    def execute_hooks(project)
-      system_hook_service.execute_hooks_for(project, :destroy)
-    end
-
     def destroy_project_related_records(project)
       log_destroy_event
       trash_relation_repositories!
@@ -177,15 +170,7 @@ module Projects
       #
       # Exclude container repositories because its before_destroy would be
       # called multiple times, and it doesn't destroy any database records.
-
-      Gitlab::Database::QueryAnalyzers::PreventCrossDatabaseModification.temporary_ignore_tables_in_transaction(
-        %w[
-          vulnerabilities
-          notes
-        ], url: 'https://gitlab.com/gitlab-org/gitlab/-/issues/485803'
-      ) do
-        project.destroy_dependent_associations_in_batches(exclude: [:container_repositories, :snippets])
-      end
+      project.destroy_dependent_associations_in_batches(exclude: [:container_repositories, :snippets])
       project.destroy!
     rescue ActiveRecord::RecordNotDestroyed => e
       raise_error(

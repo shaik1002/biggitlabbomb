@@ -21,8 +21,11 @@ SimpleCovEnv.start!
 require './spec/crystalball_env'
 CrystalballEnv.start!
 
+require_relative 'support/struct_with_kwargs'
+
 ENV["RAILS_ENV"] = 'test'
 ENV["IN_MEMORY_APPLICATION_SETTINGS"] = 'true'
+ENV["RSPEC_ALLOW_INVALID_URLS"] = 'true'
 
 require_relative '../config/environment'
 
@@ -33,7 +36,7 @@ require 'rspec-parameterized'
 require 'shoulda/matchers'
 require 'test_prof/recipes/rspec/let_it_be'
 require 'test_prof/factory_default'
-require 'test_prof/factory_prof/nate_heckler'
+require 'test_prof/factory_prof/nate_heckler' if ENV.fetch('ENABLE_FACTORY_PROF', 'true') == 'true'
 require 'parslet/rig/rspec'
 require 'axe-rspec'
 
@@ -90,12 +93,8 @@ RSpec.configure do |config|
 
   config.infer_spec_type_from_file_location!
 
-  config.define_derived_metadata(file_path: %r{(ee)?/spec/presenters/(ee)?}) do |metadata|
-    metadata[:type] = :presenter
-  end
-
   # Add :full_backtrace tag to an example if full_backtrace output is desired
-  config.before(:each, :full_backtrace) do |example|
+  config.before(:each, full_backtrace: true) do |example|
     config.full_backtrace = true
   end
 
@@ -148,9 +147,6 @@ RSpec.configure do |config|
     # Admin controller specs get auto admin mode enabled since they are
     # protected by the 'EnforcesAdminAuthentication' concern
     metadata[:enable_admin_mode] = true if %r{(ee)?/spec/controllers/admin/}.match?(location)
-
-    # The worker specs get Sidekiq context
-    metadata[:with_sidekiq_context] = true if %r{(ee)?/spec/workers/}.match?(location)
   end
 
   config.define_derived_metadata(file_path: %r{(ee)?/spec/.+_docs\.rb\z}) do |metadata|
@@ -184,14 +180,13 @@ RSpec.configure do |config|
   config.include WaitHelpers, type: :feature
   config.include WaitForRequests, type: :feature
   config.include Features::DomHelpers, type: :feature
-  config.include TestidHelpers, type: :feature
-  config.include TestidHelpers, type: :component
   config.include Features::HighlightContentHelper, type: :feature
   config.include EmailHelpers, :mailer, type: :mailer
   config.include Warden::Test::Helpers, type: :request
   config.include Gitlab::Routing, type: :routing
   config.include ApiHelpers, :api
   config.include CookieHelper, :js
+  config.include InputHelper, :js
   config.include SelectionHelper, :js
   config.include InspectRequests, :js
   config.include LiveDebugger, :js
@@ -199,7 +194,6 @@ RSpec.configure do |config|
   config.include RedisHelpers
   config.include Rails.application.routes.url_helpers, type: :routing
   config.include Rails.application.routes.url_helpers, type: :component
-  config.include Rails.application.routes.url_helpers, type: :presenter
   config.include PolicyHelpers, type: :policy
   config.include ExpectRequestWithStatus, type: :request
   config.include IdempotentWorkerHelper, type: :worker
@@ -220,6 +214,7 @@ RSpec.configure do |config|
   config.include UserWithNamespaceShim
   config.include OrphanFinalArtifactsCleanupHelpers, :orphan_final_artifacts_cleanup
   config.include ClickHouseHelpers, :click_house
+  config.include DisableNamespaceOrganizationValidationHelper
 
   config.include_context 'when rendered has no HTML escapes', type: :view
 
@@ -336,6 +331,13 @@ RSpec.configure do |config|
       # Keep-around refs should only be turned off for specific projects/repositories.
       stub_feature_flags(disable_keep_around_refs: false)
 
+      # The Vue version of the merge request list app is missing a lot of information
+      # disabling this for now whilst we work on it across multiple merge requests
+      stub_feature_flags(vue_merge_request_list: false)
+
+      # Work in progress reviewer sidebar that does not have most of the features yet
+      stub_feature_flags(reviewer_assign_drawer: false)
+
       # Disable suspending ClickHouse data ingestion workers
       stub_feature_flags(suspend_click_house_data_ingestion: false)
 
@@ -347,6 +349,10 @@ RSpec.configure do |config|
       # See https://gitlab.com/gitlab-org/gitlab/-/issues/457283
       stub_feature_flags(duo_chat_requires_licensed_seat_sm: false)
 
+      # This flag is for [Selectively disable by actor](https://docs.gitlab.com/ee/development/feature_flags/controls.html#selectively-disable-by-actor).
+      # Hence, it should not enable by default in test.
+      stub_feature_flags(v2_chat_agent_integration_override: false) if Gitlab.ee?
+
       # Experimental merge request dashboard
       stub_feature_flags(merge_request_dashboard: false)
 
@@ -354,12 +360,9 @@ RSpec.configure do |config|
       # Please see https://gitlab.com/gitlab-org/gitlab/-/issues/466081 for tracking revisiting this.
       stub_feature_flags(your_work_projects_vue: false)
 
-      # This feature flag allows enabling self-hosted features on Staging Ref: https://gitlab.com/gitlab-org/gitlab/-/issues/497784
-      stub_feature_flags(allow_self_hosted_features_for_com: false)
-
-      # Our test suite is setup to test plain text editor by default with separate tests just
-      # for the rich text editor. Switch the flag off to continue testing the same way as before
-      stub_feature_flags(rich_text_editor_as_default: false)
+      # disable license check by default, while migrating code to account for license. We still want out specs to be
+      # able to check functionality when license is enabled or disabled.
+      stub_feature_flags(enforce_check_group_level_work_items_license: false)
     else
       unstub_all_feature_flags
     end
@@ -421,7 +424,7 @@ RSpec.configure do |config|
     ::Gitlab::SafeRequestStore.ensure_request_store { example.run }
   end
 
-  config.around do |example|
+  config.around(:example, :ci_config_feature_flag_correctness) do |example|
     ::Gitlab::Ci::Config::FeatureFlags.ensure_correct_usage do
       example.run
     end

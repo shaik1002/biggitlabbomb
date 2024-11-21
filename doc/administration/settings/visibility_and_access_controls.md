@@ -39,14 +39,9 @@ Prerequisites:
 1. Expand **Visibility and access controls**.
 1. For **Default project creation protection**, select the desired roles:
    - No one.
-   - Administrators.
    - Maintainers.
    - Developers and Maintainers.
 1. Select **Save changes**.
-
-NOTE:
-If you select **Administrators** and [Admin Mode](sign_in_restrictions.md#admin-mode)
-is turned on, administrators must enter Admin Mode to create new projects.
 
 ## Restrict project deletion to administrators
 
@@ -68,11 +63,6 @@ To restrict project deletion to only administrators:
 1. Scroll to:
    - (GitLab 15.1 and later) **Allowed to delete projects**, and select **Administrators**.
    - (GitLab 15.0 and earlier) **Default project deletion protection**, and select **Only admins can delete project**.
-1. Select **Save changes**.
-
-To disable the restriction:
-
-1. Select **Owners and administrators**.
 1. Select **Save changes**.
 
 ## Deletion protection
@@ -258,8 +248,7 @@ Prerequisites:
 1. Select **Save changes**.
 
 NOTE:
-You cannot restrict a visibility level that is set as the default for new projects or groups.
-Conversely, you cannot set a restricted visibility level as the default for new projects or groups.
+You cannot select the restricted default visibility level for new projects and groups.
 
 ## Configure enabled Git access protocols
 

@@ -18,7 +18,6 @@ module Users
     BRANCH_RULES_TIP_CALLOUT = 'branch_rules_tip_callout'
     TRANSITION_TO_JIHU_CALLOUT = 'transition_to_jihu_callout'
     PERIOD_IN_TERRAFORM_STATE_NAME_ALERT = 'period_in_terraform_state_name_alert'
-    NEW_MR_DASHBOARD_BANNER = 'new_mr_dashboard_banner'
 
     def show_gke_cluster_integration_callout?(project)
       active_nav_link?(controller: sidebar_operations_paths) &&
@@ -30,9 +29,11 @@ module Users
       !user_dismissed?(GCP_SIGNUP_OFFER)
     end
 
-    def render_dashboard_ultimate_trial(user); end
+    def render_dashboard_ultimate_trial(user)
+    end
 
-    def render_two_factor_auth_recovery_settings_check; end
+    def render_two_factor_auth_recovery_settings_check
+    end
 
     def show_suggest_popover?
       !user_dismissed?(SUGGEST_POPOVER_DISMISSED)
@@ -63,7 +64,8 @@ module Users
         controller.controller_path.match?(%r{^admin(/\S*)?$})
     end
 
-    def dismiss_two_factor_auth_recovery_settings_check; end
+    def dismiss_two_factor_auth_recovery_settings_check
+    end
 
     def show_security_newsletter_user_callout?
       current_user&.can_admin_all_resources? &&
@@ -93,10 +95,6 @@ module Users
 
     def show_period_in_terraform_state_name_alert_callout?
       !user_dismissed?(PERIOD_IN_TERRAFORM_STATE_NAME_ALERT)
-    end
-
-    def show_new_mr_dashboard_banner?
-      !user_dismissed?(NEW_MR_DASHBOARD_BANNER)
     end
 
     private

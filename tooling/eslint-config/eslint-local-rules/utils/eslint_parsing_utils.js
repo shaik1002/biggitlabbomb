@@ -10,9 +10,7 @@ module.exports = {
    * @returns {Object} The merged visitor.
    */
   defineTemplateBodyVisitor(context, templateBodyVisitor, scriptVisitor) {
-    const { parserServices } = context.sourceCode;
-
-    if (parserServices.defineTemplateBodyVisitor == null) {
+    if (context.parserServices.defineTemplateBodyVisitor == null) {
       context.report({
         loc: { line: 1, column: 0 },
         message:
@@ -20,6 +18,6 @@ module.exports = {
       });
       return {};
     }
-    return parserServices.defineTemplateBodyVisitor(templateBodyVisitor, scriptVisitor);
+    return context.parserServices.defineTemplateBodyVisitor(templateBodyVisitor, scriptVisitor);
   },
 };

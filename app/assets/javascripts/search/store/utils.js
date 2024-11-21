@@ -2,7 +2,8 @@ import { isEqual, orderBy, isEmpty } from 'lodash';
 import AccessorUtilities from '~/lib/utils/accessor';
 import { formatNumber } from '~/locale';
 import { joinPaths, queryToObject, objectToQuery, getBaseURL } from '~/lib/utils/url_utility';
-import { LABEL_AGREGATION_NAME, LANGUAGE_FILTER_PARAM } from '~/search/sidebar/constants';
+import { languageFilterData } from '~/search/sidebar/components/language_filter/data';
+import { LABEL_AGREGATION_NAME } from '~/search/sidebar/components/label_filter/data';
 import {
   MAX_FREQUENT_ITEMS,
   MAX_FREQUENCY,
@@ -11,6 +12,8 @@ import {
   REGEX_PARAM,
   LS_REGEX_HANDLE,
 } from './constants';
+
+const LANGUAGE_AGGREGATION_NAME = languageFilterData.filterParam;
 
 function extractKeys(object, keyList) {
   return Object.fromEntries(keyList.map((key) => [key, object[key]]));
@@ -138,7 +141,7 @@ export const getAggregationsUrl = () => {
 };
 
 const sortLanguages = (state, entries) => {
-  const queriedLanguages = state.query?.[LANGUAGE_FILTER_PARAM] || [];
+  const queriedLanguages = state.query?.[LANGUAGE_AGGREGATION_NAME] || [];
 
   if (!Array.isArray(queriedLanguages) || !queriedLanguages.length) {
     return entries;
@@ -157,7 +160,7 @@ const getUniqueNamesOnly = (items) => {
 
 export const prepareSearchAggregations = (state, aggregationData) =>
   aggregationData.map((item) => {
-    if (item?.name === LANGUAGE_FILTER_PARAM) {
+    if (item?.name === LANGUAGE_AGGREGATION_NAME) {
       return {
         ...item,
         buckets: sortLanguages(state, item.buckets),

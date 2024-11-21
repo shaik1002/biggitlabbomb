@@ -317,7 +317,7 @@ secondary site is a read-only copy.
    1. Select **Geo > Sites**.
    1. Select **Add site**.
 
-      ![Form to add a new secondary Geo site](../replication/img/adding_a_secondary_v15_8.png)
+      ![Add secondary site](../replication/img/adding_a_secondary_v15_8.png)
 
    1. In **Name**, enter the value for `gitlab_rails['geo_node_name']` in
       `/etc/gitlab/gitlab.rb`. The values must match exactly.
@@ -430,7 +430,7 @@ the tracking database on port 5432.
 Create and configure the tracking database in your PostgreSQL instance:
 
 1. Set up PostgreSQL according to the
-   [database requirements document](../../../install/requirements.md#postgresql).
+   [database requirements document](../../../install/requirements.md#database).
 1. Set up a `gitlab_geo` user with a password of your choice, create the `gitlabhq_geo_production` database, and make the user an owner of the database.
    You can see an example of this setup in the [self-compiled installation documentation](../../../install/installation.md#7-database).
 1. If you are **not** using a cloud-managed PostgreSQL database, ensure that your secondary

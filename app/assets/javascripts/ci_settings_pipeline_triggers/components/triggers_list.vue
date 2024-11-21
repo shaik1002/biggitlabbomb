@@ -87,8 +87,7 @@ export default {
       key: 'actions',
       label: __('Actions'),
       tdClass: 'gl-text-right gl-whitespace-nowrap',
-      thAlignRight: true,
-      thClass: `gl-w-1/20`,
+      thClass: `gl-text-right gl-w-1/20`,
     },
   ],
   computed: {

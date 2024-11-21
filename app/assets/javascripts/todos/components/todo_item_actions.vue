@@ -2,8 +2,7 @@
 import { GlButton, GlTooltipDirective } from '@gitlab/ui';
 import { reportToSentry } from '~/ci/utils';
 import { s__ } from '~/locale';
-import Tracking from '~/tracking';
-import { INSTRUMENT_TODO_ITEM_CLICK, TODO_STATE_DONE, TODO_STATE_PENDING } from '../constants';
+import { TODO_STATE_DONE, TODO_STATE_PENDING } from '../constants';
 import markAsDoneMutation from './mutations/mark_as_done.mutation.graphql';
 import markAsPendingMutation from './mutations/mark_as_pending.mutation.graphql';
 
@@ -14,12 +13,16 @@ export default {
   directives: {
     GlTooltip: GlTooltipDirective,
   },
-  mixins: [Tracking.mixin()],
   props: {
     todo: {
       type: Object,
       required: true,
     },
+  },
+  data() {
+    return {
+      isLoading: false,
+    };
   },
   computed: {
     isDone() {
@@ -28,8 +31,8 @@ export default {
     isPending() {
       return this.todo.state === TODO_STATE_PENDING;
     },
-    tooltipTitle() {
-      return this.isDone ? this.$options.i18n.markAsPending : this.$options.i18n.markAsDone;
+    targetPath() {
+      return this.todo.targetPath;
     },
   },
   methods: {
@@ -54,39 +57,28 @@ export default {
       });
     },
     async toggleStatus() {
-      this.track(INSTRUMENT_TODO_ITEM_CLICK, {
-        label: this.isDone ? 'mark_pending' : 'mark_done',
-      });
       const mutation = this.isDone ? markAsPendingMutation : markAsDoneMutation;
       const showError = this.isDone ? this.showMarkAsPendingError : this.showMarkAsDoneError;
 
       try {
+        this.isLoading = true;
+
         const { data } = await this.$apollo.mutate({
           mutation,
           variables: {
             todoId: this.todo.id,
-          },
-          optimisticResponse: {
-            toggleStatus: {
-              todo: {
-                id: this.todo.id,
-                state: this.isDone ? TODO_STATE_PENDING : TODO_STATE_DONE,
-                __typename: 'Todo',
-              },
-              errors: [],
-            },
           },
         });
 
         if (data.errors?.length > 0) {
           reportToSentry(this.$options.name, new Error(data.errors.join(', ')));
           showError();
-        } else {
-          this.$emit('change', this.todo.id, this.isDone);
         }
       } catch (failure) {
         reportToSentry(this.$options.name, failure);
         showError();
+      } finally {
+        this.isLoading = false;
       }
     },
   },
@@ -101,8 +93,9 @@ export default {
   <gl-button
     v-gl-tooltip.hover
     :icon="isDone ? 'redo' : 'check'"
+    :loading="isLoading"
     :aria-label="isDone ? $options.i18n.markAsPending : $options.i18n.markAsDone"
-    :title="tooltipTitle"
+    :title="isDone ? $options.i18n.markAsPending : $options.i18n.markAsDone"
     @click.prevent="toggleStatus"
   />
 </template>

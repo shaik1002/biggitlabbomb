@@ -9,13 +9,11 @@ module Import
     presents ::BulkImport, as: :bulk_import
 
     def show_alert?
-      Feature.enabled?(:importer_user_mapping, current_user) &&
-        Feature.enabled?(:bulk_import_importer_user_mapping, current_user) &&
-        groups_awaiting_placeholder_assignment.any?
+      Feature.enabled?(:importer_user_mapping, current_user) && groups_awaiting_placeholder_assignment.any?
     end
 
     def groups_awaiting_placeholder_assignment
-      return [] unless bulk_import&.finished?
+      return [] unless bulk_import
 
       namespaces = bulk_import.namespaces_with_unassigned_placeholders
       namespaces.select do |namespace|
@@ -31,7 +29,7 @@ module Import
     end
 
     def source_hostname
-      Gitlab::Utils.parse_url(bulk_import.configuration.url).host
+      bulk_import.configuration.source_hostname
     end
 
     def title
@@ -57,7 +55,7 @@ module Import
       groups_awaiting_placeholder_assignment.collect do |namespace|
         placeholders << "%{group_#{namespace.id}_link_start}#{namespace.name}%{group_#{namespace.id}_link_end}"
         tag_pairs << tag_pair(
-          tag.a(href: group_group_members_path(namespace, tab: 'placeholders')),
+          tag.a(href: group_group_members_path(namespace)),
           :"group_#{namespace.id}_link_start",
           :"group_#{namespace.id}_link_end"
         )

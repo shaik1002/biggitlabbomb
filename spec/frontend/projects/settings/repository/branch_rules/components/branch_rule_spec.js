@@ -1,6 +1,5 @@
 import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
 import BranchRule from '~/projects/settings/repository/branch_rules/components/branch_rule.vue';
-import ProtectedBadge from '~/vue_shared/components/badges/protected_badge.vue';
 import {
   branchRuleProvideMock,
   branchRulePropsMock,
@@ -13,9 +12,6 @@ describe('Branch rule', () => {
   const createComponent = (props = {}) => {
     wrapper = shallowMountExtended(BranchRule, {
       provide: branchRuleProvideMock,
-      stubs: {
-        ProtectedBadge,
-      },
       propsData: { ...branchRulePropsMock, ...props },
     });
   };

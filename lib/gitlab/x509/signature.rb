@@ -52,7 +52,6 @@ module Gitlab
 
         :unverified
       end
-      alias_method :reverified_status, :verification_status
 
       private
 
@@ -69,9 +68,7 @@ module Gitlab
 
           if Feature.enabled?(:x509_forced_cert_loading, type: :ops)
             # Forcibly load the default cert file because the OpenSSL library seemingly ignores it
-            if File.exist?(Gitlab::X509::Certificate.default_cert_file)
-              store.add_file(Gitlab::X509::Certificate.default_cert_file)
-            end
+            store.add_file(Gitlab::X509::Certificate.default_cert_file) if File.exist?(Gitlab::X509::Certificate.default_cert_file) # rubocop:disable Layout/LineLength
           end
 
           # valid_signing_time? checks the time attributes already

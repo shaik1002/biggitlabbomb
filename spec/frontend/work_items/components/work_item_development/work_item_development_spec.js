@@ -11,7 +11,7 @@ import { STATE_CLOSED, STATE_OPEN } from '~/work_items/constants';
 import {
   workItemResponseFactory,
   workItemDevelopmentFragmentResponse,
-  workItemDevelopmentMRNodes,
+  workItemDevelopmentNodes,
 } from 'jest/work_items/mock_data';
 
 import WorkItemDevelopment from '~/work_items/components/work_item_development/work_item_development.vue';
@@ -30,15 +30,11 @@ describe('WorkItemDevelopment CE', () => {
   });
   const workItemWithOneMR = workItemResponseFactory({
     developmentWidgetPresent: true,
-    developmentItems: workItemDevelopmentFragmentResponse(
-      [workItemDevelopmentMRNodes[0]],
-      true,
-      null,
-    ),
+    developmentItems: workItemDevelopmentFragmentResponse([workItemDevelopmentNodes[0]], true),
   });
   const workItemWithMRList = workItemResponseFactory({
     developmentWidgetPresent: true,
-    developmentItems: workItemDevelopmentFragmentResponse(workItemDevelopmentMRNodes, true, null),
+    developmentItems: workItemDevelopmentFragmentResponse(workItemDevelopmentNodes, true),
   });
 
   const projectWorkItemResponseWithMRList = {
@@ -98,11 +94,11 @@ describe('WorkItemDevelopment CE', () => {
   const workItemWithEmptyMRList = workItemResponseFactory({
     canUpdate: true,
     developmentWidgetPresent: true,
-    developmentItems: workItemDevelopmentFragmentResponse([], false, null),
+    developmentItems: workItemDevelopmentFragmentResponse([]),
   });
   const workItemWithAutoCloseFlagEnabled = workItemResponseFactory({
     developmentWidgetPresent: true,
-    developmentItems: workItemDevelopmentFragmentResponse(workItemDevelopmentMRNodes, true, null),
+    developmentItems: workItemDevelopmentFragmentResponse(workItemDevelopmentNodes, true),
   });
 
   const successQueryHandlerWithEmptyMRList = jest.fn().mockResolvedValue({
@@ -268,8 +264,8 @@ describe('WorkItemDevelopment CE', () => {
     it.each`
       queryHandler                             | message                                                            | workItemState   | linkedMRsNumber
       ${successQueryHandlerWithOneMR}          | ${'This task will be closed when the following is merged.'}        | ${STATE_OPEN}   | ${1}
-      ${successQueryHandlerWithMRList}         | ${'This task will be closed when any of the following is merged.'} | ${STATE_OPEN}   | ${workItemDevelopmentMRNodes.length}
-      ${successQueryHandlerWithClosedWorkItem} | ${'The task was closed automatically when a branch was merged.'}   | ${STATE_CLOSED} | ${workItemDevelopmentMRNodes.length}
+      ${successQueryHandlerWithMRList}         | ${'This task will be closed when any of the following is merged.'} | ${STATE_OPEN}   | ${workItemDevelopmentNodes.length}
+      ${successQueryHandlerWithClosedWorkItem} | ${'The task was closed automatically when a branch was merged.'}   | ${STATE_CLOSED} | ${workItemDevelopmentNodes.length}
     `(
       'when the workItemState is `$workItemState` and number of linked MRs is `$linkedMRsNumber` shows message `$message`',
       async ({ queryHandler, message }) => {

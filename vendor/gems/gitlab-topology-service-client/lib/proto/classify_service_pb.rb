@@ -3,30 +3,29 @@
 
 require 'google/protobuf'
 
-require 'google/api/annotations_pb'
 require 'proto/cell_info_pb'
-
+require 'google/api/annotations_pb'
 Google::Protobuf::DescriptorPool.generated_pool.build do
   add_file("proto/classify_service.proto", :syntax => :proto3) do
     add_message "gitlab.cells.topology_service.ClassifyRequest" do
-      optional :type, :enum, 2, "gitlab.cells.topology_service.ClassifyType", json_name: "type"
-      optional :value, :string, 3, json_name: "value"
+      optional :type, :enum, 2, "gitlab.cells.topology_service.ClassifyType"
+      optional :value, :string, 3
     end
     add_message "gitlab.cells.topology_service.ProxyInfo" do
-      optional :address, :string, 1, json_name: "address"
+      optional :address, :string, 1
     end
     add_message "gitlab.cells.topology_service.ClassifyResponse" do
-      optional :action, :enum, 1, "gitlab.cells.topology_service.ClassifyAction", json_name: "action"
-      optional :proxy, :message, 2, "gitlab.cells.topology_service.ProxyInfo", json_name: "proxy"
+      optional :action, :enum, 1, "gitlab.cells.topology_service.ClassifyAction"
+      optional :proxy, :message, 2, "gitlab.cells.topology_service.ProxyInfo"
     end
     add_enum "gitlab.cells.topology_service.ClassifyType" do
-      value :UNSPECIFIED, 0
-      value :FIRST_CELL, 1
-      value :SESSION_PREFIX, 2
+      value :UnknownType, 0
+      value :FirstCell, 1
+      value :SessionPrefix, 2
     end
     add_enum "gitlab.cells.topology_service.ClassifyAction" do
-      value :ACTION_UNSPECIFIED, 0
-      value :PROXY, 1
+      value :UnknownAction, 0
+      value :Proxy, 1
     end
   end
 end

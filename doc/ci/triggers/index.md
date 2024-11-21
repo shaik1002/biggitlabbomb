@@ -88,7 +88,7 @@ In each example, replace:
 
 ### Use a CI/CD job
 
-You can use a CI/CD job with a pipeline trigger token to trigger pipelines when another pipeline
+You can use a CI/CD job with a pipeline triggers token to trigger pipelines when another pipeline
 runs.
 
 For example, to trigger a pipeline on the `main` branch of `project-B` when a tag
@@ -150,14 +150,14 @@ The parameter is of the form `variables[key]=value`, for example:
 curl --request POST \
      --form token=TOKEN \
      --form ref=main \
-     --form "variables[UPLOAD_TO_S3]=true" \
+     --form variables[UPLOAD_TO_S3]="true" \
      "https://gitlab.example.com/api/v4/projects/123456/trigger/pipeline"
 ```
 
 CI/CD variables in triggered pipelines display on each job's page, but only
 users with the Owner and Maintainer role can view the values.
 
-![Job variables in UI](img/trigger_variables_v11_6.png)
+![Job variables in UI](img/trigger_variables.png)
 
 ## Revoke a pipeline trigger token
 
@@ -191,7 +191,7 @@ in pipelines triggered with a pipeline trigger token.
 You can see which pipeline trigger token caused a job to run by visiting the single job page.
 A part of the trigger token displays on the right of the page, under the job details:
 
-![Marked as triggered on a single job page](img/trigger_single_job_v8.png)
+![Marked as triggered on a single job page](img/trigger_single_job.png)
 
 In pipelines triggered with a trigger token, jobs are labeled as `triggered` in
 **Build > Jobs**.

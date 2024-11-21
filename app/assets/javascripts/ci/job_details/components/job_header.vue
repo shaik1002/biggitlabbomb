@@ -4,7 +4,6 @@ import SafeHtml from '~/vue_shared/directives/safe_html';
 import { isGid, getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { glEmojiTag } from '~/emoji';
 import { __, sprintf } from '~/locale';
-import PageHeading from '~/vue_shared/components/page_heading.vue';
 import CiIcon from '~/vue_shared/components/ci_icon/ci_icon.vue';
 import TimeagoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 
@@ -16,7 +15,6 @@ export default {
     GlAvatarLink,
     GlAvatarLabeled,
     GlTooltip,
-    PageHeading,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -90,27 +88,34 @@ export default {
 </script>
 
 <template>
-  <page-heading v-if="name" data-testid="job-header-content">
-    <template #heading>
-      <span data-testid="job-name">{{ name }}</span>
-    </template>
+  <header
+    class="page-content-header gl-min-h-7 gl-w-full gl-flex-wrap !gl-pb-2 md:gl-flex"
+    data-testid="job-header-content"
+  >
+    <div v-if="name" class="gl-flex gl-w-full gl-items-center gl-justify-between">
+      <h1 class="gl-my-0 gl-inline-block gl-text-size-h-display" data-testid="job-name">
+        {{ name }}
+      </h1>
 
-    <template #actions>
-      <gl-button
-        :aria-label="__('Toggle sidebar')"
-        category="secondary"
-        class="gl-ml-2 lg:gl-hidden"
-        icon="chevron-double-lg-left"
-        @click="onClickSidebarButton"
-      />
-    </template>
+      <div class="-gl-mt-2 gl-flex gl-self-start">
+        <div class="gl-shrink-0 gl-grow gl-text-right">
+          <gl-button
+            :aria-label="__('Toggle sidebar')"
+            category="secondary"
+            class="gl-ml-2 lg:gl-hidden"
+            icon="chevron-double-lg-left"
+            @click="onClickSidebarButton"
+          />
+        </div>
+      </div>
+    </div>
+    <section class="header-main-content gl-mr-3 gl-flex gl-items-center">
+      <ci-icon class="gl-mr-3" :status="status" show-status-text />
 
-    <template #description>
-      <ci-icon class="gl-mr-1" :status="status" show-status-text />
       <template v-if="shouldRenderTriggeredLabel">{{ __('Started') }}</template>
       <template v-else>{{ __('Created') }}</template>
 
-      <timeago-tooltip :time="time" />
+      <timeago-tooltip :time="time" class="gl-mx-2" />
 
       {{ __('by') }}
 
@@ -127,7 +132,7 @@ export default {
             :size="24"
             :src="avatarUrl"
             :label="user.name"
-            class="gl-hidden sm:gl-inline-flex"
+            class="gl-mx-1 gl-hidden sm:gl-inline-flex"
           />
           <strong class="author gl-inline sm:gl-hidden">@{{ user.username }}</strong>
           <gl-tooltip v-if="message" :target="() => $refs[$options.EMOJI_REF]">
@@ -142,6 +147,6 @@ export default {
           ></span>
         </gl-avatar-link>
       </template>
-    </template>
-  </page-heading>
+    </section>
+  </header>
 </template>

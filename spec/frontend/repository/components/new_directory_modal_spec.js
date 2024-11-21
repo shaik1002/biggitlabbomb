@@ -1,4 +1,4 @@
-import { GlModal, GlFormTextarea, GlFormCheckbox } from '@gitlab/ui';
+import { GlModal, GlFormTextarea, GlToggle } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import { nextTick } from 'vue';
 import axios from 'axios';
@@ -15,7 +15,7 @@ jest.mock('~/lib/utils/url_utility', () => ({
 }));
 
 const initialProps = {
-  modalTitle: 'Create new directory',
+  modalTitle: 'Create New Directory',
   modalId: 'modal-new-directory',
   commitMessage: 'Add new directory',
   targetBranch: 'some-target-branch',
@@ -53,7 +53,7 @@ describe('NewDirectoryModal', () => {
   const findDirName = () => wrapper.find('[name="dir_name"]');
   const findBranchName = () => wrapper.find('[name="branch_name"]');
   const findCommitMessage = () => wrapper.findComponent(GlFormTextarea);
-  const findMrCheckbox = () => wrapper.findComponent(GlFormCheckbox);
+  const findMrToggle = () => wrapper.findComponent(GlToggle);
 
   const fillForm = async (inputValue = {}) => {
     const {
@@ -66,7 +66,7 @@ describe('NewDirectoryModal', () => {
     await findDirName().vm.$emit('input', dirName);
     await findBranchName().vm.$emit('input', branchName);
     await findCommitMessage().vm.$emit('input', commitMessage);
-    await findMrCheckbox().vm.$emit('input', createNewMr);
+    await findMrToggle().vm.$emit('change', createNewMr);
     await nextTick();
   };
 
@@ -95,24 +95,16 @@ describe('NewDirectoryModal', () => {
 
   describe('form', () => {
     it.each`
-      component            | defaultValue                  | canPushCode | targetBranch                 | originalBranch                 | exist    | attributes
-      ${findDirName}       | ${undefined}                  | ${true}     | ${initialProps.targetBranch} | ${initialProps.originalBranch} | ${true}  | ${'value'}
-      ${findBranchName}    | ${initialProps.targetBranch}  | ${true}     | ${initialProps.targetBranch} | ${initialProps.originalBranch} | ${true}  | ${'value'}
-      ${findBranchName}    | ${undefined}                  | ${false}    | ${initialProps.targetBranch} | ${initialProps.originalBranch} | ${false} | ${'value'}
-      ${findCommitMessage} | ${initialProps.commitMessage} | ${true}     | ${initialProps.targetBranch} | ${initialProps.originalBranch} | ${true}  | ${'value'}
-      ${findMrCheckbox}    | ${'true'}                     | ${true}     | ${'new-target-branch'}       | ${'master'}                    | ${true}  | ${'checked'}
-      ${findMrCheckbox}    | ${'true'}                     | ${true}     | ${'master'}                  | ${'master'}                    | ${true}  | ${'checked'}
+      component            | defaultValue                  | canPushCode | targetBranch                 | originalBranch                 | exist
+      ${findDirName}       | ${undefined}                  | ${true}     | ${initialProps.targetBranch} | ${initialProps.originalBranch} | ${true}
+      ${findBranchName}    | ${initialProps.targetBranch}  | ${true}     | ${initialProps.targetBranch} | ${initialProps.originalBranch} | ${true}
+      ${findBranchName}    | ${undefined}                  | ${false}    | ${initialProps.targetBranch} | ${initialProps.originalBranch} | ${false}
+      ${findCommitMessage} | ${initialProps.commitMessage} | ${true}     | ${initialProps.targetBranch} | ${initialProps.originalBranch} | ${true}
+      ${findMrToggle}      | ${'true'}                     | ${true}     | ${'new-target-branch'}       | ${'master'}                    | ${true}
+      ${findMrToggle}      | ${'true'}                     | ${true}     | ${'master'}                  | ${'master'}                    | ${true}
     `(
       'has the correct form fields',
-      ({
-        component,
-        defaultValue,
-        canPushCode,
-        targetBranch,
-        originalBranch,
-        exist,
-        attributes,
-      }) => {
+      ({ component, defaultValue, canPushCode, targetBranch, originalBranch, exist }) => {
         createComponent({
           canPushCode,
           targetBranch,
@@ -126,7 +118,7 @@ describe('NewDirectoryModal', () => {
         }
 
         expect(formField.exists()).toBe(true);
-        expect(formField.attributes(attributes)).toBe(defaultValue);
+        expect(formField.attributes('value')).toBe(defaultValue);
       },
     );
   });

@@ -471,7 +471,7 @@ RSpec.describe ApplicationHelper do
 
     context 'when @snippet is set' do
       it 'returns the passed path' do
-        snippet = create(:project_snippet)
+        snippet = create(:snippet)
         assign(:snippet, snippet)
 
         expect(helper.external_storage_url_or_path('/foo/bar', project)).to eq('/foo/bar')

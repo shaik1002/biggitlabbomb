@@ -58,7 +58,9 @@ module Ci
           instance_runners_enabled: shared_runners_enabled?(project)
         }
 
-        args.store(:namespace_traversal_ids, project.namespace.traversal_ids) if group_runners_enabled?(project)
+        if group_runners_enabled?(project)
+          args.store(:namespace_traversal_ids, project.namespace.traversal_ids)
+        end
 
         args
       end

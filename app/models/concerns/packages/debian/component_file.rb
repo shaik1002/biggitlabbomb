@@ -8,6 +8,7 @@ module Packages
       included do
         include Sortable
         include FileStoreMounter
+        include IgnorableColumns
 
         def self.container_foreign_key
           "#{container_type}_id".to_sym

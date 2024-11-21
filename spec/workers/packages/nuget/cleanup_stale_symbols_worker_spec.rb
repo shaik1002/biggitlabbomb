@@ -5,13 +5,6 @@ require 'spec_helper'
 RSpec.describe Packages::Nuget::CleanupStaleSymbolsWorker, type: :worker, feature_category: :package_registry do
   let(:worker) { described_class.new }
 
-  it_behaves_like 'an idempotent worker'
-  it_behaves_like 'worker with data consistency', described_class, data_consistency: :sticky
-
-  it 'has a none deduplicate strategy' do
-    expect(described_class.get_deduplicate_strategy).to eq(:none)
-  end
-
   describe '#perform_work' do
     subject(:perform_work) { worker.perform_work }
 
@@ -21,9 +14,9 @@ RSpec.describe Packages::Nuget::CleanupStaleSymbolsWorker, type: :worker, featur
 
     context 'with work to do' do
       let_it_be(:symbol_1) { create(:nuget_symbol) }
-      let_it_be(:symbol_2) { create(:nuget_symbol, :orphan) }
+      let_it_be(:symbol_2) { create(:nuget_symbol, :stale) }
 
-      it 'deletes the orphan symbol', :aggregate_failures do
+      it 'deletes the stale symbol', :aggregate_failures do
         expect(worker).to receive(:log_extra_metadata_on_done).with(:nuget_symbol_id, symbol_2.id)
         expect(Packages::Nuget::Symbol).to receive(:next_pending_destruction).with(order_by: nil).and_call_original
         expect { perform_work }.to change { Packages::Nuget::Symbol.count }.by(-1)
@@ -31,8 +24,8 @@ RSpec.describe Packages::Nuget::CleanupStaleSymbolsWorker, type: :worker, featur
       end
     end
 
-    context 'with an orphan symbol' do
-      let_it_be(:symbol) { create(:nuget_symbol, :orphan) }
+    context 'with a stale symbol' do
+      let_it_be(:symbol) { create(:nuget_symbol, :stale) }
 
       context 'with an error during deletion' do
         before do

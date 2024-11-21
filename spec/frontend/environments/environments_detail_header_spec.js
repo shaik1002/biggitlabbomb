@@ -27,7 +27,6 @@ describe('Environments detail header component', () => {
   const findStopEnvironmentModal = () => wrapper.findComponent(StopEnvironmentModal);
   const findDeleteEnvironmentModal = () => wrapper.findComponent(DeleteEnvironmentModal);
   const findDeployFreezeAlert = () => wrapper.findComponent(DeployFreezeAlert);
-  const findDescription = () => wrapper.findByTestId('environment-description-content');
 
   const buttons = [
     ['Cancel Auto Stop At', findCancelAutoStopAtButton],
@@ -229,23 +228,5 @@ describe('Environments detail header component', () => {
 
       expect(findDeployFreezeAlert().props('name')).toBe(environment.name);
     });
-  });
-
-  describe('environment description', () => {
-    it.each`
-      condition           | descriptionHtml          | renderDescription
-      ${"doesn't render"} | ${''}                    | ${false}
-      ${'renders'}        | ${'this is description'} | ${true}
-    `(
-      '$condition when `descriptionHtml` is "$descriptionHtml"',
-      ({ descriptionHtml, renderDescription }) => {
-        const environment = createEnvironment({ descriptionHtml });
-        createWrapper({
-          props: { environment },
-        });
-
-        expect(findDescription().exists()).toBe(renderDescription);
-      },
-    );
   });
 });

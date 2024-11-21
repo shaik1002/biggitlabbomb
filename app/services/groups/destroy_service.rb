@@ -5,7 +5,7 @@ module Groups
     DestroyError = Class.new(StandardError)
 
     def async_execute
-      mark_deleted
+      mark_pending_delete
 
       job_id = GroupDestroyWorker.perform_async(group.id, current_user.id)
       Gitlab::AppLogger.info("User #{current_user.id} scheduled a deletion of group ID #{group.id} with job ID #{job_id}")
@@ -16,7 +16,7 @@ module Groups
       # TODO - add a policy check here https://gitlab.com/gitlab-org/gitlab/-/issues/353082
       raise DestroyError, "You can't delete this group because you're blocked." if current_user.blocked?
 
-      mark_deleted
+      mark_pending_delete
 
       group.projects.includes(:project_feature).each do |project|
         # Execute the destruction of the models immediately to ensure atomic cleanup.
@@ -51,19 +51,19 @@ module Groups
 
       group
     rescue Exception # rubocop:disable Lint/RescueException -- Namespace.transaction can raise Exception
-      unmark_deleted
+      unmark_pending_delete
       raise
     end
     # rubocop: enable CodeReuse/ActiveRecord
 
     private
 
-    def mark_deleted
-      group.update_attribute(:deleted_at, Time.current)
+    def mark_pending_delete
+      group.update_attribute(:pending_delete, true)
     end
 
-    def unmark_deleted
-      group.update_attribute(:deleted_at, nil)
+    def unmark_pending_delete
+      group.update_attribute(:pending_delete, false)
     end
 
     def any_groups_shared_with_this_group?
@@ -94,6 +94,7 @@ module Groups
       group.users_ids_of_direct_members
     end
 
+    # rubocop:disable CodeReuse/ActiveRecord
     def destroy_associated_users
       current_user_id = current_user.id
       bot_ids = users_to_destroy
@@ -104,6 +105,7 @@ module Groups
         end
       end
     end
+    # rubocop:enable CodeReuse/ActiveRecord
 
     # rubocop:disable CodeReuse/ActiveRecord
     def users_to_destroy

@@ -12,7 +12,6 @@ export default {
   i18n: {
     source: s__('KubernetesDashboard|Source: %{source}'),
     justNow: s__('Timeago|just now'),
-    unknown: s__('KubernetesDashboard|unknown'),
   },
   components: {
     GlIcon,
@@ -27,27 +26,19 @@ export default {
       type: Object,
       required: true,
       validator: (item) =>
-        ['timestamp', 'message', 'reason', 'source', 'type'].every((key) =>
-          Object.prototype.hasOwnProperty.call(item, key),
-        ),
+        ['lastTimestamp', 'message', 'reason', 'source', 'type'].every((key) => item[key]),
     },
   },
   computed: {
     timeAgo() {
-      if (!this.event.timestamp) {
-        return this.$options.i18n.unknown;
-      }
-      const milliseconds = differenceInMilliseconds(new Date(this.event.timestamp));
+      const milliseconds = differenceInMilliseconds(new Date(this.event.lastTimestamp));
       const seconds = parseSeconds(milliseconds / 1000);
 
       const timeAgo = stringifyTime(seconds);
       return timeAgo === '0m' ? this.$options.i18n.justNow : stringifyTime(seconds);
     },
     tooltipText() {
-      if (!this.event.timestamp) {
-        return '';
-      }
-      return localeDateFormat.asDateTimeFull.format(new Date(this.event.timestamp));
+      return localeDateFormat.asDateTimeFull.format(this.event.lastTimestamp);
     },
   },
 };

@@ -11,7 +11,7 @@ GitLab sometimes releases features as experimental or beta, and users can opt in
 Some reasons for these kinds of feature releases include:
 
 - Validating the edge-cases of scale, support, and maintenance burden of features in their current form for every designed use case.
-- Features not complete enough to be considered an [MVC](https://handbook.gitlab.com/handbook/product/product-principles/#the-minimal-valuable-change-mvc),
+- Features not complete enough to be considered an [MVC](https://handbook.gitlab.com/handbook/product/product-principles/#the-minimal-viable-change-mvc),
   but added to the codebase as part of the development process.
 
 Please note that some features may not be aligned to these recommendations if they were developed before the recommendations were in place,
@@ -25,7 +25,7 @@ Experimental features:
 
 - Are not ready for production use.
 - Have [no support available](https://about.gitlab.com/support/statement-of-support/#experiment-beta-features).
-  Issues regarding such features should be opened in the [GitLab issue tracker](https://gitlab.com/gitlab-org/gitlab/-/issues).
+  Issues regarding such features should be opened in the GitLab issue tracker.
 - Might be unstable.
 - Could be removed at any time.
 - Might have a risk of data loss.

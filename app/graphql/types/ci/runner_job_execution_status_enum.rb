@@ -8,12 +8,12 @@ module Types
       value 'IDLE',
         description: "Runner is idle.",
         value: :idle,
-        experiment: { milestone: '15.7' }
+        alpha: { milestone: '15.7' }
 
       value 'ACTIVE',
         description: 'Runner is busy.',
         value: :active,
-        experiment: { milestone: '17.2' }
+        alpha: { milestone: '17.2' }
     end
   end
 end

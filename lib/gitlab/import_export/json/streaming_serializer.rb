@@ -78,12 +78,7 @@ module Gitlab
         def serialize_many_relations(key, records, options)
           log_relation_export(key, records.size)
 
-          # Temporarily skip preloading associations for epics as that results in not preloading
-          # epic work item associations
-          #
-          # This should be removed once we change epics import to epic work items import.
-          # https://gitlab.com/gitlab-org/gitlab/-/issues/504684
-          key_preloads = preloads&.dig(key) unless [:epic, :epics].include?(key)
+          key_preloads = preloads&.dig(key)
 
           batch(records, key) do |batch|
             next if batch.empty?
@@ -105,16 +100,6 @@ module Gitlab
             json_writer.write_relation_array(@exportable_path, key, batch_enumerator)
 
             Gitlab::SafeRequestStore.clear!
-          rescue StandardError => e
-            # if any error occurs during the export of a batch, skip the batch instead of failing the whole export
-            logger.error(
-              message: 'Error exporting relation batch',
-              exception_message: e.message,
-              exception_class: e.class.to_s,
-              relation: key,
-              sql: e.respond_to?(:sql) ? e.sql : nil,
-              **log_base_data
-            )
           end
         end
 
@@ -264,9 +249,7 @@ module Gitlab
         end
 
         def read_from_replica_if_available(&block)
-          ::Gitlab::Database::LoadBalancing::SessionMap
-            .with_sessions(Gitlab::Database::LoadBalancing.base_models)
-            .use_replicas_for_read_queries(&block)
+          ::Gitlab::Database::LoadBalancing::Session.current.use_replicas_for_read_queries(&block)
         end
 
         def before_read_callback(record)

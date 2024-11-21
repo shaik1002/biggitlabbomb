@@ -41,8 +41,7 @@ export default {
     {
       key: 'actions',
       label: __('Actions'),
-      thAlignRight: true,
-      thClass: 'gl-w-15',
+      thClass: 'gl-text-right gl-w-15',
     },
   ],
   inheritedVarsFields: [

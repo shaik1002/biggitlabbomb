@@ -18,8 +18,7 @@ RSpec.describe Boards::Lists::ListService, feature_category: :portfolio_manageme
       end
 
       let_it_be(:milestone_list) do
-        list = build(:list, board: board, milestone_id: milestone.id, list_type: List.list_types[:milestone],
-          position: 1)
+        list = build(:list, board: board, milestone_id: milestone.id, list_type: List.list_types[:milestone], position: 1) # rubocop:disable Layout/LineLength
         list.save!(validate: false)
         list
       end

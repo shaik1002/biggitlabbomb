@@ -9,21 +9,18 @@ import PipelineScheduleOwner from './cells/pipeline_schedule_owner.vue';
 import PipelineScheduleTarget from './cells/pipeline_schedule_target.vue';
 
 export default {
+  i18n: {
+    emptyText: s__('PipelineSchedules|No pipeline schedules'),
+  },
   fields: [
     {
       key: 'description',
       actualSortKey: 'DESCRIPTION',
       label: s__('PipelineSchedules|Description'),
       thClass: '!gl-border-t-0',
-      columnClass: 'gl-w-6/20',
+      columnClass: 'gl-w-8/20',
       sortable: true,
       thAttr: TH_DESCRIPTION_TEST_ID,
-    },
-    {
-      key: 'interval',
-      label: s__('PipelineSchedules|Interval'),
-      thClass: '!gl-border-t-0',
-      columnClass: 'gl-w-2/20',
     },
     {
       key: 'target',
@@ -106,7 +103,7 @@ export default {
     :fields="$options.fields"
     :items="schedules"
     :tbody-tr-attr="{ 'data-testid': 'pipeline-schedule-table-row' }"
-    :empty-text="s__('PipelineSchedules|No pipeline schedules')"
+    :empty-text="$options.i18n.emptyText"
     :sort-by="sortBy"
     :sort-desc="sortDesc"
     show-empty
@@ -120,15 +117,6 @@ export default {
     <template #cell(description)="{ item }">
       <span data-testid="pipeline-schedule-description">
         {{ item.description }}
-      </span>
-    </template>
-
-    <template #cell(interval)="{ item }">
-      <span class="gl-mb-2 gl-block" data-testid="pipeline-schedule-cron">
-        {{ item.cron }}
-      </span>
-      <span data-testid="pipeline-schedule-cron-timezone">
-        {{ item.cronTimezone }}
       </span>
     </template>
 

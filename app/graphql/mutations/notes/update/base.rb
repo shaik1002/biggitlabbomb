@@ -26,8 +26,7 @@ module Mutations
 
           {
             note: updated_note.destroyed? ? nil : updated_note.reset,
-            errors: updated_note.destroyed? ? [] : errors_on_object(updated_note),
-            quick_actions_status: updated_note.destroyed? ? nil : updated_note.quick_actions_status&.to_h
+            errors: updated_note.destroyed? ? [] : errors_on_object(updated_note)
           }
         end
 

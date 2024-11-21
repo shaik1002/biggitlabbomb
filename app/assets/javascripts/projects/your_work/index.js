@@ -2,7 +2,6 @@ import Vue from 'vue';
 import VueRouter from 'vue-router';
 import VueApollo from 'vue-apollo';
 import createDefaultClient from '~/lib/graphql';
-import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import routes from './routes';
 import YourWorkProjectsApp from './components/app.vue';
 
@@ -23,13 +22,6 @@ export const initYourWorkProjects = () => {
 
   if (!el) return false;
 
-  const {
-    dataset: { appData },
-  } = el;
-
-  const { initialSort, programmingLanguages, emptyStateProjectsSvgPath, emptyStateSearchSvgPath } =
-    convertObjectPropsToCamelCase(JSON.parse(appData));
-
   const apolloProvider = new VueApollo({
     defaultClient: createDefaultClient(),
   });
@@ -39,12 +31,6 @@ export const initYourWorkProjects = () => {
     router: createRouter(),
     apolloProvider,
     name: 'YourWorkProjectsRoot',
-    provide: {
-      initialSort,
-      programmingLanguages,
-      emptyStateProjectsSvgPath,
-      emptyStateSearchSvgPath,
-    },
     render(createElement) {
       return createElement(YourWorkProjectsApp);
     },

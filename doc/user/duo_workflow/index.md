@@ -1,13 +1,12 @@
 ---
 stage: AI-powered
-group: Duo Workflow
+group: AI Framework
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
 
 # GitLab Duo Workflow
 
 DETAILS:
-**Tier:** Ultimate
 **Offering:** GitLab.com
 **Status:** Experiment
 
@@ -18,109 +17,120 @@ The availability of this feature is controlled by a feature flag.
 For more information, see the history.
 This feature is available for internal GitLab team members for testing, but not ready for production use.
 
-WARNING:
-This feature is considered [experimental](../../policy/experiment-beta-support.md) and is not intended for customer usage outside of initial design partners. We expect major changes to this feature.
-
-DISCLAIMER:
-This page contains information related to upcoming products, features, and functionality.
-It is important to note that the information presented is for informational purposes only.
-Please do not rely on this information for purchasing or planning purposes.
-The development, release, and timing of any products, features, or functionality may be subject to change or delay and remain at the
-sole discretion of GitLab Inc.
-
 Automate tasks and help increase productivity in your development workflow by using GitLab Duo Workflow.
-GitLab Duo Workflow, currently only in your IDE, takes the information you provide
+
+GitLab Duo Workflow, as part of your IDE, takes the information you provide
 and uses AI to walk you through an implementation plan.
 
-GitLab Duo Workflow supports a wide variety of use cases. Here are a few examples:
-
-- Bootstrap a new project
-- Write tests
-- Fix a failed pipeline
-- Implement a proof of concept for an existing issue
-- Comment on a merge request with suggestions
-- Optimize CI configuration
-
-These are examples of successful use cases, but it can be used for many more.
+For the first release, there is only one supported Workflow: write or update code to fix a broken pipeline on a merge request.
+You can do this from VS Code or by running a cURL command.
 
 ## Prerequisites
 
-Before you can use GitLab Duo Workflow:
+Before you can use GitLab Duo Workflow in VS Code:
 
-1. [Install Visual Studio Code](https://code.visualstudio.com/download) (VS Code).
-1. [Install and set up](https://marketplace.visualstudio.com/items?itemName=GitLab.gitlab-workflow#setup) the GitLab Workflow extension for VS Code.
-   Minimum version 5.16.0.
+1. Enable the feature `duo_workflow` feature flag for yourself.
+   - In Slack, in the `#production` channel, type: `/chatops run feature set --user=myusername duo_workflow true`
+   - Or, post a request in the `#f_duo_workflow` Slack channel.
+1. Install the [GitLab Workflow extension for VS Code](https://marketplace.visualstudio.com/items?itemName=GitLab.gitlab-workflow).
+   Minimum version 5.8.0.
 1. In VS Code, [set the Docker socket file path](#install-docker-and-set-the-socket-file-path).
 
 ### Install Docker and set the socket file path
 
-GitLab Duo Workflow needs an execution platform like Docker where it can execute arbitrary code,
-read and write files, and make API calls to GitLab.
-
-#### Automated setup
-
-The setup script installs Docker and Colima, pulls the Docker base image, and sets Docker socket path in VS Code settings.
-You can run the script with the `--dry-run` flag to check the dependencies
-that get installed with the script.
-
-1. Download the [setup script](https://gitlab.com/-/snippets/3745948).
-1. Run the script.
+1. Install Docker:
 
    ```shell
-   chmod +x duo_workflow_runtime.sh
-   ./duo_workflow_runtime.sh
+   brew install docker
    ```
 
-#### Manual setup
+1. Install Colima by using Homebrew:
 
-If you have [Docker Desktop](https://handbook.gitlab.com/handbook/tools-and-tips/mac/#docker-desktop)
-or a container manager other than Colima installed already:
+   ```shell
+   brew install colima
+   ```
 
-1. Pull the base Docker image:
+1. Start Colima:
+
+   ```shell
+   colima start
+   ```
+
+1. Set Docker context:
+
+   ```shell
+   docker context use colima
+   ```
+
+1. [Authenticate with the GitLab container registry](../packages/container_registry/authenticate_with_container_registry.md).
+
+1. Manually pull the
+   [latest version of the Workflow Docker image](https://gitlab.com/gitlab-org/duo-workflow/default-docker-image/container_registry/6740066)
+   from the container registry:
 
    ```shell
    docker pull registry.gitlab.com/gitlab-org/duo-workflow/default-docker-image/workflow-generic-image:v0.0.4
    ```
 
-1. Set the Docker socket path in VS Code:
-   1. Open VS Code, then open its settings:
-      - On Mac: <kbd>Cmd</kbd> + <kbd>,</kbd>
-      - On Windows and Linux: <kbd>Ctrl</kbd> + <kbd>,</kbd>
-   1. In the upper-right corner, select the **Open Settings (JSON)** icon.
-   1. Add the Docker socket path setting `gitlab.duoWorkflow.dockerSocket`, according to your container manager, and save your settings file.
-   Some examples for common container managers on macOS, where you would replace `<your_user>` with your user's home folder:
+1. Access VS Code settings:
+   - On Mac: <kbd>Cmd</kbd> + <kbd>,</kbd>
+   - On Windows and Linux: <kbd>Ctrl</kbd> + <kbd>,</kbd>
+1. In the upper-right corner, select the **Open Settings (JSON)** icon.
+1. Add this line:
 
-      - Rancher Desktop:
+   ```json
+   "gitlab.duoWorkflow.dockerSocket": "/Users/<username>/.colima/default/docker.sock"
+   "gitlab.featureFlags.languageServerWebviews": true
+   ```
 
-         ```json
-         "gitlab.duoWorkflow.dockerSocket": "/Users/<your_user>/.rd/docker.sock",
-         ```
-
-      - Colima:
-
-         ```json
-         "gitlab.duoWorkflow.dockerSocket": "/Users/<your_user>/.colima/default/docker.sock",
-         ```
+1. Save the settings file.
 
 ## Use GitLab Duo Workflow in VS Code
 
 To use GitLab Duo Workflow:
 
-1. In VS Code, open a folder that has a Git repository for a GitLab project.
-   - The GitLab namespace for the project must have an **Ultimate** subscription.
-   - You must check out the branch for the code you would like to change.
-1. Open the command palette:
+1. In VS Code, open the GitLab project and check out the branch for the code you would like to change.
+1. Access the Command Palette:
    - On Mac: <kbd>Cmd</kbd> + <kbd>Shift</kbd> + <kbd>P</kbd>
    - On Windows and Linux: <kbd>Ctrl</kbd> + <kbd>P</kbd>.
 1. Type `Duo Workflow` and select **GitLab: Show Duo Workflow**.
+1. In the Duo Workflow panel, type your command, along with the merge request ID and project ID. Copy-paste is not currently possible.
+   - Merge request ID: In GitLab, the ID is in the merge request URL.
+   - Project ID: In GitLab, the ID is on the project overview page. In the upper-right corner, select the vertical ellipsis (**{ellipsis_v}**) to view it.
 
-## The context GitLab Duo Workflow is aware of
+## Use cURL to run GitLab Duo Workflow against a CI/CD pipeline
+
+Instead of running GitLab Workflow in VS Code, you can use a cURL command. See
+[the handbook](https://handbook.gitlab.com/handbook/engineering/architecture/design-documents/duo_workflow/#with-remote-ci-pipeline-execution) for details.
+
+1. Create a personal access token with the `api` scope, or create an OAuth access token with the `ai_workflows` scope.
+1. Start GitLab Workflow in a CI/CD pipeline by using the following cURL request.
+
+   ```shell
+        curl POST --verbose \
+        --header 'Authorization: Bearer $YOUR_GITLAB_PAT' \
+        --header 'Content-Type: application/json' \
+        --data '{
+            "project_id": "$PROJECT_ID_FOR_RUNNING_WORKFLOW_AGAINST",
+            "start_workflow": true,
+            "goal": "Fix the pipeline for merge request X in project Y."
+        }' \
+        --location 'https://gitlab.com/api/v4/ai/duo_workflows/workflows'
+    ```
+
+The response should be the pipeline ID. To view the pipeline execution, go to:
+
+```http
+https://gitlab.com/$namespace/$project/-/pipelines/$pipeline_id
+```
+
+## The context Duo Workflow is aware of
 
 GitLab Duo Workflow is aware of the context you're working in, specifically:
 
-| Area           | How to use GitLab Duo Workflow                                                                     |
-|----------------|----------------------------------------------------------------------------------------------------|
-| Merge requests | Enter the merge request ID and project ID in the Duo Workflow panel                                |
+| Area          | How to use GitLab Duo Workflow                                                                          |
+|---------------|--------------------------------------------------------------------------------------------------------|
+| Merge requests| Enter the merge request ID and project ID in the Duo Workflow panel                                |
 
 In addition, Duo Workflow has read-only access to:
 
@@ -131,19 +141,22 @@ In addition, Duo Workflow has read-only access to:
 
 Duo Workflow has the following limitations:
 
-- No support for VS Code themes.
-- Can only run workflows for the GitLab project that's open in VS Code.
+- No copy and paste functionality. For details, see [issue 380](https://gitlab.com/gitlab-org/editor-extensions/gitlab-lsp/-/issues/380).
+- Execution steps not displayed in UI.
+- Cannot push changes automatically.
+- Manual entry of merge request and project IDs required.
+- No theme support.
+- Project-specific workflow execution only.
 
 ## Troubleshooting
 
 If you encounter issues:
 
-1. Ensure that you have the latest version of the GitLab Workflow extension.
-1. Check that your open folder in VS Code corresponds to the GitLab project you want to interact with.
+1. Check that your open project in VS Code corresponds to the GitLab project you want to interact with.
 1. Ensure that you've checked out the branch as well.
 1. Check your Docker and Docker socket configuration:
-   1. [Install Docker and set the socket file path](#install-docker-and-set-the-socket-file-path).
-   1. Restart your container manager. For example, if using Colima:
+   1. Follow the setup instructions again.
+   1. If using Colima and encountering issues, try restarting it:
 
       ```shell
       colima stop

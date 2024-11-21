@@ -156,6 +156,7 @@ RSpec.shared_examples 'value stream analytics stage' do
     end
   end
 
+  # rubocop: disable Rails/SaveBang
   describe '#event_hash' do
     it 'associates the same stage event hash record' do
       first = create(factory, namespace: group)
@@ -223,6 +224,7 @@ RSpec.shared_examples 'value stream analytics stage' do
       end
     end
   end
+  # rubocop: enable Rails/SaveBang
 end
 
 RSpec.shared_examples 'value stream analytics label based stage' do

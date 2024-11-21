@@ -44,8 +44,6 @@ module Gitlab
         return false unless project_id
 
         pipeline.update_column(:project_id, project_id)
-      rescue StandardError
-        false
       end
     end
   end

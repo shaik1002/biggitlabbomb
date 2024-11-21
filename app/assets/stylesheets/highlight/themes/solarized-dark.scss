@@ -97,8 +97,6 @@ $solarized-dark-il: #2aa198;
 :root {
   --default-diff-color-deletion: #ff362c;
   --default-diff-color-addition: #647e0e;
-  --diff-addition-color: #{$solarized-dark-new-bg};
-  --diff-deletion-color: #{$solarized-dark-old-bg};
 }
 
 .code.solarized-dark {
@@ -132,7 +130,7 @@ $solarized-dark-il: #2aa198;
 
   // Line numbers
   .file-line-blame {
-    @include line-link($gl-color-neutral-0, 'git');
+    @include line-link($white, 'git');
   }
 
   .line-links {
@@ -151,8 +149,8 @@ $solarized-dark-il: #2aa198;
   }
 
   .diff-grid-row.line_holder.diff-tr .diff-td.commented:not(.hll) {
-    --highlight-border-color: #{$gl-color-blue-600};
-    background-color: $gl-color-blue-900;
+    --highlight-border-color: #{$blue-600};
+    background-color: $blue-900;
   }
 
   // Code itself
@@ -169,7 +167,7 @@ $solarized-dark-il: #2aa198;
   }
 
   .diff-line-expand-button {
-    @include diff-expansion(lighten($solarized-dark-pre-bg, 10%), $gl-color-neutral-200, lighten($solarized-dark-pre-bg, 20%), $gl-color-neutral-0);
+    @include diff-expansion(lighten($solarized-dark-pre-bg, 10%), $gray-200, lighten($solarized-dark-pre-bg, 20%), $white);
   }
 
   // Diff line
@@ -193,8 +191,8 @@ $solarized-dark-il: #2aa198;
     td.diff-line-num.hll,
     td.line-coverage.hll,
     td.line_content.hll {
-      --highlight-border-color: #{$gl-color-orange-500};
-      background-color: $gl-color-orange-800;
+      --highlight-border-color: #{$orange-500};
+      background-color: $orange-800;
     }
 
     .line-coverage {
@@ -257,7 +255,7 @@ $solarized-dark-il: #2aa198;
       > .diff-line-num,
       > .line-coverage,
       > .line_content {
-        border-top: 1px solid $gl-color-neutral-1000;
+        border-top: 1px solid $black;
       }
     }
 
@@ -291,11 +289,11 @@ $solarized-dark-il: #2aa198;
 
   .file-holder div.code.solarized-dark {
     .selected-inline-number-mark {
-      color: $gl-color-neutral-200;
+      color: $gray-200;
     }
 
     .unselected-inline-number-mark {
-      color: $gl-color-neutral-600;
+      color: $gray-600;
     }
   }
 

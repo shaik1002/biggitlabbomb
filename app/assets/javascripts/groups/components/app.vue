@@ -78,6 +78,8 @@ export default {
     eventHub.$on(`${this.action}fetchPage`, this.fetchPage);
     eventHub.$on(`${this.action}toggleChildren`, this.toggleChildren);
     eventHub.$on(`${this.action}showLeaveGroupModal`, this.showLeaveGroupModal);
+    eventHub.$on(`${this.action}updatePagination`, this.updatePagination);
+    eventHub.$on(`${this.action}updateGroups`, this.updateGroups);
     eventHub.$on(`${this.action}fetchFilteredAndSortedGroups`, this.fetchFilteredAndSortedGroups);
   },
   mounted() {
@@ -87,6 +89,8 @@ export default {
     eventHub.$off(`${this.action}fetchPage`, this.fetchPage);
     eventHub.$off(`${this.action}toggleChildren`, this.toggleChildren);
     eventHub.$off(`${this.action}showLeaveGroupModal`, this.showLeaveGroupModal);
+    eventHub.$off(`${this.action}updatePagination`, this.updatePagination);
+    eventHub.$off(`${this.action}updateGroups`, this.updateGroups);
     eventHub.$off(`${this.action}fetchFilteredAndSortedGroups`, this.fetchFilteredAndSortedGroups);
   },
   methods: {
@@ -161,7 +165,7 @@ export default {
           currentPath,
         );
 
-        this.updateGroups(res, Boolean(filterGroupsBy));
+        this.updateGroups(res);
       });
     },
     toggleChildren(group) {

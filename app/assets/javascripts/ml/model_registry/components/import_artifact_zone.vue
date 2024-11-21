@@ -64,19 +64,11 @@ export default {
         (s) => s === STATUS.FAILED || s === STATUS.CANCELED || s === STATUS.SUCCEEDED,
       );
     },
-    allErrors() {
-      return this.uploads
-        .map((upload, index) => {
-          return this.errors[index] ? `${upload.file.name}: ${this.errors[index]}` : null;
-        })
-        .filter(Boolean)
-        .join(' ');
-    },
     alert() {
       if (!this.states.length) {
         return null;
       }
-      const someRunning = this.states.some((s) => s === STATUS.CREATING || s === STATUS.PROCESSING);
+      const someRunning = this.states.some((s) => s === STATUS.CREATING);
 
       if (someRunning) {
         return null;
@@ -106,10 +98,6 @@ export default {
     },
   },
   methods: {
-    setError(index, message) {
-      this.errors.splice(index, 1, message);
-      this.$emit('error', this.allErrors);
-    },
     buildUploads(files) {
       this.states = new Array(files.length).fill(STATUS.CREATING);
       this.loads = new Array(files.length).fill(0);
@@ -128,7 +116,7 @@ export default {
             upload.axiosSource.cancel();
           } else if (this.states[index] === STATUS.CREATING) {
             this.states.splice(index, 1, STATUS.CANCELED);
-            this.setError(index, this.$options.i18n.cancelMessage);
+            this.errors.splice(index, 1, this.$options.i18n.cancelMessage);
           }
         };
         upload.onUploadProgress = (event) => {
@@ -185,10 +173,10 @@ export default {
         .catch((error) => {
           if (axios.isCancel(error)) {
             this.states.splice(index, 1, STATUS.CANCELED);
-            this.setError(index, this.$options.i18n.cancelMessage);
+            this.errors.splice(index, 1, this.$options.i18n.cancelMessage);
           } else {
             this.states.splice(index, 1, STATUS.FAILED);
-            this.setError(index, error);
+            this.errors.splice(index, 1, error);
           }
         });
     },
@@ -216,7 +204,7 @@ export default {
     clearButtonText: __('Clear uploads'),
     uploadMessage: s__('MlModelRegistry|Drop or %{linkStart}select%{linkEnd} artifacts to attach'),
     subfolderLabel: s__('MlModelRegistry|Subfolder'),
-    allSucceeded: s__('MlModelRegistry|Artifacts uploaded successfully.'),
+    allSucceeded: s__('MlModelRegistry|Artifact uploaded successfully.'),
     allFailedOrCanceled: s__('MlModelRegistry|All artifact uploads failed or were canceled.'),
     someFailed: s__('MlModelRegistry|Artifact uploads completed with errors.'),
     subfolderPlaceholder: s__('MlModelRegistry|folder name'),
@@ -312,20 +300,13 @@ export default {
           v-if="allCompleted"
           data-testid="clear-button"
           category="secondary"
-          class="gl-mt-3"
           @click="reset"
         >
           {{ $options.i18n.clearButtonText }}
         </gl-button>
       </div>
     </upload-dropzone>
-    <gl-alert
-      v-if="alert"
-      data-testid="alert"
-      :variant="alert.variant"
-      class="gl-mt-3"
-      @dismiss="reset"
-    >
+    <gl-alert v-if="alert" data-testid="alert" :variant="alert.variant" @dismiss="reset">
       {{ alert.message }}
     </gl-alert>
   </div>

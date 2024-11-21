@@ -152,7 +152,26 @@ export default {
         queryObject.personal = this.queryAsObject.personal;
       }
 
-      this.trackEvent(this.filterEventName);
+      const trackingProperty = Object.entries(filtersQuery).reduce(
+        (accumulator, [tokenType, optionValue]) => {
+          if (tokenType === FILTERED_SEARCH_TERM_KEY) {
+            return {
+              ...accumulator,
+              search: optionValue,
+            };
+          }
+
+          const token = this.filteredSearchTokens.find(({ type }) => type === tokenType);
+          const option = token.options.find(({ value }) => value === optionValue[0]);
+
+          return { ...accumulator, [token.title.toLowerCase()]: option.title };
+        },
+        {},
+      );
+
+      this.trackEvent(this.filterEventName, {
+        label: JSON.stringify(trackingProperty),
+      });
 
       this.visitUrlWithQueryObject(queryObject);
     },

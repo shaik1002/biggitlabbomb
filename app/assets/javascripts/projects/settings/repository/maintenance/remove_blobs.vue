@@ -28,9 +28,9 @@ const i18n = {
   ),
   modalConfirm: s__('ProjectMaintenance|Enter the following to confirm:'),
   removeBlobsError: s__('ProjectMaintenance|Something went wrong while removing blobs.'),
-  scheduledRemovalSuccessAlertTitle: s__('ProjectMaintenance|Blobs removal is scheduled.'),
-  scheduledSuccessAlertContent: s__(
-    'ProjectMaintenance|You will receive an email notification when the process is complete. Run housekeeping to remove old versions from repository.',
+  successAlertTitle: s__('ProjectMaintenance|Blobs removed'),
+  successAlertContent: s__(
+    'ProjectMaintenance|Run housekeeping to remove old versions from repository.',
   ),
   successAlertButtonText: s__('ProjectMaintenance|Go to housekeeping'),
 };
@@ -38,7 +38,7 @@ const i18n = {
 export default {
   i18n,
   DRAWER_Z_INDEX,
-  removeBlobsHelpLink: helpPagePath('/user/project/repository/repository_size', {
+  removeBlobsHelpLink: helpPagePath('/user/project/repository/reducing_the_repo_size_using_git', {
     anchor: 'get-a-list-of-object-ids',
   }),
   modalCancel: { text: i18n.modalCancelText },
@@ -117,8 +117,8 @@ export default {
     },
     generateSuccessAlert() {
       createAlert({
-        title: this.$options.i18n.scheduledRemovalSuccessAlertTitle,
-        message: this.$options.i18n.scheduledSuccessAlertContent,
+        title: i18n.successAlertTitle,
+        message: i18n.successAlertContent,
         variant: VARIANT_WARNING,
         primaryButton: {
           text: i18n.successAlertButtonText,

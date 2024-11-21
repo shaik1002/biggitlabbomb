@@ -17,7 +17,7 @@ module QA
         end
 
         Page::Project::Import::RepoByURL.perform do |import_page|
-          import_page.import!(@gitlab_repository_path, @name, group.full_path)
+          import_page.import!(@gitlab_repository_path, @name)
         end
       end
     end

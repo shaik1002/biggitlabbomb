@@ -5,7 +5,11 @@ module Gitlab
     module Cli
       module Targets
         class Database < Target
-          attr_reader :errors
+          # TODO: Refactor to remove coupling with compress and decompress commands
+          # https://gitlab.com/gitlab-org/gitlab/-/issues/454830
+          include ::Backup::Helper
+
+          attr_reader :force, :errors
 
           IGNORED_ERRORS = [
             # Ignore warnings
@@ -17,11 +21,14 @@ module Gitlab
           ].freeze
           IGNORED_ERRORS_REGEXP = Regexp.union(IGNORED_ERRORS).freeze
 
-          def initialize
+          def initialize(options:)
+            super(options: options)
+
             @errors = []
+            @force = options.force?
           end
 
-          def dump(destination_dir)
+          def dump(destination_dir, _)
             FileUtils.mkdir_p(destination_dir)
 
             each_database(destination_dir) do |backup_connection|
@@ -53,7 +60,7 @@ module Gitlab
 
               raise DatabaseBackupError.new(active_record_config, dump_file_name) unless success
 
-              report_finish_status(success)
+              report_success(success)
             end
           ensure
             if multiple_databases?
@@ -63,7 +70,7 @@ module Gitlab
                 backup_connection = ::Backup::DatabaseConnection.new(database_connection_name)
                 backup_connection.restore_timeouts!
               rescue ActiveRecord::ConnectionNotEstablished
-                raise DatabaseBackupError.new(
+                raise ::Backup::DatabaseBackupError.new(
                   backup_connection.database_configuration.activerecord_variables,
                   file_name(destination_dir, database_connection_name)
                 )
@@ -71,7 +78,9 @@ module Gitlab
             end
           end
 
-          def restore(destination_dir)
+          def restore(destination_dir, _)
+            @errors = []
+
             base_models_for_backup.each do |database_name, _|
               backup_connection = ::Backup::DatabaseConnection.new(database_name)
 
@@ -82,7 +91,7 @@ module Gitlab
 
               unless File.exist?(db_file_name)
                 if main_database?(database_name)
-                  raise(DatabaseBackupError, "Source database file does not exist #{db_file_name}")
+                  raise(::Backup::Error, "Source database file does not exist #{db_file_name}")
                 end
 
                 Gitlab::Backup::Cli::Output.warning(
@@ -92,33 +101,47 @@ module Gitlab
                 return false
               end
 
-              Gitlab::Backup::Cli::Output.warning("Removing all tables from #{database_name}.")
+              unless force
+                Gitlab::Backup::Cli::Output.warning(
+                  'Removing all tables. Press `Ctrl-C` within 5 seconds to abort'
+                )
+
+                sleep(5)
+              end
 
               # Drop all tables Load the schema to ensure we don't have any newer tables
               # hanging out from a failed upgrade
               drop_tables(database_name)
 
+              tracked_errors = []
               pg_env = backup_connection.database_configuration.pg_env_variables
+              success = with_transient_pg_env(pg_env) do
+                decompress_rd, decompress_wr = IO.pipe
+                decompress_pid = spawn(decompress_cmd, out: decompress_wr, in: db_file_name)
+                decompress_wr.close
 
-              pipeline = Gitlab::Backup::Cli::Shell::Pipeline.new(
-                Utils::Compression.decompression_command,
-                pg_restore_cmd(database, pg_env)
-              )
+                status, tracked_errors =
+                  case config[:adapter]
+                  when "postgresql"
+                    Gitlab::Backup::Cli::Output.print_info "Restoring PostgreSQL database #{database} ... "
+                    execute_and_track_errors(pg_restore_cmd(database), decompress_rd)
+                  end
+                decompress_rd.close
 
-              Gitlab::Backup::Cli::Output.print_info "Restoring PostgreSQL database #{database} ... "
-
-              pipeline_status = pipeline.run!(input: db_file_name)
-              tracked_errors = pipeline_status.stderr
+                Process.waitpid(decompress_pid)
+                $CHILD_STATUS.success? && status.success?
+              end
 
               unless tracked_errors.empty?
                 Gitlab::Backup::Cli::Output.error "------ BEGIN ERRORS -----"
                 Gitlab::Backup::Cli::Output.print(tracked_errors.join, stderr: true)
                 Gitlab::Backup::Cli::Output.error "------ END ERRORS -------"
+
+                @errors += tracked_errors
               end
 
-              report_finish_status(pipeline_status.success?)
-
-              raise DatabaseBackupError, 'Restore failed' unless pipeline_status.success?
+              report_success(success)
+              raise ::Backup::Error, 'Restore failed' unless success
             end
           end
 
@@ -142,10 +165,39 @@ module Gitlab
             IGNORED_ERRORS_REGEXP.match?(line)
           end
 
+          def execute_and_track_errors(cmd, decompress_rd)
+            errors = []
+
+            Open3.popen3(ENV, *cmd) do |stdin, stdout, stderr, thread|
+              stdin.binmode
+
+              out_reader = Thread.new do
+                data = stdout.read
+                $stdout.write(data) # rubocop:disable Rails/Output
+              end
+
+              err_reader = Thread.new do
+                until (raw_line = stderr.gets).nil?
+                  warn(raw_line)
+                  errors << raw_line unless ignore_error?(raw_line)
+                end
+              end
+
+              begin
+                IO.copy_stream(decompress_rd, stdin)
+              rescue Errno::EPIPE
+              end
+
+              stdin.close
+              [thread, out_reader, err_reader].each(&:join)
+              [thread.value, errors]
+            end
+          end
+
           private
 
-          def report_finish_status(status)
-            Gitlab::Backup::Cli::Output.print_tag(status ? :success : :failure)
+          def report_success(success)
+            Gitlab::Backup::Cli::Output.print_tag(success ? :success : :failure)
           end
 
           def drop_tables(database_name)
@@ -170,8 +222,8 @@ module Gitlab
             result
           end
 
-          def pg_restore_cmd(database, pg_env)
-            Shell::Command.new('psql', database, env: pg_env)
+          def pg_restore_cmd(database)
+            ['psql', database]
           end
 
           def each_database(destination_dir, &block)
@@ -193,7 +245,7 @@ module Gitlab
                 # Trigger a transaction snapshot export that will be used by pg_dump later on
                 backup_connection.export_snapshot!
               rescue ActiveRecord::ConnectionNotEstablished
-                raise DatabaseBackupError.new(
+                raise ::Backup::DatabaseBackupError.new(
                   backup_connection.database_configuration.activerecord_variables,
                   file_name(destination_dir, database_connection_name)
                 )

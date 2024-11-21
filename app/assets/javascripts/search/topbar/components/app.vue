@@ -1,7 +1,7 @@
 <script>
 import { GlButton } from '@gitlab/ui';
 // eslint-disable-next-line no-restricted-imports
-import { mapState, mapActions, mapGetters } from 'vuex';
+import { mapState, mapActions } from 'vuex';
 import { InternalEvents } from '~/tracking';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { s__ } from '~/locale';
@@ -13,7 +13,6 @@ import {
   LS_REGEX_HANDLE,
 } from '~/search/store/constants';
 import { loadDataFromLS } from '~/search/store/utils';
-import { SCOPE_BLOB } from '~/search/sidebar/constants';
 import { SYNTAX_OPTIONS_ADVANCED_DOCUMENT, SYNTAX_OPTIONS_ZOEKT_DOCUMENT } from '../constants';
 
 import SearchTypeIndicator from './search_type_indicator.vue';
@@ -44,7 +43,6 @@ export default {
   },
   computed: {
     ...mapState(['query', 'searchType', 'defaultBranchName', 'urlQuery']),
-    ...mapGetters(['currentScope']),
     search: {
       get() {
         return this.query ? this.query.search : '';
@@ -70,13 +68,6 @@ export default {
     isRegexButtonVisible() {
       return this.searchType === ZOEKT_SEARCH_TYPE && this.isDefaultBranch;
     },
-    isMultiMatch() {
-      return (
-        this.glFeatures.zoektMultimatchFrontend &&
-        this.searchType === ZOEKT_SEARCH_TYPE &&
-        this.currentScope === SCOPE_BLOB
-      );
-    },
   },
   created() {
     this.preloadStoredFrequentItems();
@@ -95,11 +86,6 @@ export default {
       this.setQuery({ key: REGEX_PARAM, value });
       this.regexEnabled = value;
       if (this.search) {
-        this.applyQuery();
-      }
-    },
-    submitSearch() {
-      if (!this.isMultiMatch) {
         this.applyQuery();
       }
     },
@@ -128,7 +114,7 @@ export default {
         :regex-button-state="regexEnabled"
         :regex-button-handler="regexButtonHandler"
         :placeholder="$options.i18n.searchPlaceholder"
-        @keydown.enter.stop.prevent="submitSearch"
+        @keydown.enter.stop.prevent="applyQuery"
       />
     </div>
   </section>

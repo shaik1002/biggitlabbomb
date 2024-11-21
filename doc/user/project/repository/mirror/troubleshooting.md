@@ -33,7 +33,7 @@ One of these issues might be occurring:
    - Set your GitHub email address to public.
    - Disable the [Block command line pushes that expose my email](https://github.com/settings/emails)
      setting.
-1. Your repository exceeds the GitHub file size limit of 100 MB. To fix this problem,
+1. Your repository exceeds GitHub's file size limit of 100 MB. To fix this problem,
    check the file size limit configured for on GitHub, and consider using
    [Git Large File Storage](https://git-lfs.com/) to manage large files.
 
@@ -161,9 +161,25 @@ that includes the `ssh://` protocol, like `ssh://git@gitlab.com/gitlab-org/gitla
 ## Host key verification failed
 
 This error is returned when the target host public SSH key changes.
-Public SSH keys rarely change. If host key verification fails,
-but you suspect the key is still valid, you must delete the repository mirror
-and create it again. For more information, see [Create a repository mirror](index.md#create-a-repository-mirror).
+Public SSH keys rarely, if ever, change. If host key verification fails,
+but you suspect the key is still valid, you can refresh the key's information.
+
+Prerequisites:
+
+- You must have at least the Maintainer role for a project.
+
+To resolve the issue:
+
+1. [Verify the host key](index.md#verify-a-host-key).
+1. On the left sidebar, select **Search or go to** and find your project.
+1. Select **Settings > Repository**.
+1. Expand **Mirroring repositories**.
+1. To refresh the keys, either:
+
+   - Select **Detect host keys** for GitLab to fetch the host keys from the server, and display the fingerprints.
+   - Select **Input host keys manually**, and enter the host key into the **SSH host key** field.
+
+- Select **Mirror repository**.
 
 ## Transfer mirror users and tokens to a single service account
 
@@ -245,8 +261,7 @@ When mirroring fails due to Silent Mode the following are the debug steps:
 - [Triggering the mirror using the API](pull.md#trigger-pipelines-for-mirror-updates) shows: `The project is not mirrored`.
 
 - If pull or push mirror was already set up but there are no further updates on the mirrored repository,
-  confirm the [project's pull and push mirror details ans status](../../../../api/project_pull_mirroring.md#get-a-projects-pull-mirror-details)
-  are not recent as shown below. This indicates mirroring was paused and disabling GitLab Silent Mode restarts it automatically.
+  confirm the [project's pull and push mirror details ans status](../../../../api/projects.md#get-a-projects-pull-mirror-details) are not recent as shown below. This indicates mirroring was paused and disabling GitLab Silent Mode restarts it automatically.
 
 For example, if Silent Mode is what is impeding your imports, the output is similar to the following:
 

@@ -113,9 +113,6 @@ export default {
   apollo: {
     packageProtectionRulesQueryPayload: {
       query: packagesProtectionRuleQuery,
-      context: {
-        batchKey: 'PackageRegistryProjectSettings',
-      },
       variables() {
         return {
           projectPath: this.projectPath,
@@ -249,7 +246,7 @@ export default {
     {
       key: 'col_4_actions',
       label: __('Actions'),
-      thAlignRight: true,
+      thClass: 'gl-text-right',
       tdClass: '!gl-align-middle gl-text-right',
     },
   ],
@@ -305,7 +302,6 @@ export default {
                 :aria-label="$options.i18n.minimumAccessLevelForPush"
                 :options="minimumAccessLevelOptions"
                 :disabled="isProtectionRuleMinimumAccessLevelFormSelectDisabled(item)"
-                data-testid="push-access-select"
                 @change="updatePackageProtectionRule(item)"
               />
             </template>
@@ -318,7 +314,6 @@ export default {
                 icon="remove"
                 :title="__('Delete')"
                 :aria-label="__('Delete')"
-                data-testid="delete-rule-btn"
                 :disabled="isProtectionRuleDeleteButtonDisabled(item)"
                 @click="showProtectionRuleDeletionConfirmModal(item)"
               />

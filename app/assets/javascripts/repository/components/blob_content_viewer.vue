@@ -8,7 +8,6 @@ import { createAlert } from '~/alert';
 import axios from '~/lib/utils/axios_utils';
 import { isLoggedIn, handleLocationHash } from '~/lib/utils/common_utils';
 import { __ } from '~/locale';
-import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { visitUrl, getLocationHash } from '~/lib/utils/url_utility';
 import CodeIntelligence from '~/code_navigation/components/app.vue';
 import LineHighlighter from '~/blob/line_highlighter';
@@ -16,7 +15,6 @@ import blobInfoQuery from 'shared_queries/repository/blob_info.query.graphql';
 import highlightMixin from '~/repository/mixins/highlight_mixin';
 import projectInfoQuery from '../queries/project_info.query.graphql';
 import getRefMixin from '../mixins/get_ref';
-import { getRefType } from '../utils/ref_type';
 import { DEFAULT_BLOB_INFO, TEXT_FILE_TYPE, LFS_STORAGE, LEGACY_FILE_TYPES } from '../constants';
 import BlobButtonGroup from './blob_button_group.vue';
 import ForkSuggestion from './fork_suggestion.vue';
@@ -33,7 +31,7 @@ export default {
     CodeIntelligence,
     AiGenie: () => import('ee_component/ai/components/ai_genie.vue'),
   },
-  mixins: [getRefMixin, highlightMixin, glFeatureFlagMixin()],
+  mixins: [getRefMixin, highlightMixin],
   inject: {
     originalBranch: {
       default: '',
@@ -64,7 +62,7 @@ export default {
           projectPath: this.projectPath,
           filePath: [this.path],
           ref: this.currentRef,
-          refType: getRefType(this.refType),
+          refType: this.refType?.toUpperCase() || null,
           shouldFetchRawText: true,
         };
 
@@ -335,7 +333,7 @@ export default {
         :override-copy="true"
         :show-fork-suggestion="showSingleFileEditorForkSuggestion"
         :show-web-ide-fork-suggestion="showWebIdeForkSuggestion"
-        :show-blame-toggle="glFeatures.inlineBlame"
+        :show-blame-toggle="true"
         :project-path="projectPath"
         :project-id="projectId"
         @viewer-changed="handleViewerChanged"
@@ -376,7 +374,7 @@ export default {
         :content="legacySimpleViewer"
         :is-raw-content="true"
         :active-viewer="viewer"
-        :show-blame="showBlame && glFeatures.inlineBlame"
+        :show-blame="showBlame"
         :current-ref="currentRef"
         :loading="isLoadingLegacyViewer"
         :project-path="projectPath"
@@ -387,7 +385,7 @@ export default {
         v-else
         :blob="blobInfo"
         :chunks="chunks"
-        :show-blame="showBlame && glFeatures.inlineBlame"
+        :show-blame="showBlame"
         :project-path="projectPath"
         :current-ref="currentRef"
         class="blob-viewer"

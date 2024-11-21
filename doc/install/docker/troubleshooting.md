@@ -10,11 +10,9 @@ DETAILS:
 **Tier:** Free, Premium, Ultimate
 **Offering:** Self-managed
 
-When installing GitLab in a Docker container, you might encounter the following problems.
+When installing GitLab in a Docker container, you might encounter the following issues.
 
 ## Diagnose potential problems
-
-The following commands are useful when troubleshooting your GitLab instance in a Docker container:
 
 Read container logs:
 
@@ -28,13 +26,14 @@ Enter running container:
 sudo docker exec -it gitlab /bin/bash
 ```
 
-You can administer the GitLab container from within the container as you would
-administer a [Linux package installation](https://gitlab.com/gitlab-org/omnibus-gitlab/blob/master/README.md).
+From within the container you can administer the GitLab container as you would
+usually administer a [Linux package installation](https://gitlab.com/gitlab-org/omnibus-gitlab/blob/master/README.md).
 
 ## 500 Internal Error
 
-When updating the Docker image, you may encounter an issue where all paths
-display a `500` page. If this occurs, restart the container:
+When updating the Docker image you may encounter an issue where all paths
+display a `500` page. If this occurs, restart the container to try to rectify the
+issue:
 
 ```shell
 sudo docker restart gitlab
@@ -42,9 +41,9 @@ sudo docker restart gitlab
 
 ## Permission problems
 
-When updating from older GitLab Docker images, you might encounter permission
-problems. This happens when user permissions in previous images were not
-preserved correctly. There's a script that fixes permissions for all files.
+When updating from older GitLab Docker images you might encounter permission
+problems. This happens when users in previous images were not
+preserved correctly. There's script that fixes permissions for all files.
 
 To fix your container, execute `update-permissions` and restart the
 container afterwards:
@@ -56,7 +55,7 @@ sudo docker restart gitlab
 
 ## Error executing action run on resource `ruby_block`
 
-This error occurs when using Docker Toolbox with Oracle VirtualBox on Windows or Mac,
+This error occurs when using Docker Toolbox with VirtualBox on Windows or Mac,
 and making use of Docker volumes:
 
 ```plaintext
@@ -64,16 +63,16 @@ Error executing action run on resource ruby_block[directory resource: /data/GitL
 ```
 
 The `/c/Users` volume is mounted as a
-VirtualBox Shared Folder, and does not support all POSIX file system features.
+VirtualBox Shared Folder, and does not support the all POSIX file system features.
 The directory ownership and permissions cannot be changed without remounting, and
 GitLab fails.
 
-Switch to using the native Docker install for your
+Our recommendation is to switch to using the native Docker install for your
 platform, instead of using Docker Toolbox.
 
 If you cannot use the native Docker install (Windows 10 Home Edition, or Windows 7/8),
-an alternative solution is to set up NFS mounts instead of VirtualBox shares for
-the Docker Toolbox Boot2docker.
+then an alternative solution is to set up NFS mounts instead of VirtualBox shares for
+Docker Toolbox's boot2docker.
 
 ## Linux ACL issues
 
@@ -96,20 +95,20 @@ default:mask::rwx
 default:other::r-x
 ```
 
-If these values are not correct, set them with:
+If these are not correct, set them with:
 
 ```shell
 sudo setfacl -mR default:group:docker:rwx $GITLAB_HOME
 ```
 
-The default group is named `docker`. If you changed the group name, you need to adjust the
-command.
+The default group is `docker`. If you changed the group, be sure to update your
+commands.
 
 ## `/dev/shm` mount not having enough space in Docker container
 
-GitLab comes with a Prometheus metrics endpoint at `/-/metrics` to expose
-statistics about the health and performance of GitLab. The files
-required for this are written to a temporary file system (like `/run` or
+GitLab comes with a Prometheus metrics endpoint at `/-/metrics` to expose a
+variety of statistics on the health and performance of GitLab. The files
+required for this gets written to a temporary file system (like `/run` or
 `/dev/shm`).
 
 By default, Docker allocates 64 MB to the shared memory directory (mounted at
@@ -126,11 +125,11 @@ writing value to /dev/shm/gitlab/sidekiq/histogram_sidekiq_0-0.db failed with un
 writing value to /dev/shm/gitlab/sidekiq/histogram_sidekiq_0-0.db failed with unmapped file
 ```
 
-While you can turn off the Prometheus Metrics in the **Admin** area, the recommended
-solution to fix this problem is to
-[install](configuration.md#pre-configure-docker-container) with shared memory set to at least 256 MB.
-If you use `docker run`, you can pass the flag `--shm-size 256m`.
-If you use a `docker-compose.yml` file, you can set the `shm_size` key.
+Other than disabling the Prometheus Metrics from the **Admin** area, the recommended
+solution to fix this problem is to [install](configuration.md#pre-configure-docker-container) with shared memory set to at least 256 MB.
+If using `docker run`, this can be done by passing the flag `--shm-size 256m`.
+If using a `docker-compose.yml` file, the `shm_size` key can be used for this
+purpose.
 
 ## Docker containers exhausts space due to the `json-file`
 
@@ -155,9 +154,9 @@ can't create Thread: Operation not permitted
 ```
 
 This error occurs when running a container built with newer `glibc` versions on a
-[host that doesn't support the clone3 function](https://github.com/moby/moby/issues/42680). In GitLab 16.0 and later, the container image includes
-the Ubuntu 22.04 Linux package, which is built with newer `glibc` versions.
+[host that doesn't have support for the new clone3 function](https://github.com/moby/moby/issues/42680). In GitLab 16.0 and later, the container image includes
+the Ubuntu 22.04 Linux package which is built with this newer `glibc`.
 
-This problem does not occur in newer container runtime tools like [Docker 20.10.10](https://github.com/moby/moby/pull/42836).
+This problem is fixed with newer container runtime tools like [Docker 20.10.10](https://github.com/moby/moby/pull/42836).
 
 To resolve this issue, update Docker to version 20.10.10 or later.

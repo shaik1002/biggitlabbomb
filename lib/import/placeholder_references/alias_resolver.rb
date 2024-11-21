@@ -9,7 +9,6 @@ module Import
 
       NOTE_COLUMNS = { "author_id" => "author_id", "updated_by_id" => "updated_by_id",
                        "resolved_by_id" => "resolved_by_id" }.freeze
-      NOTE_EXCLUSIONS = %w[updated_by_id resolved_by_id].freeze
 
       # A new version for a model should be defined when new entries must be
       # mapped in a different way to data that already exists in the database.
@@ -60,15 +59,13 @@ module Import
         "DiffNote" => {
           1 => {
             model: DiffNote,
-            columns: NOTE_COLUMNS,
-            columns_ignored_on_deletion: NOTE_EXCLUSIONS
+            columns: NOTE_COLUMNS
           }
         },
         "DiscussionNote" => {
           1 => {
             model: DiscussionNote,
-            columns: NOTE_COLUMNS,
-            columns_ignored_on_deletion: NOTE_EXCLUSIONS
+            columns: NOTE_COLUMNS
           }
         },
         "Event" => {
@@ -81,8 +78,7 @@ module Import
           1 => {
             model: Epic,
             columns: { "author_id" => "author_id", "assignee_id" => "assignee_id", "updated_by_id" => "updated_by_id",
-                       "last_edited_by_id" => "last_edited_by_id", "closed_by_id" => "closed_by_id" },
-            columns_ignored_on_deletion: %w[updated_by_id]
+                       "last_edited_by_id" => "last_edited_by_id", "closed_by_id" => "closed_by_id" }
           }
         },
         "GenericCommitStatus" => {
@@ -94,8 +90,7 @@ module Import
         "LegacyDiffNote" => {
           1 => {
             model: LegacyDiffNote,
-            columns: NOTE_COLUMNS,
-            columns_ignored_on_deletion: NOTE_EXCLUSIONS
+            columns: NOTE_COLUMNS
           }
         },
         "Issue" => {
@@ -121,8 +116,7 @@ module Import
           1 => {
             model: MergeRequest,
             columns: { "author_id" => "author_id", "updated_by_id" => "updated_by_id",
-                       "last_edited_by_id" => "last_edited_by_id", "merge_user_id" => "merge_user_id" },
-            columns_ignored_on_deletion: %w[last_edited_by_id]
+                       "last_edited_by_id" => "last_edited_by_id", "merge_user_id" => "merge_user_id" }
           }
         },
         "MergeRequest::Metrics" => {
@@ -146,8 +140,7 @@ module Import
         "Note" => {
           1 => {
             model: Note,
-            columns: NOTE_COLUMNS,
-            columns_ignored_on_deletion: NOTE_EXCLUSIONS
+            columns: NOTE_COLUMNS
           }
         },
         "ProtectedTag::CreateAccessLevel" => {
@@ -209,13 +202,6 @@ module Import
             model: Timelog,
             columns: { "user_id" => "user_id" }
           }
-        },
-        "WorkItem" => {
-          1 => {
-            model: WorkItem,
-            columns: { "author_id" => "author_id", "updated_by_id" => "updated_by_id",
-                       "closed_by_id" => "closed_by_id", "last_edited_by_id" => "last_edited_by_id" }
-          }
         }
       }.freeze
 
@@ -237,9 +223,9 @@ module Import
         aliased_model = aliases.dig(model, version, :model)
         return aliased_model if aliased_model.present?
 
-        track_error_for_missing(model:, version:)
+        track_error_for_missing(model: model, version: version)
 
-        model.safe_constantize || (raise missing_alias_error(model:, version:))
+        model.safe_constantize
       end
 
       def aliased_column(model, column, version:)
@@ -251,21 +237,17 @@ module Import
         column
       end
 
-      def models_with_data
+      def models_with_columns
         aliases.values
           .map { |versions| versions[versions.keys.max] }
-          .map { |data| [data[:model], data] }
-      end
-
-      private_class_method def self.missing_alias_error(model:, column: nil, version: nil)
-        message = "ALIASES must be extended to include #{model}"
-        message += ".#{column}" if column
-        message += " for version #{version}" if version
-        MissingAlias.new(message)
+          .map { |data| [data[:model], data[:columns].values] }
       end
 
       private_class_method def self.track_error_for_missing(model:, column: nil, version: nil)
-        Gitlab::ErrorTracking.track_and_raise_for_dev_exception(missing_alias_error(model:, column:, version:))
+        message = "ALIASES must be extended to include #{model}"
+        message += ".#{column}" if column
+        message += " for version #{version}" if version
+        Gitlab::ErrorTracking.track_and_raise_for_dev_exception(MissingAlias.new(message))
       end
     end
   end

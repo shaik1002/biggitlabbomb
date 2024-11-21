@@ -84,20 +84,20 @@ ul.content-list {
   padding: 0;
 
   li {
-    @apply gl-border-default;
+    border-color: $gray-50;
     font-size: $gl-font-size;
-    @apply gl-text-default;
+    color: $gl-text-color;
     word-break: break-word;
 
     .title {
       font-weight: $gl-font-weight-bold;
     }
 
-    a {
-      @apply gl-text-default;
+    a:not(.gfm-project_member) {
+      color: $gl-text-color;
 
       &.inline-link {
-        @apply gl-text-link;
+        color: $blue-600;
       }
     }
 
@@ -162,7 +162,11 @@ ul.content-list {
   }
 
   .badge-secondary {
-    @apply gl-text-subtle;
+    color: $gl-text-color-secondary;
+  }
+
+  .avatar-cell {
+    align-self: flex-start;
   }
 }
 

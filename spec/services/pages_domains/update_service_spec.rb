@@ -4,7 +4,7 @@ require 'spec_helper'
 
 RSpec.describe PagesDomains::UpdateService, feature_category: :pages do
   let_it_be(:user) { create(:user) }
-  let_it_be(:pages_domain) { create(:pages_domain) }
+  let_it_be(:pages_domain) { create(:pages_domain, :with_project) }
 
   let(:params) do
     attributes_for(:pages_domain, :with_trusted_chain).slice(:key, :certificate).tap do |params|
@@ -30,7 +30,7 @@ RSpec.describe PagesDomains::UpdateService, feature_category: :pages do
 
     context 'when it updates the domain successfully' do
       it 'updates the domain' do
-        expect(service.execute(pages_domain)).to be true
+        expect(service.execute(pages_domain)).to eq(true)
       end
 
       it 'publishes a PagesDomainUpdatedEvent' do

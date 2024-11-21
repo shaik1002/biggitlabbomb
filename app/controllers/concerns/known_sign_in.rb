@@ -36,21 +36,16 @@ module KnownSignIn
   end
 
   def sessions
-    ActiveSession.list(current_user).reject(&:is_impersonated)
+    strong_memoize(:session) do
+      ActiveSession.list(current_user).reject(&:is_impersonated)
+    end
   end
-  strong_memoize_attr :sessions
 
   def known_ip_addresses
     [current_user.last_sign_in_ip, sessions.map(&:ip_address)].flatten
   end
 
   def notify_user
-    request_info = Gitlab::Auth::VisitorLocation.new(request)
-    current_user.notification_service.unknown_sign_in(
-      current_user,
-      request.remote_ip,
-      current_user.current_sign_in_at,
-      request_info
-    )
+    current_user.notification_service.unknown_sign_in(current_user, request.remote_ip, current_user.current_sign_in_at)
   end
 end

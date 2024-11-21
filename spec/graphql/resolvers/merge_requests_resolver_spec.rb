@@ -133,17 +133,6 @@ RSpec.describe Resolvers::MergeRequestsResolver, feature_category: :code_review_
       end
     end
 
-    context 'with negated author argument' do
-      let_it_be(:author) { current_user }
-      let_it_be(:different_author_mr) { create(:merge_request, **common_attrs, author: create(:user)) }
-
-      it 'excludes merge requests with given author from selection' do
-        result = resolve_mr(project, not: { author_username: author.username })
-
-        expect(result).to contain_exactly(different_author_mr)
-      end
-    end
-
     context 'with source branches argument' do
       it 'takes one argument' do
         result = resolve_mr(project, source_branches: [merge_request_3.source_branch])
@@ -160,16 +149,6 @@ RSpec.describe Resolvers::MergeRequestsResolver, feature_category: :code_review_
       end
     end
 
-    context 'with negated source branches argument' do
-      it 'excludes merge requests with given source branches from selection' do
-        mrs = [merge_request_3, merge_request_4]
-        branches = mrs.map(&:source_branch)
-        result = resolve_mr(project, not: { source_branches: branches })
-
-        expect(result).not_to include(*mrs)
-      end
-    end
-
     context 'with target branches argument' do
       it 'takes one argument' do
         result = resolve_mr(project, target_branches: [merge_request_3.target_branch])
@@ -183,17 +162,6 @@ RSpec.describe Resolvers::MergeRequestsResolver, feature_category: :code_review_
         result = resolve_mr(project, target_branches: branches)
 
         expect(result).to match_array(mrs)
-      end
-    end
-
-    context 'with negated target branches argument' do
-      it 'excludes merge requests with given target branches from selection' do
-        mrs = [merge_request_3, merge_request_4]
-        branches = mrs.map(&:target_branch)
-        result = resolve_mr(project, not: { target_branches: branches })
-
-        expect(result).not_to include(merge_request_3, merge_request_4)
-        expect(result).to include(merge_request_1, merge_request_2, merge_request_5, merge_request_6)
       end
     end
 
@@ -360,7 +328,7 @@ RSpec.describe Resolvers::MergeRequestsResolver, feature_category: :code_review_
       end
 
       it 'does not return anything' do
-        result = resolve_mr(project, my_reaction_emoji: AwardEmoji::THUMBS_UP)
+        result = resolve_mr(project, my_reaction_emoji: "thumbsup")
 
         expect(result).to be_empty
       end
@@ -427,38 +395,6 @@ RSpec.describe Resolvers::MergeRequestsResolver, feature_category: :code_review_
 
           expect(result).to contain_exactly(merge_request_2)
         end
-      end
-    end
-
-    context 'when filtering by environment' do
-      let_it_be(:gstg) { create(:environment, project: project, name: 'gstg') }
-      let_it_be(:gprd) { create(:environment, project: project, name: 'gprd') }
-
-      let_it_be(:deploy1) do
-        create(
-          :deployment,
-          :success,
-          deployable: nil,
-          environment: gstg,
-          project: project,
-          sha: merge_request_1.diff_head_sha
-        )
-      end
-
-      before do
-        deploy1.link_merge_requests(MergeRequest.where(id: merge_request_1.id))
-      end
-
-      it 'returns merge requests for a given environment' do
-        result = resolve_mr(project, environment_name: gstg.name)
-
-        expect(result).to contain_exactly(merge_request_1)
-      end
-
-      it 'returns an empty list when no merge requests exist in a given environment' do
-        result = resolve_mr(project, environment_name: gprd.name)
-
-        expect(result).to be_empty
       end
     end
 
@@ -549,8 +485,6 @@ RSpec.describe Resolvers::MergeRequestsResolver, feature_category: :code_review_
         expect(result).to be_empty
       end
     end
-
-    # subscribed filtering handled in request spec, spec/requests/api/graphql/merge_requests/merge_requests_spec.rb
 
     describe 'combinations' do
       it 'requires all filters' do

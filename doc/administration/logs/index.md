@@ -1,6 +1,6 @@
 ---
 stage: Monitor
-group: Platform Insights
+group: Respond
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
 
@@ -416,7 +416,7 @@ like this example:
   "project_id":8,
   "project_path":"h5bp/html5-boilerplate",
   "message":"Error sending message",
-  "client_url":"http://jira.gitlab.com:8080",
+  "client_url":"http://jira.gitlap.com:8080",
   "error":"execution expired"
 }
 {
@@ -1029,26 +1029,9 @@ DETAILS:
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/120506) in GitLab 16.0.
 
 The `llm.log` file logs information related to
-[AI features](../../user/ai_features.md). Logging includes information about AI events.
+[AI features](../../user/ai_features.md).
 
-### LLM input and output logging
-
-> - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/13401) in GitLab 17.2 [with a flag](../../administration/feature_flags.md) named `expanded_ai_logging`. Disabled by default.
-
-FLAG:
-The availability of this feature is controlled by a feature flag.
-For more information, see the history.
-This feature is available for testing, but not ready for production use.
-
-LLM prompt input and response output can be logged by enabling the `expanded_ai_logging` feature flag.
-This flag is disabled by default and can only be enabled:
-
-- For GitLab.com, when you provide consent through a GitLab [Support Ticket](https://about.gitlab.com/support/portal/).
-- For self-managed, when you enable this feature flag.
-
-By default, the log does not contain LLM prompt input and response output to support [data retention policies](../../user/gitlab_duo/data_usage.md#data-retention) of AI feature data.
-
-The log file is located at:
+This file is located at:
 
 - `/var/log/gitlab/gitlab-rails/llm.log` on Linux package installations.
 - `/home/git/gitlab/log/llm.log` on self-compiled installations.
@@ -1212,8 +1195,6 @@ GitLab also tracks [Prometheus metrics for Praefect](../gitaly/monitoring.md#mon
 ## Backup log
 
 For Linux package installations, the backup log is located at `/var/log/gitlab/gitlab-rails/backup_json.log`.
-
-For Helm chart installations, the backup log is stored in the Toolbox pod, at `/var/log/gitlab/backup_json.log`.
 
 This log is populated when a [GitLab backup is created](../../administration/backup_restore/index.md). You can use this log to understand how the backup process performed.
 

@@ -6,25 +6,27 @@ module QA
       include Runtime::Fixtures
       include Support::Helpers::MaskToken
 
-      let(:personal_access_token) { Runtime::UserStore.default_api_client.personal_access_token }
       let(:project) { create(:project, :private, name: 'pypi-package-project') }
       let(:package) { build(:package, name: "mypypipackage-#{SecureRandom.hex(8)}", project: project) }
 
       let!(:runner) do
         create(:project_runner,
-          name: "qa-runner-#{SecureRandom.hex(6)}",
+          name: "qa-runner-#{Time.now.to_i}",
           tags: ["runner-for-#{project.name}"],
           executor: :docker,
           project: project)
       end
 
       let(:uri) { URI.parse(Runtime::Scenario.gitlab_address) }
+
+      let!(:personal_access_token) do
+        use_ci_variable(name: 'PERSONAL_ACCESS_TOKEN', value: Runtime::Env.personal_access_token, project: project)
+      end
+
       let(:gitlab_address_with_port) { Support::GitlabAddress.address_with_port }
       let(:gitlab_host_with_port) { Support::GitlabAddress.host_with_port(with_default_port: false) }
 
       before do
-        use_ci_variable(name: 'PERSONAL_ACCESS_TOKEN', value: personal_access_token, project: project)
-
         Flow::Login.sign_in
 
         pypi_yaml = ERB.new(read_fixture('package_managers/pypi',

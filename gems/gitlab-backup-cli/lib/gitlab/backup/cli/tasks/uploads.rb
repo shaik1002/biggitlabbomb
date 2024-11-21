@@ -13,8 +13,8 @@ module Gitlab
 
           private
 
-          def local
-            Gitlab::Backup::Cli::Targets::Files.new(context, storage_path, excludes: ['tmp'])
+          def target
+            check_object_storage(::Backup::Targets::Files.new(nil, storage_path, options: options, excludes: ['tmp']))
           end
 
           def storage_path = context.upload_path

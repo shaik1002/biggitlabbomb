@@ -1,7 +1,8 @@
 <script>
 import { GlAreaChart } from '@gitlab/ui/dist/charts';
-import { localeDateFormat, newDate } from '~/lib/utils/datetime_utility';
 import { __ } from '~/locale';
+import { dateFormats } from '~/analytics/shared/constants';
+import dateFormat from '~/lib/dateformat';
 
 export default {
   name: 'ContributorAreaChart',
@@ -36,7 +37,7 @@ export default {
   methods: {
     formatTooltipText({ seriesData }) {
       const [dateTime, value] = seriesData[0].data;
-      this.tooltipTitle = localeDateFormat.asDate.format(newDate(dateTime));
+      this.tooltipTitle = dateFormat(dateTime, dateFormats.defaultDate);
       this.tooltipValue = value;
     },
   },

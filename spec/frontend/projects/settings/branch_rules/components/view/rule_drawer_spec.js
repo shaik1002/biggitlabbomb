@@ -19,7 +19,7 @@ describe('Edit Rule Drawer', () => {
   let wrapper;
 
   const findDrawer = () => wrapper.findComponent(GlDrawer);
-  const findCancelButton = () => wrapper.findByTestId('cancel-btn');
+  const findCancelButton = () => wrapper.findByText('Cancel');
   const findHeader = () => wrapper.find('h2');
   const findSaveButton = () => wrapper.findByTestId('save-allowed-to-merge');
   const findCheckboxes = () => wrapper.findAllComponents(GlFormCheckbox);

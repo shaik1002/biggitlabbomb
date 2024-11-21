@@ -4,12 +4,18 @@ import VueApollo from 'vue-apollo';
 import JobsTableApp from '~/ci/jobs_page/jobs_page_app.vue';
 import createDefaultClient from '~/lib/graphql';
 import { parseBoolean } from '~/lib/utils/common_utils';
+import cacheConfig from './graphql/cache_config';
 
 Vue.use(VueApollo);
 Vue.use(GlToast);
 
 const apolloProvider = new VueApollo({
-  defaultClient: createDefaultClient(),
+  defaultClient: createDefaultClient(
+    {},
+    {
+      cacheConfig,
+    },
+  ),
 });
 
 export default (containerId = 'js-jobs-table') => {

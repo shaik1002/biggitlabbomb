@@ -5,7 +5,7 @@ description: Installation settings.
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
 
-# Configure GitLab
+# Configure your GitLab installation
 
 DETAILS:
 **Tier:** Free, Premium, Ultimate
@@ -14,7 +14,7 @@ DETAILS:
 Customize and configure your self-managed GitLab installation.
 
 - [Authentication](auth/index.md)
-- [CI/CD](../administration/cicd/index.md)
+- [CI/CD](../administration/cicd.md)
 - [Configuration](../administration/admin_area.md)
 - [Consul](../administration/consul.md)
 - [Environment variables](../administration/environment_variables.md)
@@ -48,4 +48,3 @@ Customize and configure your self-managed GitLab installation.
 - [Snippets](../administration/snippets/index.md)
 - [Host the product documentation](../administration/docs_self_host.md)
 - [Custom HTML header tags](../administration/custom_html_header_tags.md)
-- [Self-hosted models](../administration/self_hosted_models/index.md)

@@ -22,16 +22,6 @@ module BulkImports
         def load(_context, data)
           return unless data
 
-          if data[:source_user]
-            create_placeholder_membership(data)
-          else
-            create_member(data)
-          end
-        end
-
-        private
-
-        def create_member(data)
           user_id = data[:user_id]
 
           # Current user is already a member
@@ -48,13 +38,7 @@ module BulkImports
           member.save!
         end
 
-        def create_placeholder_membership(data)
-          result = Import::PlaceholderMemberships::CreateService.new(**data).execute
-
-          return unless result.error?
-
-          result.track_and_raise_exception(access_level: data[:access_level])
-        end
+        private
 
         def graphql_extractor
           @graphql_extractor ||= BulkImports::Common::Extractors::GraphqlExtractor

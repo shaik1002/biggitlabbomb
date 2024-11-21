@@ -9,12 +9,7 @@ RSpec.describe MergeRequests::CreatePipelineWorker, feature_category: :pipeline_
     let(:merge_request) { create(:merge_request) }
     let(:worker) { described_class.new }
 
-    subject do
-      worker.perform(
-        project.id, user.id, merge_request.id,
-        'pipeline_creation_request' => { 'key' => '123', 'id' => '456' }
-      )
-    end
+    subject { worker.perform(project.id, user.id, merge_request.id) }
 
     context 'when the objects exist' do
       it 'calls the merge request create pipeline service and calls update head pipeline' do
@@ -22,11 +17,7 @@ RSpec.describe MergeRequests::CreatePipelineWorker, feature_category: :pipeline_
           expect_next_instance_of(MergeRequests::CreatePipelineService,
             project: project,
             current_user: user,
-            params: {
-              allow_duplicate: nil,
-              push_options: nil,
-              pipeline_creation_request: { 'key' => '123', 'id' => '456' }
-            }) do |service|
+            params: { allow_duplicate: nil, push_options: nil }) do |service|
             expect(service).to receive(:execute).with(merge_request)
           end
 
@@ -38,12 +29,7 @@ RSpec.describe MergeRequests::CreatePipelineWorker, feature_category: :pipeline_
       end
 
       context 'when push options are passed as Hash to the worker' do
-        let(:extra_params) do
-          {
-            'pipeline_creation_request' => { 'key' => '123', 'id' => '456' },
-            'push_options' => { 'ci' => { 'skip' => true } }
-          }
-        end
+        let(:extra_params) { { 'push_options' => { 'ci' => { 'skip' => true } } } }
 
         subject { worker.perform(project.id, user.id, merge_request.id, extra_params) }
 
@@ -52,11 +38,7 @@ RSpec.describe MergeRequests::CreatePipelineWorker, feature_category: :pipeline_
             expect_next_instance_of(MergeRequests::CreatePipelineService,
               project: project,
               current_user: user,
-              params: {
-                allow_duplicate: nil,
-                push_options: { ci: { skip: true } },
-                pipeline_creation_request: { 'key' => '123', 'id' => '456' }
-              }) do |service|
+              params: { allow_duplicate: nil, push_options: { ci: { skip: true } } }) do |service|
               expect(service).to receive(:execute).with(merge_request)
             end
 

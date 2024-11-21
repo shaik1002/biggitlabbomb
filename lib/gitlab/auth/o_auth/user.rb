@@ -111,8 +111,6 @@ module Gitlab
 
         protected
 
-        attr_reader :user_params
-
         def activate_user_if_user_cap_not_reached
           nil
         end
@@ -134,6 +132,8 @@ module Gitlab
             log.info "Correct LDAP account has been found. identity to user: #{gl_user.username}."
             gl_user.identities.build(provider: ldap_person.provider, extern_uid: ldap_person.dn)
           end
+
+          identity
         end
 
         def find_or_build_ldap_user
@@ -224,8 +224,8 @@ module Gitlab
         end
 
         def build_new_user(skip_confirmation: true)
-          augmented_user_params = user_attributes.merge(skip_confirmation: skip_confirmation)
-          Users::AuthorizedBuildService.new(nil, augmented_user_params).execute
+          user_params = user_attributes.merge(skip_confirmation: skip_confirmation)
+          Users::AuthorizedBuildService.new(nil, user_params).execute
         end
 
         def user_attributes
@@ -249,7 +249,7 @@ module Gitlab
             password: auth_hash.password,
             password_confirmation: auth_hash.password,
             password_automatically_set: true,
-            organization_id: user_params[:organization_id]
+            organization_id: @user_params[:organization_id]
           }
         end
 

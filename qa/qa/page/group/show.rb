@@ -4,7 +4,6 @@ module QA
   module Page
     module Group
       class Show < Page::Base
-        include Layout::Flash
         include Page::Component::GroupsFilter
         include QA::Page::Component::ConfirmModal
 
@@ -60,3 +59,4 @@ module QA
 end
 
 QA::Page::Group::Show.prepend_mod_with('Page::Component::DuoChatCallout', namespace: QA)
+QA::Page::Group::Show.prepend_mod_with('Page::Alert::FreeTrial', namespace: QA)

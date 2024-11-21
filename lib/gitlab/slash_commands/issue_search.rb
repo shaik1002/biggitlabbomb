@@ -11,6 +11,7 @@ module Gitlab
         "issue search <your query>"
       end
 
+      # rubocop: disable CodeReuse/ActiveRecord
       def execute(match)
         issues = collection.search(match[:query]).limit(QUERY_LIMIT)
 
@@ -20,6 +21,7 @@ module Gitlab
           Presenters::Access.new(issues).not_found
         end
       end
+      # rubocop: enable CodeReuse/ActiveRecord
     end
   end
 end

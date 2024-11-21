@@ -1,10 +1,8 @@
 ---
-stage: Application Security Testing
+stage: Secure
 group: Composition Analysis
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
-
-# Dependency Scanning
 
 <style>
 table.ds-table tr:nth-child(even) {
@@ -43,6 +41,8 @@ table.no-vertical-table-lines tr {
 }
 </style>
 
+# Dependency Scanning
+
 DETAILS:
 **Tier:** Ultimate
 **Offering:** GitLab.com, Self-managed, GitLab Dedicated
@@ -55,7 +55,7 @@ aspects of inspecting the items your code uses. These items typically include ap
 dependencies that are almost always imported from external sources, rather than sourced from items
 you wrote yourself.
 
-Dependency Scanning can run in the development phase of your application's lifecycle. Every time a
+Dependency Scanning can run in the development phase of your application's life cycle. Every time a
 pipeline runs, vulnerabilities are identified and compared between the source and target branches.
 Vulnerabilities and their severity are listed in the merge request, enabling you to proactively
 address the risk to your application, before the code change is committed.
@@ -677,7 +677,7 @@ The `gemnasium` analyzer scans supports JavaScript projects for vendored librari
 #### Go
 
 Multiple files are supported. When a `go.mod` file is detected, the analyzer attempts to generate a [build list](https://go.dev/ref/mod#glos-build-list) using
-[Minimal Version Selection](https://go.dev/ref/mod#glos-minimal-version-selection). If this fails, the analyzer instead attempts to parse the dependencies within the `go.mod` file.
+[Minimal Version Selection](https://go.dev/ref/mod#glos-minimal-version-selection).
 
 As a requirement, the `go.mod` file should be cleaned up using the command `go mod tidy` to ensure proper management of dependencies. The process is repeated for every detected `go.mod` file.
 
@@ -856,10 +856,9 @@ The following variables configure the behavior of specific dependency scanning a
 | `GOFLAGS`                            | `gemnasium`        |                              | The flags passed to the `go build` tool. |
 | `GOPRIVATE`                          | `gemnasium`        |                              | A list of glob patterns and prefixes to be fetched from source. For more information, see the Go private modules [documentation](https://go.dev/ref/mod#private-modules). |
 | `DS_JAVA_VERSION`                    | `gemnasium-maven`  | `17`                         | Version of Java. Available versions: `8`, `11`, `17`, `21`. |
-| `MAVEN_CLI_OPTS`                     | `gemnasium-maven`  | `"-DskipTests --batch-mode"` | List of command line arguments that are passed to `maven` by the analyzer. See an example for [using private repositories](#authenticate-with-a-private-maven-repository). |
+| `MAVEN_CLI_OPTS`                     | `gemnasium-maven`  | `"-DskipTests --batch-mode"` | List of command line arguments that are passed to `maven` by the analyzer. See an example for [using private repositories](../index.md#using-private-maven-repositories). |
 | `GRADLE_CLI_OPTS`                    | `gemnasium-maven`  |                              | List of command line arguments that are passed to `gradle` by the analyzer. |
 | `GRADLE_PLUGIN_INIT_PATH`            | `gemnasium-maven`  | `"gemnasium-init.gradle"`    | Specifies the path to the Gradle initialization script. The init script must include `allprojects { apply plugin: 'project-report' }` to ensure compatibility. |
-| `DS_GRADLE_RESOLUTION_POLICY`        | `gemnasium-maven`  | `"failed"`                   | Controls Gradle dependency resolution strictness. Accepts `"none"` to allow partial results, or `"failed"` to fail the scan when any dependencies fail to resolve. |
 | `SBT_CLI_OPTS`                       | `gemnasium-maven`  |                              | List of command-line arguments that the analyzer passes to `sbt`. |
 | `PIP_INDEX_URL`                      | `gemnasium-python` | `https://pypi.org/simple`    | Base URL of Python Package Index. |
 | `PIP_EXTRA_INDEX_URL`                | `gemnasium-python` |                              | Array of [extra URLs](https://pip.pypa.io/en/stable/reference/pip_install/#cmdoption-extra-index-url) of package indexes to use in addition to `PIP_INDEX_URL`. Comma-separated. **Warning:** Read [the following security consideration](#python-projects) when using this environment variable. |
@@ -928,42 +927,12 @@ variables:
       -----END CERTIFICATE-----
 ```
 
-### Authenticate with a private Maven repository
+### Using private Maven repositories
 
-To use a private Maven repository that requires authentication, you should store your credentials in
-a CI/CD variable and reference them in your Maven settings file. Do not add the credentials to your
-`.gitlab-ci.yml` file.
+If your private Maven repository requires login credentials,
+you can use the `MAVEN_CLI_OPTS` CI/CD variable.
 
-To authenticate with a private Maven repository:
-
-1. Add the `MAVEN_CLI_OPTS` CI/CD variable to your
-   [project's settings](../../../ci/variables/index.md#for-a-project), setting the value to include
-   your credentials.
-
-   For example, if your username is `myuser` and the password is `verysecret`:
-
-   | Type     | Key              | Value |
-   |----------|------------------|-------|
-   | Variable | `MAVEN_CLI_OPTS` | `--settings mysettings.xml -Drepository.password=verysecret -Drepository.user=myuser` |
-
-1. Create a Maven settings file with your server configuration.
-
-   For example, add the following to the settings file `mysettings.xml`. This file is referenced in
-   the `MAVEN_CLI_OPTS` CI/CD variable.
-
-   ```xml
-   <!-- mysettings.xml -->
-   <settings>
-       ...
-       <servers>
-           <server>
-               <id>private_server</id>
-               <username>${private.username}</username>
-               <password>${private.password}</password>
-           </server>
-       </servers>
-   </settings>
-   ```
+Read more on [how to use private Maven repositories](../index.md#using-private-maven-repositories).
 
 ### FIPS-enabled images
 
@@ -975,10 +944,6 @@ scanning jobs automatically use the FIPS-enabled images. To manually switch to F
 set the variable `DS_IMAGE_SUFFIX` to `"-fips"`.
 
 Dependency scanning for Gradle projects and auto-remediation for Yarn projects are not supported in FIPS mode.
-
-FIPS-enabled images are based on RedHat's UBI micro.
-They don't have package managers such as `dnf` or `microdnf`
-so it's not possible to install system packages at runtime.
 
 ## Output
 
@@ -1125,7 +1090,7 @@ To use dependency scanning with all [supported languages and frameworks](#suppor
 
    ```yaml
    include:
-     - template: Jobs/Dependency-Scanning.gitlab-ci.yml
+     - template: Security/Dependency-Scanning.gitlab-ci.yml
 
    variables:
      SECURE_ANALYZERS_PREFIX: "docker-registry.example.com/analyzers"
@@ -1278,44 +1243,6 @@ We recommend that you use the most recent version of all containers, and the mos
 ### Gradle projects
 
 Do not override the `reports.html.destination` or `reports.html.outputLocation` properties when generating an HTML dependency report for Gradle projects. Doing so prevents Dependency Scanning from functioning correctly.
-
-### Maven Projects
-
-In isolated networks, if the central repository is a private registry (explicitly set with the `<mirror>` directive), Maven builds may fail to find the `gemnasium-maven-plugin` dependency. This issue occurs because Maven doesn't search the local repository (`/root/.m2`) by default and attempts to fetch from the central repository. The result is an error about the missing dependency.
-
-#### Workaround
-
-To resolve this issue, add a `<pluginRepositories>` section to your `settings.xml` file. This allows Maven to find plugins in the local repository.
-
-Before you begin, consider the following:
-
-- This workaround is only for environments where the default Maven central repository is mirrored to a private registry.
-- After applying this workaround, Maven searches the local repository for plugins, which may have security implications in some environments. Make sure this aligns with your organization's security policies.
-
-Follow these steps to modify the `settings.xml` file:
-
-1. Locate your Maven `settings.xml` file. This file is typically found in one of these locations:
-
-   - `/root/.m2/settings.xml` for the root user.
-   - `~/.m2/settings.xml` for a regular user.
-   - `${maven.home}/conf/settings.xml` global settings.
-
-1. Check if there's an existing `<pluginRepositories>` section in the file.
-
-1. If a `<pluginRepositories>` section already exists, add only the following `<pluginRepository>` element inside it.
-Otherwise, add the entire `<pluginRepositories>` section:
-
-      ```xml
-        <pluginRepositories>
-          <pluginRepository>
-              <id>local2</id>
-              <name>local repository</name>
-              <url>file:///root/.m2/repository/</url>
-          </pluginRepository>
-        </pluginRepositories>
-      ```
-
-1. Run your Maven build or dependency scanning process again.
 
 ### Python projects
 

@@ -10,12 +10,12 @@ module RapidDiffs
       }.freeze
 
       class ExpandLinesComponent < ViewComponent::Base
-        def initialize(directions:)
-          @directions = directions
+        def initialize(direction:)
+          @direction = direction
         end
 
-        def icon_name(direction)
-          ICON_NAMES[direction]
+        def icon_name
+          ICON_NAMES[@direction]
         end
       end
     end

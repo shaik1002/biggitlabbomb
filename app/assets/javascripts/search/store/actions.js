@@ -1,11 +1,11 @@
-import { omitBy } from 'lodash';
 import Api from '~/api';
 import { createAlert } from '~/alert';
 import axios from '~/lib/utils/axios_utils';
 import { visitUrl, setUrlParams, getNormalizedURL, updateHistory } from '~/lib/utils/url_utility';
 import { logError } from '~/lib/logger';
 import { __ } from '~/locale';
-import { SCOPE_BLOB, SEARCH_TYPE_ZOEKT, LABEL_FILTER_PARAM } from '~/search/sidebar/constants';
+import { LABEL_FILTER_PARAM } from '~/search/sidebar/components/label_filter/data';
+import { SCOPE_BLOB, SEARCH_TYPE_ZOEKT } from '~/search/sidebar/constants';
 import {
   GROUPS_LOCAL_STORAGE_KEY,
   PROJECTS_LOCAL_STORAGE_KEY,
@@ -124,8 +124,7 @@ export const setQuery = ({ state, commit, getters }, { key, value }) => {
 };
 
 export const applyQuery = ({ state }) => {
-  const query = omitBy(state.query, (item) => item === '');
-  visitUrl(setUrlParams({ ...query, page: null }, window.location.href, true, true));
+  visitUrl(setUrlParams({ ...state.query, page: null }, window.location.href, false, true));
 };
 
 export const resetQuery = ({ state }) => {

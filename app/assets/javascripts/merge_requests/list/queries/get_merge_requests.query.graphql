@@ -22,9 +22,6 @@ query getMergeRequests(
   $myReactionEmoji: String
   $sourceBranches: [String!]
   $targetBranches: [String!]
-  $deployedBefore: Time
-  $deployedAfter: Time
-  $environmentName: String
   $not: MergeRequestsResolverNegatedParams
   $beforeCursor: String
   $afterCursor: String
@@ -51,9 +48,6 @@ query getMergeRequests(
       myReactionEmoji: $myReactionEmoji
       sourceBranches: $sourceBranches
       targetBranches: $targetBranches
-      deployedBefore: $deployedBefore
-      deployedAfter: $deployedAfter
-      environmentName: $environmentName
       not: $not
       before: $beforeCursor
       after: $afterCursor

@@ -1,19 +1,19 @@
 ---
-stage: Software Supply Chain Security
+stage: Govern
 group: Authentication
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
 
-# Moderate users
+# Moderate users (administration)
 
 DETAILS:
 **Tier:** Free, Premium, Ultimate
 **Offering:** Self-managed
 
-If you are the administrator of a GitLab self-managed instance, you have several options to moderate and control user access.
+This is the administration documentation. For information about moderating users in a group, see the [group documentation](../user/group/moderate_users.md).
 
-NOTE:
-This topic is specifically related to user moderation in a GitLab self-managed instance. For information related to groups, see the [group documentation](../user/group/moderate_users.md).
+GitLab administrators can moderate user access by approving, blocking, banning, or deactivating
+users.
 
 ## Users pending approval
 
@@ -75,19 +75,6 @@ Rejecting a user:
 - Prevents the user from signing in or accessing instance information.
 - Deletes the user.
 
-## View users pending role promotion
-
-If [administrator approval for role promotions](../administration/settings/sign_up_restrictions.md#turn-on-administrator-approval-for-role-promotions) is turned on, membership requests that promote existing users into a billable role require administrator approval.
-
-To view users pending role promotion:
-
-1. On the left sidebar, at the bottom, select **Admin**.
-1. Select **Overview > Users**.
-1. Select **Role Promotions**.
-
-A list of users with the highest role requested is displayed.
-You can **Approve** or **Reject** the requests.
-
 ## Block and unblock users
 
 GitLab administrators can block and unblock users.
@@ -95,10 +82,9 @@ You should block a user when you don't want them to access the instance, but you
 
 A blocked user:
 
-- Cannot sign in or access any repositories.
-  - Any associated data remains in these repositories.
-- Cannot use [slash commands](../user/project/integrations/gitlab_slack_application.md#slash-commands).
-- Does not occupy a [seat](../subscriptions/self_managed/index.md#billable-users).
+- Cannot sign in or access any repositories. The blocked user's data remains in those repositories.
+- Cannot use slash commands. For more information, see [slash commands](../user/project/integrations/gitlab_slack_application.md#slash-commands).
+- Does not occupy a seat. For more information, see [billable users](../subscriptions/self_managed/index.md#billable-users).
 
 ### Block a user
 
@@ -179,7 +165,7 @@ For more information, see [user deactivation emails](../administration/settings/
 To deactivate users with the GitLab API, see [deactivate user](../api/user_moderation.md#deactivate-a-user). For information about permanent user restrictions, see [block and unblock users](#block-and-unblock-users).
 
 To remove a user from a GitLab.com subscription, see
-[Remove users from your subscription](../subscriptions/gitlab_com/index.md#remove-users-from-subscription).
+[Remove users from your subscription](../subscriptions/gitlab_com/index.md#remove-users-from-your-subscription).
 
 ### Automatically deactivate dormant users
 
@@ -256,7 +242,7 @@ The user's state is set to active and they consume a
 [seat](../subscriptions/self_managed/index.md#billable-users).
 
 NOTE:
-A deactivated user can also activate their account themselves by logging back in through the UI.
+A deactivated user can also activate their account themselves by logging back in via the UI.
 Users can also be activated using the [GitLab API](../api/user_moderation.md#activate-a-user).
 
 ## Ban and unban users
@@ -270,33 +256,29 @@ You should ban a user when you want to block them and hide their activity from t
 
 A banned user:
 
-- Cannot sign in or access any repositories.
-  - Any associated projects, issues, merge requests, or comments are hidden.
-- Cannot use [slash commands](../user/project/integrations/gitlab_slack_application.md#slash-commands).
+- Is blocked from the instance. The banned user's projects, issues, merge requests, and comments are hidden.
 - Does not occupy a [seat](../subscriptions/self_managed/index.md#billable-users).
 
 ### Ban a user
 
 To block a user and hide their contributions, administrators can ban the user.
 
-To ban a user:
+Users can be banned using the **Admin** area. To do this:
 
 1. On the left sidebar, at the bottom, select **Admin**.
 1. Select **Overview > Users**.
-1. Next to the member you want to ban, select the vertical ellipsis (**{ellipsis_v}**).
-1. From the dropdown list, select **Ban member**.
+1. For the user you want to ban, select the vertical ellipsis (**{ellipsis_v}**), then **Ban user**.
 
 ### Unban a user
 
 > - Ability to filter a user by state [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/238183) in GitLab 17.0.
 
-To unban a user:
+A banned user can be unbanned using the **Admin** area. To do this:
 
 1. On the left sidebar, at the bottom, select **Admin**.
 1. Select **Overview > Users**.
 1. In the search box , filter by **State=Banned** and press <kbd>Enter</kbd>.
-1. Next to the member you want to ban, select the vertical ellipsis (**{ellipsis_v}**).
-1. From the dropdown list, select **Unban member**.
+1. For the user you want to unban, select the vertical ellipsis (**{ellipsis_v}**), then **Unban user**.
 
 The user's state is set to active and they consume a
 [seat](../subscriptions/self_managed/index.md#billable-users).

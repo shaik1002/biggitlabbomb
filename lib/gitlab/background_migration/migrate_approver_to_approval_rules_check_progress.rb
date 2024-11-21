@@ -2,8 +2,10 @@
 
 module Gitlab
   module BackgroundMigration
+    # rubocop: disable Style/Documentation
     class MigrateApproverToApprovalRulesCheckProgress
-      def perform; end
+      def perform
+      end
     end
   end
 end

@@ -3,13 +3,6 @@
 require 'spec_helper'
 
 RSpec.describe Gitlab::BackgroundMigration::UpdateSbomOccurrencesComponentNameBasedOnPep503, feature_category: :software_composition_analysis do
-  before(:all) do
-    # This migration will not work if a sec database is configured. It should be finalized and removed prior to
-    # sec db rollout.
-    # Consult https://gitlab.com/gitlab-org/gitlab/-/merge_requests/171707 for more info.
-    skip_if_multiple_databases_are_setup(:sec)
-  end
-
   let(:occurrences) { table(:sbom_occurrences) }
   let(:components) { table(:sbom_components) }
   let(:projects) { table(:projects) }
@@ -32,7 +25,7 @@ RSpec.describe Gitlab::BackgroundMigration::UpdateSbomOccurrencesComponentNameBa
 
     context 'without data' do
       before do
-        component = components.create!(name: 'azure', purl_type: 8, component_type: 0, organization_id: 1)
+        component = components.create!(name: 'azure', purl_type: 8, component_type: 0)
         occurrences.create!(project_id: project.id, component_id: component.id, commit_sha: 'commit_sha',
           uuid: SecureRandom.uuid, component_name: 'azure')
       end
@@ -45,7 +38,7 @@ RSpec.describe Gitlab::BackgroundMigration::UpdateSbomOccurrencesComponentNameBa
     context 'with data' do
       before do
         %w[aws-cdk.region-info azure.identity backports.cached-property backports.csv].each do |input_name|
-          component = components.create!(name: input_name, purl_type: 8, component_type: 0, organization_id: 1)
+          component = components.create!(name: input_name, purl_type: 8, component_type: 0)
           occurrences.create!(project_id: project.id, component_id: component.id, commit_sha: 'commit_sha',
             uuid: SecureRandom.uuid, component_name: input_name)
         end
@@ -61,10 +54,7 @@ RSpec.describe Gitlab::BackgroundMigration::UpdateSbomOccurrencesComponentNameBa
 
       context 'with unrelated components' do
         let(:component_name) { 'unrelated.component' }
-        let(:unrelated_component) do
-          components.create!(name: component_name, purl_type: 6, component_type: 0, organization_id: 1)
-        end
-
+        let(:unrelated_component) { components.create!(name: component_name, purl_type: 6, component_type: 0) }
         let!(:unrelated_occurrence) do
           occurrences.create!(project_id: project.id, component_id: unrelated_component.id, commit_sha: 'commit_sha',
             uuid: SecureRandom.uuid, component_name: component_name)

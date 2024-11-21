@@ -2,7 +2,7 @@
 
 module Gitlab
   module BackgroundMigration
-    class DestroyInvalidGroupMembers < Gitlab::BackgroundMigration::BatchedMigrationJob
+    class DestroyInvalidGroupMembers < Gitlab::BackgroundMigration::BatchedMigrationJob # rubocop:disable Style/Documentation
       scope_to ->(relation) do
         relation.where(source_type: 'Namespace')
                 .joins('LEFT OUTER JOIN namespaces ON members.source_id = namespaces.id')

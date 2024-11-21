@@ -10,7 +10,7 @@ data_source: redis_hll
 distribution:
 - ce
 - ee
-tiers:
+tier:
 - free
 - premium
 - ultimate

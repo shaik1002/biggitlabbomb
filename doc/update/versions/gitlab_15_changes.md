@@ -157,19 +157,6 @@ if you can't upgrade to 15.11.12 and later.
 
   For more information, see [issue 415724](https://gitlab.com/gitlab-org/gitlab/-/issues/415724).
 
-- A [bug with Terraform configuration](https://gitlab.com/gitlab-org/gitlab/-/issues/348453) caused Terraform state to
-  remain enabled even when `gitlab_rails['terraform_state_enabled']` was set to `false` in the `gitlab.rb` configuration
-  file. Because this bug was fixed in GitLab 15.10, upgrading to GitLab 15.10 could break projects that use the
-  [Terraform state](../../administration/terraform_state.md) feature if it's disabled in the `gitlab.rb` configuration.
-  If you have configured `gitlab_rails['terraform_state_enabled'] = false` in your `gitlab.rb`, check if any projects
-  are using the Terraform state feature. To check:
-  1. Read the [Rails console](../../administration/operations/rails_console.md) warning.
-  1. Start a [Rails console session](../../administration/operations/rails_console.md#starting-a-rails-console-session).
-  1. Run the command `Terraform::State.pluck(:project_id)`. This command returns an array of all projects IDs that have a
-     Terraform state.
-  1. Navigate to each project and work with stakeholders as necessary to determine if the Terraform state feature is
-     actively used. If Terraform state is no longer needed, you can follow the steps to [remove a state file](../../user/infrastructure/iac/terraform_state.md#remove-a-state-file).
-
 ### Geo installations
 
 DETAILS:
@@ -197,7 +184,7 @@ DETAILS:
     [issue 393216](https://gitlab.com/gitlab-org/gitlab/-/issues/393216).
   - The second [bug fix](https://gitlab.com/gitlab-org/gitlab/-/issues/394760) ensures it is possible to upgrade directly from 15.4.x.
 - As part of the [CI Partitioning effort](../../architecture/blueprints/ci_data_decay/pipeline_partitioning.md), a [new Foreign Key](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/107547) was added to `ci_builds_needs`. On GitLab instances with large CI tables, adding this constraint can take longer than usual.
-- Praefect's metadata verifier [invalid metadata deletion behavior](../../administration/gitaly/praefect.md#enable-deletions) is now enabled by default.
+- Praefect's metadata verifier's [invalid metadata deletion behavior](../../administration/gitaly/praefect.md#enable-deletions) is now enabled by default.
 
   The metadata verifier processes replica records in the Praefect database and verifies the replicas actually exist on the Gitaly nodes. If the replica doesn't exist, its
   metadata record is deleted. This enables Praefect to fix situations where a replica has a metadata record indicating it's fine but, in reality, it doesn't exist on disk.
@@ -876,7 +863,7 @@ DETAILS:
 
   1. Ensure all GitLab web nodes are running GitLab 15.1.6.
   1. If you run [GitLab on Kubernetes](https://docs.gitlab.com/charts/installation/) by using the cloud native GitLab Helm chart, make sure that all
-     Webservice pods are running GitLab 15.1.Z:
+     webservice pods are running GitLab 15.1.Z:
 
      ```shell
      kubectl get pods -l app=webservice -o custom-columns=webservice-image:{.spec.containers[0].image},workhorse-image:{.spec.containers[1].image}
@@ -893,7 +880,7 @@ DETAILS:
 
   1. Only then, continue to upgrade to later versions of GitLab.
 - Unauthenticated requests to the [`ciConfig` GraphQL field](../../api/graphql/reference/index.md#queryciconfig) are no longer supported.
-  Before you upgrade to GitLab 15.1, add an [access token](../../api/rest/authentication.md) to your requests.
+  Before you upgrade to GitLab 15.1, add an [access token](../../api/rest/index.md#authentication) to your requests.
   The user creating the token must have [permission](../../user/permissions.md) to create pipelines in the project.
 
 ### Geo installations
@@ -1002,9 +989,9 @@ DETAILS:
   15.0.
 
 - Starting with GitLab 15.0, the `AES256-GCM-SHA384` SSL cipher will not be allowed by
-  NGINX by default. If you use the
-  [AWS Classic Load Balancer](https://docs.aws.amazon.com/en_en/elasticloadbalancing/latest/classic/elb-ssl-security-policy.html#ssl-ciphers) and require the cipher,
-  you can add it back to the allowlist. To add the SSL cipher to the allowlist:
+  NGINX by default. If you require this cipher (for example, if you use
+  [AWS's Classic Load Balancer](https://docs.aws.amazon.com/en_en/elasticloadbalancing/latest/classic/elb-ssl-security-policy.html#ssl-ciphers)),
+  you can add the cipher back to the allow list by following the steps below:
 
   1. Edit `/etc/gitlab/gitlab.rb` and add the following line:
 
@@ -1018,7 +1005,7 @@ DETAILS:
      sudo gitlab-ctl reconfigure
      ```
 
-- Support for internal socket path for Gitaly is removed.
+- Support for Gitaly's internal socket path is removed.
   In GitLab 14.10, Gitaly introduced a new directory that holds all runtime
   data Gitaly requires to operate correctly. This new directory replaces the
   old internal socket directory, and consequentially the usage of

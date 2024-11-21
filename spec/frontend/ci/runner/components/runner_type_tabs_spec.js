@@ -74,11 +74,11 @@ describe('RunnerTypeTabs', () => {
     createComponent({
       stubs: {
         RunnerCount: {
-          ...RunnerCount,
-          data() {
-            return {
+          props: ['variables'],
+          render() {
+            return this.$scopedSlots.default({
               count: mockCount(this.variables.type),
-            };
+            });
           },
         },
       },
@@ -91,11 +91,11 @@ describe('RunnerTypeTabs', () => {
     createComponent({
       stubs: {
         RunnerCount: {
-          ...RunnerCount,
-          data() {
-            return {
+          props: ['variables'],
+          render() {
+            return this.$scopedSlots.default({
               count: mockCount(this.variables.type, 1000),
-            };
+            });
           },
         },
       },

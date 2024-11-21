@@ -15,13 +15,8 @@ module Gitlab
       @contributor_time_instance = local_timezone_instance(contributor.timezone).now
       @current_user = current_user
       @groups = [] # Overriden in EE
-      @projects = ContributedProjectsFinder.new(
-        user: @contributor,
-        current_user: current_user,
-        params: {
-          ignore_visibility: @contributor.include_private_contributions?
-        }
-      ).execute
+      @projects = ContributedProjectsFinder.new(contributor)
+        .execute(current_user, ignore_visibility: @contributor.include_private_contributions?)
     end
 
     def activity_dates

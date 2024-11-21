@@ -49,13 +49,11 @@ html {
   }
 }
 
-.alert-wrapper-top-space {
+.alert-wrapper {
   .gl-alert:first-child {
     @apply gl-mt-3;
   }
-}
 
-.alert-wrapper {
   .alert-link-group {
     float: right;
   }
@@ -167,20 +165,5 @@ html {
   .gl-drawer-body > * {
     padding-left: 0;
     padding-right: 0;
-  }
-}
-
-
-/*
- * These are used by the `Tab width` user preference in
- * `https://gitlab.com/-/profile/preferences`. The `css_class_for_user` method in 
- * `lib/gitlab/tab_width.rb` is used to add one of these classes to the `body` element.
-*/
-
-@for $i from 1 through 12 {
-  #{'.tab-width-#{$i}'} {
-    /* stylelint-disable-next-line property-no-vendor-prefix */
-    -moz-tab-size: $i;
-    tab-size: $i;
   }
 }

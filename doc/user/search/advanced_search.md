@@ -1,5 +1,5 @@
 ---
-stage: Foundations
+stage: Data Stores
 group: Global Search
 info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments"
 ---
@@ -40,8 +40,6 @@ You can use advanced search in:
   [enable advanced search](../../integration/advanced_search/elasticsearch.md#enable-advanced-search).
 
 ## Syntax
-
-<!-- Remember to also update the tables in `doc/drawers/advanced_search_syntax.md` -->
 
 > - Refining user search [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/388409) in GitLab 15.10.
 

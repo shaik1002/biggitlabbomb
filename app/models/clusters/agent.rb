@@ -4,6 +4,7 @@ module Clusters
   class Agent < ApplicationRecord
     include FromUnion
     include Gitlab::Utils::StrongMemoize
+    include IgnorableColumns
 
     self.table_name = 'cluster_agents'
 

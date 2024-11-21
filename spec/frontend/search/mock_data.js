@@ -459,6 +459,9 @@ export const TEST_RAW_BUCKETS = [
 ];
 
 export const TEST_FILTER_DATA = {
+  header: 'Language',
+  scopes: { BLOBS: 'blobs' },
+  filterParam: 'language',
   filters: {
     GO: { label: 'Go', value: 'Go', count: 350 },
     C: { label: 'C', value: 'C', count: 298 },
@@ -1677,18 +1680,3 @@ export const mockDataForBlobBody = {
   projectPath: 'Testjs/Test',
   __typename: 'SearchBlobFileType',
 };
-
-export const mockSourceBranches = [
-  {
-    text: 'master',
-    value: 'master',
-  },
-  {
-    text: 'feature',
-    value: 'feature',
-  },
-  {
-    text: 'develop',
-    value: 'develop',
-  },
-];

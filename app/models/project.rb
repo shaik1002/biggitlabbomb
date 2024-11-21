@@ -44,6 +44,7 @@ class Project < ApplicationRecord
   include IssueParent
   include WorkItems::Parent
   include UpdatedAtFilterable
+  include IgnorableColumns
   include CrossDatabaseIgnoredTables
   include UseSqlFunctionForPrimaryKeyLookups
   include Importable
@@ -188,7 +189,6 @@ class Project < ApplicationRecord
   belongs_to :creator, class_name: 'User'
   belongs_to :organization, class_name: 'Organizations::Organization'
   belongs_to :group, -> { where(type: Group.sti_name) }, foreign_key: 'namespace_id'
-  alias_method :notification_group, :group
   belongs_to :namespace
   # Sync deletion via DB Trigger to ensure we do not have
   # a project without a project_namespace (or vice-versa)
@@ -199,7 +199,6 @@ class Project < ApplicationRecord
   has_one :catalog_resource, class_name: 'Ci::Catalog::Resource', inverse_of: :project
   has_many :ci_components, class_name: 'Ci::Catalog::Resources::Component', inverse_of: :project
   # These are usages of the ci_components owned (not used) by the project
-  has_many :ci_component_last_usages, class_name: 'Ci::Catalog::Resources::Components::LastUsage', inverse_of: :component_project
   has_many :ci_component_usages, class_name: 'Ci::Catalog::Resources::Components::Usage', inverse_of: :project
   has_many :catalog_resource_versions, class_name: 'Ci::Catalog::Resources::Version', inverse_of: :project
   has_many :catalog_resource_sync_events, class_name: 'Ci::Catalog::Resources::SyncEvent', inverse_of: :project
@@ -617,7 +616,7 @@ class Project < ApplicationRecord
 
   validates :project_feature, presence: true
   validates :namespace, presence: true
-  validates :organization, presence: true
+  validates :organization, presence: true, if: :require_organization?
   validates :project_namespace, presence: true, on: :create, if: -> { self.namespace }
   validates :project_namespace, presence: true, on: :update, if: -> { self.project_namespace_id_changed?(to: nil) }
   validates :name, uniqueness: { scope: :namespace_id }
@@ -631,7 +630,7 @@ class Project < ApplicationRecord
   validate :visibility_level_allowed_as_fork, if: :should_validate_visibility_level?
   validate :validate_pages_https_only, if: -> { changes.has_key?(:pages_https_only) }
   validate :changing_shared_runners_enabled_is_allowed
-  validate :parent_organization_match
+  validate :parent_organization_match, if: :require_organization?
   validates :repository_storage, presence: true, inclusion: { in: ->(_) { Gitlab.config.repositories.storages.keys } }
   validates :variables, nested_attributes_duplicates: { scope: :environment_scope }
   validates :bfg_object_map, file_size: { maximum: :max_attachment_size }
@@ -730,7 +729,6 @@ class Project < ApplicationRecord
   scope :with_jira_dvcs_server, -> { joins(:feature_usage).merge(ProjectFeatureUsage.with_jira_dvcs_integration_enabled(cloud: false)) }
   scope :by_name, ->(name) { where('projects.name LIKE ?', "#{sanitize_sql_like(name)}%") }
   scope :inc_routes, -> { includes(:route, namespace: :route) }
-  scope :include_fork_networks, -> { includes(:fork_network) }
   scope :with_statistics, -> { includes(:statistics) }
   scope :with_namespace, -> { includes(:namespace) }
   scope :joins_namespace, -> { joins(:namespace) }
@@ -1492,8 +1490,7 @@ class Project < ApplicationRecord
     job_type = type.to_s.capitalize
 
     if job_id
-      use_primary = ::Gitlab::Database::LoadBalancing::SessionMap.current(load_balancer).use_primary?
-      Gitlab::AppLogger.info("#{job_type} job scheduled for #{full_path} with job ID #{job_id} (primary: #{use_primary}).")
+      Gitlab::AppLogger.info("#{job_type} job scheduled for #{full_path} with job ID #{job_id} (primary: #{::Gitlab::Database::LoadBalancing::Session.current.use_primary?}).")
     else
       Gitlab::AppLogger.error("#{job_type} job failed to create for #{full_path}.")
     end
@@ -2140,7 +2137,7 @@ class Project < ApplicationRecord
 
   override :after_repository_change_head
   def after_repository_change_head
-    ProjectCacheWorker.perform_async(self.id, [], %w[commit_count])
+    ProjectCacheWorker.perform_async(self.id, [], [:commit_count])
 
     super
   end
@@ -2361,7 +2358,7 @@ class Project < ApplicationRecord
     wiki.repository.expire_content_cache
 
     DetectRepositoryLanguagesWorker.perform_async(id)
-    ProjectCacheWorker.perform_async(self.id, [], %w[repository_size wiki_size])
+    ProjectCacheWorker.perform_async(self.id, [], [:repository_size, :wiki_size])
     AuthorizedProjectUpdate::ProjectRecalculateWorker.perform_async(id)
 
     enqueue_record_project_target_platforms
@@ -2573,7 +2570,7 @@ class Project < ApplicationRecord
       break unless pages_enabled?
 
       variables.append(key: 'CI_PAGES_DOMAIN', value: Gitlab.config.pages.host)
-      variables.append(key: 'CI_PAGES_URL', value: pages_url)
+      variables.append(key: 'CI_PAGES_URL', value: Gitlab::Pages::UrlBuilder.new(self).pages_url(with_unique_domain: true))
     end
   end
 
@@ -2975,9 +2972,13 @@ class Project < ApplicationRecord
   end
 
   def group_protected_branches
-    return root_namespace.protected_branches if root_namespace.is_a?(Group)
+    return root_namespace.protected_branches if allow_protected_branches_for_group? && root_namespace.is_a?(Group)
 
     ProtectedBranch.none
+  end
+
+  def allow_protected_branches_for_group?
+    Feature.enabled?(:group_protected_branches, group) || Feature.enabled?(:allow_protected_branches_for_group, group)
   end
 
   def deploy_token_create_url(opts = {})
@@ -3041,7 +3042,7 @@ class Project < ApplicationRecord
     config = Gitlab.config.incoming_email
     wildcard = Gitlab::Email::Common::WILDCARD_PLACEHOLDER
 
-    config.address&.gsub(wildcard, default_service_desk_subaddress_part)
+    config.address&.gsub(wildcard, "#{full_path_slug}-#{default_service_desk_suffix}")
   end
 
   def service_desk_alias_address
@@ -3056,10 +3057,6 @@ class Project < ApplicationRecord
     return unless service_desk_setting&.custom_email_enabled?
 
     service_desk_setting.custom_email
-  end
-
-  def default_service_desk_subaddress_part
-    "#{full_path_slug}-#{default_service_desk_suffix}"
   end
 
   def default_service_desk_suffix
@@ -3167,8 +3164,6 @@ class Project < ApplicationRecord
 
   def ci_inbound_job_token_scope_enabled?
     return true unless ci_cd_settings
-
-    return true if ::Gitlab::CurrentSettings.enforce_ci_inbound_job_token_scope_enabled?
 
     ci_cd_settings.inbound_job_token_scope_enabled?
   end
@@ -3295,10 +3290,6 @@ class Project < ApplicationRecord
     group&.glql_integration_feature_flag_enabled? || Feature.enabled?(:glql_integration, self)
   end
 
-  def wiki_comments_feature_flag_enabled?
-    group&.wiki_comments_feature_flag_enabled? || Feature.enabled?(:wiki_comments, self, type: :wip)
-  end
-
   def enqueue_record_project_target_platforms
     return unless Gitlab.com?
 
@@ -3350,12 +3341,6 @@ class Project < ApplicationRecord
     return false unless group
 
     group.crm_enabled?
-  end
-
-  def crm_group
-    return unless group
-
-    group.crm_group
   end
 
   def supports_lock_on_merge?
@@ -3413,19 +3398,6 @@ class Project < ApplicationRecord
 
   def refresh_lfs_file_locks_changed_epoch
     refresh_epoch_cache(lfs_file_locks_changed_epoch_cache_key)
-  end
-
-  def placeholder_reference_store
-    return unless import_state
-
-    ::Import::PlaceholderReferences::Store.new(
-      import_source: import_type,
-      import_uid: import_state.id
-    )
-  end
-
-  def pages_url
-    Gitlab::Pages::UrlBuilder.new(self).pages_url
   end
 
   private

@@ -10,7 +10,6 @@ import {
   USERS_FILTER_ALL,
   USERS_FILTER_SAML_PROVIDER_ID,
   VALID_TOKEN_BACKGROUND,
-  WARNING_TOKEN_BACKGROUND,
   INVALID_TOKEN_BACKGROUND,
 } from '../constants';
 
@@ -46,11 +45,6 @@ export default {
       type: Number,
       required: false,
       default: null,
-    },
-    usersWithWarning: {
-      type: Object,
-      required: false,
-      default: () => ({}),
     },
     invalidMembers: {
       type: Object,
@@ -92,8 +86,8 @@ export default {
       }
       return this.$options.defaultQueryOptions;
     },
-    hasErrorOrWarning() {
-      return !isEmpty(this.invalidMembers) || !isEmpty(this.usersWithWarning);
+    hasInvalidMembers() {
+      return !isEmpty(this.invalidMembers);
     },
     textInputAttrs() {
       return {
@@ -107,10 +101,10 @@ export default {
     // tied to the specific `selectedToken` such that if the token is removed and re-added, this
     // state is reset.
     // See https://gitlab.com/gitlab-org/gitlab/-/merge_requests/90076#note_1027165312
-    hasErrorOrWarning: {
-      handler(newValue) {
-        // Only update tokens if we receive users with error or warning
-        if (!newValue) {
+    hasInvalidMembers: {
+      handler(updatedInvalidMembers) {
+        // Only update tokens if we receive invalid members
+        if (!updatedInvalidMembers) {
           return;
         }
 
@@ -119,7 +113,6 @@ export default {
     },
   },
   methods: {
-    memberName,
     handleTextInput(inputQuery) {
       this.originalInput = inputQuery;
       this.query = inputQuery.trim();
@@ -155,10 +148,6 @@ export default {
         return INVALID_TOKEN_BACKGROUND;
       }
 
-      if (this.hasWarning(token)) {
-        return WARNING_TOKEN_BACKGROUND;
-      }
-
       // assume success for this token
       return VALID_TOKEN_BACKGROUND;
     },
@@ -185,11 +174,8 @@ export default {
         this.$refs.tokenSelector.handleEnter();
       }
     },
-    hasWarning(token) {
-      return Object.prototype.hasOwnProperty.call(this.usersWithWarning, memberName(token));
-    },
     hasError(token) {
-      return Object.prototype.hasOwnProperty.call(this.invalidMembers, memberName(token));
+      return Object.keys(this.invalidMembers).includes(memberName(token));
     },
   },
   defaultQueryOptions: { without_project_bots: true, active: true },
@@ -224,18 +210,10 @@ export default {
         class="gl-mr-2"
         :data-testid="`error-icon-${token.id}`"
       />
-      <gl-icon
-        v-else-if="hasWarning(token)"
-        name="warning"
-        :size="16"
-        class="gl-mr-2"
-        :data-testid="`warning-icon-${token.id}`"
-      />
       <gl-avatar
         v-else-if="token.avatar_url"
         :src="token.avatar_url"
         :size="16"
-        :alt="memberName(token)"
         data-testid="token-avatar"
       />
       {{ token.name }}

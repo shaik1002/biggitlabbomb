@@ -31,7 +31,10 @@ can access the object pool connected to the source project.
 
 To fork an existing project in GitLab:
 
-1. On the project's homepage, in the upper-right corner, select **Fork** (**{fork}**).
+1. On the project's homepage, in the upper-right corner, select **Fork** (**{fork}**):
+
+   ![Fork this project](img/forking_workflow_fork_button_v13_10.png)
+
 1. Optional. Edit the **Project name**.
 1. For **Project URL**, select the [namespace](../../namespace/index.md)
    your fork should belong to.
@@ -98,15 +101,57 @@ To update your fork from the GitLab UI:
 
 ### From the command line
 
-You can also choose to update your fork from the command line.
+To update your fork from the command line, first ensure that you have configured
+an `upstream` remote repository for your fork:
 
-Prerequisites:
+1. Clone your fork locally, if you have not already done so. For more information, see
+   [Cloning Git repositories](../../../topics/git/clone.md).
+1. View the remotes configured for your fork:
 
-- You must [download and install the Git client](../../../topics/git/how_to_install_git/index.md) on your local machine.
-- You must [create a fork](#create-a-fork) of the repository you want to update.
+   ```shell
+   git remote -v
+   ```
 
-To update your fork from the command line, follow the instruction in
-[use Git to update a fork](../../../topics/git/forks.md#update-a-fork).
+1. If your fork does not have a remote pointing to the original repository,
+   use one of these examples to configure a remote called `upstream`:
+
+   ```shell
+   # Use this line to set any repository as your upstream after editing <upstream_url>
+   git remote add upstream <upstream_url>
+
+   # Use this line to set the main GitLab repository as your upstream
+   git remote add upstream https://gitlab.com/gitlab-org/gitlab.git
+   ```
+
+   After ensuring your local copy has the extra remote configured, you are ready to update your fork.
+
+1. In your local copy, ensure you have checked out the [default branch](branches/default.md),
+   replacing `main` with the name of your default branch:
+
+   ```shell
+   git checkout main
+   ```
+
+   If Git identifies unstaged changes, commit or stash them before continuing.
+
+1. Fetch the changes to the upstream repository:
+
+   ```shell
+   git fetch upstream
+   ```
+
+1. Pull the changes into your fork, replacing `main` with the name of the branch
+   you are updating:
+
+   ```shell
+   git pull upstream main
+   ```
+
+1. Push the changes to your fork repository on the server (GitLab.com or self-managed):
+
+   ```shell
+   git push origin main
+   ```
 
 ### With repository mirroring
 
@@ -155,7 +200,7 @@ Prerequisites:
 WARNING:
 If you remove a fork relationship, you can't send merge requests to the source.
 If anyone has forked your project, their fork also loses the relationship.
-To restore the fork relationship, [use the API](../../../api/project_forks.md#create-a-fork-relationship-between-projects).
+To restore the fork relationship, [use the API](../../../api/projects.md#create-a-forked-fromto-relation-between-existing-projects).
 
 To remove a fork relationship:
 

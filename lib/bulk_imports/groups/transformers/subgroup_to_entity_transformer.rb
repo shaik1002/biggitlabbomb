@@ -11,8 +11,7 @@ module BulkImports
             destination_name: entry['path'],
             destination_namespace: context.entity.group.full_path,
             parent_id: context.entity.id,
-            migrate_projects: context.entity.migrate_projects,
-            migrate_memberships: context.entity.migrate_memberships
+            migrate_projects: context.entity.migrate_projects
           }
         end
       end

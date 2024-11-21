@@ -28,18 +28,18 @@ RSpec.describe Ci::PipelineMetadata, feature_category: :pipeline_composition do
     end
   end
 
-  describe 'partitioning' do
+  describe 'partitioning', :ci_partitionable do
     include Ci::PartitioningHelpers
 
     let(:pipeline) { create(:ci_pipeline) }
     let(:pipeline_metadata) { create(:ci_pipeline_metadata, pipeline: pipeline) }
 
     before do
-      stub_current_partition_id(ci_testing_partition_id)
+      stub_current_partition_id(ci_testing_partition_id_for_check_constraints)
     end
 
     it 'assigns the same partition id as the one that pipeline has' do
-      expect(pipeline_metadata.partition_id).to eq(ci_testing_partition_id)
+      expect(pipeline_metadata.partition_id).to eq(ci_testing_partition_id_for_check_constraints)
     end
   end
 end

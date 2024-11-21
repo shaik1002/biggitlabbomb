@@ -18,40 +18,23 @@ export default {
     workItemType: {
       default: null,
     },
-    listPath: {
+    epicsListPath: {
       default: null,
-    },
-    isGroup: {
-      default: false,
     },
   },
   computed: {
     isEpicsList() {
       return this.workItemType === WORK_ITEM_TYPE_ENUM_EPIC;
     },
-    listName() {
-      if (this.isEpicsList) {
-        return __('Epics');
-      }
-
-      return this.isGroup ? s__('WorkItem|Work items') : __('Issues');
-    },
-    issueAsWorkItem() {
-      return (
-        !this.isGroup &&
-        this.glFeatures.workItemsViewPreference &&
-        gon.current_user_use_work_items_view
-      );
-    },
     crumbs() {
       const indexCrumb = {
-        text: this.listName,
+        text: this.isEpicsList ? __('Epics') : s__('WorkItem|Work items'),
       };
 
-      if (this.glFeatures.workItemEpicsList || this.issueAsWorkItem) {
+      if (this.glFeatures.workItemEpicsList) {
         indexCrumb.to = { name: ROUTES.index, query: this.$route.query };
       } else {
-        indexCrumb.href = this.listPath;
+        indexCrumb.href = this.epicsListPath;
       }
 
       const crumbs = [indexCrumb];
@@ -77,5 +60,5 @@ export default {
 </script>
 
 <template>
-  <gl-breadcrumb :key="crumbs.length" :items="crumbs" :auto-resize="false" />
+  <gl-breadcrumb :items="crumbs" :auto-resize="false" />
 </template>

@@ -439,8 +439,8 @@ RSpec.describe API::Ci::Runners, :aggregate_failures, feature_category: :fleet_v
 
         describe 'with ci_runner_machines' do
           before_all do
-            version_ci_runner = create(:ci_runner, description: 'Runner with machine')
-            version_16_ci_runner = create(:ci_runner, description: 'Runner with machine version 16')
+            version_ci_runner = create(:ci_runner, :project, description: 'Runner with machine')
+            version_16_ci_runner = create(:ci_runner, :project, description: 'Runner with machine version 16')
             create(:ci_runner_machine, runner: version_ci_runner, version: '15.0.3')
             create(:ci_runner_machine, runner: version_16_ci_runner, version: '16.0.1')
           end
@@ -2319,9 +2319,7 @@ RSpec.describe API::Ci::Runners, :aggregate_failures, feature_category: :fleet_v
     end
 
     context 'user is not admin and does not have access to project runner' do
-      let_it_be(:project3) { create(:project) }
-      let_it_be(:new_project_runner) { create(:ci_runner, :project, projects: [project3]) }
-
+      let!(:new_project_runner) { create(:ci_runner, :project) }
       let(:runner) { new_project_runner }
       let(:current_user) { user }
 

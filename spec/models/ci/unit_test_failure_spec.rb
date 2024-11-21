@@ -71,7 +71,7 @@ RSpec.describe Ci::UnitTestFailure do
     end
   end
 
-  describe 'partitioning' do
+  describe 'partitioning', :ci_partitionable do
     let(:project) { FactoryBot.build(:project) }
     let(:unit_test) { FactoryBot.build(:ci_unit_test, project: project) }
 

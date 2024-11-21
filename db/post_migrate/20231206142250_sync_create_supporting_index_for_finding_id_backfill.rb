@@ -8,7 +8,7 @@ class SyncCreateSupportingIndexForFindingIdBackfill < Gitlab::Database::Migratio
   INDEX_NAME = "tmp_index_vulnerabilities_on_id_finding_id_empty"
 
   def up
-    add_concurrent_index( # rubocop:disable Migration/PreventIndexCreation -- Legacy migration
+    add_concurrent_index(
       :vulnerabilities,
       :id,
       where: "finding_id IS NULL",

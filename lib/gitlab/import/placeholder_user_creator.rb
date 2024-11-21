@@ -3,20 +3,11 @@
 module Gitlab
   module Import
     class PlaceholderUserCreator
-      LAMBDA_FOR_UNIQUE_USERNAME = ->(username) do
-        ::Namespace.by_path(username) || User.username_exists?(username)
-      end.freeze
-      LAMBDA_FOR_UNIQUE_EMAIL = ->(email) do
-        User.find_by_email(email) || ::Email.find_by_email(email)
-      end.freeze
+      LAMBDA_FOR_UNIQUE_USERNAME = ->(username) { User.username_exists?(username) }.freeze
+      LAMBDA_FOR_UNIQUE_EMAIL = ->(email) { User.find_by_email(email) || ::Email.find_by_email(email) }.freeze
 
       delegate :import_type, :namespace, :source_user_identifier, :source_name, :source_username, to: :source_user,
         private: true
-
-      def self.placeholder_email_pattern
-        import_type_matcher = ::Import::HasImportSource::IMPORT_SOURCES.except(:none).keys.join('|')
-        ::Gitlab::UntrustedRegexp.new("(#{import_type_matcher})(_[0-9A-Fa-f]+_[0-9]+@#{Settings.gitlab.host})")
-      end
 
       def initialize(source_user)
         @source_user = source_user
@@ -30,11 +21,8 @@ module Gitlab
           email: placeholder_email
         )
 
-        user.skip_confirmation_notification!
         user.assign_personal_namespace(namespace.organization)
         user.save!
-
-        log_placeholder_user_creation(user)
 
         user
       end
@@ -87,16 +75,6 @@ module Gitlab
         uniquify.string(->(unique_number) { format(base_pattern, unique_number) }) do |str|
           lambda_for_uniqueness.call(str)
         end
-      end
-
-      def log_placeholder_user_creation(user)
-        ::Import::Framework::Logger.info(
-          message: 'Placeholder user created',
-          source_user_id: source_user.id,
-          import_type: source_user.import_type,
-          namespace_id: source_user.namespace_id,
-          user_id: user.id
-        )
       end
     end
   end

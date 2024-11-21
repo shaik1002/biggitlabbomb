@@ -47,7 +47,7 @@ You can also integrate GitLab with the following security partners:
 - [StackHawk](https://docs.stackhawk.com/continuous-integration/gitlab.html)
 - [Tenable](https://docs.tenable.com/vulnerability-management/Content/ContainerSecurity/Dashboard.htm)
 - [Venafi](https://marketplace.venafi.com/xchange/620d2d6ed419fb06a5c5bd36/solution/6292c2ef7550f2ee553cf223)
-- [Veracode](https://docs.veracode.com/r/c_integration_buildservs#gitlab)
+- [Veracode](https://community.veracode.com/s/knowledgeitem/gitlab-ci-MCEKSYPRWL35BRTGOVI55SK5RI4A)
 
 <!-- vale gitlab_base.Spelling = YES -->
 
@@ -98,7 +98,7 @@ You can find information in:
 - `json.exception.message`
 - `json.message`
 
-### Error: `Test Failed. Save Anyway`
+### `Test Failed. Save Anyway` error
 
 When you configure an integration on an uninitialized repository, the integration might fail with
 a `Test Failed. Save Anyway` error. This error occurs because the integration uses push data

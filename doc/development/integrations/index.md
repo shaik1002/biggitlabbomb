@@ -12,7 +12,7 @@ which are part of our [main Rails project](https://gitlab.com/gitlab-org/gitlab)
 
 Also see our [direction page](https://about.gitlab.com/direction/manage/import_and_integrate/integrations/) for an overview of our strategy around integrations.
 
-This guide is a work in progress. You're welcome to ping `@gitlab-org/foundations/import-and-integrate`
+This guide is a work in progress. You're welcome to ping `@gitlab-org/manage/import-and-integrate`
 if you need clarification or spot any outdated information.
 
 ## Add a new integration
@@ -21,8 +21,8 @@ if you need clarification or spot any outdated information.
 
 1. Add a new model in `app/models/integrations` extending from `Integration`.
    - For example, `Integrations::FooBar` in `app/models/integrations/foo_bar.rb`.
-   - For certain types of integrations, you can include these base modules (or inherit from them if they are classes):
-     - `Integrations::Base::ChatNotification`
+   - For certain types of integrations, you can also build on these base classes:
+     - `Integrations::BaseChatNotification`
      - `Integrations::BaseCi`
      - `Integrations::BaseIssueTracker`
      - `Integrations::BaseMonitoring`
@@ -107,11 +107,11 @@ The following events are supported for integrations:
 
 | Event type                                                                                     | Default | Value                | Trigger |
 |:-----------------------------------------------------------------------------------------------|:--------|:---------------------|:--|
-| Alert event                                                                                    |         | `alert`              | A new, unique alert is recorded. |
+| Alert event                                                                                    |         | `alert`              | A a new, unique alert is recorded. |
 | Commit event                                                                                   | ✓       | `commit`             | A commit is created or updated. |
 | [Deployment event](../../user/project/integrations/webhook_events.md#deployment-events)        |         | `deployment`         | A deployment starts or finishes. |
-| [Work item event](../../user/project/integrations/webhook_events.md#work-item-events)          | ✓       | `issue`              | An issue is created, updated, or closed. |
-| [Confidential issue event](../../user/project/integrations/webhook_events.md#work-item-events) | ✓       | `confidential_issue` | A confidential issue is created, updated, or closed. |
+| [Issue event](../../user/project/integrations/webhook_events.md#issue-events)                  | ✓       | `issue`              | An issue is created, updated, or closed. |
+| [Confidential issue event](../../user/project/integrations/webhook_events.md#issue-events)     | ✓       | `confidential_issue` | A confidential issue is created, updated, or closed. |
 | [Job event](../../user/project/integrations/webhook_events.md#job-events)                      |         | `job` | |
 | [Merge request event](../../user/project/integrations/webhook_events.md#merge-request-events)  | ✓       | `merge_request`      | A merge request is created, updated, or merged. |
 | [Comment event](../../user/project/integrations/webhook_events.md#comment-events)              |         | `comment`            | A new comment is added. |
@@ -152,7 +152,7 @@ end
 
 #### Masking channel values
 
-Integrations that [include from `Integrations::Base::ChatNotification`](#define-the-integration) can hide the
+Integrations that [inherit from `Integrations::BaseChatNotification`](#define-the-integration) can hide the
 values of their channel input fields. Integrations should hide these values whenever the
 fields contain sensitive information such as auth tokens.
 
@@ -392,18 +392,14 @@ When developing a new integration, we also recommend you gate the availability b
 
 ## Documentation
 
-Add documentation for the integration:
-
-- Add a page in `doc/user/project/integrations`.
-- Link it from the [Integrations overview](../../user/project/integrations/index.md).
-- After the documentation has merged, [add an entry](../../development/documentation/site_architecture/global_nav.md#add-a-navigation-entry)
-  to the documentation navigation under the [Integrations category title](https://gitlab.com/gitlab-org/gitlab-docs/-/blob/24c8ab629383b47a6d6351a9d48325cb43ed5287/content/_data/navigation.yaml?page=3#L2822).
-
-You can also refer to our general [documentation guidelines](../documentation/index.md).
-
 You can provide help text in the integration form, including links to off-site documentation,
 as described above in [Customize the frontend form](#customize-the-frontend-form). Refer to
 our [usability guidelines](https://design.gitlab.com/usability/contextual-help) for help text.
+
+For more detailed documentation, provide a page in `doc/user/project/integrations`,
+and link it from the [Integrations overview](../../user/project/integrations/index.md).
+
+You can also refer to our general [documentation guidelines](../documentation/index.md).
 
 ## Testing
 
@@ -471,4 +467,4 @@ You can refer to these issues for examples of adding new integrations:
 - [Datadog](https://gitlab.com/gitlab-org/gitlab/-/issues/270123): Metrics collector, similar to the Prometheus integration.
 - [EWM/RTC](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/36662): External issue tracker.
 - [Webex Teams](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/31543): Chat notifications.
-- [ZenTao](https://gitlab.com/gitlab-org/gitlab/-/issues/338178): External issue tracker with custom issue views, similar to the Jira issues integration.
+- [ZenTao](https://gitlab.com/gitlab-org/gitlab/-/issues/338178): External issue tracker with custom issue views, similar to the Jira integration.

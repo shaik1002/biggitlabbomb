@@ -16,6 +16,7 @@ module AlertManagement
     include Gitlab::Utils::StrongMemoize
     include Referable
     include ::IncidentManagement::Escalatable
+    include IgnorableColumns
 
     ignore_column :prometheus_alert_id, remove_with: '17.6', remove_after: '2024-10-12'
 

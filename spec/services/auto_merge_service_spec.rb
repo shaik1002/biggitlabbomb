@@ -52,7 +52,17 @@ RSpec.describe AutoMergeService, feature_category: :code_review_workflow do
       is_expected.to include('merge_when_checks_pass')
     end
 
-    context 'when the head pipeline succeeded' do
+    context 'when merge_when_checks_pass is off' do
+      before do
+        stub_feature_flags(merge_when_checks_pass: false)
+      end
+
+      it 'returns available strategies' do
+        is_expected.to include('merge_when_pipeline_succeeds')
+      end
+    end
+
+    context 'when the head piipeline succeeded' do
       let(:pipeline_status) { :success }
 
       it 'returns available strategies' do
@@ -147,15 +157,19 @@ RSpec.describe AutoMergeService, feature_category: :code_review_workflow do
       end
     end
 
-    context 'when the strategy is MWPS' do
+    context 'when the strategy is MWPS and merge_when_checks_pass is off' do
+      before do
+        stub_feature_flags(merge_when_checks_pass: false)
+      end
+
       let(:strategy) { AutoMergeService::STRATEGY_MERGE_WHEN_PIPELINE_SUCCEEDS }
 
-      it 'does not call execute and returns failed' do
+      it 'delegates to a relevant service instance' do
         expect_next_instance_of(AutoMerge::MergeWhenPipelineSucceedsService) do |service|
-          expect(service).not_to receive(:execute).with(merge_request)
+          expect(service).to receive(:execute).with(merge_request)
         end
 
-        expect(subject).to eq(:failed)
+        subject
       end
     end
 
@@ -199,6 +213,10 @@ RSpec.describe AutoMergeService, feature_category: :code_review_workflow do
       context 'when the merge request is MWPS' do
         let(:merge_request) { create(:merge_request, :merge_when_pipeline_succeeds) }
 
+        before do
+          stub_feature_flags(merge_when_checks_pass: false)
+        end
+
         it 'delegates to a relevant service instance' do
           expect_next_instance_of(AutoMerge::MergeWhenPipelineSucceedsService) do |service|
             expect(service).to receive(:update).with(merge_request)
@@ -236,6 +254,10 @@ RSpec.describe AutoMergeService, feature_category: :code_review_workflow do
     context 'when the merge request is MWPS' do
       let(:merge_request) { create(:merge_request, :merge_when_pipeline_succeeds) }
 
+      before do
+        stub_feature_flags(merge_when_checks_pass: false)
+      end
+
       it 'delegates to a relevant service instance' do
         expect_next_instance_of(AutoMerge::MergeWhenPipelineSucceedsService) do |service|
           expect(service).to receive(:process).with(merge_request)
@@ -271,6 +293,10 @@ RSpec.describe AutoMergeService, feature_category: :code_review_workflow do
 
     context 'when the merge request is MWPS' do
       let(:merge_request) { create(:merge_request, :merge_when_pipeline_succeeds) }
+
+      before do
+        stub_feature_flags(merge_when_checks_pass: false)
+      end
 
       it 'delegates to a relevant service instance' do
         expect_next_instance_of(AutoMerge::MergeWhenPipelineSucceedsService) do |service|
@@ -311,6 +337,10 @@ RSpec.describe AutoMergeService, feature_category: :code_review_workflow do
 
     context 'when the merge request is MWPS' do
       let(:merge_request) { create(:merge_request, :merge_when_pipeline_succeeds) }
+
+      before do
+        stub_feature_flags(merge_when_checks_pass: false)
+      end
 
       it 'delegates to a relevant service instance' do
         expect_next_instance_of(AutoMerge::MergeWhenPipelineSucceedsService) do |service|

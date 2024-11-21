@@ -68,6 +68,13 @@ compile-production-assets as-if-foss:
     - .as-if-foss
     - .qa:rules:test-on-omnibus-ce:follow-up
 
+follow-up:compile-production-assets:
+  extends:
+    - compile-production-assets
+    - .qa:rules:follow-up-e2e
+  needs:
+    - manual:e2e-test-pipeline-generate
+
 compile-test-assets:
   extends:
     - .compile-assets-base
@@ -209,7 +216,7 @@ graphql-schema-dump:
     - .default-retry
     - .ruby-cache
     - .default-before_script
-    - .frontend:rules:default-frontend-jobs
+    - .frontend:rules:default-frontend-jobs-with-docs-changes
   stage: fixtures
   needs: []
   script:
@@ -279,18 +286,16 @@ jest-build-cache:
     NODE_OPTIONS: --max-old-space-size=7680
   allow_failure: true
 
-.with-jest-build-cache-vue3-ensure-compilable-sfcs-needs:
+.with-jest-build-cache-vue3-needs:
   needs:
-    - job: jest-build-cache-vue3-ensure-compilable-sfcs
+    - job: jest-build-cache-vue3
       optional: true
 
-jest-build-cache-vue3-ensure-compilable-sfcs:
+jest-build-cache-vue3:
   extends:
-    - .vue3
-    # Make sure allow_failure is set by jest-build-cache rather than .vue3.
-    # Failures should not be allowed in merge requests.
     - jest-build-cache
     - .frontend:rules:jest
+    - .vue3
 
 jest:
   extends:
@@ -311,8 +316,7 @@ jest:
       junit: junit_jest.xml
   parallel: 11
   script:
-    - if [[ -z "${CI_MERGE_REQUEST_IID}" ]] && ! [[ "$CI_COMMIT_BRANCH" =~ ^as-if-foss/ ]]; then export JEST_COVERAGE="--coverage"; fi
-    - run_timed_command "yarn jest:ci:without-fixtures $JEST_COVERAGE"
+    - run_timed_command "yarn jest:ci:without-fixtures"
 
 jest-with-fixtures:
   extends:
@@ -326,8 +330,7 @@ jest-with-fixtures:
     - !reference [.with-fixtures-needs, needs]
   parallel: 2
   script:
-    - if [[ -z "${CI_MERGE_REQUEST_IID}" ]] && ! [[ "$CI_COMMIT_BRANCH" =~ ^as-if-foss/ ]]; then export JEST_COVERAGE="--coverage"; fi
-    - run_timed_command "yarn jest:ci:with-fixtures $JEST_COVERAGE"
+    - run_timed_command "yarn jest:ci:with-fixtures"
 
 jest vue3:
   extends:
@@ -335,7 +338,7 @@ jest vue3:
     - .frontend:rules:jest-vue3-nightly
     - .vue3
   needs:
-    - !reference [.with-jest-build-cache-vue3-ensure-compilable-sfcs-needs, needs]
+    - !reference [.with-jest-build-cache-vue3-needs, needs]
 
 jest-with-fixtures vue3:
   extends:
@@ -354,7 +357,7 @@ jest vue3 mr:
     - .frontend:rules:jest
     - .vue3
   needs:
-    - !reference [.with-jest-build-cache-vue3-ensure-compilable-sfcs-needs, needs]
+    - !reference [.with-jest-build-cache-vue3-needs, needs]
   artifacts:
     name: vue3-mr-junit
     expire_in: 31d
@@ -364,14 +367,14 @@ jest vue3 mr:
   parallel: 6
   script:
     - run_timed_command "yarn jest:ci:vue3-mr:without-fixtures"
-  allow_failure: false
+  allow_failure: true
 
 jest-with-fixtures vue3 mr:
   extends:
     - jest vue3 mr
     - .repo-from-artifacts
   needs:
-    - !reference [.with-jest-build-cache-vue3-ensure-compilable-sfcs-needs, needs]
+    - !reference [.with-jest-build-cache-vue3-needs, needs]
     # it's ok to wait for the repo artifact as we're waiting for the fixtures (which wait for the repo artifact) anyway
     - !reference [.repo-from-artifacts, needs]
     - !reference [.with-fixtures-needs, needs]
@@ -425,45 +428,6 @@ jest-with-fixtures vue3 predictive:
     - "detect-tests"
   script:
     - if [[ -s "$RSPEC_CHANGED_FILES_PATH" ]] || [[ -s "$RSPEC_MATCHING_JS_FILES_PATH" ]]; then run_timed_command "yarn jest:ci:vue3-mr:predictive-with-fixtures"; fi
-  allow_failure: false
-
-jest vue3 check quarantined:
-  extends:
-    - jest vue3 mr
-    - .frontend:rules:jest-vue3-check-quarantined
-  needs:
-    - !reference [jest vue3 mr, needs]
-    - "detect-tests"
-  script:
-    - if [[ -s "$RSPEC_CHANGED_FILES_PATH" ]] || [[ -s "$RSPEC_MATCHING_JS_FILES_PATH" ]]; then run_timed_command "yarn jest:ci:vue3-mr:check-quarantined-without-fixtures"; fi
-  parallel: 1
-  artifacts:
-    name: quarantined_tests_output
-    expire_in: 31d
-    when: always
-    paths:
-      - jest_stdout
-      - jest_stderr
-      - junit_jest.xml
-
-jest-with-fixtures vue3 check quarantined:
-  extends:
-    - jest-with-fixtures vue3 mr
-    - .frontend:rules:jest-vue3-check-quarantined
-  needs:
-    - !reference [jest-with-fixtures vue3 mr, needs]
-    - "detect-tests"
-  script:
-    - if [[ -s "$RSPEC_CHANGED_FILES_PATH" ]] || [[ -s "$RSPEC_MATCHING_JS_FILES_PATH" ]]; then run_timed_command "yarn jest:ci:vue3-mr:check-quarantined-with-fixtures"; fi
-  parallel: 1
-  artifacts:
-    name: quarantined_tests_output
-    expire_in: 31d
-    when: always
-    paths:
-      - jest_stdout
-      - jest_stderr
-      - junit_jest.xml
 
 jest-integration:
   extends:

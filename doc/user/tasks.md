@@ -158,13 +158,10 @@ To promote a task to an issue:
 1. In the issue description, in the **Child items** section, select the task you want to edit.
    The task window opens.
 1. Unlink the parent issue and promote the task: In the task window, use these two
-   [quick actions](../user/project/quick_actions.md) in separate comments:
+   [quick actions](../user/project/quick_actions.md) in a comment, on separate lines:
 
    ```plaintext
    /remove_parent
-   ```
-
-   ```plaintext
    /promote_to issue
    ```
 
@@ -173,11 +170,9 @@ The previous URL with `/work_items/` still works.
 
 ## Remove a task from an issue
 
-> - Minimum required role [changed](https://gitlab.com/gitlab-org/gitlab/-/issues/404799) from Reporter to Guest in GitLab 17.0.
-
 Prerequisites:
 
-- You must have at least the Guest role for the project.
+- You must have at least the Reporter role for the project.
 
 You can remove a task from an issue. The task is not deleted, but the two are no longer connected.
 It's not possible to connect them again.

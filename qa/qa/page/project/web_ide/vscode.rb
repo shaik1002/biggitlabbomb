@@ -227,6 +227,7 @@ module QA
           def create_merge_request
             within_vscode_editor do
               within_element('.notification-toast-container') do
+                has_element?('div[title="GitLab Web IDE Extension (Extension)"]')
                 click_monaco_button('Create MR')
               end
             end

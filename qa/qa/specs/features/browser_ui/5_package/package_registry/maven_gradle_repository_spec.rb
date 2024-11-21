@@ -12,7 +12,6 @@ module QA
       include Runtime::Fixtures
       include Support::Helpers::MaskToken
 
-      let(:personal_access_token) { Runtime::UserStore.default_api_client.personal_access_token }
       let(:group_id) { 'com.gitlab.qa' }
       let(:artifact_id) { "maven_gradle-#{SecureRandom.hex(8)}" }
       let(:package_name) { "#{group_id}/#{artifact_id}".tr('.', '/') }
@@ -21,7 +20,7 @@ module QA
       let(:project) { create(:project, :private, :with_readme, name: "#{package_type}_project") }
       let!(:runner) do
         create(:project_runner,
-          name: "qa-runner-#{SecureRandom.hex(6)}",
+          name: "qa-runner-#{Time.now.to_i}",
           tags: ["runner-for-#{project.name}"],
           executor: :docker,
           project: project)
@@ -63,7 +62,7 @@ module QA
         let(:token) do
           case authentication_token_type
           when :personal_access_token
-            use_ci_variable(name: 'PERSONAL_ACCESS_TOKEN', value: personal_access_token, project: project)
+            use_ci_variable(name: 'PERSONAL_ACCESS_TOKEN', value: Runtime::Env.personal_access_token, project: project)
           when :ci_job_token
             project_inbound_job_token_disabled
             '${CI_JOB_TOKEN}'

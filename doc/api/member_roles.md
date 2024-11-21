@@ -1,5 +1,5 @@
 ---
-stage: Software Supply Chain Security
+stage: Govern
 group: Authentication
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
@@ -34,7 +34,7 @@ DETAILS:
 
 Prerequisites:
 
-- [Authenticate yourself](rest/authentication.md) as an administrator.
+- [Authenticate yourself](rest/index.md#authentication) as an administrator.
 
 You can get, create and delete instance-wide member roles.
 
@@ -176,7 +176,7 @@ Supported attributes:
 |:----------|:--------|:---------|:-------------------------------------|
 | `member_role_id` | integer | yes   | The ID of the member role. |
 
-If successful, returns [`204`](rest/troubleshooting.md#status-codes) and an empty response.
+If successful, returns [`204`](rest/index.md#status-codes) and an empty response.
 
 Example request:
 
@@ -206,7 +206,7 @@ Supported attributes:
 
 | Attribute | Type | Required | Description |
 |:----------|:--------|:---------|:-------------------------------------|
-| `id`      | integer/string | yes | The ID or [URL-encoded path of the group](rest/index.md#namespaced-paths) of the group |
+| `id`      | integer/string | yes | The ID or [URL-encoded path of the group](rest/index.md#namespaced-path-encoding) of the group |
 
 Example request:
 
@@ -289,7 +289,7 @@ Parameters:
 
 | Attribute | Type                | Required | Description |
 |:----------|:--------|:---------|:-------------------------------------|
-| `id`      | integer/string      | yes      | The ID or [URL-encoded path of the group](rest/index.md#namespaced-paths) of the group. |
+| `id`      | integer/string      | yes      | The ID or [URL-encoded path of the group](rest/index.md#namespaced-path-encoding) of the group. |
 | `admin_cicd_variables` | boolean | no       | Permission to create, read, update, and delete CI/CD variables. |
 | `admin_compliance_framework` | boolean | no       | Permission to administer compliance frameworks. |
 | `admin_group_member` | boolean | no       | Permission to add, remove and assign members in a group. |
@@ -365,10 +365,10 @@ DELETE /groups/:id/member_roles/:member_role_id
 
 | Attribute | Type | Required | Description |
 |:----------|:--------|:---------|:-------------------------------------|
-| `id`      | integer/string | yes | The ID or [URL-encoded path of the group](rest/index.md#namespaced-paths) of the group. |
+| `id`      | integer/string | yes | The ID or [URL-encoded path of the group](rest/index.md#namespaced-path-encoding) of the group. |
 | `member_role_id` | integer | yes   | The ID of the member role. |
 
-If successful, returns [`204`](rest/troubleshooting.md#status-codes) and an empty response.
+If successful, returns [`204`](rest/index.md#status-codes) and an empty response.
 
 Example request:
 

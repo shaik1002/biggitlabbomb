@@ -19,31 +19,9 @@ To enable debug logs in JetBrains:
 1. On the top bar, go to **Help > Diagnostic Tools > Debug Log Settings**, or
    search for the action by going to **Help > Find Action > Debug log settings**.
 1. Add this line: `com.gitlab.plugin`
-1. Select **OK** or **Save**.
+1. Select **OK**.
 
-To enable GitLab Language Server debug logs:
-
-1. In your IDE, on the top bar, select your IDE name, then select **Settings**.
-1. On the left sidebar, select **Tools > GitLab Duo**.
-1. Select **GitLab Language Server** to expand the section.
-1. In **Logging > Log Level**, enter `debug`.
-1. Select **Apply**.
-1. Below **Enable GitLab Language Server**, select **Restart Language Server**.
-
-The debug logs are available in the `idea.log` log file. To view this file, either:
-
-- In your IDE, go to **Help > Show Log in Finder**.
-- Go to the directory `/Users/<user>/Library/Logs/JetBrains/IntelliJIdea<build_version>`, replacing
-  `<user>` and `<build_version>` with the appropriate values.
-
-## Use an HTTP proxy
-
-If you experience [certificate errors](#certificate-errors) or other connection errors, and
-use a HTTP proxy to connect to your GitLab instance, you must
-[configure the Language Server to use a proxy](../language_server/index.md#configure-the-language-server-to-use-a-proxy)
-for the GitLab Language Server.
-
-You can also [enable proxy authentication](../language_server/index.md#enable-proxy-authentication).
+The debug logs are available in the `idea.log` log file.
 
 ## Error: `unable to find valid certification path to requested target`
 
@@ -88,7 +66,8 @@ To do this:
 1. Confirm your default browser trusts the **URL to GitLab instance** you're using.
 1. Enable the **Ignore certificate errors** option.
 1. Select **Verify setup**.
-1. Select **OK** or **Save**.
+1. Select **Apply**.
+1. Select **OK**.
 
 ## Error: `Failed to check token`
 
@@ -100,4 +79,4 @@ GitLab Language Server process are invalid. To re-enable Code Suggestions:
 1. Under **Connection**, select **Verify setup**.
 1. Update your **Connection** details as needed.
 1. Select **Verify setup**, and confirm that authentication succeeds.
-1. Select **OK** or **Save**.
+1. Select **OK**.

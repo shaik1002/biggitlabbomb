@@ -21,6 +21,11 @@
   display: block;
 }
 
+@mixin set-invisible {
+  transform: translateY(-10px);
+  display: none;
+}
+
 .show.dropdown {
   .dropdown-menu {
     @include set-visible;
@@ -74,8 +79,13 @@
 .dropdown-menu-close {
   &:active,
   &:focus {
-    @apply gl-focus;
+    @include gl-focus;
   }
+}
+
+// Get search dropdown to line up with other nav dropdowns
+.search-input-container .dropdown-menu {
+  margin-top: 11px;
 }
 
 .dropdown-toggle,
@@ -156,7 +166,7 @@
   .dropdown-menu-toggle-icon {
     position: absolute;
     right: $gl-padding-8;
-    @apply gl-fill-icon-subtle;
+    color: $gray-500;
   }
 }
 
@@ -176,8 +186,8 @@
 }
 
 @mixin dropdown-item-hover {
-  background-color: var(--gl-dropdown-option-background-color-unselected-hover);
-  color: var(--gl-dropdown-option-text-color-hover);
+  background-color: $gray-50;
+  color: $gl-text-color;
   outline: 0;
 }
 
@@ -337,7 +347,7 @@
   .unclickable {
     cursor: not-allowed;
     padding: 5px 8px;
-    @apply gl-text-subtle;
+    color: $gl-text-color-secondary;
   }
 
   .badge.badge-pill + span:not(.badge):not(.badge-pill) {
@@ -539,7 +549,7 @@
           mask-repeat: no-repeat;
           mask-size: cover;
           mask-position: center center;
-          background: var(--gl-dropdown-option-indicator-color-selected-default);
+          background: $black-normal;
         }
       }
     }
@@ -588,7 +598,7 @@
     position: absolute;
     top: $gl-padding-8;
     right: 20px;
-    @apply gl-fill-icon-subtle;
+    color: $gray-500;
     font-size: 12px;
     pointer-events: none;
   }
@@ -617,7 +627,7 @@
 }
 
 .dropdown-input-field {
-  background-color: var(--gl-control-background-color-default);
+  background-color: $input-bg;
   display: block;
   width: 100%;
   min-height: 30px;
@@ -627,12 +637,12 @@
   padding-right: $gl-spacing-scale-3;
   color: $gray-700;
   line-height: 30px;
-  border: 1px solid var(--gl-control-border-color-default);
+  border: 1px solid $gray-400;
   border-radius: $gl-border-radius-base;
   outline: 0;
 
   &:focus {
-    @apply gl-focus;
+    @include gl-focus;
   }
 
   &:hover {
@@ -648,7 +658,7 @@
 }
 
 .dropdown-info-note {
-  @apply gl-text-subtle;
+  color: $gl-text-color-secondary;
   text-align: center;
 }
 
@@ -737,12 +747,12 @@
 
 .dropdown-menu-inner-content {
   display: block;
-  @apply gl-text-subtle;
+  color: $gl-text-color-secondary;
 }
 
 .dropdown-toggle-text {
   &.is-default {
-    color: var(--gl-text-color-subtle);
+    color: $gl-text-color-secondary;
   }
 }
 
@@ -762,8 +772,7 @@
   @include set-visible;
 
   &.is-hidden {
-    transform: translateY(-10px);
-    display: none;
+    @include set-invisible;
     overflow: hidden;
   }
 }

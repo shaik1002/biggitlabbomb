@@ -2,7 +2,7 @@
 data_category: operational
 key_path: counts.projects_prometheus_active
 description: Count of projects with active integrations for Prometheus
-product_group: platform_insights
+product_group: respond
 value_type: number
 status: active
 time_frame: all
@@ -10,7 +10,7 @@ data_source: database
 distribution:
 - ce
 - ee
-tiers:
+tier:
 - free
 - premium
 - ultimate

@@ -158,8 +158,10 @@ RSpec.describe 'User page', feature_category: :user_profile do
         end
       end
 
+      it_behaves_like 'follower links with count badges'
+
       context 'with profile_tabs_vue feature flag disabled' do
-        before do
+        before_all do
           stub_feature_flags(profile_tabs_vue: false)
         end
 

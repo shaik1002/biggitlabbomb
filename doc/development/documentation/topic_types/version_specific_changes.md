@@ -46,17 +46,17 @@ For more information about upgrading GitLab Helm Chart, see [the release notes f
 - General upgrade notes and issues.
 - ...
 
-### Linux package installations X.Y.1
+### Linux package installations
 
 - Information specific to Linux package installations.
 - ...
 
-### Self-compiled installations X.Y.1
+### Self-compiled installations
 
 - Information specific to self-compiled installations.
 - ...
 
-### Geo installations X.Y.1
+### Geo installations
 
  - Information specific to Geo.
  - ...

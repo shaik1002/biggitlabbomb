@@ -59,8 +59,8 @@ RSpec.describe ::Ci::Runners::SetRunnerAssociatedProjectsService, '#execute', fe
 
           runner.reload
 
-          expect(runner.owner).to eq(owner_project)
-          expect(runner.runner_projects.order(:id).map(&:project_id)).to eq([owner_project, *new_projects].map(&:id))
+          expect(runner.owner_project).to eq(owner_project)
+          expect(runner.projects.ids).to match_array([owner_project, *new_projects].map(&:id))
         end
       end
 
@@ -72,8 +72,8 @@ RSpec.describe ::Ci::Runners::SetRunnerAssociatedProjectsService, '#execute', fe
 
           runner.reload
 
-          expect(runner.owner).to eq(owner_project)
-          expect(runner.runner_projects.order(:id).map(&:project_id)).to eq([owner_project, *new_projects].map(&:id))
+          expect(runner.owner_project).to eq(owner_project)
+          expect(runner.projects.ids).to eq([owner_project, *new_projects].map(&:id))
         end
       end
 
@@ -85,7 +85,7 @@ RSpec.describe ::Ci::Runners::SetRunnerAssociatedProjectsService, '#execute', fe
 
           runner.reload
 
-          expect(runner.owner).to eq(owner_project)
+          expect(runner.owner_project).to eq(owner_project)
           expect(runner.projects.ids).to contain_exactly(owner_project.id)
         end
       end
@@ -101,7 +101,7 @@ RSpec.describe ::Ci::Runners::SetRunnerAssociatedProjectsService, '#execute', fe
 
         expect(execute).to be_error
         expect(execute.reason).to eq(:failed_runner_project_destroy)
-        expect(runner.reload.runner_projects.order(:id).map(&:project_id)).to eq(original_projects.map(&:id))
+        expect(runner.reload.projects.order(:id)).to eq(original_projects)
       end
     end
 
@@ -122,7 +122,7 @@ RSpec.describe ::Ci::Runners::SetRunnerAssociatedProjectsService, '#execute', fe
             expect(execute).to be_error
             expect(execute.reason).to eq(:not_authorized_to_add_runner_in_project)
             expect(execute.errors).to contain_exactly(_('user is not authorized to add runners to project'))
-            expect(runner.reload.runner_projects.order(:id).map(&:project_id)).to eq(original_projects.map(&:id))
+            expect(runner.reload.projects.order(:id)).to eq(original_projects)
           end
         end
 
@@ -136,7 +136,7 @@ RSpec.describe ::Ci::Runners::SetRunnerAssociatedProjectsService, '#execute', fe
             expect(execute.errors).to contain_exactly(
               _('runner can only be assigned to projects in the same organization')
             )
-            expect(runner.reload.runner_projects.order(:id).map(&:project_id)).to eq(original_projects.map(&:id))
+            expect(runner.reload.projects.order(:id)).to eq(original_projects)
           end
 
           context 'with multiple failures' do
@@ -149,7 +149,7 @@ RSpec.describe ::Ci::Runners::SetRunnerAssociatedProjectsService, '#execute', fe
                 _('runner can only be assigned to projects in the same organization'),
                 _('user is not authorized to add runners to project')
               )
-              expect(runner.reload.runner_projects.order(:id).map(&:project_id)).to eq(original_projects.map(&:id))
+              expect(runner.reload.projects.order(:id)).to eq(original_projects)
             end
           end
         end
@@ -164,7 +164,7 @@ RSpec.describe ::Ci::Runners::SetRunnerAssociatedProjectsService, '#execute', fe
 
             runner.reload
 
-            expect(runner.owner).to be_nil
+            expect(runner.owner_project).to be_nil
             expect(runner.projects.ids).to be_empty
           end
 
@@ -176,7 +176,7 @@ RSpec.describe ::Ci::Runners::SetRunnerAssociatedProjectsService, '#execute', fe
 
               runner.reload
 
-              expect(runner.owner).to be_nil
+              expect(runner.owner_project).to be_nil
               expect(runner.projects.ids).to be_empty
             end
           end
@@ -204,8 +204,8 @@ RSpec.describe ::Ci::Runners::SetRunnerAssociatedProjectsService, '#execute', fe
 
             runner.reload
 
-            expect(runner.owner).to eq(owner_project)
-            expect(runner.runner_projects.order(:id).map(&:project_id)).to eq(new_projects.map(&:id))
+            expect(runner.owner_project).to eq(owner_project)
+            expect(runner.projects.ids).to match_array(new_projects.map(&:id))
           end
         end
 
@@ -217,7 +217,7 @@ RSpec.describe ::Ci::Runners::SetRunnerAssociatedProjectsService, '#execute', fe
 
             runner.reload
 
-            expect(runner.owner).to be_nil
+            expect(runner.owner_project).to be_nil
             expect(runner.projects.ids).to be_empty
           end
         end

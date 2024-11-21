@@ -21,7 +21,6 @@
 #     author_id: integer
 #     author_username: string
 #     assignee_id: integer or 'None' or 'Any'
-#     closed_by_id: integer
 #     assignee_username: string
 #     search: string
 #     in: 'title', 'description', or a string joining them with comma
@@ -62,19 +61,17 @@ class IssuableFinder
     def scalar_params
       @scalar_params ||= %i[
         assignee_id
-        closed_by_id
         assignee_username
         author_id
         author_username
         crm_contact_id
         crm_organization_id
-        in
         label_name
         milestone_title
         release_tag
         my_reaction_emoji
         search
-        subscribed
+        in
       ]
     end
 
@@ -140,7 +137,6 @@ class IssuableFinder
     items = by_closed_at(items)
     items = by_state(items)
     items = by_assignee(items)
-    items = by_closed_by(items)
     items = by_author(items)
     items = by_non_archived(items)
     items = by_iids(items)
@@ -149,7 +145,6 @@ class IssuableFinder
     items = by_label(items)
     items = by_my_reaction_emoji(items)
     items = by_crm_contact(items)
-    items = by_subscribed(items)
     by_crm_organization(items)
   end
 
@@ -239,8 +234,7 @@ class IssuableFinder
 
         # These are "helper" params that modify the results, like :in and :search. They usually come in at the top-level
         # params, but if they do come in inside the `:not` params, the inner ones should take precedence.
-        not_helpers = params.slice(*NEGATABLE_PARAMS_HELPER_KEYS)
-                            .merge(params[:not].to_h.slice(*NEGATABLE_PARAMS_HELPER_KEYS))
+        not_helpers = params.slice(*NEGATABLE_PARAMS_HELPER_KEYS).merge(params[:not].to_h.slice(*NEGATABLE_PARAMS_HELPER_KEYS))
         not_helpers.each do |key, value|
           not_params[key] = value unless not_params[key].present?
         end
@@ -373,14 +367,7 @@ class IssuableFinder
   def sort(items)
     # Ensure we always have an explicit sort order (instead of inheriting
     # multiple orders when combining ActiveRecord::Relation objects).
-    if params[:sort]
-      items.sort_by_attribute(
-        params[:sort],
-        excluded_labels: label_filter.label_names_excluded_from_priority_sort
-      )
-    else
-      items.reorder(id: :desc)
-    end
+    params[:sort] ? items.sort_by_attribute(params[:sort], excluded_labels: label_filter.label_names_excluded_from_priority_sort) : items.reorder(id: :desc)
   end
   # rubocop: enable CodeReuse/ActiveRecord
 
@@ -401,14 +388,6 @@ class IssuableFinder
       )
     end
   end
-
-  # rubocop: disable CodeReuse/ActiveRecord
-  def by_closed_by(items)
-    return items if params[:closed_by_id].blank?
-
-    items.where(closed_by_id: params[:closed_by_id])
-  end
-  # rubocop: enable CodeReuse/ActiveRecord
 
   def by_label(items)
     label_filter.filter(items)
@@ -517,20 +496,6 @@ class IssuableFinder
     return items unless can_filter_by_crm_organization?
 
     Issuables::CrmOrganizationFilter.new(params: original_params).filter(items)
-  end
-
-  def by_subscribed(items)
-    return items unless current_user
-    return items unless Feature.enabled?(:filter_subscriptions, current_user)
-
-    case params[:subscribed]
-    when :explicitly_subscribed
-      items.explicitly_subscribed(current_user)
-    when :explicitly_unsubscribed
-      items.explicitly_unsubscribed(current_user)
-    else
-      items
-    end
   end
 
   def can_filter_by_crm_contact?

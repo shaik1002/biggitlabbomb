@@ -26,7 +26,6 @@ export default {
       class="label-filter-menu-item gl-px-5 gl-py-3"
     >
       <gl-form-checkbox
-        v-model="label.checked"
         class="label-with-color-checkbox gl-inline-flex gl-min-h-5"
         :value="label.key"
       >

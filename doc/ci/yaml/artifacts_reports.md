@@ -140,7 +140,7 @@ artifacts:
 
 The collected coverage report is uploaded to GitLab as an artifact.
 
-You can generate multiple JaCoCo or Cobertura reports within a job and include them in the final
+You can generate multiple JaCoCo or Corbertura reports within a job and include them in the final
 job artifact using [wildcards](../jobs/job_artifacts.md#with-wildcards).
 The results of the reports are aggregated in the final coverage report.
 
@@ -352,7 +352,7 @@ GitLab can display the results of one or more reports in the
 ## `artifacts:reports:repository_xray`
 
 DETAILS:
-**Tier:** Premium, Ultimate
+**Tier:** Ultimate
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/432235) in GitLab 16.7.
 

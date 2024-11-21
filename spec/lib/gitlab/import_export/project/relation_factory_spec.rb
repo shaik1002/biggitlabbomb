@@ -173,7 +173,7 @@ RSpec.describe Gitlab::ImportExport::Project::RelationFactory, :use_clean_rails_
       expect(created_object.target_project).to equal(project)
     end
 
-    it 'has auto merge set to false' do
+    it 'has MWPS set to false' do
       expect(created_object.merge_when_pipeline_succeeds).to eq(false)
     end
 
@@ -506,7 +506,7 @@ RSpec.describe Gitlab::ImportExport::Project::RelationFactory, :use_clean_rails_
     end
   end
 
-  describe 'protected refs access levels' do
+  describe 'protected branch access levels' do
     shared_examples 'access levels' do
       let(:relation_hash) { { 'access_level' => access_level, 'created_at' => '2022-03-29T09:53:13.457Z', 'updated_at' => '2022-03-29T09:54:13.457Z' } }
 
@@ -563,26 +563,16 @@ RSpec.describe Gitlab::ImportExport::Project::RelationFactory, :use_clean_rails_
       end
     end
 
-    describe 'protected branch access levels' do
-      context 'merge access level' do
-        let(:relation_sym) { :'ProtectedBranch::MergeAccessLevel' }
+    describe 'merge access level' do
+      let(:relation_sym) { :'ProtectedBranch::MergeAccessLevel' }
 
-        include_examples 'access levels'
-      end
-
-      context 'push access level' do
-        let(:relation_sym) { :'ProtectedBranch::PushAccessLevel' }
-
-        include_examples 'access levels'
-      end
+      include_examples 'access levels'
     end
 
-    describe 'protected tag access levels' do
-      context 'create access level' do
-        let(:relation_sym) { :'ProtectedTag::CreateAccessLevel' }
+    describe 'push access level' do
+      let(:relation_sym) { :'ProtectedBranch::PushAccessLevel' }
 
-        include_examples 'access levels'
-      end
+      include_examples 'access levels'
     end
   end
 

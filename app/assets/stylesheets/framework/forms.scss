@@ -4,8 +4,8 @@ textarea {
 
 input {
   border-radius: $border-radius-base;
-  @apply gl-text-default;
-  background-color: var(--gl-control-background-color-default);
+  color: $gl-text-color;
+  background-color: $input-bg;
 }
 
 input[type='text'].danger {
@@ -86,6 +86,7 @@ label {
   margin-right: 0;
 
   .form-control {
+    background: $white;
     font-family: $monospace-font;
   }
 
@@ -100,8 +101,6 @@ label {
 
 .form-control {
   @include box-shadow(none);
-  background: var(--gl-control-background-color-default);
-  @apply gl-text-default;
   border-radius: $gl-border-radius-base;
   padding: $gl-vert-padding $gl-input-padding;
 
@@ -117,10 +116,8 @@ label {
 .form-control,
 [contenteditable=true] {
   &:focus {
-    background: var(--gl-control-background-color-default);
-    border-color: var(--gl-control-border-color-default);
-    @apply gl-text-default;
-    @apply gl-focus;
+    border-color: $gray-400;
+    @include gl-focus;
   }
 }
 
@@ -140,7 +137,7 @@ label {
 }
 
 .form-control::placeholder {
-  color: var(--gl-control-placeholder-color);
+  color: $gl-text-color-tertiary;
 }
 
 .input-group {
@@ -156,7 +153,7 @@ label {
   }
 }
 
-.form-text {
+.form-text.text-muted {
   margin-bottom: 0;
   margin-top: #{$grid-size / 2};
   font-size: $gl-font-size;
@@ -204,6 +201,10 @@ label {
   .gl-field-error-message {
     color: $red-500;
   }
+
+  .gl-field-hint {
+    color: $gl-text-color;
+  }
 }
 
 .show-password-complexity-errors {
@@ -235,6 +236,11 @@ label {
   color: $gray-400;
 }
 
+.input-md {
+  max-width: $input-md-width;
+  width: 100%;
+}
+
 .input-lg {
   max-width: $input-lg-width;
   width: 100%;
@@ -260,5 +266,5 @@ label {
 
 .add-issuable-form-input-wrapper.focus,
 .issue-token-remove-button:focus {
-  @apply gl-focus;
+  @include gl-focus;
 }

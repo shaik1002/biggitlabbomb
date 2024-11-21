@@ -80,11 +80,9 @@ module API
           requires :token, type: String, desc: "The runner's authentication token"
         end
         delete '/', urgency: :low, feature_category: :runner do
-          authenticate_runner!(ensure_runner_manager: false, update_contacted_at: false)
+          authenticate_runner!
 
-          destroy_conditionally!(current_runner) do
-            ::Ci::Runners::UnregisterRunnerService.new(current_runner, params[:token]).execute
-          end
+          destroy_conditionally!(current_runner) { ::Ci::Runners::UnregisterRunnerService.new(current_runner, params[:token]).execute }
         end
 
         desc 'Delete a registered runner manager' do
@@ -250,7 +248,7 @@ module API
             .new(job, declared_params(include_missing: false))
 
           service.execute.then do |result|
-            track_ci_minutes_usage!(job)
+            track_ci_minutes_usage!(job, current_runner)
 
             header 'Job-Status', job.status
             header 'X-GitLab-Trace-Update-Interval', result.backoff
@@ -289,7 +287,7 @@ module API
             break error!('416 Range Not Satisfiable', 416, { 'Range' => "0-#{result.stream_size}" })
           end
 
-          track_ci_minutes_usage!(job)
+          track_ci_minutes_usage!(job, current_runner)
 
           status result.status
           header 'Job-Status', job.status

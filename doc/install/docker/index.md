@@ -10,17 +10,25 @@ DETAILS:
 **Tier:** Free, Premium, Ultimate
 **Offering:** Self-managed
 
-To run GitLab in a Docker container, use a GitLab image, which contains all of the
+The GitLab Docker images are monolithic images of GitLab running all the
 necessary services in a single container.
 
-Find the GitLab official Docker images at:
+## Installation
 
-- [GitLab Docker images in Docker Hub](https://hub.docker.com/r/gitlab/gitlab-ee/)
+For installation options and details, see [Install GitLab in a Docker container](installation.md).
 
-## Related topics
+## Configuration
 
-- [Install GitLab in a Docker container](installation.md)
-- [Configure GitLab running in a Docker container](configuration.md)
-- [Back up GitLab running in a Docker container](backup_restore.md)
-- [Upgrade GitLab running in a Docker container](upgrade.md)
-- [Troubleshooting GitLab running in a Docker container](../docker/troubleshooting.md)
+To configure your GitLab installation on Docker, see [Configure GitLab running in a Docker container](configuration.md).
+
+## Backup and restore
+
+For information on backing and restoring your GitLab installation or database, see [Back up GitLab running in a Docker container](backup_restore.md).
+
+## Upgrade
+
+To upgrade GitLab, see [Upgrade GitLab running in a Docker container](upgrade.md).
+
+## Troubleshooting
+
+See [Troubleshooting GitLab installations that use Docker](../docker/troubleshooting.md).

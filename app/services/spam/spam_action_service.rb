@@ -132,8 +132,10 @@ module Spam
         verdict: result
       }
 
+      base_class = Feature.enabled?(:rename_abuse_workers, user, type: :worker) ? AntiAbuse : Abuse
+
       target.run_after_commit_or_now do
-        AntiAbuse::SpamAbuseEventsWorker.perform_async(params)
+        base_class::SpamAbuseEventsWorker.perform_async(params)
       end
     end
 

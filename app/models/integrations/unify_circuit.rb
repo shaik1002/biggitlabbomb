@@ -1,27 +1,20 @@
 # frozen_string_literal: true
 
 module Integrations
-  class UnifyCircuit < Integration
-    include Base::ChatNotification
-
+  class UnifyCircuit < BaseChatNotification
     field :webhook,
       section: SECTION_TYPE_CONNECTION,
-      help: -> { _('The Unify Circuit webhook (for example, `https://circuit.com/rest/v2/webhooks/incoming/...`).') },
+      help: 'https://yourcircuit.com/rest/v2/webhooks/incoming/…',
       required: true
 
     field :notify_only_broken_pipelines,
       type: :checkbox,
-      description: -> { _('Send notifications for broken pipelines.') },
       section: SECTION_TYPE_CONFIGURATION
 
     field :branches_to_be_notified,
       type: :select,
       section: SECTION_TYPE_CONFIGURATION,
       title: -> { s_('Integrations|Branches for which notifications are to be sent') },
-      description: -> {
-                     _('Branches to send notifications for. Valid options are `all`, `default`, `protected`, ' \
-                       'and `default_and_protected`. The default value is `default`.')
-                   },
       choices: -> { branch_choices }
 
     def self.title
@@ -38,12 +31,13 @@ module Integrations
 
     def self.help
       build_help_page_url(
-        'user/project/integrations/unify_circuit.md',
+        'user/project/integrations/unify_circuit',
         s_("Integrations|Send notifications about project events to a Unify Circuit conversation.")
       )
     end
 
-    def default_channel_placeholder; end
+    def default_channel_placeholder
+    end
 
     def self.supported_events
       %w[push issue confidential_issue merge_request note confidential_note tag_push

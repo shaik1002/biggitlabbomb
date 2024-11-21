@@ -83,19 +83,6 @@ To enable silent admin project and group file exports:
 1. Scroll to **Silent exports by admins**.
 1. Select the **Enabled** checkbox.
 
-## Allow contribution mapping to administrators
-
-> - Introduced in GitLab 17.5 [with flag](../../administration/feature_flags.md) named `importer_user_mapping`. Disabled by default.
-
-Allow mapping of imported user contributions to administrators.
-
-To allow mapping of imported user contributions to administrators:
-
-1. On the left sidebar, at the bottom, select **Admin**.
-1. Select **Settings > General**, then expand **Import and export settings**.
-1. Scroll to **Allow contribution mapping to administrators**.
-1. Select the **Enabled** checkbox.
-
 ## Max export size
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/86124) in GitLab 15.0.
@@ -212,24 +199,6 @@ To modify this setting:
 1. Select **Settings > General**.
 1. Expand **Import and export settings**.
 1. Set another value for **Maximum number of simultaneous import jobs** for the desired importer.
-
-## Maximum number of simultaneous batch export jobs
-
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/169122) in GitLab 17.6.
-
-Direct transfer exports can consume a significant amount of resources.
-To prevent using up the database or Sidekiq processes,
-administrators can configure the `concurrent_relation_batch_export_limit` setting.
-
-The default value is `8` jobs, which corresponds to a
-[reference architecture for up to 40 RPS or 2,000 users](../../administration/reference_architectures/2k_users.md).
-If you encounter `PG::QueryCanceled: ERROR: canceling statement due to statement timeout` errors
-or jobs getting interrupted due to Sidekiq memory limits, you might want to reduce this number.
-If you have enough resources, you can increase this number to process more concurrent export jobs.
-
-To modify this setting, send an API request to `/api/v4/application/settings`
-with `concurrent_relation_batch_export_limit`.
-For more information, see [application settings API](../../api/settings.md).
 
 ## Troubleshooting
 

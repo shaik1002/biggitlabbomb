@@ -4,15 +4,13 @@ group: Import and Integrate
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
 
-# Jira issues integration
+# Jira issue integration
 
 DETAILS:
 **Tier:** Free, Premium, Ultimate
 **Offering:** GitLab.com, Self-managed, GitLab Dedicated
 
-> - Name [updated](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/166555) to Jira issues integration in GitLab 17.6.
-
-The Jira issues integration connects one or more GitLab projects to a Jira instance.
+The Jira issue integration connects one or more GitLab projects to a Jira instance.
 You can host the Jira instance yourself or in [Jira Cloud](https://www.atlassian.com/migration/assess/why-cloud).
 The supported Jira versions are `6.x`, `7.x`, `8.x`, and `9.x`.
 
@@ -23,7 +21,6 @@ The supported Jira versions are `6.x`, `7.x`, `8.x`, and `9.x`.
 > - **Jira issues** and **Jira issues for vulnerabilities** sections [generally available](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/151753) in GitLab 17.0. Feature flag `jira_multiple_project_keys` removed.
 > - **Enable Jira issues** checkbox [renamed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/149055) to **View Jira issues** in GitLab 17.0.
 > - **Enable Jira issue creation from vulnerabilities** checkbox [renamed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/149055) to **Create Jira issues for vulnerabilities** in GitLab 17.0.
-> - **Customize Jira issues** setting [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/478824) in GitLab 17.5.
 
 Prerequisites:
 
@@ -37,7 +34,7 @@ Prerequisites:
   - [Jira username and password](jira_server_configuration.md).
   - Jira personal access token (GitLab 16.0 and later).
 
-You can enable the Jira issues integration by configuring your project settings in GitLab.
+You can enable the Jira issue integration by configuring your project settings in GitLab.
 You can also configure the integration for a specific
 [group](../../user/project/integrations/index.md#manage-group-default-settings-for-a-project-integration) or an entire
 [instance](../../administration/settings/project_integration_management.md#manage-instance-level-default-settings-for-a-project-integration)
@@ -48,7 +45,7 @@ To configure your project settings in GitLab:
 
 1. On the left sidebar, select **Search or go to** and find your project.
 1. Select **Settings > Integrations**.
-1. Select **Jira issues**.
+1. Select **Jira**.
 1. Under **Enable integration**, select the **Active** checkbox.
 1. Provide connection details:
    - **Web URL**: Base URL for the Jira instance web interface you're linking
@@ -96,8 +93,6 @@ To configure your project settings in GitLab:
    1. Enter a Jira project key.
    1. Select **Fetch issue types for this project key** (**{retry}**),
       then select the type of Jira issues to create.
-   1. Optional. Select the **Customize Jira issues** checkbox to be able to review, modify, or add details
-      to a Jira issue when it's created for a vulnerability.
 1. Optional. Select **Test settings**.
 1. Select **Save changes**.
 
@@ -112,7 +107,7 @@ DETAILS:
 
 Prerequisites:
 
-- Ensure the Jira issues integration is [configured](#configure-the-integration)
+- Ensure the Jira issue integration is [configured](#configure-the-integration)
   and the **View Jira issues** checkbox is selected.
 
 You can enable Jira issues for a specific group or project, but you can view the issues in GitLab projects only.
@@ -142,7 +137,7 @@ DETAILS:
 
 Prerequisites:
 
-- Ensure the Jira issues integration is [configured](#configure-the-integration)
+- Ensure the Jira issue integration is [configured](#configure-the-integration)
   and the **View Jira issues** checkbox is selected.
 
 When you [view Jira issues](#view-jira-issues) in GitLab,
@@ -168,7 +163,7 @@ DETAILS:
 
 Prerequisites:
 
-- Ensure the Jira issues integration is [configured](#configure-the-integration)
+- Ensure the Jira issue integration is [configured](#configure-the-integration)
   and the **Create Jira issues for vulnerabilities** checkbox is selected.
 - You must have a Jira user account with permission to create issues in the target project.
 
@@ -180,15 +175,13 @@ To create a Jira issue for a vulnerability:
 1. Select the vulnerability's description.
 1. Select **Create Jira issue**.
 
-   If the [**Customize Jira issues**](#configure-the-integration) setting is selected, you will be redirected to the issue creation form on your Jira instance, pre-filled with vulnerability data. You can review, modify, or add details before creating the Jira issue.
-
 The issue is created in the target Jira project with information from the vulnerability report.
 
 To create a GitLab issue, see [Create a GitLab issue for a vulnerability](../../user/application_security/vulnerabilities/index.md#create-a-gitlab-issue-for-a-vulnerability).
 
 ## Create a Jira Cloud API token
 
-To configure the Jira issues integration for Jira Cloud, you must have a Jira Cloud API token.
+To configure the Jira issue integration for Jira Cloud, you must have a Jira Cloud API token.
 To create a Jira Cloud API token:
 
 1. Sign in to [Atlassian](https://id.atlassian.com/manage-profile/security/api-tokens)
@@ -204,13 +197,11 @@ To copy the API token, select **Copy**.
 
 ## Migrate from Jira Server to Jira Cloud
 
-> - Integration name [updated](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/166555) to **Jira issues** in GitLab 17.6.
-
-To migrate from Jira Server to Jira Cloud in GitLab and maintain your Jira issues integration:
+To migrate from Jira Server to Jira Cloud in GitLab and maintain your Jira integration:
 
 1. On the left sidebar, select **Search or go to** and find your project.
 1. Select **Settings > Integrations**.
-1. Select **Jira issues**.
+1. Select **Jira**.
 1. In **Web URL**, enter the new Jira site URL (for example, `https://myjirasite.atlassian.net`).
 1. In **Email or username**, enter the email registered on your Jira profile.
 1. [Create a Jira Cloud API token](#create-a-jira-cloud-api-token), and copy the token value.

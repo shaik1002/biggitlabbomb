@@ -5,34 +5,35 @@ module Gitlab
     module Cli
       module Tasks
         class Task
-          attr_writer :target
-          attr_reader :context
-
-          def initialize(context:)
-            @context = context
-          end
+          attr_reader :options, :context
 
           # Identifier used as parameter in the CLI to skip from executing
           def self.id
             raise NotImplementedError
           end
 
+          def initialize(context:, options:)
+            @context = context
+            @options = options
+          end
+
           # Initiate a backup
           #
           # @param [Pathname] backup_path a path where to store the backups
-          def backup!(backup_path)
+          # @param [String] backup_id
+          def backup!(backup_path, backup_id)
             backup_output = backup_path.join(destination_path)
 
             # During test, we ensure storage exists so we can run against `RAILS_ENV=test` environment
-            FileUtils.mkdir_p(storage_path) if context&.env&.test? && respond_to?(:storage_path, true)
+            FileUtils.mkdir_p(storage_path) if context.env.test? && respond_to?(:storage_path, true)
 
-            target.dump(backup_output)
+            target.dump(backup_output, backup_id)
           end
 
           def restore!(archive_directory)
             archived_data_location = Pathname(archive_directory).join(destination_path)
 
-            target.restore(archived_data_location)
+            target.restore(archived_data_location, nil)
           end
 
           # Key string that identifies the task
@@ -68,10 +69,7 @@ module Gitlab
           end
 
           def config
-            return context.config(id) if context
-
-            Output.warning("No context passed to derive configuration from.")
-            nil
+            Gitlab::Backup::Cli::SourceContext.new.config(id)
           end
 
           def object_storage?
@@ -85,31 +83,19 @@ module Gitlab
             true
           end
 
-          def asynchronous?
-            target.asynchronous? || false
-          end
-
-          def wait_until_done!
-            target.wait_until_done!
-          end
-
-          def target
-            return @target unless @target.nil?
-
-            @target = if object_storage?
-                        ::Gitlab::Backup::Cli::Targets::ObjectStorage.find_task(id, options, config)
-                      else
-                        local
-                      end
-
-            @target
-          end
-
           private
 
           # The target factory method
-          def local
+          def target
             raise NotImplementedError
+          end
+
+          def check_object_storage(file_target)
+            if object_storage?
+              ::Gitlab::Backup::Cli::Targets::ObjectStorage.find_task(id, options, config)
+            else
+              file_target
+            end
           end
         end
       end

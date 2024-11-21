@@ -1,4 +1,3 @@
-import { isObject } from 'lodash';
 import Api from '~/api';
 
 /**
@@ -24,12 +23,4 @@ export const groupsPath = (groupsFilter, parentGroupID) => {
   }
 
   return Api.buildUrl(url);
-};
-
-export const initialSelectionPropValidator = (value) => {
-  if (!isObject(value)) {
-    return true;
-  }
-
-  return value.text !== undefined && value.value !== undefined;
 };

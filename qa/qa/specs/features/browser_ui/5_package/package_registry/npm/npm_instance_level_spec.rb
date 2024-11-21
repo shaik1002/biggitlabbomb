@@ -8,17 +8,9 @@ module QA
       include Runtime::Fixtures
       include Support::Helpers::MaskToken
 
-      let!(:personal_access_token) { Runtime::UserStore.test_user.current_personal_access_token }
-      let!(:project) { create(:project, name: 'npm-instance-publish') }
-      let!(:group) { project.group }
-      let!(:registry_scope) { group.sandbox.name }
-      let!(:another_project) { create(:project, name: 'npm-instance-install', group: group) }
-      let!(:runner) do
-        create(:group_runner,
-          name: "qa-runner-#{SecureRandom.hex(6)}",
-          tags: ["runner-for-#{group.name}"],
-          executor: :docker,
-          group: group)
+      let!(:registry_scope) { Runtime::Namespace.sandbox_name }
+      let!(:personal_access_token) do
+        Resource::PersonalAccessToken.fabricate_via_api!.token
       end
 
       let(:project_deploy_token) do
@@ -34,7 +26,19 @@ module QA
 
       let(:gitlab_address_without_port) { Support::GitlabAddress.address_with_port(with_default_port: false) }
       let(:gitlab_host_without_port) { Support::GitlabAddress.host_with_port(with_default_port: false) }
-      let(:package) { build(:package, name: "@#{registry_scope}/#{project.name}", project: project) }
+      let!(:project) { create(:project, name: 'npm-instance-level-publish') }
+      let!(:another_project) { create(:project, name: 'npm-instance-level-install', group: project.group) }
+      let!(:runner) do
+        create(:group_runner,
+          name: "qa-runner-#{Time.now.to_i}",
+          tags: ["runner-for-#{project.group.name}"],
+          executor: :docker,
+          group: project.group)
+      end
+
+      let(:package) do
+        build(:package, name: "@#{registry_scope}/#{project.name}-#{SecureRandom.hex(8)}", project: project)
+      end
 
       before do
         Flow::Login.sign_in
@@ -64,7 +68,7 @@ module QA
           end
         end
 
-        it 'push and pull a npm package via CI', :blocking, testcase: params[:testcase] do
+        it 'push and pull a npm package via CI', testcase: params[:testcase] do
           npm_upload_yaml = ERB.new(read_fixture('package_managers/npm',
             'npm_upload_package_instance.yaml.erb')).result(binding)
           package_json = ERB.new(read_fixture('package_managers/npm', 'package.json.erb')).result(binding)

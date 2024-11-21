@@ -96,17 +96,11 @@ module Namespaces
         traversal_ids.present?
       end
 
-      # Return the top most ancestor of this namespace.
-      # This method aims to minimize the number of queries by trying to re-use data that has already been loaded.
       def root_ancestor
         strong_memoize(:root_ancestor) do
-          if parent_loaded_and_present?
+          if association(:parent).loaded? && parent.present?
+            # This case is possible when parent has not been persisted or we're inside a transaction.
             parent.root_ancestor
-          elsif parent_id_present_and_traversal_ids_empty?
-            # Parent is in the database, so find our root ancestor using our parent's traversal_ids.
-            parent = Namespace.where(id: parent_id).select(:traversal_ids)
-            Namespace.from("(#{parent.to_sql}) AS parent_namespace, namespaces")
-                     .find_by('namespaces.id = parent_namespace.traversal_ids[1]')
           elsif parent_id.nil?
             # There is no parent, so we are the root ancestor.
             self
@@ -120,16 +114,16 @@ module Namespaces
         all_projects.select(:id)
       end
 
-      def self_and_descendants(skope: self.class)
+      def self_and_descendants
         return super unless use_traversal_ids?
 
-        lineage(top: self, skope: skope)
+        lineage(top: self)
       end
 
-      def self_and_descendant_ids(skope: self.class)
+      def self_and_descendant_ids
         return super unless use_traversal_ids?
 
-        self_and_descendants(skope: skope).as_ids
+        self_and_descendants.as_ids
       end
 
       def descendants
@@ -259,14 +253,16 @@ module Namespaces
           .new(Namespace.where(id: parent_ids))
           .base_and_ancestors
           .reorder(nil)
-          .top_level
+          .where(parent_id: nil)
 
         Namespace.lock.select(:id).where(id: roots).order(id: :asc).load
       end
 
       # Search this namespace's lineage. Bound inclusively by top node.
-      def lineage(top: nil, bottom: nil, hierarchy_order: nil, skope: self.class)
+      def lineage(top: nil, bottom: nil, hierarchy_order: nil)
         raise UnboundedSearch, 'Must bound search by either top or bottom' unless top || bottom
+
+        skope = self.class
 
         if top
           skope = skope.where("traversal_ids @> ('{?}')", top.id)
@@ -303,16 +299,6 @@ module Namespaces
         else
           index + 1
         end
-      end
-
-      # This case is possible when parent has not been persisted or we're inside a transaction.
-      def parent_loaded_and_present?
-        association(:parent).loaded? && parent.present?
-      end
-
-      # This case occurs when parent is persisted but we are not.
-      def parent_id_present_and_traversal_ids_empty?
-        parent_id.present? && traversal_ids.empty?
       end
     end
   end

@@ -1,5 +1,5 @@
 ---
-stage: Software Supply Chain Security
+stage: Govern
 group: Compliance
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
@@ -63,7 +63,7 @@ These features can help provide visibility into GitLab and audit what is happeni
 | [Audit events](audit_event_reports.md)                                    | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | To maintain the integrity of your code, audit events give administrators the ability to view any modifications made in the GitLab server in an advanced audit events system, so you can control, analyze, and track every change. |
 | [Audit reports](audit_event_reports.md)                                  | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | Create and access reports based on the audit events that have occurred. Use pre-built GitLab reports or the API to build your own.                                                                                                |
 | [Auditor users](auditor_users.md)                                  | **{check-circle}** Yes | **{dotted-circle}** No | **{dotted-circle}** No | Auditor users are users who are given read-only access to all projects, groups, and other resources on the GitLab instance.                                                                                                       |
-| [Compliance center](../user/compliance/compliance_center/index.md) | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | Quickly get visibility into the compliance posture of your organization through compliance standards adherence reporting and violations reports. Manage your groups compliance frameworks centrally. |
+| [Compliance center](../user/compliance/compliance_center/index.md) | **{dotted-circle}** No | **{check-circle}** Yes | **{dotted-circle}** No | Quickly get visibility into the compliance posture of your organization through compliance standards adherence reporting and violations reports. Manage your groups compliance frameworks centrally. |
 
 ## Other compliance features
 

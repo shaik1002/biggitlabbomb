@@ -9,6 +9,12 @@
     .icon {
       vertical-align: 1px;
     }
+
+    .home-panel-topic-list {
+      .icon {
+        top: 3px;
+      }
+    }
   }
 
   .home-panel-description {
@@ -110,7 +116,7 @@
       background-color: transparent;
       font-size: $gl-font-size;
       line-height: $gl-btn-line-height;
-      @apply gl-text-subtle;
+      color: var(--gray-500, $gl-text-color-secondary);
       white-space: pre-wrap;
     }
 
@@ -128,7 +134,7 @@
       }
 
       .icon {
-        @apply gl-fill-icon-subtle;
+        color: var(--gray-500, $gl-text-color-secondary);
       }
     }
 
@@ -147,7 +153,7 @@
   margin-bottom: 7px;
 
   h5 {
-    @apply gl-text-heading;
+    color: var(--gl-text-color-heading);
   }
 }
 

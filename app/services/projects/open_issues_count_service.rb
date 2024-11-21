@@ -61,8 +61,9 @@ module Projects
     # This will still show a discrepancy on issues number but should be less than before.
     # Check https://gitlab.com/gitlab-org/gitlab-foss/issues/38418 description.
 
+    # rubocop: disable CodeReuse/ActiveRecord
     def self.query(projects, public_only: true)
-      open_issues = Issue.opened.without_hidden
+      open_issues = Issue.opened
 
       if public_only
         open_issues.public_only.where(project: projects)

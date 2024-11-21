@@ -15,9 +15,6 @@ In accordance with [the GitLab Subscription Agreement](https://about.gitlab.com/
 GitLab reviews your seat usage and sends you an invoice for any overages.
 This review occurs either quarterly (quarterly reconciliation process) or annually (annual true-up process).
 
-To prevent overages, you can [turn on restricted access](../user/group/manage.md#turn-on-restricted-access).
-This setting restricts groups from adding new billable users when there are no seats left in the subscription.
-
 ## Quarterly reconciliation versus annual true-ups
 
 With **quarterly reconciliation**, you are billed per quarter on a prorated basis for the remaining portion of the subscription term.
@@ -36,7 +33,7 @@ Throughout the year, the number of users fluctuated between 95 and 120.
 
 The following chart illustrates the number of users during the year, per month and quarter.
 
-![Bar chart with number of users per month and quarter](img/quarterly_reconciliation_v14_7.png)
+![Bar chart with number of users per month and quarter](img/quarterly_reconciliation.png)
 
 If you are billed annually:
 

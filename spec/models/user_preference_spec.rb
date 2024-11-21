@@ -95,10 +95,6 @@ RSpec.describe UserPreference, feature_category: :user_profile do
     describe 'user belongs to the home organization' do
       let_it_be(:organization) { create(:organization) }
 
-      before do
-        user_preference.home_organization = organization
-      end
-
       context 'when user is an organization user' do
         before do
           create(:organization_user, organization: organization, user: user)
@@ -317,43 +313,6 @@ RSpec.describe UserPreference, feature_category: :user_profile do
 
       it 'returns assigned value' do
         expect(pref.dpop_enabled).to eq(true)
-      end
-    end
-  end
-
-  describe '#text_editor' do
-    let(:pref) { described_class.new(text_editor_type: text_editor_type) }
-    let(:text_editor_type) { nil }
-
-    context 'when text_editor_type is not set' do
-      it 'returns rich_text_editor if rich_text_editor_as_default ff is enabled' do
-        stub_feature_flags(rich_text_editor_as_default: true)
-
-        expect(pref.text_editor).to eq(:rich_text_editor)
-      end
-
-      it 'returns plain_text_editor if rich_text_editor_as_default ff is disabled' do
-        stub_feature_flags(rich_text_editor_as_default: false)
-
-        expect(pref.text_editor).to eq(:plain_text_editor)
-      end
-    end
-
-    context 'when text_editor_type is set' do
-      where(:text_editor_type) { %w[plain_text_editor rich_text_editor] }
-
-      with_them do
-        it 'returns assigned text_editor_type regardless of rich_text_editor_as_default ff value' do
-          expect(pref.text_editor).to eq(text_editor_type)
-
-          stub_feature_flags(rich_text_editor_as_default: false)
-
-          expect(pref.text_editor).to eq(text_editor_type)
-
-          stub_feature_flags(rich_text_editor_as_default: true)
-
-          expect(pref.text_editor).to eq(text_editor_type)
-        end
       end
     end
   end

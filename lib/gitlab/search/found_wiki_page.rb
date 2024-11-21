@@ -7,8 +7,6 @@ module Gitlab
     class FoundWikiPage < SimpleDelegator
       attr_reader :wiki
 
-      delegate :container, to: :wiki
-
       def self.declarative_policy_class
         'WikiPagePolicy'
       end

@@ -5,7 +5,7 @@ exports[`Registry Project Empty state to match the default snapshot 1`] = `
   <p>
     With the Container Registry, every project can have its own space to store its Docker images.
     <gl-link-stub
-      href="/help/user/packages/container_registry/index"
+      href="baz"
       target="_blank"
     >
       More Information
@@ -17,14 +17,14 @@ exports[`Registry Project Empty state to match the default snapshot 1`] = `
   <p>
     If you are not already logged in, you need to authenticate to the Container Registry by using your GitLab username and password. If you have
     <gl-link-stub
-      href="/help/user/profile/account/two_factor_authentication"
+      href="barBaz"
       target="_blank"
     >
       Two-Factor Authentication
     </gl-link-stub>
     enabled, use a
     <gl-link-stub
-      href="/help/user/profile/personal_access_tokens"
+      href="fooBaz"
       target="_blank"
     >
       personal access token

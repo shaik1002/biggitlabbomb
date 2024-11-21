@@ -81,8 +81,7 @@ module Gitlab
           redis.eval(LUA_INCREMENT_WITH_DEDUPLICATION_SCRIPT, **increment_args(increment)).to_i
         end
 
-        FlushCounterIncrementsWorker.perform_in(WORKER_DELAY, counter_record.class.name, counter_record.id,
-          attribute.to_s)
+        FlushCounterIncrementsWorker.perform_in(WORKER_DELAY, counter_record.class.name, counter_record.id, attribute)
 
         result
       end
@@ -96,8 +95,7 @@ module Gitlab
           end
         end
 
-        FlushCounterIncrementsWorker.perform_in(WORKER_DELAY, counter_record.class.name, counter_record.id,
-          attribute.to_s)
+        FlushCounterIncrementsWorker.perform_in(WORKER_DELAY, counter_record.class.name, counter_record.id, attribute)
 
         result.last.to_i
       end
@@ -129,8 +127,7 @@ module Gitlab
           redis.eval(LUA_FINALIZE_REFRESH_SCRIPT, keys: [key, refresh_key, refresh_indicator_key])
         end
 
-        FlushCounterIncrementsWorker.perform_in(WORKER_DELAY, counter_record.class.name, counter_record.id,
-          attribute.to_s)
+        FlushCounterIncrementsWorker.perform_in(WORKER_DELAY, counter_record.class.name, counter_record.id, attribute)
         ::Counters::CleanupRefreshWorker.perform_async(counter_record.class.name, counter_record.id, attribute)
       end
 

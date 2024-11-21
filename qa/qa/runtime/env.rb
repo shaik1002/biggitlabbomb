@@ -2,14 +2,12 @@
 
 require 'active_support/deprecation'
 require 'uri'
-require 'etc'
 
 module QA
   module Runtime
     module Env
       extend self
 
-      # TODO: remove all mutation from generic environment variable accessor module
       attr_writer :personal_access_token, :admin_personal_access_token, :gitlab_url
       attr_accessor :dry_run
 
@@ -92,10 +90,6 @@ module QA
         ENV['CI_PROJECT_PATH']
       end
 
-      def ci_project_dir
-        ENV.fetch('CI_PROJECT_DIR')
-      end
-
       def coverband_enabled?
         enabled?(ENV['COVERBAND_ENABLED'], default: false)
       end
@@ -145,16 +139,9 @@ module QA
         enabled?(ENV['ACCEPT_INSECURE_CERTS'])
       end
 
-      def running_on_live_env?
-        running_on_dot_com? || running_on_release?
-      end
-
       def running_on_dot_com?
-        gitlab_host.include?('.com')
-      end
-
-      def running_on_release?
-        gitlab_host.include?('release.gitlab.net')
+        uri = URI.parse(Runtime::Scenario.gitlab_address)
+        uri.host.include?('.com')
       end
 
       def running_on_dev?
@@ -419,6 +406,10 @@ module QA
         ENV['QA_HOSTNAME']
       end
 
+      def cache_namespace_name?
+        enabled?(ENV['CACHE_NAMESPACE_NAME'], default: true)
+      end
+
       def knapsack?
         ENV['CI_NODE_TOTAL'].to_i > 1 && ENV['NO_KNAPSACK'] != "true"
       end
@@ -492,10 +483,6 @@ module QA
 
       def workspaces_oauth_signing_key
         ENV.fetch("WORKSPACES_OAUTH_SIGNING_KEY")
-      end
-
-      def workspaces_proxy_version
-        ENV.fetch("WORKSPACES_PROXY_VERSION", '0.1.12')
       end
 
       def workspaces_proxy_domain
@@ -581,6 +568,10 @@ module QA
 
       def geo_environment?
         QA::Runtime::Scenario.attributes.include?(:geo_secondary_address)
+      end
+
+      def gitlab_agentk_version
+        ENV.fetch('GITLAB_AGENTK_VERSION', 'v16.10.0')
       end
 
       def transient_trials
@@ -743,42 +734,7 @@ module QA
         enabled?(ENV['QA_RSPEC_RETRIED'], default: false)
       end
 
-      def parallel_processes
-        ENV.fetch('QA_PARALLEL_PROCESSES') do
-          [Etc.nprocessors / 2, 1].max
-        end.to_i
-      end
-
-      # Execution was started by parallel runner
-      #
-      # @return [Boolean]
-      def parallel_run?
-        ENV["TEST_ENV_NUMBER"].present?
-      end
-
-      # Execute tests in multiple parallel processes
-      #
-      # @return [Boolean]
-      def run_in_parallel?
-        enabled?(ENV["QA_RUN_IN_PARALLEL"], default: false)
-      end
-
-      # Environment has no support for admin operations
-      #
-      # @return [Boolean]
-      def no_admin_environment?
-        enabled?(ENV["QA_NO_ADMIN_ENV"], default: false) || gitlab_host == "gitlab.com"
-      end
-
       private
-
-      # Gitlab host tests are running against
-      #
-      # @return [String]
-      def gitlab_host
-        # gitlab address should be immutable so it's ok to memoize as global
-        @gitlab_host ||= URI.parse(Runtime::Scenario.gitlab_address).host
-      end
 
       def remote_grid_credentials
         if remote_grid_username

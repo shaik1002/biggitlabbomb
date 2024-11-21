@@ -45,7 +45,7 @@ RSpec.describe GitlabSchema.types['Project'], feature_category: :groups_and_proj
       incident_management_timeline_event_tags visible_forks inherited_ci_variables autocomplete_users
       ci_cd_settings detailed_import_status value_streams ml_models
       allows_multiple_merge_request_assignees allows_multiple_merge_request_reviewers is_forked
-      protectable_branches available_deploy_keys explore_catalog_path
+      protectable_branches available_deploy_keys ci_pipeline_creation
     ]
 
     expect(described_class).to include_graphql_fields(*expected_fields)
@@ -371,8 +371,7 @@ RSpec.describe GitlabSchema.types['Project'], feature_category: :groups_and_proj
         :milestone_title,
         :milestone_wildcard_id,
         :not,
-        :sort,
-        :subscribed
+        :sort
       )
     end
   end
@@ -449,13 +448,6 @@ RSpec.describe GitlabSchema.types['Project'], feature_category: :groups_and_proj
 
     it { is_expected.to have_graphql_type(Types::ReleaseType.connection_type) }
     it { is_expected.to have_graphql_resolver(Resolvers::ReleasesResolver) }
-  end
-
-  describe 'container tags expiration policy field' do
-    subject { described_class.fields['containerTagsExpirationPolicy'] }
-
-    it { is_expected.to have_graphql_type(Types::ContainerRegistry::ContainerTagsExpirationPolicyType) }
-    it { expect(subject.instance_variable_get(:@authorize)).to include(:read_container_image) }
   end
 
   describe 'container expiration policy field' do
@@ -1317,40 +1309,6 @@ RSpec.describe GitlabSchema.types['Project'], feature_category: :groups_and_proj
         expect(organization_edit_path).to eq(
           "/-/organizations/#{organization.path}/projects/#{project.path_with_namespace}/edit"
         )
-      end
-    end
-  end
-
-  describe 'explore_catalog_path' do
-    let_it_be(:user) { create(:user) }
-    let(:query) do
-      %(
-        query {
-          project(fullPath: "#{project.full_path}") {
-            exploreCatalogPath
-          }
-        }
-      )
-    end
-
-    let(:response) { GitlabSchema.execute(query, context: { current_user: user }).as_json }
-
-    subject(:explore_catalog_path) { response.dig('data', 'project', 'exploreCatalogPath') }
-
-    context 'when project is not a catalog resource' do
-      let_it_be(:project) { create(:project, :public) }
-
-      it 'returns nil for explore_catalog_path' do
-        expect(explore_catalog_path).to be_nil
-      end
-    end
-
-    context 'when project is a catalog resource' do
-      let_it_be(:project) { create(:project, :public, :catalog_resource_with_components, create_tag: '1.0.0') }
-      let_it_be(:catalog_resource) { create(:ci_catalog_resource, project: project) }
-
-      it 'returns correct path for explore_catalog_path' do
-        expect(explore_catalog_path).to eq("/explore/catalog/#{project.path_with_namespace}")
       end
     end
   end

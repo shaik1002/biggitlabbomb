@@ -3,8 +3,7 @@
 require 'spec_helper'
 require_migration!
 
-RSpec.describe QueueBackfillErrorTrackingErrorEventsProjectId, migration: :gitlab_main_cell,
-  feature_category: :observability do
+RSpec.describe QueueBackfillErrorTrackingErrorEventsProjectId, feature_category: :error_tracking do
   let!(:batched_migration) { described_class::MIGRATION }
 
   it 'schedules a new batched migration' do

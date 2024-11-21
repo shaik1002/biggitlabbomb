@@ -16,14 +16,13 @@ module Import
       json_schema: { filename: 'import_source_user_placeholder_reference_composite_key' },
       allow_nil: true
     validate :validate_numeric_or_composite_key_present
-    validate :validate_model_is_not_member
 
     attribute :composite_key, :ind_jsonb
 
     scope :model_groups_for_source_user, ->(source_user) do
       where(source_user: source_user)
-        .select(:model, :user_reference_column, :alias_version)
-        .group(:model, :user_reference_column, :alias_version)
+        .select(:model, :user_reference_column)
+        .group(:model, :user_reference_column)
     end
 
     MODEL_BATCH_LIMIT = 500
@@ -62,10 +61,9 @@ module Import
     end
 
     def model_record
-      model_class = aliased_model
-
+      model_class = model.constantize
       model_relation = numeric_key? ? model_class.primary_key_in(numeric_key) : model_class.where(composite_key)
-      model_relation.where({ aliased_user_reference_column => source_user.placeholder_user_id }).first
+      model_relation.where({ user_reference_column => source_user.placeholder_user_id }).first
     end
 
     class << self
@@ -80,40 +78,39 @@ module Import
       end
 
       # Model relations are yielded in a block to ensure all relations will be batched, regardless of the model
-      def model_relations_for_source_user_reference(model:, source_user:, user_reference_column:, alias_version:)
-        aliased_model = PlaceholderReferences::AliasResolver.aliased_model(model, version: alias_version)
-        aliased_user_reference_column = PlaceholderReferences::AliasResolver.aliased_column(
-          model, user_reference_column, version: alias_version
-        )
-        primary_key = aliased_model.primary_key
+      def model_relations_for_source_user_reference(model:, source_user:, user_reference_column:)
+        # Look up model from alias after https://gitlab.com/gitlab-org/gitlab/-/issues/467522
+        model = model.constantize
 
-        where(model:, source_user:, user_reference_column:, alias_version:).each_batch(of: MODEL_BATCH_LIMIT) do
-          |placeholder_reference_batch|
+        where(
+          source_user: source_user,
+          model: model.to_s,
+          user_reference_column: user_reference_column
+        ).each_batch(of: MODEL_BATCH_LIMIT) do |placeholder_reference_batch|
+          primary_key = model.primary_key
           model_relation = nil
 
           # This is the simplest way to check for composite pkey for now. In Rails 7.1, composite primary keys will be
-          # fully supported: https://guides.rubyonrails.org/7_1_release_notes.html#composite-primary-keys.
-          # The `elseif primary_key.is_a?(Array)` block exists for Rails 7.1 support, so will not execute in Rails 7.0,
-          # thus the code is not covered by specs and we can ignore underecoverage reports about it until we upgrade.
+          # fully supported: https://guides.rubyonrails.org/7_1_release_notes.html#composite-primary-keys
           # .pluck is used instead of .select to avoid CrossSchemaAccessErrors on CI tables
           # rubocop: disable Database/AvoidUsingPluckWithoutLimit -- plucking limited by placeholder batch
           if primary_key.nil?
             composite_keys = placeholder_reference_batch.pluck(:composite_key)
 
-            model_relation = aliased_model.where(
+            model_relation = model.where(
               "#{composite_key_columns(composite_keys)} IN #{composite_key_values(composite_keys)}"
             )
           elsif primary_key.is_a?(Array)
             composite_keys = placeholder_reference_batch.pluck(:composite_key)
             key = composite_keys.first.keys
             values = composite_keys.map(&:values)
-            model_relation = aliased_model.where({ key => values })
+            model_relation = model.where({ key => values })
           else
-            model_relation = aliased_model.primary_key_in(placeholder_reference_batch.pluck(:numeric_key))
+            model_relation = model.primary_key_in(placeholder_reference_batch.pluck(:numeric_key))
           end
           # rubocop: enable Database/AvoidUsingPluckWithoutLimit
 
-          model_relation = model_relation.where(aliased_user_reference_column => source_user.placeholder_user_id)
+          model_relation = model_relation.where({ user_reference_column => source_user.placeholder_user_id })
 
           next if model_relation.empty?
 
@@ -141,16 +138,7 @@ module Import
     def validate_numeric_or_composite_key_present
       return if numeric_key.present? ^ composite_key.present?
 
-      errors.add(:base, :blank, message: 'one of numeric_key or composite_key must be present')
-    end
-
-    # Membership data is handled in `Import::Placeholders::Membership` records instead.
-    # Use `Import::PlaceholderMemberships::CreateService` to save the membership data.
-    def validate_model_is_not_member
-      model_class = model&.safe_constantize
-      return unless model_class.present? && model_class.new.is_a?(Member)
-
-      errors.add(:model, :invalid, message: 'cannot be a Member')
+      errors.add(:base, :blank, message: 'numeric_key or composite_key must be present')
     end
   end
 end

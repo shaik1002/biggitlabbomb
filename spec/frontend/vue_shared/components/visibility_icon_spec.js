@@ -49,7 +49,6 @@ describe('Visibility icon', () => {
 
           expect(glTooltipDirectiveMock.mock.calls[0][1].value).toEqual({
             placement: tooltipPlacement,
-            boundary: 'viewport',
           });
         },
       );
@@ -75,7 +74,6 @@ describe('Visibility icon', () => {
 
           expect(glTooltipDirectiveMock.mock.calls[0][1].value).toEqual({
             placement: tooltipPlacement,
-            boundary: 'viewport',
           });
         },
       );

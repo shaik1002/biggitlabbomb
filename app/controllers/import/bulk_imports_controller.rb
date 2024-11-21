@@ -148,7 +148,6 @@ class Import::BulkImportsController < ApplicationController
       destination_slug
       destination_namespace
       migrate_projects
-      migrate_memberships
     ]
   end
 

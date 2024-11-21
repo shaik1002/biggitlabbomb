@@ -9,13 +9,6 @@ module PreferencesHelper
     ]
   end
 
-  def text_editor_choices
-    [
-      [s_('TextEditor|Rich text editor'), :rich_text_editor],
-      [s_('TextEditor|Plain text editor'), :plain_text_editor]
-    ]
-  end
-
   # Returns an Array usable by a select field for more user-friendly option text
   def dashboard_choices
     dashboards = User.dashboards.keys
@@ -34,14 +27,8 @@ module PreferencesHelper
 
   # Maps `dashboard` values to more user-friendly option text
   def localized_dashboard_choices
-    projects = if Feature.enabled?(:your_work_projects_vue, current_user)
-                 _("Your Contributed Projects (default)")
-               else
-                 _("Your Projects (default)")
-               end
-
     {
-      projects: projects,
+      projects: _("Your Projects (default)"),
       stars: _("Starred Projects"),
       your_activity: _("Your Activity"),
       project_activity: _("Your Projects' Activity"),
@@ -143,49 +130,22 @@ module PreferencesHelper
 
   def integration_views
     [].tap do |views|
-      if Gitlab::CurrentSettings.gitpod_enabled
-        views << {
-          name: 'gitpod',
-          message: gitpod_enable_description,
-          message_url: gitpod_url_placeholder,
-          help_link: help_page_path('integration/gitpod.md')
-        }
-      end
-
-      if Gitlab::Sourcegraph.feature_available? && Gitlab::CurrentSettings.sourcegraph_enabled
-        views << {
-          name: 'sourcegraph',
-          message: sourcegraph_url_message,
-          message_url: Gitlab::CurrentSettings.sourcegraph_url,
-          help_link: help_page_path(
-            'user/profile/preferences.md',
-            anchor: 'integrate-your-gitlab-instance-with-sourcegraph'
-          )
-        }
-      end
-
-      views << extensions_marketplace_view
-    end.compact
+      views << { name: 'gitpod', message: gitpod_enable_description, message_url: gitpod_url_placeholder, help_link: help_page_path('integration/gitpod') } if Gitlab::CurrentSettings.gitpod_enabled
+      views << { name: 'sourcegraph', message: sourcegraph_url_message, message_url: Gitlab::CurrentSettings.sourcegraph_url, help_link: help_page_path('user/profile/preferences', anchor: 'sourcegraph') } if Gitlab::Sourcegraph.feature_available? && Gitlab::CurrentSettings.sourcegraph_enabled
+      views << extensions_marketplace_view if WebIde::ExtensionsMarketplace.feature_enabled?(user: current_user)
+    end
   end
 
   private
 
   def extensions_marketplace_view
-    return unless WebIde::ExtensionsMarketplace.feature_enabled?(user: current_user)
-
-    build_extensions_marketplace_view(
-      title: s_("Preferences|Web IDE"),
-      message: s_(
-        "PreferencesIntegrations|Uses %{extensions_marketplace_home} as the extension marketplace for the Web IDE.")
-    )
-  end
-
-  def build_extensions_marketplace_view(title:, message:)
+    # We handle the linkStart / linkEnd inside of a Vue sprintf
     extensions_marketplace_home = "%{linkStart}#{::WebIde::ExtensionsMarketplace.marketplace_home_url}%{linkEnd}"
+    message = format(s_('PreferencesIntegrations|Uses %{extensions_marketplace_home} as the extension marketplace for the Web IDE.'), extensions_marketplace_home: extensions_marketplace_home)
+
     {
       name: 'extensions_marketplace',
-      message: format(message, extensions_marketplace_home: extensions_marketplace_home),
-      title: title,
+      message: message,
       message_url: WebIde::ExtensionsMarketplace.marketplace_home_url,
       help_link: WebIde::ExtensionsMarketplace.help_preferences_url
     }

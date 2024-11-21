@@ -145,7 +145,7 @@ RSpec.describe Gitlab::Ci::Config::External::File::Artifact, feature_category: :
                   end
 
                   let(:expected_error) do
-                    'File `[MASKED]xxxx/generated.yml` is empty!'
+                    'File `xxxxxxxxxxxx/generated.yml` is empty!'
                   end
 
                   it_behaves_like 'is invalid'
@@ -188,7 +188,7 @@ RSpec.describe Gitlab::Ci::Config::External::File::Artifact, feature_category: :
 
         context 'when job does not exist in the parent pipeline' do
           let(:expected_error) do
-            'Job `[MASKED]xxxxxxxxxxxxxxx` not found in parent pipeline or does not have artifacts!'
+            'Job `xxxxxxxxxxxxxxxxxxxxxxx` not found in parent pipeline or does not have artifacts!'
           end
 
           it_behaves_like 'is invalid'
@@ -225,7 +225,7 @@ RSpec.describe Gitlab::Ci::Config::External::File::Artifact, feature_category: :
           context_sha: nil,
           type: :artifact,
           location: 'generated.yml',
-          extra: { job_name: '[MASKED]xxxxxxxxxxxxxxx' }
+          extra: { job_name: 'xxxxxxxxxxxxxxxxxxxxxxx' }
         )
       }
     end

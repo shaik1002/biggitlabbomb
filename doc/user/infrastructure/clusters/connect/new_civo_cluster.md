@@ -70,7 +70,7 @@ Use CI/CD environment variables to configure your project.
 1. Set the variable `TF_VAR_agent_token` to the agent token you received in the previous task.
 1. Set the variable `TF_VAR_kas_address` to the agent server address in the previous task.
 
-![Required configuration](img/variables_civo_v17_3.png)
+![img/variables_civo.png](img/variables_civo.png)
 
 **Optional configuration:**
 
@@ -91,8 +91,8 @@ Refer to the [Civo Terraform provider](https://registry.terraform.io/providers/c
 
 After configuring your project, manually trigger the provisioning of your cluster. In GitLab:
 
+1. On the left sidebar, go to **Build > Pipelines**.
 1. On the left sidebar, select **Build > Pipelines**.
-1. Select **New pipeline**.
 1. Select **Run pipeline**, and then select the newly created pipeline from the list.
 1. Next to the **deploy** job, select **Manual action** (**{status_manual}**).
 

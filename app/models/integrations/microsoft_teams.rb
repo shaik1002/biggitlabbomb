@@ -1,9 +1,7 @@
 # frozen_string_literal: true
 
 module Integrations
-  class MicrosoftTeams < Integration
-    include Base::ChatNotification
-
+  class MicrosoftTeams < BaseChatNotification
     field :webhook,
       section: SECTION_TYPE_CONNECTION,
       help: 'https://outlook.office.com/webhook/…',
@@ -36,7 +34,8 @@ module Integrations
       '<p>Use this service to send notifications about events in GitLab projects to your Microsoft Teams channels. <a href="https://docs.gitlab.com/ee/user/project/integrations/microsoft_teams.html" target="_blank" rel="noopener noreferrer">How do I configure this integration?</a></p>'
     end
 
-    def default_channel_placeholder; end
+    def default_channel_placeholder
+    end
 
     def self.supported_events
       %w[push issue confidential_issue merge_request note confidential_note tag_push

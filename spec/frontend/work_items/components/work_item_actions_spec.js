@@ -15,7 +15,6 @@ import toast from '~/vue_shared/plugins/global_toast';
 import WorkItemActions from '~/work_items/components/work_item_actions.vue';
 import WorkItemAbuseModal from '~/work_items/components/work_item_abuse_modal.vue';
 import WorkItemStateToggle from '~/work_items/components/work_item_state_toggle.vue';
-import CreateWorkItemModal from '~/work_items/components/create_work_item_modal.vue';
 import {
   STATE_OPEN,
   TEST_ID_CONFIDENTIALITY_TOGGLE_ACTION,
@@ -27,7 +26,6 @@ import {
   TEST_ID_PROMOTE_ACTION,
   TEST_ID_TOGGLE_ACTION,
   TEST_ID_REPORT_ABUSE,
-  TEST_ID_NEW_RELATED_WORK_ITEM,
 } from '~/work_items/constants';
 import updateWorkItemMutation from '~/work_items/graphql/update_work_item.mutation.graphql';
 import updateWorkItemNotificationsMutation from '~/work_items/graphql/update_work_item_notifications.mutation.graphql';
@@ -63,9 +61,7 @@ describe('WorkItemActions component', () => {
   const findCopyCreateNoteEmailButton = () =>
     wrapper.findByTestId(TEST_ID_COPY_CREATE_NOTE_EMAIL_ACTION);
   const findReportAbuseButton = () => wrapper.findByTestId(TEST_ID_REPORT_ABUSE);
-  const findNewRelatedItemButton = () => wrapper.findByTestId(TEST_ID_NEW_RELATED_WORK_ITEM);
   const findReportAbuseModal = () => wrapper.findComponent(WorkItemAbuseModal);
-  const findCreateWorkItemModal = () => wrapper.findComponent(CreateWorkItemModal);
   const findMoreDropdown = () => wrapper.findByTestId('work-item-actions-dropdown');
   const findMoreDropdownTooltip = () => getBinding(findMoreDropdown().element, 'gl-tooltip');
   const findDropdownItems = () => wrapper.findAll('[data-testid="work-item-actions-dropdown"] > *');
@@ -123,7 +119,6 @@ describe('WorkItemActions component', () => {
     workItemCreateNoteEmail = mockWorkItemCreateNoteEmail,
     hideSubscribe = undefined,
     hasChildren = false,
-    canCreateRelatedItem = true,
   } = {}) => {
     wrapper = shallowMountExtended(WorkItemActions, {
       isLoggedIn: isLoggedIn(),
@@ -152,13 +147,9 @@ describe('WorkItemActions component', () => {
         workItemCreateNoteEmail,
         hideSubscribe,
         hasChildren,
-        canCreateRelatedItem,
       },
       mocks: {
         $toast,
-      },
-      provide: {
-        fullPath: 'gitlab-org/gitlab-test',
       },
       stubs: {
         GlModal: stubComponent(GlModal, {
@@ -202,10 +193,6 @@ describe('WorkItemActions component', () => {
         text: '',
       },
       {
-        testId: TEST_ID_NEW_RELATED_WORK_ITEM,
-        text: 'New related task',
-      },
-      {
         testId: TEST_ID_LOCK_ACTION,
         text: 'Lock discussion',
       },
@@ -233,19 +220,6 @@ describe('WorkItemActions component', () => {
         text: 'Delete task',
       },
     ]);
-  });
-
-  it('includes a new related item option', () => {
-    createComponent({ workItemType: 'Task' });
-
-    expect(findDropdownItemsActual()).toEqual(
-      expect.arrayContaining([
-        {
-          testId: TEST_ID_NEW_RELATED_WORK_ITEM,
-          text: 'New related task',
-        },
-      ]),
-    );
   });
 
   describe('lock discussion action', () => {
@@ -325,16 +299,14 @@ describe('WorkItemActions component', () => {
       expect(wrapper.emitted('toggleWorkItemConfidentiality')[0]).toEqual([true]);
     });
 
-    it('does not render when canUpdate is false', () => {
-      createComponent({ canUpdate: false });
-      expect(findConfidentialityToggleButton().exists()).toBe(false);
-    });
+    it.each`
+      props                             | propName                  | value
+      ${{ isParentConfidential: true }} | ${'isParentConfidential'} | ${true}
+      ${{ canUpdate: false }}           | ${'canUpdate'}            | ${false}
+    `('does not render when $propName is $value', ({ props }) => {
+      createComponent(props);
 
-    it('is disabled when item has confidential parent', () => {
-      createComponent({ isParentConfidential: true });
-      expect(findConfidentialityToggleButton().props('item')).toMatchObject({
-        extraAttrs: { disabled: true },
-      });
+      expect(findConfidentialityToggleButton().exists()).toBe(false);
     });
   });
 
@@ -544,41 +516,6 @@ describe('WorkItemActions component', () => {
       await nextTick();
 
       expect(wrapper.emitted('toggleReportAbuseModal')).toEqual([[true]]);
-    });
-  });
-
-  describe('new related item', () => {
-    it('opens the create work item modal', async () => {
-      createComponent({ workItemType: 'Task' });
-
-      findNewRelatedItemButton().vm.$emit('action');
-      await nextTick();
-
-      expect(findCreateWorkItemModal().props('visible')).toBe(true);
-    });
-
-    it.each`
-      isProjectSelectorVisible | workItemType
-      ${false}                 | ${'Epic'}
-      ${true}                  | ${'Issue'}
-      ${true}                  | ${'Task'}
-    `(
-      'when workItemType is $workItemType, sets `CreateWorkItemModal` `showProjectSelector` prop to $isProjectSelectorVisible',
-      ({ isProjectSelectorVisible, workItemType }) => {
-        createComponent({ workItemType });
-
-        expect(findCreateWorkItemModal().props('showProjectSelector')).toBe(
-          isProjectSelectorVisible,
-        );
-      },
-    );
-
-    it('emits `workItemCreated` when `CreateWorkItemModal` emits `workItemCreated`', () => {
-      createComponent();
-
-      findCreateWorkItemModal().vm.$emit('workItemCreated');
-
-      expect(wrapper.emitted('workItemCreated')).toHaveLength(1);
     });
   });
 });

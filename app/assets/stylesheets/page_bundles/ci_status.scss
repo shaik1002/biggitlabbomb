@@ -21,11 +21,7 @@
   }
 
   &.ci-success {
-    @include status-color(
-      var(--green-100, $green-100),
-      var(--green-500, $green-500),
-      var(--green-700, $green-700)
-    );
+    @include green-status-color;
   }
 
   &.ci-canceling,
@@ -66,11 +62,11 @@
 
   &.ci-created,
   &.ci-skipped {
-    @apply gl-text-subtle;
+    color: var(--gray-500, $gray-500);
     border-color: currentColor;
 
     &:not(span):hover {
-      @apply gl-bg-alpha-dark-4;
+      background-color: rgba($gl-text-color-secondary, 0.07);
     }
   }
 }

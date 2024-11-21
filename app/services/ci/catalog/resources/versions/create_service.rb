@@ -5,11 +5,11 @@ module Ci
     module Resources
       module Versions
         class CreateService
-          def initialize(release, user, metadata)
+          def initialize(release, user, components_data)
             @release = release
             @user = user
             @project = release.project
-            @metadata = metadata
+            @components_data = components_data
             @errors = []
           end
 
@@ -19,7 +19,7 @@ module Ci
             publish(version)
 
             if errors.empty?
-              ServiceResponse.success(payload: { version: version })
+              ServiceResponse.success
             else
               ServiceResponse.error(message: errors.flatten.first(10).join(', '))
             end
@@ -27,7 +27,7 @@ module Ci
 
           private
 
-          attr_reader :project, :errors, :release, :user, :metadata
+          attr_reader :project, :errors, :release, :user, :components_data
 
           def build_catalog_resource_version
             return error('Project is not a catalog resource') unless project.catalog_resource
@@ -48,8 +48,7 @@ module Ci
           def build_components(version)
             return if errors.present?
 
-            # metadata is passed as `nil` from the `Releases::CreateService`.
-            response = BuildComponentsService.new(release, version, metadata.try(:[], :components)).execute
+            response = BuildComponentsService.new(release, version, components_data).execute
 
             if response.success?
               version.components = response.payload

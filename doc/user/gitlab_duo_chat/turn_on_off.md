@@ -10,12 +10,8 @@ GitLab Duo Chat can be turned on and off, and availability changed.
 
 ## For GitLab.com
 
-In GitLab 16.11 and later, GitLab Duo Chat is:
-
-- Generally available.
-- Available to any user with an assigned GitLab Duo seat.
-
-If you [turn on or turn off GitLab Duo](../gitlab_duo/turn_on_off.md), you turn on or turn off Duo Chat as well.
+For a limited time, GitLab Duo Chat is automatically available for all GitLab.com users
+who are members of at least one group with a Premium or Ultimate subscription.
 
 ## For self-managed
 
@@ -35,10 +31,10 @@ Then, depending on the version of GitLab you have, you can enable GitLab Duo Cha
 
 ### In GitLab 16.11 and later
 
-In GitLab 16.11 and later, GitLab Duo Chat is:
+In GitLab 16.11 and later, GitLab Duo Chat is generally available
+and automatically enabled for all users who have a subscription to the Premium or Ultimate tier.
 
-- Generally available.
-- Available to any user with an assigned GitLab Duo seat.
+You do not need to do anything to enable GitLab Duo Chat if you have GitLab 16.11 or later.
 
 ### In earlier GitLab versions
 
@@ -80,5 +76,5 @@ To limit the data that Duo Chat has access to, follow the instructions for
 
 To disable GitLab Duo Chat in VS Code:
 
-1. Go to **Settings > Extensions > GitLab Workflow**.
+1. Go to **Settings > Extensions > GitLab Workflow (GitLab VS Code Extension)**.
 1. Clear the **Enable GitLab Duo Chat assistant** checkbox.

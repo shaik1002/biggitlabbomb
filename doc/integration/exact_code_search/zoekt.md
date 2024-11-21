@@ -1,5 +1,5 @@
 ---
-stage: Foundations
+stage: Data Stores
 group: Global Search
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
@@ -23,7 +23,7 @@ Zoekt is an open-source search engine designed specifically to search for code.
 
 With this integration, you can use [exact code search](../../user/search/exact_code_search.md)
 instead of [advanced search](../../user/search/advanced_search.md) to search for code in GitLab.
-You can use exact match and regular expression modes to search for code in a group or repository.
+You can use regular expression and exact match modes to search for code in a group or repository.
 
 ## Install Zoekt
 
@@ -56,31 +56,13 @@ To enable [exact code search](../../user/search/exact_code_search.md) in GitLab:
 1. Select the **Enable indexing for exact code search** and **Enable exact code search** checkboxes.
 1. Select **Save changes**.
 
-## Delete offline nodes automatically
-
-Prerequisites:
-
-- You must have administrator access to the instance.
-
-You can automatically delete Zoekt nodes that are offline for more than 12 hours
-and their related indices, repositories, and tasks.
-
-To delete offline nodes automatically:
-
-1. On the left sidebar, at the bottom, select **Admin**.
-1. Select **Settings > Search**.
-1. Expand **Exact code search configuration**.
-1. Select the **Delete offline nodes automatically after 12 hours** checkbox.
-1. Select **Save changes**.
-
 ## Index root namespaces automatically
 
 Prerequisites:
 
 - You must have administrator access to the instance.
 
-You can index both existing and new root namespaces automatically.
-To index all root namespaces automatically:
+You can index both existing and new root namespaces automatically. To index all root namespaces automatically:
 
 1. On the left sidebar, at the bottom, select **Admin**.
 1. Select **Settings > Search**.
@@ -110,19 +92,22 @@ To pause indexing for [exact code search](../../user/search/exact_code_search.md
 When you pause indexing for exact code search, all changes in your repository are queued.
 To resume indexing, clear the **Pause indexing for exact code search** checkbox.
 
-## Set concurrent indexing tasks
+## Control indexing concurrency
 
 Prerequisites:
 
 - You must have administrator access to the instance.
 
-You can set the number of concurrent indexing tasks for a Zoekt node relative to its CPU capacity.
+You can set the number of concurrent indexing tasks
+that can be run on a Zoekt node relative to its CPU capacity.
 
-A higher multiplier means more tasks can run concurrently, which would
-improve indexing throughput at the cost of increased CPU usage.
-The default value is `1.0` (one task per CPU core).
+A higher ratio allows more tasks to run concurrently, potentially
+improving indexing throughput at the cost of increased CPU usage.
+The default value is `1.0`, meaning one task per CPU core.
 
-You can adjust this value based on the node's performance and workload.
+You can adjust this value based on your Zoekt node's performance
+characteristics and workload.
+
 To set the number of concurrent indexing tasks:
 
 1. On the left sidebar, at the bottom, select **Admin**.
@@ -130,9 +115,8 @@ To set the number of concurrent indexing tasks:
 1. Expand **Exact code search configuration**.
 1. In the **Indexing CPU to tasks multiplier** text box, enter a value.
 
-   For example, if a Zoekt node has `4` CPU cores and the multiplier is `1.5`,
-   the number of concurrent tasks for the node is `6`.
-
+   For example, if a Zoekt node has `4` CPU cores and the ratio is set to `1.5`, the
+   number of concurrent tasks for a node is going to be `4 * 1.5`, which is `6`.
 1. Select **Save changes**.
 
 ## Troubleshooting

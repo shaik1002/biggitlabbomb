@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::Tracking::EventDefinition, feature_category: :product_analytics do
+RSpec.describe Gitlab::Tracking::EventDefinition, feature_category: :product_analytics_data_management do
   it 'only has valid event definitions', :aggregate_failures do
     described_class.definitions.each do |definition|
       validation_errors = Gitlab::Tracking::EventDefinitionValidator.new(definition).validation_errors

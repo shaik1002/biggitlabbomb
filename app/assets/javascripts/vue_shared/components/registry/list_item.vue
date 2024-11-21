@@ -31,6 +31,9 @@ export default {
       detailsSlots: [],
     };
   },
+  i18n: {
+    toggleDetailsLabel: __('Toggle details'),
+  },
   computed: {
     optionalClasses() {
       return {
@@ -40,12 +43,6 @@ export default {
         '!gl-border-t-transparent': this.selected && !this.first,
         'gl-bg-blue-50 gl-border-blue-200': this.selected,
       };
-    },
-    toggleDetailsIcon() {
-      return this.isDetailsShown ? 'chevron-up' : 'chevron-down';
-    },
-    toggleDetailsLabel() {
-      return this.isDetailsShown ? __('Hide details') : __('Show details');
     },
   },
   mounted() {
@@ -84,12 +81,12 @@ export default {
             <gl-button
               v-if="detailsSlots.length > 0"
               v-gl-tooltip
-              :icon="toggleDetailsIcon"
-              :aria-label="toggleDetailsLabel"
+              :selected="isDetailsShown"
+              icon="ellipsis_h"
               size="small"
               class="gl-ml-2 gl-hidden sm:gl-block"
-              category="tertiary"
-              :title="toggleDetailsLabel"
+              :title="$options.i18n.toggleDetailsLabel"
+              :aria-label="$options.i18n.toggleDetailsLabel"
               :aria-expanded="isDetailsShown"
               @click="toggleDetails"
             />

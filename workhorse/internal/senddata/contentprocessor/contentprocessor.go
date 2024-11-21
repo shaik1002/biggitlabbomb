@@ -133,7 +133,7 @@ func (cd *contentDisposition) FlushError() error {
 		return err
 	}
 
-	return http.NewResponseController(cd.rw).Flush() //nolint:errcheck
+	return http.NewResponseController(cd.rw).Flush()
 }
 
 // Unwrap lets http.ResponseController get the underlying http.ResponseWriter.

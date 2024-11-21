@@ -6,20 +6,6 @@ module API
 
     feature_category :groups_and_projects
 
-    before do
-      set_current_organization
-    end
-
-    helpers do
-      def find_topic!(id)
-        topic = ::Projects::Topic.find(id)
-
-        find_organization!(topic.organization_id)
-
-        topic
-      end
-    end
-
     desc 'Get topics' do
       detail 'This feature was introduced in GitLab 14.5.'
       success Entities::Projects::Topic
@@ -29,17 +15,10 @@ module API
         desc: 'Return list of topics matching the search criteria',
         documentation: { example: 'search' }
       optional :without_projects, type: Boolean, desc: 'Return list of topics without assigned projects'
-      optional :organization_id, type: Integer, default: -> { ::Current.organization_id },
-        desc: 'The organization id for the topics'
       use :pagination
     end
     get 'topics' do
-      organization = find_organization!(params[:organization_id])
-
-      topics = ::Projects::TopicsFinder.new(
-        params: declared_params(include_missing: false),
-        organization_id: organization.id
-      ).execute
+      topics = ::Projects::TopicsFinder.new(params: declared_params(include_missing: false)).execute
 
       present paginate(topics), with: Entities::Projects::Topic
     end
@@ -52,7 +31,7 @@ module API
       requires :id, type: Integer, desc: 'ID of project topic'
     end
     get 'topics/:id' do
-      topic = find_topic!(params[:id])
+      topic = ::Projects::Topic.find(params[:id])
 
       present topic, with: Entities::Projects::Topic
     end
@@ -98,7 +77,7 @@ module API
     put 'topics/:id' do
       authenticated_as_admin!
 
-      topic = find_topic!(params[:id])
+      topic = ::Projects::Topic.find(params[:id])
 
       topic.remove_avatar! if params.key?(:avatar) && params[:avatar].nil?
 
@@ -118,7 +97,7 @@ module API
     delete 'topics/:id' do
       authenticated_as_admin!
 
-      topic = find_topic!(params[:id])
+      topic = ::Projects::Topic.find(params[:id])
 
       destroy_conditionally!(topic)
     end
@@ -134,8 +113,8 @@ module API
     post 'topics/merge' do
       authenticated_as_admin!
 
-      source_topic = find_topic!(params[:source_topic_id])
-      target_topic = find_topic!(params[:target_topic_id])
+      source_topic = ::Projects::Topic.find(params[:source_topic_id])
+      target_topic = ::Projects::Topic.find(params[:target_topic_id])
 
       response = ::Topics::MergeService.new(source_topic, target_topic).execute
       render_api_error!(response.message, :bad_request) if response.error?

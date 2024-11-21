@@ -115,9 +115,6 @@ regardless of the machine or platform you use.
   - Only `preStart` is supported.
 - `parent`, `projects`, and `starterProjects` are not supported.
 - For `variables`, keys must not start with `gl-`, `gl_`, `GL-`, or `GL_`.
-- For `attributes`:
-  - `pod-overrides` must not be set at the root level or in `components`.
-  - `container-overrides` must not be set in `components`.
 
 ### `container` component type
 
@@ -194,15 +191,14 @@ For more information, see [GitLab Workflow extension for VS Code](https://gitlab
 
 ## Extension marketplace
 
-DETAILS:
-**Status:** Beta
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/438491) in GitLab 16.9 [with a flag](../../administration/feature_flags.md) named `allow_extensions_marketplace_in_workspace`. Disabled by default.
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/438491) as a [beta](../../policy/experiment-beta-support.md#beta) in GitLab 16.9 [with a flag](../../administration/feature_flags.md) named `allow_extensions_marketplace_in_workspace`. Disabled by default.
-> - Feature flag `allow_extensions_marketplace_in_workspace` [removed](https://gitlab.com/gitlab-org/gitlab/-/issues/454669) in GitLab 17.6.
+FLAG:
+The availability of this feature is controlled by a feature flag.
+For more information, see the history.
 
-You can use the
-[extension marketplace](../project/web_ide/index.md#extension-marketplace) in workspaces
-when it is [enabled](../profile/preferences.md#integrate-with-the-extension-marketplace).
+When `allow_extensions_marketplace_in_workspace` is enabled, you can use the extension marketplace in workspaces.
+An administrator can enable or disable the flag for top-level groups only.
 
 The extension marketplace connects to the [Open VSX Registry](https://open-vsx.org/).
 
@@ -246,17 +242,6 @@ When you stop a workspace, the compute resources for that workspace are scaled d
 However, the volume provisioned for the workspace still exists.
 
 To delete the provisioned volume, you must terminate the workspace.
-
-## Automatic workspace stop and termination
-
-> - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/14910) in GitLab 17.6.
-
-By default, a workspace automatically:
-
-- Stops 36 hours after the workspace was last started or restarted.
-  For more information, see [`max_active_hours_before_stop`](gitlab_agent_configuration.md#max_active_hours_before_stop).
-- Terminates 722 hours after the workspace was last stopped.
-  For more information, see [`max_stopped_hours_before_termination`](gitlab_agent_configuration.md#max_stopped_hours_before_termination).
 
 ## Arbitrary user IDs
 

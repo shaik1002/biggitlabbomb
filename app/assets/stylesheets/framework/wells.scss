@@ -1,5 +1,8 @@
 .info-well {
-  @apply gl-bg-subtle gl-text-default gl-border gl-border-section gl-rounded-base;
+  background: $gray-10;
+  color: $gl-text-color;
+  border: 1px solid $gray-100;
+  border-radius: $gl-border-radius-base;
 
   .icon-container {
     display: inline-block;
@@ -15,7 +18,7 @@
     &.commit-icon {
       svg {
         path {
-          @apply gl-fill-icon-default;
+          fill: $gl-text-color;
         }
       }
     }

@@ -33,12 +33,11 @@ module Projects
       end
 
       def set_feature_flag_packages_protected_packages
-        push_frontend_feature_flag(:packages_protected_packages_pypi, project)
-        push_frontend_feature_flag(:packages_protected_packages_conan, project)
+        push_frontend_feature_flag(:packages_protected_packages, project)
       end
 
       def set_feature_flag_container_registry_protected_containers
-        push_frontend_feature_flag(:container_registry_protected_containers, project.root_ancestor)
+        push_frontend_feature_flag(:container_registry_protected_containers, project)
       end
     end
   end

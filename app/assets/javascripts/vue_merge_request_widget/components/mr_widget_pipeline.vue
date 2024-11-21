@@ -79,9 +79,9 @@ export default {
       type: String,
       required: false,
     },
-    pipelineMiniGraphVariables: {
-      type: Object,
-      required: true,
+    pipelineIid: {
+      type: Number,
+      required: false,
     },
     buildsWithCoverage: {
       type: Array,
@@ -151,13 +151,12 @@ export default {
       return this.hasPipeline && !this.ciStatus;
     },
     status() {
-      return this.pipeline?.details?.status || {};
+      return this.pipeline.details && this.pipeline.details.status
+        ? this.pipeline.details.status
+        : {};
     },
     artifacts() {
       return this.pipeline?.details?.artifacts;
-    },
-    hasArtifacts() {
-      return Boolean(this.pipeline?.details?.artifacts?.length);
     },
     hasStages() {
       return this.pipeline?.details?.stages?.length > 0;
@@ -207,6 +206,9 @@ export default {
         this.buildsWithCoverage.length,
       );
     },
+    pipelineMiniGraphQueryId() {
+      return this.pipelineIid?.toString() || null;
+    },
     isMergeTrain() {
       return Boolean(this.pipeline.flags?.merge_train_pipeline);
     },
@@ -232,7 +234,7 @@ export default {
 <template>
   <div class="ci-widget media">
     <template v-if="hasCIError">
-      <gl-icon name="status_failed" :size="24" variant="danger" />
+      <gl-icon name="status_failed" class="gl-text-red-500" :size="24" />
       <p class="gl-mb-0 gl-ml-5 gl-grow" data-testid="ci-error-message">
         <gl-sprintf :message="$options.errorText">
           <template #link="{ content }">
@@ -243,7 +245,7 @@ export default {
     </template>
     <template v-else-if="retargeted">
       <gl-icon name="status_canceled" class="gl-mr-3 gl-self-center" />
-      <p class="gl-mb-0 gl-ml-3 gl-flex gl-grow gl-text-subtle" data-testid="retargeted-message">
+      <p class="text-muted gl-mb-0 gl-ml-3 gl-flex gl-grow" data-testid="retargeted-message">
         {{
           __(
             'You should run a new pipeline, because the target branch has changed for this merge request.',
@@ -301,9 +303,9 @@ export default {
               <div class="gl-inline-flex gl-grow gl-items-center gl-justify-between">
                 <div>
                   <pipeline-mini-graph
-                    v-if="isGraphQLPipelineMiniGraph && pipelineMiniGraphVariables.iid"
-                    :iid="pipelineMiniGraphVariables.iid"
-                    :full-path="pipelineMiniGraphVariables.fullPath"
+                    v-if="isGraphQLPipelineMiniGraph && pipelineMiniGraphQueryId"
+                    :iid="pipelineMiniGraphQueryId"
+                    :full-path="targetProjectFullPath"
                     :is-merge-train="isMergeTrain"
                     :pipeline-etag="pipelineEtag"
                   />
@@ -317,7 +319,6 @@ export default {
                   />
                 </div>
                 <pipeline-artifacts
-                  v-if="hasArtifacts"
                   :pipeline-id="pipeline.id"
                   :artifacts="artifacts"
                   class="gl-ml-3"
@@ -326,7 +327,10 @@ export default {
             </div>
 
             <div class="gl-flex gl-flex-wrap gl-items-center">
-              <p class="gl-m-0 gl-text-sm gl-text-subtle" data-testid="pipeline-details-container">
+              <p
+                class="gl-m-0 gl-text-sm gl-text-gray-500"
+                data-testid="pipeline-details-container"
+              >
                 {{ pipeline.details.event_type_name }} {{ pipeline.details.status.label }}
                 <template v-if="hasCommitInfo">
                   {{ s__('Pipeline|for') }}

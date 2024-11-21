@@ -95,13 +95,6 @@ module API
     end
     # rubocop:enable Gitlab/ModuleWithInstanceVariables
 
-    def set_current_organization(user: current_user)
-      ::Current.organization = Gitlab::Current::Organization.new(
-        params: {},
-        user: user
-      ).organization
-    end
-
     def save_current_user_in_env(user)
       env[API_USER_ENV] = { user_id: user.id, username: user.username }
     end
@@ -188,7 +181,7 @@ module API
     def find_pipeline(id)
       return unless id
 
-      if INTEGER_ID_REGEX.match?(id.to_s)
+      if id.to_s =~ INTEGER_ID_REGEX
         ::Ci::Pipeline.find_by(id: id)
       end
     end
@@ -209,7 +202,7 @@ module API
     end
 
     def find_organization!(id)
-      organization = ::Organizations::Organization.find_by_id(id)
+      organization = Organizations::Organization.find_by_id(id)
       check_organization_access(organization)
     end
 
@@ -217,7 +210,7 @@ module API
     def find_group(id, organization: nil)
       collection = organization.present? ? Group.in_organization(organization) : Group.all
 
-      if INTEGER_ID_REGEX.match?(id.to_s)
+      if id.to_s =~ INTEGER_ID_REGEX
         collection.find_by(id: id)
       else
         collection.find_by_full_path(id)
@@ -234,10 +227,12 @@ module API
       check_group_access(group)
     end
 
+    # rubocop: disable CodeReuse/ActiveRecord
     def find_group_by_full_path!(full_path)
       group = Group.find_by_full_path(full_path)
       check_group_access(group)
     end
+    # rubocop: enable CodeReuse/ActiveRecord
 
     def check_group_access(group)
       return group if can?(current_user, :read_group, group)
@@ -255,7 +250,7 @@ module API
     # find_namespace returns the namespace regardless of user access level on the namespace
     # rubocop: disable CodeReuse/ActiveRecord
     def find_namespace(id)
-      if INTEGER_ID_REGEX.match?(id.to_s)
+      if id.to_s =~ INTEGER_ID_REGEX
         Namespace.without_project_namespaces.find_by(id: id)
       else
         find_namespace_by_path(id)
@@ -582,8 +577,8 @@ module API
       render_api_error!('201 Created', 201)
     end
 
-    def accepted!(message = '202 Accepted')
-      render_api_error!(message, 202)
+    def accepted!
+      render_api_error!('202 Accepted', 202)
     end
 
     def render_validation_error!(models, status = 400)
@@ -693,25 +688,22 @@ module API
     def present_carrierwave_file!(file, supports_direct_download: true, content_disposition: nil, content_type: nil)
       return not_found! unless file&.exists?
 
-      if content_disposition
-        response_disposition = ActionDispatch::Http::ContentDisposition.format(disposition: content_disposition, filename: file.filename)
-      end
-
       if file.file_storage?
         file_content_type = content_type || 'application/octet-stream'
         present_disk_file!(file.path, file.filename, file_content_type)
-      elsif supports_direct_download && file.direct_download_enabled?
+      elsif supports_direct_download && file.class.direct_download_enabled?
         return redirect(ObjectStorage::S3.signed_head_url(file)) if request.head? && file.fog_credentials[:provider] == 'AWS'
 
         redirect_params = {}
         if content_disposition
+          response_disposition = ActionDispatch::Http::ContentDisposition.format(disposition: content_disposition, filename: file.filename)
           redirect_params[:query] = { 'response-content-disposition' => response_disposition, 'response-content-type' => content_type || file.content_type }
         end
 
         file_url = ObjectStorage::CDN::FileUrl.new(file: file, ip_address: ip_address, redirect_params: redirect_params)
         redirect(file_url.url)
       else
-        response_headers = { 'Content-Type' => content_type, 'Content-Disposition' => response_disposition }.compact_blank
+        response_headers = { 'Content-Type' => content_type }.compact_blank
         header(*Gitlab::Workhorse.send_url(file.url, response_headers: response_headers))
         status :ok
         body '' # to avoid an error from API::APIGuard::ResponseCoercerMiddleware
@@ -748,7 +740,7 @@ module API
         namespace: namespace,
         project: project
       )
-    rescue Gitlab::Tracking::EventValidator::UnknownEventError => e
+    rescue Gitlab::InternalEvents::UnknownEventError => e
       Gitlab::ErrorTracking.track_exception(e, event_name: event_name)
 
       # We want to keep the error silent on production to keep the behavior

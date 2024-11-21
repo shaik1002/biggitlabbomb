@@ -9,6 +9,7 @@ module Gitlab
 
       scope_to ->(relation) { relation.where(normalized_version: nil) }
 
+      # rubocop: disable Style/Documentation
       class Package < ApplicationRecord
         self.table_name = 'packages_packages'
       end
@@ -56,6 +57,7 @@ module Gitlab
           version
         end
       end
+      # rubocop: enable Style/Documentation
 
       def perform
         each_sub_batch do |sub_batch|

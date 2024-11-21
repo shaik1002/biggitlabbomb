@@ -1,6 +1,6 @@
 import { identity, memoize, isEmpty } from 'lodash';
 import { initEmojiMap, getAllEmoji, searchEmoji } from '~/emoji';
-import { newDate } from '~/lib/utils/datetime_utility';
+import { parsePikadayDate } from '~/lib/utils/datetime_utility';
 import axios from '~/lib/utils/axios_utils';
 import { COMMANDS } from '../constants';
 
@@ -38,7 +38,7 @@ function parseMilestone(milestone) {
     return milestone;
   }
 
-  const dueDate = milestone.due_date ? newDate(milestone.due_date) : null;
+  const dueDate = milestone.due_date ? parsePikadayDate(milestone.due_date) : null;
   const expired = dueDate ? Date.now() > dueDate.getTime() : false;
 
   return {
@@ -80,26 +80,27 @@ export function createDataSource({
   sorter = defaultSorter(searchFields),
   cache = true,
   limit = 15,
-  filterOnBackend = false,
 }) {
-  const fetchData = async (query) => {
+  const fetchData = source ? async () => (await axios.get(source)).data : () => [];
+  let items = [];
+
+  const sync = async function sync() {
     try {
-      const queryOptions = filterOnBackend ? { params: { search: query } } : {};
-      return source ? (await axios.get(source, queryOptions)).data : [];
+      items = await fetchData();
     } catch {
-      return [];
+      items = [];
     }
   };
 
   const cacheTimeoutFn = () => (cache ? 0 : Math.floor(Date.now() / 1e4));
-  const memoizedFetchData = memoize(fetchData, cacheTimeoutFn);
+  const init = memoize(sync, cacheTimeoutFn);
 
   return {
     search: async (query) => {
-      let results = filterOnBackend ? await fetchData(query) : await memoizedFetchData();
+      await init();
 
-      results = results.map(mapper);
-      if (filter) results = filter(results, query);
+      let results = items.map(mapper);
+      if (filter) results = filter(items, query);
 
       if (query) {
         results = results.filter((item) => {
@@ -129,13 +130,10 @@ export default class AutocompleteHelper {
       ? dataSourceUrls
       : gl.GfmAutoComplete?.dataSources || {};
 
-    this.getDataSource = memoize(this.#getDataSource, (referenceType, { command } = {}) => {
-      if (referenceType === 'command') return referenceType;
-      return referenceType + (command ? `_${command}` : '');
-    });
+    this.getDataSource = memoize(this.#getDataSource, (referenceType) => referenceType);
   }
 
-  #getDataSource = (referenceType, { command } = {}) => {
+  #getDataSource = (referenceType, config = {}) => {
     const sources = {
       user: this.dataSourceUrls.members,
       issue: this.dataSourceUrls.issues,
@@ -166,8 +164,8 @@ export default class AutocompleteHelper {
     const filters = {
       label: (items) =>
         items.filter((item) => {
-          if (command === COMMANDS.UNLABEL) return item.set;
-          if (command === COMMANDS.LABEL) return !item.set;
+          if (config.command === COMMANDS.UNLABEL) return item.set;
+          if (config.command === COMMANDS.LABEL) return !item.set;
 
           return true;
         }),
@@ -180,10 +178,10 @@ export default class AutocompleteHelper {
             (reviewer) => reviewer.username === item.username,
           );
 
-          if (command === COMMANDS.ASSIGN) return !assigned;
-          if (command === COMMANDS.ASSIGN_REVIEWER) return !assignedReviewer;
-          if (command === COMMANDS.UNASSIGN) return assigned;
-          if (command === COMMANDS.UNASSIGN_REVIEWER) return assignedReviewer;
+          if (config.command === COMMANDS.ASSIGN) return !assigned;
+          if (config.command === COMMANDS.ASSIGN_REVIEWER) return !assignedReviewer;
+          if (config.command === COMMANDS.UNASSIGN) return assigned;
+          if (config.command === COMMANDS.UNASSIGN_REVIEWER) return assignedReviewer;
 
           return true;
         }),
@@ -211,7 +209,8 @@ export default class AutocompleteHelper {
       mapper: mappers[referenceType] || mappers.default,
       sorter: sorters[referenceType] || sorters.default,
       filter: filters[referenceType],
-      command,
+      cache: config.cache,
+      limit: config.limit,
     });
   };
 }

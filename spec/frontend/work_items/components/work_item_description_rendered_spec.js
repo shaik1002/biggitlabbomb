@@ -1,3 +1,4 @@
+import { shallowMount } from '@vue/test-utils';
 import { nextTick } from 'vue';
 import waitForPromises from 'helpers/wait_for_promises';
 import { useMockInternalEventsTracking } from 'helpers/tracking_internal_events_helper';
@@ -6,20 +7,18 @@ import { handleLocationHash } from '~/lib/utils/common_utils';
 import eventHub from '~/issues/show/event_hub';
 import CreateWorkItemModal from '~/work_items/components/create_work_item_modal.vue';
 import WorkItemDescriptionRendered from '~/work_items/components/work_item_description_rendered.vue';
-import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
 import { descriptionHtmlWithCheckboxes, descriptionTextWithCheckboxes } from '../mock_data';
 
 jest.mock('~/behaviors/markdown/render_gfm');
 jest.mock('~/lib/utils/common_utils');
 
 describe('WorkItemDescriptionRendered', () => {
-  /** @type {import('helpers/vue_test_utils_helper').ExtendedWrapper} */
+  /** @type {import('@vue/test-utils').Wrapper} */
   let wrapper;
 
   const findCheckboxAtIndex = (index) => wrapper.findAll('input[type="checkbox"]').at(index);
   const findCreateWorkItemModal = () => wrapper.findComponent(CreateWorkItemModal);
   const findReadMore = () => wrapper.findComponent({ ref: 'show-all-btn' });
-  const findDescription = () => wrapper.findByTestId('work-item-description');
 
   const defaultWorkItemDescription = {
     description: descriptionTextWithCheckboxes,
@@ -31,24 +30,19 @@ describe('WorkItemDescriptionRendered', () => {
     canEdit = false,
     isGroup = false,
     workItemType = 'ISSUE',
-    withoutHeadingAnchors = false,
-    disableTruncation = false,
+    mockComputed = {},
   } = {}) => {
-    wrapper = shallowMountExtended(WorkItemDescriptionRendered, {
+    wrapper = shallowMount(WorkItemDescriptionRendered, {
       propsData: {
         workItemId: 'gid://gitlab/WorkItem/818',
         workItemDescription,
         canEdit,
         isGroup,
         workItemType,
-        withoutHeadingAnchors,
-        disableTruncation,
       },
+      computed: mockComputed,
       provide: {
         fullPath: 'full/path',
-      },
-      stubs: {
-        CreateWorkItemModal,
       },
     });
   };
@@ -69,15 +63,17 @@ describe('WorkItemDescriptionRendered', () => {
           description: 'This is a long description',
           descriptionHtml: '<p>This is a long description</p>',
         },
+        mockComputed: {
+          isTruncated() {
+            return true;
+          },
+        },
       });
-      const { element } = findDescription();
-      jest.spyOn(element, 'clientHeight', 'get').mockImplementation(() => 800);
     });
 
     it('shows the untruncate action', () => {
       expect(findReadMore().exists()).toBe(true);
     });
-
     it('tracks untruncate action', async () => {
       const { trackEventSpy } = bindInternalEventDocument(wrapper.element);
 
@@ -130,40 +126,6 @@ describe('WorkItemDescriptionRendered', () => {
 
       expect(handleLocationHash).toHaveBeenCalled();
       expect(wrapper.vm.truncateLongDescription).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('`disableHeadingAnchors` prop', () => {
-    const baseAnchorHtml =
-      '<a id="user-content-this-is-an-anchor" class="anchor" aria-hidden="true" href="#this-is-an-anchor"></a>';
-    const uninteractiveAnchorHtml =
-      '<a id="user-content-this-is-an-anchor" class="anchor after:!gl-hidden" aria-hidden="true" href="#this-is-an-anchor"></a>';
-    const baseHtml =
-      '<h1 data-sourcepos="1:1-1:19" dir="auto">&#x000A;<a href="#this-is-an-anchor" aria-hidden="true" class="anchor" id="user-content-this-is-an-anchor"></a>This is an anchor</h1>';
-    it('renders anchor links as normal when prop is `false`', () => {
-      createComponent({
-        withoutHeadingAnchors: false,
-        workItemDescription: {
-          description: 'This is an anchor',
-          descriptionHtml: baseHtml,
-        },
-      });
-
-      const renderedHtml = findDescription().html();
-      expect(renderedHtml).toContain(baseAnchorHtml);
-    });
-
-    it('makes anchor links uninteractive when prop is `true`', () => {
-      createComponent({
-        withoutHeadingAnchors: true,
-        workItemDescription: {
-          description: 'This is an anchor',
-          descriptionHtml: baseHtml,
-        },
-      });
-
-      const renderedHtml = findDescription().html();
-      expect(renderedHtml).toContain(uninteractiveAnchorHtml);
     });
   });
 
@@ -250,7 +212,6 @@ and even more`,
           hideButton: true,
           isGroup: false,
           parentId: 'gid://gitlab/WorkItem/818',
-          relatedItem: null,
           showProjectSelector: false,
           title:
             'item 2 with a really really really really really really really really really really really really really really really really really really really really really really really really really really really really really really really really really really rea',

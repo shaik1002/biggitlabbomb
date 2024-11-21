@@ -6,9 +6,6 @@ export const RESOURCE_TYPE_PROJECTS = 'projects';
 
 export const ORGANIZATION_ROOT_ROUTE_NAME = 'root';
 
-export const ACCESS_LEVEL_DEFAULT = 'default';
-export const ACCESS_LEVEL_OWNER = 'owner';
-
 export const FORM_FIELD_NAME = 'name';
 export const FORM_FIELD_ID = 'id';
 export const FORM_FIELD_PATH = 'path';
@@ -32,6 +29,9 @@ export const FORM_FIELD_DESCRIPTION_VALIDATORS = [
     (val) => val.length <= MAX_DESCRIPTION_COUNT,
   ),
 ];
+
+export const QUERY_PARAM_START_CURSOR = 'start_cursor';
+export const QUERY_PARAM_END_CURSOR = 'end_cursor';
 
 export const SORT_DIRECTION_ASC = 'asc';
 export const SORT_DIRECTION_DESC = 'desc';

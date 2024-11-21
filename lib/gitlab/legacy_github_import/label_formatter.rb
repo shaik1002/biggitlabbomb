@@ -15,7 +15,7 @@ module Gitlab
         :labels
       end
 
-      def create_record
+      def create!
         params  = attributes.except(:project)
         service = ::Labels::FindOrCreateService.new(nil, project, params)
         label   = service.execute(skip_authorization: true)
@@ -23,10 +23,6 @@ module Gitlab
         raise ActiveRecord::RecordInvalid, label unless label.persisted?
 
         label
-      end
-
-      def contributing_user_formatters
-        {}
       end
 
       private

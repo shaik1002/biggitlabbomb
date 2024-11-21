@@ -9,7 +9,7 @@ class Dashboard::TodosController < Dashboard::ApplicationController
   before_action :authorize_read_group!, only: :index
   before_action :find_todos, only: [:index, :destroy_all]
 
-  feature_category :notifications
+  feature_category :team_planning
   urgency :low
 
   def index
@@ -44,9 +44,7 @@ class Dashboard::TodosController < Dashboard::ApplicationController
     updated_ids = TodoService.new.resolve_todos(@todos, current_user, resolved_by_action: :mark_all_done)
 
     respond_to do |format|
-      format.html do
-        redirect_to dashboard_todos_path, status: :found, notice: _('Everything on your to-do list is marked as done.')
-      end
+      format.html { redirect_to dashboard_todos_path, status: :found, notice: _('Everything on your to-do list is marked as done.') }
       format.js { head :ok }
       format.json { render json: todos_counts.merge(updated_ids: updated_ids) }
     end

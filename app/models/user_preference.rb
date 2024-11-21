@@ -1,6 +1,10 @@
 # frozen_string_literal: true
 
 class UserPreference < ApplicationRecord
+  include IgnorableColumns
+
+  ignore_column :use_web_ide_extension_marketplace, remove_with: '17.4', remove_after: '2024-08-15'
+
   # We could use enums, but Rails 4 doesn't support multiple
   # enum options with same name for multiple fields, also it creates
   # extra methods that aren't really needed here.
@@ -39,11 +43,11 @@ class UserPreference < ApplicationRecord
   attribute :render_whitespace_in_code, default: false
   attribute :project_shortcut_buttons, default: true
   attribute :keyboard_shortcuts_enabled, default: true
+  attribute :use_web_ide_extension_marketplace, default: false
   attribute :dpop_enabled, default: false
 
   enum :visibility_pipeline_id_type, { id: 0, iid: 1 }, scopes: false
 
-  enum text_editor_type: { plain_text_editor: 1, rich_text_editor: 2 }
   enum extensions_marketplace_opt_in_status: Enums::WebIde::ExtensionsMarketplaceOptInStatus.statuses
   enum organization_groups_projects_display: { projects: 0, groups: 1 }
 
@@ -108,14 +112,6 @@ class UserPreference < ApplicationRecord
     else
       super(value)
     end
-  end
-
-  def text_editor
-    text_editor_type || (Feature.enabled?(:rich_text_editor_as_default, user) ? :rich_text_editor : :plain_text_editor)
-  end
-
-  def text_editor=(value)
-    self.text_editor_type = value
   end
 
   private

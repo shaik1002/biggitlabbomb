@@ -42,6 +42,7 @@ export default {
     GlTabs,
   },
   apollo: {
+    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     environmentApp: {
       query: environmentAppQuery,
       variables() {
@@ -92,7 +93,6 @@ export default {
   data() {
     const { page = '1', search = '', scope } = queryToObject(window.location.search);
     return {
-      environmentApp: null,
       interval: undefined,
       isReviewAppModalVisible: false,
       isStopStaleEnvModalVisible: false,
@@ -207,7 +207,7 @@ export default {
     window.addEventListener('popstate', this.syncPageFromQueryParams);
     window.addEventListener('popstate', this.syncSearchFromQueryParams);
   },
-  beforeDestroy() {
+  destroyed() {
     window.removeEventListener('popstate', this.syncPageFromQueryParams);
     window.removeEventListener('popstate', this.syncSearchFromQueryParams);
     this.$apollo.queries.environmentApp.stopPolling();

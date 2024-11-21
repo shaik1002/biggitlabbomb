@@ -6,7 +6,6 @@ import AutocompleteHelper, {
   createDataSource,
 } from '~/content_editor/services/autocomplete_helper';
 import { HTTP_STATUS_OK, HTTP_STATUS_INTERNAL_SERVER_ERROR } from '~/lib/utils/http_status';
-import { EMOJI_THUMBS_UP } from '~/emoji/constants';
 import {
   MOCK_MEMBERS,
   MOCK_COMMANDS,
@@ -75,45 +74,24 @@ describe('createDataSource', () => {
     mock.restore();
   });
 
-  describe('on fetch success', () => {
-    const dataSourceParams = {
+  it('fetches data from source and filters based on query', async () => {
+    const data = [
+      { name: 'abc', description: 'xyz' },
+      { name: 'bcd', description: 'wxy' },
+      { name: 'cde', description: 'vwx' },
+    ];
+    mock.onGet('/source').reply(HTTP_STATUS_OK, data);
+
+    const dataSource = createDataSource({
       source: '/source',
       searchFields: ['name', 'description'],
-    };
-
-    beforeEach(() => {
-      const data = [
-        { name: 'abc', description: 'xyz' },
-        { name: 'bcd', description: 'wxy' },
-        { name: 'cde', description: 'vwx' },
-      ];
-      mock.onGet('/source').reply(HTTP_STATUS_OK, data);
     });
 
-    it('fetches data from source and filters based on query', async () => {
-      const dataSource = createDataSource(dataSourceParams);
-
-      const results = await dataSource.search('b');
-      expect(results).toEqual([
-        { name: 'bcd', description: 'wxy' },
-        { name: 'abc', description: 'xyz' },
-      ]);
-    });
-
-    describe('if filterOnBackend: true', () => {
-      it('fetches data from source, passing a `search` param', async () => {
-        const dataSource = createDataSource({
-          ...dataSourceParams,
-          filterOnBackend: true,
-        });
-
-        const results = await dataSource.search('bcd');
-        expect(mock.history.get[0].params).toEqual({ search: 'bcd' });
-
-        // results are still filtered out on frontend, on top of backend filtering
-        expect(results).toEqual([{ name: 'bcd', description: 'wxy' }]);
-      });
-    });
+    const results = await dataSource.search('b');
+    expect(results).toEqual([
+      { name: 'bcd', description: 'wxy' },
+      { name: 'abc', description: 'xyz' },
+    ]);
   });
 
   it('handles source fetch errors', async () => {
@@ -235,36 +213,6 @@ describe('AutocompleteHelper', () => {
     },
   );
 
-  it('filters items correctly for the second time, when the first command was different', async () => {
-    let dataSource = autocompleteHelper.getDataSource('label', { command: '/label' });
-    let results = await dataSource.search();
-
-    // all labels listed for the first command
-    expect(results.map(({ title }) => title)).toEqual([
-      'Bronce',
-      'Contour',
-      'Corolla',
-      'Cygsync',
-      'Frontier',
-      'Grand Am',
-      'Onesync',
-      'Phone',
-      'Pynefunc',
-      'Trinix',
-      'Trounswood',
-      'group::knowledge',
-      'scoped label',
-      'type::one',
-      'type::two',
-    ]);
-
-    dataSource = autocompleteHelper.getDataSource('label', { command: '/unlabel' });
-    results = await dataSource.search();
-
-    // only set labels listed for the second command
-    expect(results.map(({ title }) => title)).toEqual(['Amsche', 'Brioffe', 'Bryncefunc', 'Ghost']);
-  });
-
   it('loads default datasources if not passed', () => {
     gl.GfmAutoComplete = {
       dataSources: {
@@ -284,7 +232,7 @@ describe('AutocompleteHelper', () => {
     const dataSource = autocompleteHelper.getDataSource('emoji');
     const results = await dataSource.search('');
 
-    expect(results).toEqual([{ emoji: { name: EMOJI_THUMBS_UP }, fieldValue: EMOJI_THUMBS_UP }]);
+    expect(results).toEqual([{ emoji: { name: 'thumbsup' }, fieldValue: 'thumbsup' }]);
   });
 
   it('updates dataSourcesUrl correctly', () => {

@@ -208,10 +208,8 @@ RSpec.shared_examples 'work item supports type change via quick actions' do
                                                            .and change { noteable.assignees }.to([])
 
         expect(response).to have_gitlab_http_status(:success)
-        expect(mutation_response['errors']).to eq([])
-        expect(mutation_response['quickActionsStatus']['messages'])
-          .to include("Type changed successfully. Assigned @#{assignee.username}.")
-        expect(mutation_response['quickActionsStatus']['error_messages']).to be_nil
+        expect(mutation_response['errors'])
+          .to include("Commands only Type changed successfully. Assigned @#{assignee.username}.")
       end
     end
 

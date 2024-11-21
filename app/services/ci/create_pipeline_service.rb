@@ -39,7 +39,6 @@ module Ci
       Gitlab::Ci::Pipeline::Chain::Metrics,
       Gitlab::Ci::Pipeline::Chain::TemplateUsage,
       Gitlab::Ci::Pipeline::Chain::ComponentUsage,
-      Gitlab::Ci::Pipeline::Chain::KeywordUsage,
       Gitlab::Ci::Pipeline::Chain::Pipeline::Process].freeze
 
     # Create a new pipeline in the specified project.
@@ -105,19 +104,15 @@ module Ci
           Ci::PipelineCreatedEvent.new(data: { pipeline_id: pipeline.id })
         )
 
-        after_successful_creation_hook
+        create_namespace_onboarding_action
       else
         # If pipeline is not persisted, try to recover IID
         pipeline.reset_project_iid
       end
 
       if error_message = pipeline.full_error_messages.presence || pipeline.failure_reason.presence
-        ::Ci::PipelineCreation::Requests.failed(params[:pipeline_creation_request], error_message)
-
         ServiceResponse.error(message: error_message, payload: pipeline)
       else
-        ::Ci::PipelineCreation::Requests.succeeded(params[:pipeline_creation_request], pipeline.id)
-
         ServiceResponse.success(payload: pipeline)
       end
 
@@ -129,10 +124,6 @@ module Ci
 
     private
 
-    def after_successful_creation_hook
-      # overridden in EE
-    end
-
     # rubocop:disable Gitlab/NoCodeCoverageComment
     # :nocov: Tested in FOSS and fully overridden and tested in EE
     def validate_options!(_)
@@ -140,6 +131,10 @@ module Ci
     end
     # :nocov:
     # rubocop:enable Gitlab/NoCodeCoverageComment
+
+    def create_namespace_onboarding_action
+      Onboarding::PipelineCreatedWorker.perform_async(project.namespace_id)
+    end
 
     def extra_options(content: nil, dry_run: false)
       { content: content, dry_run: dry_run }

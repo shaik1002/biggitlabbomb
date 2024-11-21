@@ -1,5 +1,5 @@
 ---
-stage: Software Supply Chain Security
+stage: Govern
 group: Authentication
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
@@ -182,7 +182,7 @@ To set up OneLogin as your identity provider:
 ### Configure assertions
 
 NOTE:
-The attributes are case-insensitive.
+The attributes are case-sensitive.
 
 At minimum, you must configure the following assertions:
 

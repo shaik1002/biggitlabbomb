@@ -23,7 +23,7 @@ module Integrations
       help: -> {
         docs_link = ActionController::Base.helpers.link_to(
           _('service accounts'),
-          Rails.application.routes.url_helpers.help_page_url('user/profile/service_accounts.md'),
+          Rails.application.routes.url_helpers.help_page_url('user/profile/service_accounts'),
           target: '_blank', rel: 'noopener noreferrer')
 
         format(s_(
@@ -44,7 +44,7 @@ module Integrations
 
     def self.help
       build_help_page_url(
-        'user/project/integrations/beyond_identity.md',
+        'user/project/integrations/beyond_identity',
         s_('Verify that GPG keys are authorized by Beyond Identity Authenticator.')
       )
     end

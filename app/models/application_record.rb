@@ -10,7 +10,6 @@ class ApplicationRecord < ActiveRecord::Base
   include Gitlab::SensitiveSerializableHash
   include ResetOnColumnErrors
   include HasCheckConstraints
-  include IgnorableColumns
 
   self.abstract_class = true
 
@@ -70,7 +69,7 @@ class ApplicationRecord < ActiveRecord::Base
   # to allow callers gracefully handling the errors to still complete within
   # the 5s target duration of a low urgency request.
   def self.with_fast_read_statement_timeout(timeout_ms = 4500)
-    ::Gitlab::Database::LoadBalancing::SessionMap.current(load_balancer).fallback_to_replicas_for_ambiguous_queries do
+    ::Gitlab::Database::LoadBalancing::Session.current.fallback_to_replicas_for_ambiguous_queries do
       transaction(requires_new: true) do # rubocop:disable Performance/ActiveRecordSubtransactions
         connection.exec_query("SET LOCAL statement_timeout = #{timeout_ms}")
 
@@ -136,6 +135,12 @@ class ApplicationRecord < ActiveRecord::Base
   def self.nullable_column?(column_name)
     columns.find { |column| column.name == column_name }.null &&
       !not_null_check?(column_name)
+  end
+
+  def require_organization?
+    return false unless Feature.enabled?(:require_organization, Feature.current_request)
+
+    Gitlab::SafeRequestStore.fetch(:require_organization) { true } # rubocop:disable Style/RedundantFetchBlock -- This fetch has a different interface
   end
 
   def readable_by?(user)

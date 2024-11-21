@@ -6,7 +6,7 @@ module API
 
     ERROR_TRACKING_PROJECT_SETTINGS_TAGS = %w[error_tracking_project_settings].freeze
 
-    feature_category :observability
+    feature_category :error_tracking
     urgency :low
 
     helpers do

@@ -50,7 +50,7 @@ export default {
       isLoadingMore: false,
       isValidated: false,
       search: '',
-      selectedUserToReassign: null,
+      selectedUser: null,
     };
   },
 
@@ -91,7 +91,7 @@ export default {
     },
 
     userSelectInvalid() {
-      return this.isValidated && !this.selectedUserToReassign;
+      return this.isValidated && !this.selectedUser;
     },
 
     userItems() {
@@ -99,7 +99,7 @@ export default {
     },
 
     dontReassignSelected() {
-      return !isNull(this.selectedUserToReassign) && isEmpty(this.selectedUserToReassign);
+      return !isNull(this.selectedUser) && isEmpty(this.selectedUser);
     },
 
     toggleText() {
@@ -107,15 +107,15 @@ export default {
         return s__("UserMapping|Don't reassign");
       }
 
-      if (this.selectedUserToReassign) {
-        return `@${this.selectedUserToReassign.username}`;
+      if (this.selectedUser) {
+        return `@${this.selectedUser.username}`;
       }
 
       return s__('UserMapping|Select user');
     },
 
     selectedUserValue() {
-      return this.selectedUserToReassign?.value;
+      return this.selectedUser?.value;
     },
 
     confirmText() {
@@ -132,7 +132,7 @@ export default {
 
   created() {
     if (this.statusIsAwaitingApproval || this.statusIsReassigning) {
-      this.selectedUserToReassign = this.sourceUser.reassignToUser;
+      this.selectedUser = this.sourceUser.reassignToUser;
     }
 
     this.debouncedSetSearch = debounce(this.setSearch, DEFAULT_DEBOUNCE_AND_THROTTLE_MS);
@@ -175,14 +175,14 @@ export default {
 
     onSelect(value) {
       if (value === '') {
-        this.selectedUserToReassign = {};
+        this.selectedUser = {};
         try {
           this.$refs.userSelect.closeAndFocus();
         } catch {
           // ignore when we can't close listbox
         }
       } else {
-        this.selectedUserToReassign = this.userItems.find((user) => user.value === value);
+        this.selectedUser = this.userItems.find((user) => user.value === value);
       }
     },
 
@@ -243,24 +243,25 @@ export default {
     onConfirm() {
       this.isValidated = true;
       if (!this.userSelectInvalid) {
-        const hasSelectedUserToReassign = Boolean(this.selectedUserToReassign.id);
+        const hasSelectedUser = Boolean(this.selectedUser.id);
         this.isConfirmLoading = true;
         this.$apollo
           .mutate({
-            mutation: hasSelectedUserToReassign
+            mutation: hasSelectedUser
               ? importSourceUserReassignMutation
               : importSourceUserKeepAsPlaceholderMutation,
             variables: {
               id: this.sourceUser.id,
-              ...(hasSelectedUserToReassign ? { userId: this.selectedUserToReassign.id } : {}),
+              ...(hasSelectedUser ? { userId: this.selectedUser.id } : {}),
             },
-            refetchQueries: [hasSelectedUserToReassign ? {} : importSourceUsersQuery],
+            // importSourceUsersQuery used in placeholders_table.vue
+            refetchQueries: [hasSelectedUser ? {} : importSourceUsersQuery],
           })
           .then(({ data }) => {
             const { errors } = getFirstPropertyValue(data);
             if (errors?.length) {
               createAlert({ message: errors.join() });
-            } else if (!hasSelectedUserToReassign) {
+            } else if (!hasSelectedUser) {
               this.$emit('confirm');
             }
           })
@@ -280,13 +281,13 @@ export default {
 
 <template>
   <div class="gl-flex gl-items-start gl-gap-3">
-    <div class="gl-w-28">
+    <div>
       <gl-collapsible-listbox
         ref="userSelect"
         block
         is-check-centered
-        toggle-class="!gl-w-28"
-        :class="{ 'is-invalid': userSelectInvalid || sourceUser.reassignmentError }"
+        toggle-class="gl-w-28"
+        :class="{ 'is-invalid': userSelectInvalid }"
         :header-text="s__('UserMapping|Re-assign to')"
         :toggle-text="toggleText"
         :disabled="statusIsAwaitingApproval || statusIsReassigning"
@@ -313,7 +314,7 @@ export default {
 
         <template #footer>
           <div
-            class="gl-flex gl-flex-col gl-border-t-1 gl-border-t-dropdown !gl-p-2 !gl-pt-0 gl-border-t-solid"
+            class="gl-flex gl-flex-col gl-border-t-1 gl-border-t-gray-200 !gl-p-2 !gl-pt-0 gl-border-t-solid"
           >
             <gl-button
               category="tertiary"
@@ -329,9 +330,6 @@ export default {
 
       <span v-if="userSelectInvalid" class="invalid-feedback">
         {{ __('This field is required.') }}
-      </span>
-      <span v-if="sourceUser.reassignmentError" class="invalid-feedback">
-        {{ sourceUser.reassignmentError }}
       </span>
     </div>
 

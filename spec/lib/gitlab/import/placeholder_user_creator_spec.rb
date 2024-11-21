@@ -6,7 +6,7 @@ RSpec.describe Gitlab::Import::PlaceholderUserCreator, feature_category: :import
   let_it_be(:namespace) { create(:namespace) }
 
   let(:import_type) { 'github' }
-  let(:source_hostname) { 'https://github.com' }
+  let(:source_hostname) { 'github.com' }
   let(:source_name) { 'Pry Contributor' }
   let(:source_username) { 'a_pry_contributor' }
   let(:source_user_identifier) { '1' }
@@ -36,30 +36,6 @@ RSpec.describe Gitlab::Import::PlaceholderUserCreator, feature_category: :import
       expect(new_placeholder_user.namespace.organization).to eq(namespace.organization)
     end
 
-    it 'does not cache user policies', :request_store do
-      expect { service.execute }.not_to change {
-                                          Gitlab::SafeRequestStore.storage.keys.select do |key|
-                                            key.to_s.include?('User')
-                                          end
-                                        }
-    end
-
-    it 'logs placeholder user creation' do
-      allow(::Import::Framework::Logger).to receive(:info)
-
-      service.execute
-
-      expect(::Import::Framework::Logger).to have_received(:info).with(
-        hash_including(
-          message: 'Placeholder user created',
-          source_user_id: source_user.id,
-          import_type: source_user.import_type,
-          namespace_id: source_user.namespace_id,
-          user_id: User.last.id
-        )
-      )
-    end
-
     context 'when there are non-unique usernames on the same import source' do
       it 'creates two unique users with different usernames and emails' do
         placeholder_user1 = service.execute
@@ -67,18 +43,6 @@ RSpec.describe Gitlab::Import::PlaceholderUserCreator, feature_category: :import
 
         expect(placeholder_user1.username).not_to eq(placeholder_user2.username)
         expect(placeholder_user1.email).not_to eq(placeholder_user2.email)
-      end
-    end
-
-    context 'when an existing namespace conflicts with the placeholder user namespace' do
-      before do
-        create(:group, path: 'aprycontributor_placeholder_user_1')
-      end
-
-      it 'creates a placeholder with a username that avoids the conflict' do
-        placeholder_user1 = service.execute
-
-        expect(placeholder_user1.username).to eq('aprycontributor_placeholder_user_2')
       end
     end
 
@@ -188,31 +152,6 @@ RSpec.describe Gitlab::Import::PlaceholderUserCreator, feature_category: :import
 
         expect(service.placeholder_username).to match(expected_match)
       end
-    end
-  end
-
-  describe '.placeholder_email_pattern' do
-    subject(:placeholder_email_pattern) { described_class.placeholder_email_pattern }
-
-    ::Import::HasImportSource::IMPORT_SOURCES.except(:none).each_key do |import_type|
-      it "matches the emails created for placeholder users imported from #{import_type}" do
-        import_source_user = create(:import_source_user, import_type: import_type)
-        placeholder_user = described_class.new(import_source_user).execute
-
-        expect(placeholder_email_pattern === placeholder_user.email).to eq(true)
-      end
-    end
-
-    it 'does not match emails without an import source' do
-      email = 'email_12e4ab78_1@gitlab.com'
-
-      expect(placeholder_email_pattern === email).to eq(false)
-    end
-
-    it 'does not match emails with domains other than the host' do
-      email = "github_12e4ab78_2@not#{Settings.gitlab.host}"
-
-      expect(placeholder_email_pattern === email).to eq(false)
     end
   end
 end

@@ -189,15 +189,13 @@ module Gitlab
           current_time = Time.current
 
           base_types = ::WorkItems::Type::BASE_TYPES.map do |type, attributes|
-            attributes
-              .slice(:name, :icon_name, :id)
-              .merge(created_at: current_time, updated_at: current_time, base_type: type, correct_id: attributes[:id])
+            attributes.slice(:name, :icon_name)
+                      .merge(created_at: current_time, updated_at: current_time, base_type: type)
           end
 
           ::WorkItems::Type.upsert_all(
             base_types,
-            unique_by: :index_work_item_types_on_name_unique,
-            update_only: %i[name icon_name base_type]
+            unique_by: :index_work_item_types_on_name_unique
           )
 
           upsert_widgets

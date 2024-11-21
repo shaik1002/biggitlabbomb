@@ -3,7 +3,6 @@ import {
   CoreV1Api,
   AppsV1Api,
   WatchApi,
-  WebSocketWatchManager,
   EVENT_DATA,
   EVENT_TIMEOUT,
   EVENT_ERROR,
@@ -14,7 +13,6 @@ import { CLUSTER_AGENT_ERROR_MESSAGES } from '~/environments/constants';
 import k8sPodsQuery from '~/environments/graphql/queries/k8s_pods.query.graphql';
 import k8sServicesQuery from '~/environments/graphql/queries/k8s_services.query.graphql';
 import k8sDeploymentsQuery from '~/environments/graphql/queries/k8s_deployments.query.graphql';
-import k8sEventsQuery from '~/environments/graphql/queries/k8s_events.query.graphql';
 import { updateConnectionStatus } from '~/environments/graphql/resolvers/kubernetes/k8s_connection_status';
 import {
   connectionStatus,
@@ -37,16 +35,15 @@ describe('~/frontend/environments/graphql/resolvers', () => {
 
   const configuration = {
     basePath: 'kas-proxy/',
-    headers: { 'GitLab-Agent-Id': '1', 'X-CSRF-Token': 'token' },
+    baseOptions: {
+      headers: { 'GitLab-Agent-Id': '1' },
+    },
   };
   const namespace = 'default';
 
   beforeEach(() => {
     mockResolvers = resolvers();
     mock = new MockAdapter(axios);
-    gon.features = {
-      useWebsocketForK8sWatch: false,
-    };
   });
 
   afterEach(() => {
@@ -130,47 +127,6 @@ describe('~/frontend/environments/graphql/resolvers', () => {
           query: k8sPodsQuery,
           variables: { configuration, namespace: '' },
           data: { k8sPods: [] },
-        });
-      });
-
-      describe('when `useWebsocketForK8sWatch` feature is enabled', () => {
-        const mockWebsocketManager = WebSocketWatchManager.prototype;
-        const mockInitConnectionFn = jest.fn().mockImplementation(() => {
-          return Promise.resolve(mockWebsocketManager);
-        });
-
-        beforeEach(() => {
-          gon.features = {
-            useWebsocketForK8sWatch: true,
-          };
-
-          jest
-            .spyOn(mockWebsocketManager, 'initConnection')
-            .mockImplementation(mockInitConnectionFn);
-          jest.spyOn(mockWebsocketManager, 'on').mockImplementation(jest.fn());
-        });
-
-        it('calls websocket API', async () => {
-          await mockResolvers.Query.k8sPods(null, { configuration, namespace }, { client });
-
-          expect(mockInitConnectionFn).toHaveBeenCalledWith({
-            configuration,
-            message: {
-              watchId: `k8sPods-n-${namespace}`,
-              watchParams: {
-                namespace,
-                resource: 'pods',
-                version: 'v1',
-              },
-            },
-          });
-        });
-
-        it("doesn't call watch API", async () => {
-          await mockResolvers.Query.k8sPods(null, { configuration, namespace }, { client });
-
-          expect(CoreV1Api.prototype.listCoreV1NamespacedPod).toHaveBeenCalled();
-          expect(mockPodsListWatcherFn).not.toHaveBeenCalled();
         });
       });
     });
@@ -257,47 +213,6 @@ describe('~/frontend/environments/graphql/resolvers', () => {
           query: k8sServicesQuery,
           variables: { configuration, namespace: '' },
           data: { k8sServices: [] },
-        });
-      });
-
-      describe('when `useWebsocketForK8sWatch` feature is enabled', () => {
-        const mockWebsocketManager = WebSocketWatchManager.prototype;
-        const mockInitConnectionFn = jest.fn().mockImplementation(() => {
-          return Promise.resolve(mockWebsocketManager);
-        });
-
-        beforeEach(() => {
-          gon.features = {
-            useWebsocketForK8sWatch: true,
-          };
-
-          jest
-            .spyOn(mockWebsocketManager, 'initConnection')
-            .mockImplementation(mockInitConnectionFn);
-          jest.spyOn(mockWebsocketManager, 'on').mockImplementation(jest.fn());
-        });
-
-        it('calls websocket API', async () => {
-          await mockResolvers.Query.k8sServices(null, { configuration, namespace }, { client });
-
-          expect(mockInitConnectionFn).toHaveBeenCalledWith({
-            configuration,
-            message: {
-              watchId: `k8sServices-n-${namespace}`,
-              watchParams: {
-                namespace,
-                resource: 'services',
-                version: 'v1',
-              },
-            },
-          });
-        });
-
-        it("doesn't call watch API", async () => {
-          await mockResolvers.Query.k8sServices(null, { configuration, namespace }, { client });
-
-          expect(CoreV1Api.prototype.listCoreV1NamespacedService).toHaveBeenCalled();
-          expect(mockServicesListWatcherFn).not.toHaveBeenCalled();
         });
       });
     });
@@ -460,8 +375,6 @@ describe('~/frontend/environments/graphql/resolvers', () => {
   });
 
   describe('k8sEvents', () => {
-    const client = { writeQuery: jest.fn() };
-
     const involvedObjectName = 'my-pod';
     const mockEventsListFn = jest.fn().mockImplementation(() => {
       return Promise.resolve({
@@ -469,107 +382,24 @@ describe('~/frontend/environments/graphql/resolvers', () => {
       });
     });
 
-    const mockWatcher = WatchApi.prototype;
-    const mockEventsListWatcherFn = jest.fn().mockImplementation(() => {
-      return Promise.resolve(mockWatcher);
-    });
+    const mockNamespacedEventsListFn = jest.fn().mockImplementation(mockEventsListFn);
 
-    const mockOnDataFn = jest.fn().mockImplementation((eventName, callback) => callback([]));
+    it('should request namespaced events with the field selector from the cluster_client library if namespace is specified', async () => {
+      jest
+        .spyOn(CoreV1Api.prototype, 'listCoreV1NamespacedEvent')
+        .mockImplementation(mockNamespacedEventsListFn);
 
-    describe('when the API request is successful', () => {
-      beforeEach(() => {
-        jest
-          .spyOn(CoreV1Api.prototype, 'listCoreV1NamespacedEvent')
-          .mockImplementation(mockEventsListFn);
-        jest.spyOn(mockWatcher, 'subscribeToStream').mockImplementation(mockEventsListWatcherFn);
-        jest.spyOn(mockWatcher, 'on').mockImplementation(mockOnDataFn);
+      const events = await mockResolvers.Query.k8sEvents(null, {
+        configuration,
+        namespace,
+        involvedObjectName,
       });
 
-      it('should request namespaced events with the field selector from the cluster_client library if namespace is specified', async () => {
-        const events = await mockResolvers.Query.k8sEvents(
-          null,
-          {
-            configuration,
-            namespace,
-            involvedObjectName,
-          },
-          { client },
-        );
-
-        expect(mockEventsListFn).toHaveBeenCalledWith({
-          namespace,
-          fieldSelector: `involvedObject.name=${involvedObjectName}`,
-        });
-        expect(events).toEqual(k8sEventsMock);
+      expect(mockNamespacedEventsListFn).toHaveBeenCalledWith({
+        namespace,
+        fieldSelector: `involvedObject.name=${involvedObjectName}`,
       });
-
-      it('should update cache with the new data when received from the library', async () => {
-        await mockResolvers.Query.k8sEvents(
-          null,
-          {
-            configuration,
-            namespace,
-            involvedObjectName,
-          },
-          { client },
-        );
-
-        expect(client.writeQuery).toHaveBeenCalledWith({
-          query: k8sEventsQuery,
-          variables: { configuration, namespace, involvedObjectName },
-          data: { k8sEvents: [] },
-        });
-      });
-
-      describe('when `useWebsocketForK8sWatch` feature is enabled', () => {
-        const mockWebsocketManager = WebSocketWatchManager.prototype;
-        const mockInitConnectionFn = jest.fn().mockImplementation(() => {
-          return Promise.resolve(mockWebsocketManager);
-        });
-
-        beforeEach(() => {
-          gon.features = {
-            useWebsocketForK8sWatch: true,
-          };
-
-          jest
-            .spyOn(mockWebsocketManager, 'initConnection')
-            .mockImplementation(mockInitConnectionFn);
-          jest.spyOn(mockWebsocketManager, 'on').mockImplementation(jest.fn());
-        });
-
-        it('calls websocket API', async () => {
-          await mockResolvers.Query.k8sEvents(
-            null,
-            { configuration, namespace, involvedObjectName },
-            { client },
-          );
-
-          expect(mockInitConnectionFn).toHaveBeenCalledWith({
-            configuration,
-            message: {
-              watchId: `events-io-${involvedObjectName}`,
-              watchParams: {
-                namespace,
-                resource: 'events',
-                fieldSelector: `involvedObject.name=${involvedObjectName}`,
-                version: 'v1',
-              },
-            },
-          });
-        });
-
-        it("doesn't call watch API", async () => {
-          await mockResolvers.Query.k8sEvents(
-            null,
-            { configuration, namespace, involvedObjectName },
-            { client },
-          );
-
-          expect(CoreV1Api.prototype.listCoreV1NamespacedEvent).toHaveBeenCalled();
-          expect(mockEventsListWatcherFn).not.toHaveBeenCalled();
-        });
-      });
+      expect(events).toEqual(k8sEventsMock);
     });
 
     it('should throw an error if the API call fails', async () => {
@@ -578,11 +408,7 @@ describe('~/frontend/environments/graphql/resolvers', () => {
         .mockRejectedValue(new Error('API error'));
 
       await expect(
-        mockResolvers.Query.k8sEvents(
-          null,
-          { configuration, namespace, involvedObjectName },
-          { client },
-        ),
+        mockResolvers.Query.k8sEvents(null, { configuration, namespace, involvedObjectName }),
       ).rejects.toThrow('API error');
     });
   });

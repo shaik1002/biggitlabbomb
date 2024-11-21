@@ -3,6 +3,7 @@
 module Ci
   class JobArtifact < Ci::ApplicationRecord
     include Ci::Partitionable
+    include IgnorableColumns
     include AfterCommitQueue
     include UpdateProjectStatistics
     include UsageStatistics
@@ -49,7 +50,7 @@ module Ci
     validate :validate_file_format!, unless: :trace?, on: :create
 
     scope :not_expired, -> { where('expire_at IS NULL OR expire_at > ?', Time.current) }
-    scope :for_sha, ->(sha, project_id) { joins(job: :pipeline).merge(Ci::Pipeline.for_sha(sha).for_project(project_id)) }
+    scope :for_sha, ->(sha, project_id) { joins(job: :pipeline).where(ci_pipelines: { sha: sha, project_id: project_id }) }
     scope :for_job_ids, ->(job_ids) { where(job_id: job_ids) }
     scope :for_job_name, ->(name) { joins(:job).merge(Ci::Build.by_name(name)) }
     scope :created_at_before, ->(time) { where(arel_table[:created_at].lteq(time)) }
@@ -179,7 +180,9 @@ module Ci
 
     def expire_in=(value)
       self.expire_at =
-        (::Gitlab::Ci::Build::DurationParser.new(value).seconds_from_now if value)
+        if value
+          ::Gitlab::Ci::Build::DurationParser.new(value).seconds_from_now
+        end
     end
 
     def stored?
@@ -250,10 +253,12 @@ module Ci
     end
 
     # method overridden in EE
-    def file_stored_after_transaction_hooks; end
+    def file_stored_after_transaction_hooks
+    end
 
     # method overridden in EE
-    def file_stored_in_transaction_hooks; end
+    def file_stored_in_transaction_hooks
+    end
 
     def set_size
       self.size = file.size

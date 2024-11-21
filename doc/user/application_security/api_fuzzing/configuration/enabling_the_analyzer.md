@@ -1,5 +1,5 @@
 ---
-stage: Application Security Testing
+stage: Secure
 group: Dynamic Analysis
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
@@ -129,7 +129,7 @@ Example `.gitlab-ci.yml` file using an OpenAPI Specification:
      - fuzz
 
    include:
-     - template: Security/API-Fuzzing.gitlab-ci.yml
+     - template: API-Fuzzing.gitlab-ci.yml
 
    variables:
      FUZZAPI_PROFILE: Quick-10
@@ -195,7 +195,7 @@ Example `.gitlab-ci.yml` file using a HAR file:
      - fuzz
 
    include:
-     - template: Security/API-Fuzzing.gitlab-ci.yml
+     - template: API-Fuzzing.gitlab-ci.yml
 
    variables:
      FUZZAPI_PROFILE: Quick-10
@@ -253,7 +253,7 @@ stages:
   - fuzz
 
 include:
-  - template: Security/API-Fuzzing.gitlab-ci.yml
+  - template: API-Fuzzing.gitlab-ci.yml
 
 apifuzzer_fuzz:
   variables:
@@ -294,7 +294,7 @@ stages:
   - fuzz
 
 include:
-  - template: Security/API-Fuzzing.gitlab-ci.yml
+  - template: API-Fuzzing.gitlab-ci.yml
 
 apifuzzer_fuzz:
   variables:
@@ -310,7 +310,7 @@ stages:
   - fuzz
 
 include:
-  - template: Security/API-Fuzzing.gitlab-ci.yml
+  - template: API-Fuzzing.gitlab-ci.yml
 
 apifuzzer_fuzz:
   variables:
@@ -380,7 +380,7 @@ Example `.gitlab-ci.yml` file using a Postman Collection file:
      - fuzz
 
    include:
-     - template: Security/API-Fuzzing.gitlab-ci.yml
+     - template: API-Fuzzing.gitlab-ci.yml
 
    variables:
      FUZZAPI_PROFILE: Quick-10
@@ -409,15 +409,15 @@ requests. These placeholders are called variables, as explained in [using variab
 You can use variables to store and reuse values in your requests and scripts. For example, you can
 edit the collection to add variables to the document:
 
-![Edit collection variable tab View](../img/api_fuzzing_postman_collection_edit_variable_v13_9.png)
+![Edit collection variable tab View](../img/api_fuzzing_postman_collection_edit_variable.png)
 
 Or alternatively, you can add variables in an environment:
 
-![Edit environment variables View](../img/api_fuzzing_postman_environment_edit_variable_v13_9.png)
+![Edit environment variables View](../img/api_fuzzing_postman_environment_edit_variable.png)
 
 You can then use the variables in sections such as URL, headers, and others:
 
-![Edit request using variables View](../img/api_fuzzing_postman_request_edit_v13_9.png)
+![Edit request using variables View](../img/api_fuzzing_postman_request_edit.png)
 
 Postman has grown from a basic client tool with a nice UX experience to a more complex ecosystem that allows testing APIs with scripts, creating complex collections that trigger secondary requests, and setting variables along the way. Not every feature in the Postman ecosystem is supported. For example, scripts are not supported. The main focus of the Postman support is to ingest Postman Collection definitions that are used by the Postman Client and their related variables defined in the workspace, environments, and the collections themselves.
 
@@ -664,7 +664,7 @@ stages:
      - fuzz
 
 include:
-  - template: Security/API-Fuzzing.gitlab-ci.yml
+  - template: API-Fuzzing.gitlab-ci.yml
 
 variables:
   FUZZAPI_PROFILE: Quick-10
@@ -684,7 +684,7 @@ stages:
   - fuzz
 
 include:
-  - template: Security/API-Fuzzing.gitlab-ci.yml
+  - template: API-Fuzzing.gitlab-ci.yml
 
 variables:
   FUZZAPI_PROFILE: Quick
@@ -704,7 +704,7 @@ stages:
   - fuzz
 
 include:
-  - template: Security/API-Fuzzing.gitlab-ci.yml
+  - template: API-Fuzzing.gitlab-ci.yml
 
 variables:
   FUZZAPI_PROFILE: Quick
@@ -724,7 +724,7 @@ stages:
   - fuzz
 
 include:
-  - template: Security/API-Fuzzing.gitlab-ci.yml
+  - template: API-Fuzzing.gitlab-ci.yml
 
 variables:
   FUZZAPI_PROFILE: Quick
@@ -758,7 +758,7 @@ stages:
   - fuzz
 
 include:
-  - template: Security/API-Fuzzing.gitlab-ci.yml
+  - template: API-Fuzzing.gitlab-ci.yml
 
 variables:
   FUZZAPI_PROFILE: Quick
@@ -790,7 +790,7 @@ stages:
   - fuzz
 
 include:
-  - template: Security/API-Fuzzing.gitlab-ci.yml
+  - template: API-Fuzzing.gitlab-ci.yml
 
 variables:
   FUZZAPI_PROFILE: Quick
@@ -825,7 +825,7 @@ stages:
   - fuzz
 
 include:
-  - template: Security/API-Fuzzing.gitlab-ci.yml
+  - template: API-Fuzzing.gitlab-ci.yml
 
 variables:
   FUZZAPI_PROFILE: Quick

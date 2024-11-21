@@ -9,9 +9,7 @@ module Environments
     feature_category :continuous_delivery
 
     def perform(environment_id, params = {})
-      Environment.find_by_id(environment_id).try do |environment|
-        Environments::StopService.new(environment.project).unsafe_execute!(environment)
-      end
+      Environment.find_by_id(environment_id).try(&:stop_with_actions!)
     end
   end
 end

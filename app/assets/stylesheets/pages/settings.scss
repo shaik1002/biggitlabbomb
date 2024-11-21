@@ -42,7 +42,7 @@
 
 .settings-section,
 .settings-section-no-bottom ~ .settings-section {
-  padding-top: 0;
+  padding-top: 0 !important;
 }
 
 // Fix for sticky header when there is no search bar.
@@ -50,9 +50,12 @@
   padding-top: $gl-spacing-scale-3;
 }
 
-.settings-section:not(.settings-section-no-bottom) ~ .settings-section {
-  @apply gl-border-t;
+.settings-section ~ .settings-section {
   padding-top: $gl-spacing-scale-6;
+}
+
+.settings-section:not(.settings-section-no-bottom) ~ .settings-section {
+  @include gl-border-t;
 }
 
 .settings-section-no-bottom::after {
@@ -68,11 +71,11 @@ $sticky-header-z-index: 98;
 .settings-sticky-header,
 .settings-sticky-footer {
   position: sticky;
-  @apply gl-bg-default;
+  z-index: $sticky-header-z-index;
+  background: $body-bg;
 }
 
 .settings-sticky-header {
-  z-index: $sticky-header-z-index;
   top: $calc-application-header-height;
 
   &::before {
@@ -81,7 +84,7 @@ $sticky-header-z-index: 98;
     height: $gl-padding-8;
     position: sticky;
     top: calc(#{$calc-application-header-height} + 36px);
-    box-shadow: 0 1px 0 var(--gl-border-color-default);
+    box-shadow: 0 1px 0 $gray-100;
   }
 }
 
@@ -89,14 +92,13 @@ $sticky-header-z-index: 98;
   position: sticky;
   padding: $gl-padding-12 $gl-padding $gl-padding-8;
   margin: #{-$gl-padding} #{-$gl-padding} 0;
-  @apply gl-bg-default;
+  background: $body-bg;
 }
 
 .settings-sticky-footer {
-  z-index: #{$sticky-header-z-index +1};
   bottom: 0;
   padding: $gl-padding-8 0;
-  box-shadow: 0 -1px 0 var(--gl-border-color-default);
+  box-shadow: 0 -1px 0 $gray-100;
 }
 
 // Header shouldn't be sticky if only one section on page

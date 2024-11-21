@@ -2,8 +2,10 @@
 
 module Gitlab
   module BackgroundMigration
+    # rubocop: disable Style/Documentation
     class MigrateApproverToApprovalRulesInBatch
-      def perform(start_id, end_id); end
+      def perform(start_id, end_id)
+      end
     end
   end
 end

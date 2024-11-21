@@ -1,88 +1,51 @@
 import { GlDrawer, GlLink } from '@gitlab/ui';
-import Vue, { nextTick } from 'vue';
+import Vue from 'vue';
 import VueApollo from 'vue-apollo';
 
 import createMockApollo from 'helpers/mock_apollo_helper';
 import waitForPromises from 'helpers/wait_for_promises';
-import { stubComponent } from 'helpers/stub_component';
 
 import { TYPE_EPIC, TYPE_ISSUE } from '~/issues/constants';
-import { DETAIL_VIEW_QUERY_PARAM_NAME } from '~/work_items/constants';
 import WorkItemDrawer from '~/work_items/components/work_item_drawer.vue';
 import WorkItemDetail from '~/work_items/components/work_item_detail.vue';
 import deleteWorkItemMutation from '~/work_items/graphql/delete_work_item.mutation.graphql';
-import workspacePermissionsQuery from '~/work_items/graphql/workspace_permissions.query.graphql';
-import { shallowMountExtended, mountExtended } from 'helpers/vue_test_utils_helper';
-import { visitUrl, updateHistory, setUrlParams, removeParams } from '~/lib/utils/url_utility';
-import { makeDrawerUrlParam } from '~/work_items/utils';
-import { mockProjectPermissionsQueryResponse } from '../mock_data';
-
-jest.mock('~/lib/utils/url_utility');
+import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
 
 Vue.use(VueApollo);
 
 const deleteWorkItemMutationHandler = jest
   .fn()
   .mockResolvedValue({ data: { workItemDelete: { errors: [] } } });
-const workspacePermissionsHandler = jest
-  .fn()
-  .mockResolvedValue(mockProjectPermissionsQueryResponse());
 
 describe('WorkItemDrawer', () => {
   let wrapper;
 
   const mockListener = jest.fn();
-  const mockRouterPush = jest.fn();
 
   const findGlDrawer = () => wrapper.findComponent(GlDrawer);
   const findWorkItem = () => wrapper.findComponent(WorkItemDetail);
-  const findLinkButton = () => wrapper.findByTestId('work-item-drawer-link-button');
-  const findReferenceLink = () => wrapper.findComponent(GlLink);
 
   const createComponent = ({
     open = false,
     activeItem = { iid: '1', webUrl: 'test', fullPath: 'gitlab-org/gitlab' },
     issuableType = TYPE_ISSUE,
-    clickOutsideExcludeSelector = undefined,
-    isGroup = true,
-    workItemsViewPreference = false,
-    mountFn = shallowMountExtended,
-    stubs = { WorkItemDetail },
   } = {}) => {
-    window.gon.current_user_use_work_items_view = true;
-
-    wrapper = mountFn(WorkItemDrawer, {
-      attachTo: document.body,
+    wrapper = shallowMountExtended(WorkItemDrawer, {
       propsData: {
         activeItem,
         open,
         issuableType,
-        clickOutsideExcludeSelector,
       },
       listeners: {
         customEvent: mockListener,
       },
       provide: {
-        fullPath: 'gitlab-org/gitlab',
+        fullPath: '/gitlab-org',
         reportAbusePath: '',
         groupPath: '',
         hasSubepicsFeature: false,
-        hasLinkedItemsEpicsFeature: true,
-        isGroup,
-        glFeatures: {
-          workItemsViewPreference,
-        },
       },
-      mocks: {
-        $router: {
-          push: mockRouterPush,
-        },
-      },
-      stubs,
-      apolloProvider: createMockApollo([
-        [deleteWorkItemMutation, deleteWorkItemMutationHandler],
-        [workspacePermissionsQuery, workspacePermissionsHandler],
-      ]),
+      apolloProvider: createMockApollo([[deleteWorkItemMutation, deleteWorkItemMutationHandler]]),
     });
   };
 
@@ -90,24 +53,6 @@ describe('WorkItemDrawer', () => {
     createComponent();
 
     expect(findGlDrawer().props('open')).toBe(false);
-  });
-
-  it('focus on first item when drawer loads the active item', async () => {
-    createComponent({
-      mountFn: mountExtended,
-      stubs: {
-        GlDrawer: stubComponent(GlDrawer, {
-          template: `
-        <div>
-          <slot name="title"></slot>
-          <slot></slot>
-        </div>`,
-        }),
-      },
-    });
-    await nextTick();
-
-    expect(document.activeElement).toBe(findReferenceLink().element);
   });
 
   it('displays correct URL and text in link', () => {
@@ -132,64 +77,12 @@ describe('WorkItemDrawer', () => {
     ).toBe('test');
   });
 
-  describe('closing the drawer', () => {
-    it('emits `close` event when drawer is closed', () => {
-      createComponent({ open: true });
+  it('emits `close` event when drawer is closed', () => {
+    createComponent({ open: true });
 
-      findGlDrawer().vm.$emit('close');
+    findGlDrawer().vm.$emit('close');
 
-      expect(wrapper.emitted('close')).toHaveLength(1);
-    });
-
-    it('emits `close` event when clicking outside of drawer', () => {
-      createComponent({ open: true });
-
-      document.dispatchEvent(new MouseEvent('click'));
-
-      expect(wrapper.emitted('close')).toHaveLength(1);
-    });
-
-    it('calls `upddateHistory`', () => {
-      createComponent({ open: true });
-
-      findGlDrawer().vm.$emit('close');
-
-      expect(updateHistory).toHaveBeenCalled();
-    });
-    it('calls `removeParams` to remove the `show` param', () => {
-      createComponent({ open: true });
-
-      findGlDrawer().vm.$emit('close');
-
-      expect(removeParams).toHaveBeenCalledWith([DETAIL_VIEW_QUERY_PARAM_NAME]);
-    });
-
-    describe('`clickOutsideExcludeSelector` prop', () => {
-      let fakeParent;
-      let otherElement;
-
-      beforeEach(() => {
-        createComponent({ open: true, clickOutsideExcludeSelector: '.selector' });
-
-        fakeParent = document.createElement('div');
-        fakeParent.classList.add('selector');
-        document.body.appendChild(fakeParent);
-
-        otherElement = document.createElement('div');
-        document.body.appendChild(otherElement);
-      });
-      it('emits `close` event when clicking outside of drawer and not on excluded element', () => {
-        otherElement.dispatchEvent(new MouseEvent('click'));
-
-        expect(wrapper.emitted('close')).toHaveLength(1);
-      });
-
-      it('does not emit `close` event when clicking outside of drawer on excluded element', () => {
-        fakeParent.dispatchEvent(new MouseEvent('click'));
-
-        expect(wrapper.emitted('close')).toBeUndefined();
-      });
-    });
+    expect(wrapper.emitted('close')).toHaveLength(1);
   });
 
   it('passes listeners correctly to WorkItemDetail', () => {
@@ -241,10 +134,10 @@ describe('WorkItemDrawer', () => {
     });
 
     describe('when active issuable has no fullPath property', () => {
-      it('uses injected fullPath if active issuable has no reference path or full path', () => {
+      it('passes empty value if active issuable has no reference path or full path', () => {
         createComponent({ activeItem: {} });
 
-        expect(findWorkItem().props('modalWorkItemFullPath')).toBe('gitlab-org/gitlab');
+        expect(findWorkItem().props('modalWorkItemFullPath')).toBe('');
       });
 
       it('passes correctly calculated path if active issuable is an issue', () => {
@@ -274,125 +167,5 @@ describe('WorkItemDrawer', () => {
     createComponent({ issuableType: TYPE_EPIC });
 
     expect(findWorkItem().props('modalIsGroup')).toBe(true);
-  });
-
-  describe('when redirecting to full screen view', () => {
-    it('calls `visitUrl` when link is not a work item path', () => {
-      createComponent();
-      findLinkButton().vm.$emit('click', new MouseEvent('click'));
-
-      expect(visitUrl).toHaveBeenCalledWith('test');
-    });
-
-    it('calls `router.push` when link is a group level work item and we are at the group level', () => {
-      createComponent({
-        isGroup: true,
-        activeItem: {
-          iid: '1',
-          webUrl: '/groups/gitlab-org/gitlab/-/work_items/1',
-          fullPath: 'gitlab-org/gitlab',
-        },
-      });
-      findLinkButton().vm.$emit('click', new MouseEvent('click'));
-
-      expect(visitUrl).not.toHaveBeenCalled();
-      expect(mockRouterPush).toHaveBeenCalledWith({ name: 'workItem', params: { iid: '1' } });
-    });
-
-    it('does not call `router.push` when link is a group level work item and we are at the project level', () => {
-      createComponent({
-        isGroup: false,
-        activeItem: {
-          iid: '1',
-          webUrl: '/groups/gitlab-org/gitlab/-/work_items/1',
-          fullPath: 'gitlab-org/gitlab',
-        },
-      });
-      findLinkButton().vm.$emit('click', new MouseEvent('click'));
-
-      expect(visitUrl).toHaveBeenCalledWith('/groups/gitlab-org/gitlab/-/work_items/1');
-      expect(mockRouterPush).not.toHaveBeenCalled();
-    });
-
-    it('calls `router.push` when issue as work item view is enabled and work item is in same project', () => {
-      createComponent({
-        isGroup: false,
-        workItemsViewPreference: true,
-        activeItem: {
-          iid: '1',
-          webUrl: '/gitlab-org/gitlab/-/work_items/1',
-          fullPath: 'gitlab-org/gitlab',
-        },
-      });
-
-      findLinkButton().vm.$emit('click', new MouseEvent('click'));
-
-      expect(visitUrl).not.toHaveBeenCalled();
-      expect(mockRouterPush).toHaveBeenCalledWith({ name: 'workItem', params: { iid: '1' } });
-    });
-
-    it('does not call `router.push` when issue as work item view is enabled and work item is in different project', () => {
-      createComponent({
-        isGroup: false,
-        workItemsViewPreference: true,
-        activeItem: {
-          iid: '1',
-          webUrl: '/gitlab-org/gitlab-other/-/work_items/1',
-          fullPath: 'gitlab-org/gitlab',
-        },
-      });
-
-      findLinkButton().vm.$emit('click', new MouseEvent('click'));
-
-      expect(visitUrl).toHaveBeenCalledWith('/gitlab-org/gitlab-other/-/work_items/1');
-      expect(mockRouterPush).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('when `activeItem` prop is changed and it contains an `id`', () => {
-    const activeItem = {
-      iid: '1',
-      webUrl: '/groups/gitlab-org/gitlab/-/work_items/1',
-      fullPath: 'gitlab-org/gitlab',
-      id: 'gid://gitlab/WorkItem/1',
-    };
-    const showParam = makeDrawerUrlParam(activeItem, 'gitlab-org/gitlab');
-    beforeEach(async () => {
-      createComponent();
-      await wrapper.setProps({
-        open: true,
-        activeItem,
-      });
-    });
-    it('calls `updateHistory`', () => {
-      expect(updateHistory).toHaveBeenCalled();
-    });
-    it('calls `setUrlParams` with `show` param', () => {
-      expect(setUrlParams).toHaveBeenCalledWith({ [DETAIL_VIEW_QUERY_PARAM_NAME]: showParam });
-    });
-
-    it('focus on first item once drawer loads', async () => {
-      createComponent({
-        mountFn: mountExtended,
-        stubs: {
-          GlDrawer: stubComponent(GlDrawer, {
-            template: `
-          <div>
-            <slot name="title"></slot>
-            <slot></slot>
-          </div>`,
-          }),
-        },
-      });
-
-      await wrapper.setProps({
-        open: true,
-        activeItem,
-      });
-
-      await nextTick();
-
-      expect(document.activeElement).toBe(findReferenceLink().element);
-    });
   });
 });

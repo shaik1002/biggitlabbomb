@@ -79,20 +79,10 @@ export default {
         .then((response) => {
           const data = Array.isArray(response) ? response : response.data;
 
-          const uniqueData = data.reduce((acc, current) => {
-            const existingItem = acc.find((item) => item.title === current.title);
-
-            if (!existingItem) {
-              acc.push(current);
-            }
-
-            return acc;
-          }, []);
-
           if (this.config.shouldSkipSort) {
-            this.milestones = uniqueData;
+            this.milestones = data;
           } else {
-            this.milestones = uniqueData.slice().sort(sortMilestonesByDueDate);
+            this.milestones = data.slice().sort(sortMilestonesByDueDate);
           }
         })
         .catch(() => {

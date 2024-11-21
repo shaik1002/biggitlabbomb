@@ -15,16 +15,17 @@ RSpec.describe Gitlab::Cng::Commands::Destroy do
 
     it "defines cluster command" do
       expect_command_to_include_attributes(command_name, {
-        description: "Destroy kind cluster created for kind type deployments",
+        description: "Destroy kind cluster",
+        name: command_name,
         usage: command_name
       })
     end
 
     context "with accepted prompt" do
       it "invokes kind cluster deletion" do
-        invoke_command(command_name, [])
+        invoke_command(command_name, [], { name: "test-cluster" })
 
-        expect(Gitlab::Cng::Kind::Cluster).to have_received(:destroy)
+        expect(Gitlab::Cng::Kind::Cluster).to have_received(:destroy).with("test-cluster")
       end
     end
 
@@ -32,7 +33,7 @@ RSpec.describe Gitlab::Cng::Commands::Destroy do
       let(:prompt_response) { false }
 
       it "skips cluster deletion" do
-        invoke_command(command_name, [])
+        invoke_command(command_name, [], { name: "test-cluster" })
 
         expect(Gitlab::Cng::Kind::Cluster).not_to have_received(:destroy)
       end

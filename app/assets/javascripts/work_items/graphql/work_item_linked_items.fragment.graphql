@@ -13,10 +13,6 @@ fragment WorkItemLinkedItemsFragment on WorkItem {
             id
             iid
             confidential
-            namespace {
-              id
-              fullPath
-            }
             workItemType {
               id
               name

@@ -103,16 +103,8 @@ Backup and restore recreates the entire database, including the indexes.
 1. In all PostgreSQL nodes, install the new GitLab package of the same GitLab version.
 1. In a [database console](../troubleshooting/postgresql.md#start-a-database-console), rebuild all indexes:
 
-   ```sql
-   SET statement_timeout = 0;
-   REINDEX DATABASE gitlabhq_production;
-   ```
-
-1. After reindexing the database, the version must be refreshed for all affected collations.
-   To update the system catalog to record the current collation version:
-
-   ```sql
-   ALTER COLLATION <collation_name> REFRESH VERSION;
+   ```shell
+   REINDEX DATABASE gitlabhq_production
    ```
 
 1. In all nodes, start GitLab.
@@ -143,16 +135,8 @@ Backup and restore recreates the entire database, including the indexes.
 1. In the primary site, in a
    [database console](../troubleshooting/postgresql.md#start-a-database-console), rebuild all indexes:
 
-   ```sql
-   SET statement_timeout = 0;
-   REINDEX DATABASE gitlabhq_production;
-   ```
-
-1. After reindexing the database, the version must be refreshed for all affected collations.
-   To update the system catalog to record the current collation version:
-
-   ```sql
-   ALTER COLLATION <collation_name> REFRESH VERSION;
+   ```shell
+   REINDEX DATABASE gitlabhq_production
    ```
 
 1. If the secondary sites receive traffic from users, then let the read-replica databases catch up
@@ -179,16 +163,15 @@ different types of indexes were handled, see the blog post about
 1. [Determine which indexes are affected](https://wiki.postgresql.org/wiki/Locale_data_changes#What_indexes_are_affected).
 1. In a [database console](../troubleshooting/postgresql.md#start-a-database-console), reindex each affected index:
 
-   ```sql
-   SET statement_timeout = 0;
-   REINDEX INDEX <index name> CONCURRENTLY;
+   ```shell
+   REINDEX INDEX <index name> CONCURRENTLY
    ```
 
 1. After reindexing bad indexes, the collation must be refreshed. To update the system catalog to
    record the current collation version:
 
-   ```sql
-   ALTER COLLATION <collation_name> REFRESH VERSION;
+   ```shell
+   ALTER COLLATION <collation_name> REFRESH VERSION
    ```
 
 1. In all nodes, start GitLab.
@@ -220,16 +203,15 @@ different types of indexes were handled, see the blog post about
 1. In the primary site, in a
    [database console](../troubleshooting/postgresql.md#start-a-database-console), reindex each affected index:
 
-   ```sql
-   SET statement_timeout = 0;
-   REINDEX INDEX <index name> CONCURRENTLY;
+   ```shell
+   REINDEX INDEX <index name> CONCURRENTLY
    ```
 
 1. After reindexing bad indexes, the collation must be refreshed. To update the system catalog to
    record the current collation version:
 
-   ```sql
-   ALTER COLLATION <collation_name> REFRESH VERSION;
+   ```shell
+   ALTER COLLATION <collation_name> REFRESH VERSION
    ```
 
 1. The existing PostgreSQL streaming replication should replicate the reindex changes to the
@@ -239,6 +221,8 @@ different types of indexes were handled, see the blog post about
 ## Checking `glibc` versions
 
 To see what version of `glibc` is used, run `ldd --version`.
+
+You can compare the behavior of `glibc` on your servers [using shell commands](../geo/replication/troubleshooting/common.md#check-os-locale-data-compatibility).
 
 The following table shows the `glibc` versions shipped for different operating systems:
 

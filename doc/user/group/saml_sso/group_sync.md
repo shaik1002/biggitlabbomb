@@ -1,5 +1,5 @@
 ---
-stage: Software Supply Chain Security
+stage: Govern
 group: Authentication
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
@@ -19,8 +19,6 @@ Before making changes, ensure either the SAML response includes the `groups` att
 and the `AttributeValue` value matches the **SAML Group Name** in GitLab,
 or that all groups are removed from GitLab to disable Group Sync.
 
-SAML group sync allows users to be assigned to pre-existing GitLab groups with specific permissions based on the user's group assignment in the SAML identity provider (IdP). This feature allows you to create a many-to-many mapping between SAML IdP groups and GitLab groups. For example, if the user `@amelia` is assigned to the `security` group in the SAML IdP, SAML group sync allows you to assign `@amelia` to the `security-gitlab` and `vulnerability` GitLab groups with `maintainer` and `reporter` permissions, respectively. SAML group sync does not create groups. You [create groups separately](../index.md#create-a-group), and then create the mapping.
-
 <i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
 For a demo of Group Sync using Azure, see [Demo: SAML Group Sync](https://youtu.be/Iqvo2tJfXjg).
 
@@ -36,7 +34,8 @@ Prerequisites:
 When SAML is enabled, users with the Owner role see a new menu
 item in group **Settings > SAML Group Links**.
 
-- You can configure one or more **SAML Group Links** to map a SAML IdP group name to a GitLab role.
+- You can configure one or more **SAML Group Links** to map a SAML identity
+  provider (IdP) group name to a GitLab role.
 - Members of the SAML IdP group are added as members of the GitLab
   group on their next SAML sign-in.
 - Group membership is evaluated each time a user signs in using SAML.
@@ -85,7 +84,7 @@ Now let's change the previous example so that the user is not a member of either
 - When the user signs in to a group with `SAML1`, the user is given the `Owner` role in that group.
 - When the user signs in with `SAML2`, the user is removed from the group because they are not a member of either configured group link.
 
-### Role prioritization
+### How role conflicts are resolved
 
 #### Members of multiple mapped SAML groups
 
@@ -261,10 +260,6 @@ When global group memberships lock is enabled:
 - Only an administrator can manage memberships of any group including access levels.
 - Users cannot:
   - Share a project with other groups.
-
-    NOTE:
-    This limits the use of groups in other product features such as [adding a group as a Code Owner](../../project/codeowners/index.md#add-a-group-as-a-code-owner).
-
   - Invite members to a project created in a group.
 
 To enable global group memberships lock:
@@ -384,4 +379,4 @@ not limited to 150 groups.
 
 Otherwise, you can work around this issue by changing the [group claims](https://learn.microsoft.com/en-us/entra/identity/hybrid/connect/how-to-connect-fed-group-claims#configure-the-microsoft-entra-application-registration-for-group-attributes) to use the `Groups assigned to the application` option instead.
 
-![Manage Group Claims](img/Azure-manage-group-claims_v15_9.png)
+![Manage Group Claims](img/Azure-manage-group-claims.png)

@@ -31,12 +31,12 @@ import TimelineEntryItem from './timeline_entry_item.vue';
 
 const MAX_VISIBLE_COMMIT_LIST_COUNT = 3;
 const ICON_COLORS = {
-  check: 'system-note-icon-success',
-  'merge-request-close': 'system-note-icon-danger',
-  merge: 'system-note-icon-info',
-  'issue-close': 'system-note-icon-info',
-  issues: 'system-note-icon-success',
-  error: 'system-note-icon-danger',
+  check: 'gl-bg-green-100 gl-text-green-700 icon-success',
+  'merge-request-close': 'gl-bg-red-100 gl-text-red-700 icon-danger',
+  merge: 'gl-bg-blue-100 gl-text-blue-700 icon-info',
+  'issue-close': 'gl-bg-blue-100 gl-text-blue-700 icon-info',
+  issues: 'gl-bg-green-100 gl-text-green-700 icon-success',
+  error: 'gl-bg-red-100 gl-text-red-700 icon-danger',
 };
 
 export default {
@@ -105,7 +105,7 @@ export default {
       return this.getNoteableData.noteableType === 'MergeRequest';
     },
     iconBgClass() {
-      return ICON_COLORS[this.note.system_note_icon_name] || 'gl-bg-gray-50 gl-text-subtle';
+      return ICON_COLORS[this.note.system_note_icon_name] || 'gl-bg-gray-50 gl-text-gray-600';
     },
     systemNoteIconName() {
       let icon = this.note.system_note_icon_name;
@@ -218,7 +218,7 @@ export default {
         ></div>
         <div v-if="hasMoreCommits" class="flex-list">
           <div
-            class="flex-row gl-relative gl-z-2 gl-cursor-pointer gl-pl-4 gl-pt-3 gl-text-link hover:gl-underline"
+            class="flex-row gl-relative gl-z-2 gl-cursor-pointer gl-pl-4 gl-pt-3 gl-text-blue-500 hover:gl-underline"
             @click="expanded = !expanded"
           >
             <gl-icon :name="toggleIcon" :size="12" class="gl-mr-2" />

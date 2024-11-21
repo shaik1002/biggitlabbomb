@@ -1,4 +1,3 @@
-#!/usr/bin/env ruby
 # frozen_string_literal: true
 
 # Internal Events Tracking Monitor
@@ -18,34 +17,6 @@
 # Exiting:
 #   - To exit the script, press Ctrl+C.
 #
-
-unless defined?(Rails)
-  puts <<~TEXT
-
-    Error! The Internal Events Tracking Monitor could not access the Rails context!
-
-      Ensure GDK is running, then run:
-
-      bin/rails runner scripts/internal_events/monitor.rb #{ARGV.any? ? ARGV.join(' ') : '<events-to-monitor>'}
-
-  TEXT
-
-  exit! 1
-end
-
-unless ARGV.any?
-  puts <<~TEXT
-
-    Error! The Internal Events Tracking Monitor requires events to be specified.
-
-      For example, to monitor events g_edit_by_web_ide and g_edit_by_sfe, run:
-
-      bin/rails runner scripts/internal_events/monitor.rb g_edit_by_web_ide g_edit_by_sfe
-
-  TEXT
-
-  exit! 1
-end
 
 require 'terminal-table'
 require 'net/http'

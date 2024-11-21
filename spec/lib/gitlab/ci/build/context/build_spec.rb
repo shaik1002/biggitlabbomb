@@ -70,12 +70,35 @@ RSpec.describe Gitlab::Ci::Build::Context::Build, feature_category: :pipeline_co
 
     it_behaves_like 'variables collection'
 
+    context 'when the FF ci_variables_optimization_for_yaml_and_node is disabled' do
+      before do
+        stub_feature_flags(ci_variables_optimization_for_yaml_and_node: false)
+      end
+
+      it_behaves_like 'variables collection'
+    end
+
     context 'when the pipeline has a trigger request' do
       let!(:trigger_request) { create(:ci_trigger_request, pipeline: pipeline) }
 
       it 'includes trigger variables' do
         expect(variables).to include('CI_PIPELINE_TRIGGERED' => 'true')
         expect(variables).to include('CI_TRIGGER_SHORT_TOKEN' => trigger_request.trigger_short_token)
+      end
+
+      context 'when the FF ci_variables_optimization_for_yaml_and_node is disabled' do
+        before do
+          stub_feature_flags(ci_variables_optimization_for_yaml_and_node: false)
+        end
+
+        context 'when the pipeline has a trigger request' do
+          let!(:trigger_request) { create(:ci_trigger_request, pipeline: pipeline) }
+
+          it 'includes trigger variables' do
+            expect(variables).to include('CI_PIPELINE_TRIGGERED' => 'true')
+            expect(variables).to include('CI_TRIGGER_SHORT_TOKEN' => trigger_request.trigger_short_token)
+          end
+        end
       end
     end
 
@@ -107,56 +130,16 @@ RSpec.describe Gitlab::Ci::Build::Context::Build, feature_category: :pipeline_co
         is_expected.to include('CI_ENVIRONMENT_NAME' => 'env-master')
         is_expected.to include('KUBE_NAMESPACE' => "k8s-#{project.full_path}")
       end
-    end
 
-    context 'when environment includes nested variables' do
-      let(:seed_attributes) do
-        {
-          name: 'some-job',
-          environment: 'env-$NESTED_VAR',
-          yaml_variables: [
-            { key: 'NESTED_VAR', value: 'nested-$CI_COMMIT_REF_NAME' }
-          ],
-          options: {
-            environment: { name: 'env-$NESTED_VAR' }
-          }
-        }
-      end
+      context 'when the FF ci_variables_optimization_for_yaml_and_node is disabled' do
+        before do
+          stub_feature_flags(ci_variables_optimization_for_yaml_and_node: false)
+        end
 
-      it 'expands the nested variable' do
-        is_expected.to include('CI_ENVIRONMENT_NAME' => 'env-nested-master')
-      end
-    end
-
-    context 'when kubernetes namespace includes nested variables' do
-      let(:seed_attributes) do
-        {
-          name: 'some-job',
-          environment: 'env-master',
-          yaml_variables: [
-            { key: 'NESTED_VAR', value: 'nested-$CI_PROJECT_PATH' }
-          ],
-          options: {
-            environment: { name: 'env-master', kubernetes: { namespace: 'k8s-$NESTED_VAR' } }
-          }
-        }
-      end
-
-      let!(:default_cluster) do
-        create(
-          :cluster,
-          :not_managed,
-          platform_type: :kubernetes,
-          projects: [project],
-          environment_scope: '*',
-          platform_kubernetes: default_cluster_kubernetes
-        )
-      end
-
-      let(:default_cluster_kubernetes) { create(:cluster_platform_kubernetes, token: 'default-AAA') }
-
-      it 'does not expand the nested variable' do
-        is_expected.to include('KUBE_NAMESPACE' => "k8s-nested-$CI_PROJECT_PATH")
+        it 'returns a collection of variables' do
+          is_expected.to include('CI_ENVIRONMENT_NAME' => 'env-master')
+          is_expected.to include('KUBE_NAMESPACE' => "k8s-#{project.full_path}")
+        end
       end
     end
   end
@@ -165,14 +148,6 @@ RSpec.describe Gitlab::Ci::Build::Context::Build, feature_category: :pipeline_co
     subject { context.variables_hash }
 
     it { expect(context.variables_hash).to be_instance_of(ActiveSupport::HashWithIndifferentAccess) }
-
-    it_behaves_like 'variables collection'
-  end
-
-  describe '#variables_hash_expanded' do
-    subject { context.variables_hash_expanded }
-
-    it { expect(context.variables_hash_expanded).to be_instance_of(ActiveSupport::HashWithIndifferentAccess) }
 
     it_behaves_like 'variables collection'
   end

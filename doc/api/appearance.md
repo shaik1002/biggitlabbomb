@@ -1,5 +1,5 @@
 ---
-stage: Software Supply Chain Security
+stage: Govern
 group: Authentication
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
@@ -21,8 +21,6 @@ List the current appearance configuration of the GitLab instance.
 ```plaintext
 GET /application/appearance
 ```
-
-Example request:
 
 ```shell
 curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/application/appearance"
@@ -61,7 +59,7 @@ PUT /application/appearance
 ```
 
 | Attribute                         | Type    | Required | Description |
-|-----------------------------------|---------|----------|-------------|
+| --------------------------------- | ------- | -------- | ----------- |
 | `title`                           | string  | no       | Instance title on the sign in / sign up page |
 | `description`                     | string  | no       | Markdown text shown on the sign in / sign up page |
 | `pwa_name`                        | string  | no       | Full name of the Progressive Web App. Used for the attribute `name` in `manifest.json`. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/375708) in GitLab 15.8. |
@@ -79,8 +77,6 @@ PUT /application/appearance
 | `message_background_color`        | string  | no       | Background color for the system header / footer bar |
 | `message_font_color`              | string  | no       | Font color for the system header / footer bar |
 | `email_header_and_footer_enabled` | boolean | no       | Add header and footer to all outgoing emails if enabled |
-
-Example request:
 
 ```shell
 curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/application/appearance?email_header_and_footer_enabled=true&header_message=test"
@@ -123,10 +119,10 @@ preceded by `@`.
 PUT /application/appearance
 ```
 
-| Attribute  | Type  | Required | Description |
-|------------|-------|----------|-------------|
-| `logo`     | mixed | Yes      | File to upload |
-| `pwa_icon` | mixed | Yes      | File to upload. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/375708) in GitLab 15.8. |
+| Attribute   | Type   | Required | Description    |
+| ---------   | ------ | -------- | -------------- |
+| `logo`      | mixed  | Yes      | File to upload |
+| `pwa_icon`  | mixed  | Yes      | File to upload. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/375708) in GitLab 15.8. |
 
 Example request:
 
@@ -137,10 +133,10 @@ curl --location --request PUT "https://gitlab.example.com/api/v4/application/app
 --form "logo=@/path/to/logo.png"
 ```
 
-Example response:
+Returned object:
 
 ```json
 {
-  "logo":"/uploads/-/system/appearance/logo/1/logo.png"
+   "logo":"/uploads/-/system/appearance/logo/1/logo.png"
 }
 ```

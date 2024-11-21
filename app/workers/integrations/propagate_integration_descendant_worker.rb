@@ -4,7 +4,7 @@ module Integrations
   class PropagateIntegrationDescendantWorker
     include ApplicationWorker
 
-    data_consistency :always
+    data_consistency :always # rubocop:disable SidekiqLoadBalancing/WorkerDataConsistency -- Updates integrations in batches
     feature_category :integrations
     urgency :low
 

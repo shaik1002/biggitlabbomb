@@ -183,7 +183,6 @@ colocate
 colocated
 colocating
 commit's
-Command Palette
 CommonMark
 compilable
 composable
@@ -227,8 +226,8 @@ cybersecurity
 CycloneDX
 Dangerfile
 DAST
-Database Lab
 Database Lab Engine
+Database Lab
 Databricks
 Datadog
 datasource
@@ -407,7 +406,6 @@ globals
 globbing
 globstar
 globstars
-GLQL's
 Gmail
 Godep
 Golang
@@ -457,9 +455,9 @@ hyperparameter
 hyperparameters
 iCalendar
 iCloud
-IDE's
 idempotence
 IDEs
+IDE's
 idmapper
 Iglu
 IIFEs
@@ -507,7 +505,6 @@ kanban
 kanbans
 kaniko
 Karma
-Kata
 KCachegrind
 Kerberos
 Keycloak
@@ -530,8 +527,8 @@ kubectl
 Kubernetes
 Kubesec
 Kucoin
-Kustomization
 Kustomize
+Kustomization
 kwargs
 Laravel
 LaunchDarkly
@@ -539,12 +536,12 @@ ldapsearch
 Lefthook
 Leiningen
 Lemmy
+LLM
+LLMs
 libFuzzer
 Libgcrypt
 Libravatar
 liveness
-LLM
-LLMs
 lockfile
 lockfiles
 Lodash
@@ -698,8 +695,8 @@ pgvector
 Phabricator
 phaser
 phasers
-Phorge
 phpenv
+Phorge
 PHPUnit
 PIDs
 Pinia
@@ -761,7 +758,6 @@ pseudonymizer
 Pulumi
 Puma
 Pumble
-Pylint
 PyPI
 pytest
 Python
@@ -1012,7 +1008,6 @@ swimlane
 swimlanes
 syncable
 Sysbench
-Sysbox
 syscall
 syscalls
 syslog

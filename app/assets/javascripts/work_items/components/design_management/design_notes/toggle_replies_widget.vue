@@ -33,7 +33,7 @@ export default {
         : __('Collapse replies');
     },
     toggleTextColor() {
-      return this.collapsed ? 'gl-text-link' : 'gl-text-default';
+      return this.collapsed ? 'gl-text-blue-500' : 'gl-text-gray-900';
     },
     authors() {
       return [...new Set(this.replies.map((item) => item.author))];

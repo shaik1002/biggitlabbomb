@@ -5,7 +5,7 @@
 .md {
   position: relative;
   z-index: 1;
-  @apply gl-text-default;
+  color: $gl-text-color;
   word-wrap: break-word;
 
   [dir='auto'] {
@@ -21,11 +21,17 @@
   }
 
   p {
-    @apply gl-text-default;
+    color: $gl-text-color;
     margin: 0 0 16px;
 
     > code {
       font-weight: inherit;
+    }
+
+    a:not(.no-attachment-icon) img {
+      // Remove bottom padding because
+      // <p> already has $gl-padding bottom
+      margin-bottom: 0;
     }
   }
 
@@ -33,21 +39,20 @@
     display: inline-flex;
     flex-direction: column;
     margin-bottom: $gl-spacing-scale-2;
-
-    video {
-      max-width: 100%;
-    }
   }
 
   img {
     max-width: 100%;
-    vertical-align: baseline;
   }
 
   img[width][height] {
     object-fit: contain;
     object-position: top;
     height: auto;
+  }
+
+  img:not(.emoji) {
+    margin: 0 0 8px;
   }
 
   img.lazy {
@@ -93,6 +98,7 @@
   // Single code lines should wrap
   code {
     font-family: $monospace-font;
+    vertical-align: bottom;
     white-space: pre-wrap;
     // Safari
     word-wrap: break-word;
@@ -110,7 +116,7 @@
     margin: 24px 0 16px;
     padding-bottom: 0.3em;
     border-bottom: 1px solid $gray-200;
-    @apply gl-text-heading;
+    color: $gl-text-color;
 
     &:first-child {
       margin-top: 0;
@@ -123,7 +129,7 @@
     margin: 24px 0 16px;
     padding-bottom: 0.3em;
     border-bottom: 1px solid $gray-200;
-    @apply gl-text-heading;
+    color: $gl-text-color;
   }
 
   h3 {
@@ -199,7 +205,7 @@
 
   table:not(.code) {
     margin: 16px 0;
-    @apply gl-text-default;
+    color: $gl-text-color;
     border: 0;
     width: auto;
     display: block;
@@ -256,6 +262,7 @@
         }
       }
     }
+
 
     &.grid-rows {
       > thead > tr > th,
@@ -444,8 +451,7 @@
     padding-left: 3px;
 
     /* Normalize the bullet position on webkit. */
-    /* stylelint-disable-next-line media-feature-name-no-vendor-prefix */
-    @media screen and (-webkit-min-device-pixel-ratio: 0) {
+    @include on-webkit-only {
       margin-left: 28px;
       padding-left: 0;
     }
@@ -471,36 +477,36 @@
   li.inapplicable {
     // for a single line list item, no paragraph (tight list)
     > s {
-        @apply gl-text-disabled;
+      color: $gl-text-color-disabled;
     }
 
     // additional blocks, other than paragraphs
     > div {
       text-decoration: line-through;
-      @apply gl-text-disabled;
+      color: $gl-text-color-disabled;
     }
 
     // because of the embedded checkbox, putting line-through on the entire
     // paragraph causes the space between the checkbox and the text to have the
     // line-through.  Targeting just the `s` fixes this
     > p:first-of-type > s {
-      @apply gl-text-disabled;
+      color: $gl-text-color-disabled;
     }
 
     > p:not(:first-of-type) {
       text-decoration: line-through;
-      @apply gl-text-disabled;
+      color: $gl-text-color-disabled;
     }
 
     .drag-icon {
-      @apply gl-fill-icon-default;
+      color: $gl-text-color;
     }
 
     // If an inapplicable task list item contains labels or <kbd>s, strike them
     // out as well.
     .gl-label, kbd {
       text-decoration: line-through;
-      text-decoration-color: var(--gl-text-color-disabled);
+      text-decoration-color: $gl-text-color-disabled;
       vertical-align: text-bottom;
     }
   }
@@ -685,7 +691,7 @@
   @include email-code-block;
 
   &.gl-text-secondary {
-    @apply gl-text-subtle;
+    color: $gl-text-color-secondary;
 
     p,
     h1,
@@ -694,14 +700,8 @@
     h4,
     h5,
     table:not(.code) {
-      @apply gl-text-subtle;
+      color: $gl-text-color-secondary;
     }
-  }
-
-  /* Vertically align badges with icons */
-  .gl-badge:has(> svg) {
-    position: relative;
-    bottom: -3px;
   }
 }
 
@@ -752,7 +752,7 @@ pre {
   font-size: $gl-font-size;
   word-break: break-all;
   word-wrap: break-word;
-  @apply gl-text-default;
+  color: $gl-text-color;
   background-color: $gray-10;
   border: 1px solid $gray-100;
   border-radius: $border-radius-small;
@@ -763,8 +763,15 @@ pre {
   }
 }
 
+code {
+  &.key-fingerprint {
+    background: $body-bg;
+    color: $text-color;
+  }
+}
+
 .monospace {
-  @apply gl-font-monospace;
+  @include gl-font-monospace;
 }
 
 .weight-normal {
@@ -797,7 +804,7 @@ h2,
 h3,
 h4 {
   small {
-    @apply gl-text-heading;
+    color: $gl-text-color;
   }
 }
 
@@ -821,15 +828,34 @@ h4 {
   background: $line-added-dark;
 }
 
+
 /**
  * form text input i.e. search bar, comments, forms, etc.
  */
+/* stylelint-disable selector-no-vendor-prefix  */
 input,
 textarea {
-  &::placeholder {
-    color: var(--gl-control-placeholder-color);
+  &::-webkit-input-placeholder {
+    color: $gl-text-color-tertiary;
+  }
+
+  // support firefox 19+ vendor prefix
+  &::-moz-placeholder {
+    color: $gl-text-color-tertiary;
+    opacity: 1; // FF defaults to 0.54
+  }
+
+  // support Edge vendor prefix
+  &::-ms-input-placeholder {
+    color: $gl-text-color-tertiary;
+  }
+
+  // support IE vendor prefix
+  &:-ms-input-placeholder {
+    color: $gl-text-color-tertiary;
   }
 }
+/* stylelint-enable */
 
 wbr {
   display: inline-block;
@@ -865,12 +891,5 @@ wbr {
      p {
       margin-block-end: 0;
      }
-  }
-
-  // prevent backref character from rendering as emoji
-  .footnote-backref gl-emoji {
-    font-family: inherit;
-    font-size: 0.875em;
-    pointer-events: none;
   }
 }

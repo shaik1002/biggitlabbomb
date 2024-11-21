@@ -47,13 +47,9 @@ module Mutations
         required: false,
         description: 'Full path of the project the work item is associated with.',
         deprecated: {
-          reason: 'Please use namespacePath instead. That will cover for both projects and groups',
+          reason: 'Please use namespace_path instead. That will cover for both projects and groups',
           milestone: '15.10'
         }
-      argument :start_and_due_date_widget,
-        ::Types::WorkItems::Widgets::StartAndDueDateUpdateInputType,
-        required: false,
-        description: 'Input for start and due date widget.'
       argument :title,
         GraphQL::Types::String,
         required: true,
@@ -63,10 +59,9 @@ module Mutations
         required: true,
         description: 'Global ID of a work item type.'
 
-      field :work_item,
-        ::Types::WorkItemType,
-        null: true,
-        description: 'Created work item.'
+      field :work_item, Types::WorkItemType,
+            null: true,
+            description: 'Created work item.'
 
       def ready?(**args)
         if args.slice(:project_path, :namespace_path)&.length != 1

@@ -2,12 +2,12 @@
 
 require 'spec_helper'
 
-RSpec.describe WorkItems::Callbacks::StartAndDueDate, feature_category: :team_planning do
+RSpec.describe WorkItems::Callbacks::StartAndDueDate, feature_category: :portfolio_management do
   let_it_be(:project) { create(:project) }
   let_it_be(:user) { create(:user, reporter_of: project) }
   let_it_be_with_reload(:work_item) { create(:work_item, project: project) }
 
-  let(:widget) { work_item.get_widget(:start_and_due_date) }
+  let(:widget) { work_item.widgets.find { |widget| widget.is_a?(WorkItems::Callbacks::StartAndDueDate) } }
 
   subject(:service) { described_class.new(issuable: work_item, current_user: user, params: params) }
 
@@ -15,7 +15,7 @@ RSpec.describe WorkItems::Callbacks::StartAndDueDate, feature_category: :team_pl
     let_it_be(:user) { create(:user) }
 
     specify do
-      expect { update_dates }
+      expect { update_params }
         .to not_change { work_item.dates_source&.start_date }
         .and not_change { work_item.start_date }
         .and not_change { work_item.dates_source&.due_date }
@@ -33,14 +33,12 @@ RSpec.describe WorkItems::Callbacks::StartAndDueDate, feature_category: :team_pl
       it_behaves_like "when user does not have permissions to update the dates"
 
       it "correctly sets date values" do
-        expect { update_dates }
-          .to change { work_item.start_date }.from(nil).to(start_date)
-          .and change { work_item.due_date }.from(nil).to(due_date)
-          .and change { work_item.dates_source&.start_date }.from(nil).to(start_date)
-          .and change { work_item.dates_source&.start_date_fixed }.from(nil).to(start_date)
+        expect { update_params }
+          .to change { work_item.dates_source&.start_date }.from(nil).to(start_date)
+          .and change { work_item.start_date }.from(nil).to(start_date)
           .and change { work_item.dates_source&.start_date_is_fixed }.from(nil).to(true)
           .and change { work_item.dates_source&.due_date }.from(nil).to(due_date)
-          .and change { work_item.dates_source&.due_date_fixed }.from(nil).to(due_date)
+          .and change { work_item.due_date }.from(nil).to(due_date)
           .and change { work_item.dates_source&.due_date_is_fixed }.from(nil).to(true)
       end
     end
@@ -49,7 +47,7 @@ RSpec.describe WorkItems::Callbacks::StartAndDueDate, feature_category: :team_pl
       let(:params) { {} }
 
       it "does not change work item date values" do
-        expect { update_dates }
+        expect { update_params }
           .to not_change { work_item.dates_source&.start_date }.from(nil)
           .and not_change { work_item.start_date }.from(nil)
           .and not_change { work_item.dates_source&.due_date }.from(nil)
@@ -66,7 +64,7 @@ RSpec.describe WorkItems::Callbacks::StartAndDueDate, feature_category: :team_pl
         let(:params) { {} }
 
         it "does not change work item date values" do
-          expect { update_dates }
+          expect { update_params }
             .to not_change { work_item.dates_source.start_date }
             .and not_change { work_item.start_date }
             .and not_change { work_item.dates_source.due_date }
@@ -78,13 +76,13 @@ RSpec.describe WorkItems::Callbacks::StartAndDueDate, feature_category: :team_pl
         let(:params) { { start_date: nil } }
 
         it 'sets only one date to null' do
-          expect { update_dates }
+          expect { update_params }
             .to change { work_item.dates_source&.start_date }.from(start_date).to(nil)
             .and change { work_item.start_date }.from(start_date).to(nil)
             .and change { work_item.dates_source&.start_date_is_fixed }.from(false).to(true)
-            .and change { work_item.dates_source&.due_date_is_fixed }.from(false).to(true)
             .and not_change { work_item.dates_source&.due_date }.from(due_date)
             .and not_change { work_item.due_date }.from(due_date)
+            .and change { work_item.dates_source&.due_date_is_fixed }.from(false).to(true)
         end
       end
 
@@ -92,7 +90,7 @@ RSpec.describe WorkItems::Callbacks::StartAndDueDate, feature_category: :team_pl
         let(:params) { { due_date: nil } }
 
         it 'sets only one date to null' do
-          expect { update_dates }
+          expect { update_params }
             .to change { work_item.dates_source&.due_date }.from(due_date).to(nil)
             .and change { work_item.due_date }.from(due_date).to(nil)
             .and change { work_item.dates_source&.start_date_is_fixed }.from(false).to(true)
@@ -112,7 +110,7 @@ RSpec.describe WorkItems::Callbacks::StartAndDueDate, feature_category: :team_pl
         it_behaves_like "when user does not have permissions to update the dates"
 
         it "sets both dates to null" do
-          expect { update_dates }
+          expect { update_params }
             .to change { work_item.dates_source&.start_date }.from(start_date).to(nil)
             .and change { work_item.start_date }.from(start_date).to(nil)
             .and change { work_item.dates_source&.start_date_is_fixed }.from(false).to(true)
@@ -125,13 +123,13 @@ RSpec.describe WorkItems::Callbacks::StartAndDueDate, feature_category: :team_pl
   end
 
   describe "#before_create" do
-    let(:update_dates) { service.before_create }
+    let(:update_params) { service.before_create }
 
     it_behaves_like "updating work item's dates_source"
   end
 
   describe "#before_update" do
-    let(:update_dates) { service.before_update }
+    let(:update_params) { service.before_update }
 
     it_behaves_like "updating work item's dates_source"
   end

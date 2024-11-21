@@ -8,9 +8,6 @@
       - scheduler_failure
       - stuck_or_timeout_failure
       - unknown_failure
-    exit_codes:
-      - 111 # low free disk space https://gitlab.com/gitlab-org/gitlab/-/issues/498142
-      - 112 # Known flaky tests
 
 .default-utils-before_script:
   before_script:
@@ -19,7 +16,7 @@
     - export GOPATH=$CI_PROJECT_DIR/.go
     - mkdir -p $GOPATH
     - source scripts/utils.sh
-    - log_disk_usage "true" # https://gitlab.com/gitlab-org/gitlab/-/issues/478880
+    - log_disk_usage before_script # https://gitlab.com/gitlab-org/gitlab/-/issues/478880
 
 .default-before_script:
   before_script:
@@ -139,12 +136,16 @@
 
 .qa-ruby-gems-cache: &qa-ruby-gems-cache
   key:
-    prefix: "qa-ruby-gems-${BUILD_OS}-${OS_VERSION}-ruby-${RUBY_VERSION}"
+    prefix: "qa-ruby-gems-${BUILD_OS}-${OS_VERSION}-ruby-${RUBY_VERSION}-gemfile-${BUNDLE_GEMFILE}"
     files:
       - qa/Gemfile.lock
   paths:
     - qa/vendor/ruby
   policy: pull
+
+.qa-ruby-gems-cache-push: &qa-ruby-gems-cache-push
+  <<: *qa-ruby-gems-cache
+  policy: pull-push
 
 .setup-test-env-cache:
   cache:
@@ -210,8 +211,7 @@
 .qa-cache-push:
   <<: *qa-bundler-variables
   cache:
-    - <<: *qa-ruby-gems-cache
-      policy: pull-push
+    - *qa-ruby-gems-cache-push
 
 .yarn-cache:
   cache:
@@ -323,30 +323,8 @@
 
 .ai-gateway-services:
   services:
-    - name: registry.gitlab.com/gitlab-org/modelops/applied-ml/code-suggestions/ai-assist/model-gateway:v1.18.0
+    - name: registry.gitlab.com/gitlab-org/modelops/applied-ml/code-suggestions/ai-assist/model-gateway:v1.15.0
       alias: ai-gateway
-
-.litellm-proxy-variables:
-  variables:
-    LITELLM_CONFIG_CONTENT: |
-      model_list:
-        - model_name: codestral
-          litellm_params:
-            model: ollama/codestral
-            mock_response: "Mock response from codestral"
-        - model_name: mistral
-          litellm_params:
-            model: ollama/mistral
-            mock_response: "Mock response from mistral"
-
-.litellm-proxy-services:
-  services:
-    - name: ghcr.io/berriai/litellm:main-latest
-      alias: litellm-proxy
-      entrypoint: ["/bin/sh", "-c"]
-      command:
-        - |
-          mkdir -p /tmp && echo "${LITELLM_CONFIG_CONTENT}" > /tmp/config.yaml && litellm --config /tmp/config.yaml
 
 .use-pg13:
   extends:
@@ -395,12 +373,10 @@
     - .use-pg14
     - .zoekt-variables
     - .ai-gateway-variables
-    - .litellm-proxy-variables
   services:
     - !reference [.db-services-with-auto-explain, services]
     - !reference [.es7-services, services]
     - !reference [.ai-gateway-services, services]
-    - !reference [.litellm-proxy-services, services]
 
 .use-pg15-es7-ee:
   extends:

@@ -1,10 +1,9 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script>
 import InputCopyToggleVisibility from '~/vue_shared/components/form/input_copy_toggle_visibility.vue';
-import SettingsSection from '~/vue_shared/components/settings/settings_section.vue';
 
 export default {
-  components: { InputCopyToggleVisibility, SettingsSection },
+  components: { InputCopyToggleVisibility },
   props: {
     token: {
       type: String,
@@ -37,14 +36,9 @@ export default {
 </script>
 
 <template>
-  <settings-section>
-    <template #heading>
-      <slot name="title"></slot>
-    </template>
-    <template #description>
-      <slot name="description"></slot>
-    </template>
-
+  <div>
+    <h4 class="gl-my-0"><slot name="title"></slot></h4>
+    <slot name="description"></slot>
     <input-copy-toggle-visibility
       :label="inputLabel"
       :label-for="inputId"
@@ -55,10 +49,8 @@ export default {
       :size="size"
     >
       <template #description>
-        <div class="gl-mt-3">
-          <slot name="input-description"></slot>
-        </div>
+        <slot name="input-description"></slot>
       </template>
     </input-copy-toggle-visibility>
-  </settings-section>
+  </div>
 </template>

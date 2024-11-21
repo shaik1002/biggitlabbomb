@@ -1,5 +1,5 @@
 ---
-stage: Security Risk Management
+stage: Govern
 group: Security Policies
 info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments"
 ---
@@ -72,18 +72,18 @@ External status checks have the following states:
 If something changes outside of GitLab, you can [set the status of an external status check](../../../api/status_checks.md#set-status-of-an-external-status-check)
 using the API. You don't need to wait for a merge request webhook payload to be sent first.
 
-## View status check services
+## View the status checks on a project
 
-To view a list of status check services added to a project from the merge request settings:
+Within each project's settings, you can see a list of status check services added to the project:
 
 1. On the left sidebar, select **Search or go to** and find your project.
 1. Select **Settings > Merge requests**.
-1. Scroll down to **Status checks**. This list shows the service name, API URL, targeted branch,
-   and HMAC authentication status.
+1. Scroll down to **Status checks**.
 
 ![Status checks list](img/status_checks_list_view_v14_0.png)
 
-You can also view a list of status check services from the [Branch rules](../repository/branches/branch_rules.md#add-a-status-check-service) settings.
+This list shows the service name, API URL, targeted branch, and HMAC authentication status.
+It also provides actions to allow you to create, edit, or remove status checks.
 
 ## Add or update a status check service
 

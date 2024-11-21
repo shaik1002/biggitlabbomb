@@ -1,9 +1,7 @@
 # frozen_string_literal: true
 
 module Integrations
-  class Matrix < Integration
-    include Base::ChatNotification
-
+  class Matrix < BaseChatNotification
     MATRIX_HOSTNAME = "%{hostname}/_matrix/client/v3/rooms/%{roomId}/send/m.room.message/?access_token=%{token}" # gitleaks:allow
 
     field :hostname,
@@ -70,7 +68,7 @@ module Integrations
 
     def self.help
       build_help_page_url(
-        'user/project/integrations/matrix.md',
+        'user/project/integrations/matrix',
         s_("MatrixIntegration|Send notifications about project events to Matrix.")
       )
     end
@@ -90,7 +88,7 @@ module Integrations
     end
 
     def notify(message, _opts)
-      context = { no_sourcepos: true }.merge(project_level? ? { project: project } : { skip_project_check: true })
+      context = project_level? ? { project: project } : { skip_project_check: true }
 
       body = {
         body: message.summary,

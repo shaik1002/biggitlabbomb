@@ -159,10 +159,9 @@ describe('Redact text', () => {
             await waitForPromises();
 
             expect(createAlert).toHaveBeenCalledWith({
-              message:
-                'You will receive an email notification when the process is complete. To remove old versions from the repository, run housekeeping.',
+              message: 'To remove old versions from the repository, run housekeeping.',
               primaryButton: { clickHandler: expect.any(Function), text: 'Go to housekeeping' },
-              title: 'Text redaction removal is scheduled.',
+              title: 'Text redacted',
               variant: VARIANT_WARNING,
             });
           });

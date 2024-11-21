@@ -1,5 +1,4 @@
 import { shallowMount, mount } from '@vue/test-utils';
-import RunnerCount from '~/ci/runner/components/stat/runner_count.vue';
 import RunnerStats from '~/ci/runner/components/stat/runner_stats.vue';
 import RunnerSingleStat from '~/ci/runner/components/stat/runner_single_stat.vue';
 import {
@@ -17,6 +16,23 @@ describe('RunnerStats', () => {
 
   const findSingleStats = () => wrapper.findAllComponents(RunnerSingleStat);
 
+  const RunnerCountStub = {
+    props: ['variables'],
+    render() {
+      // return a count for each status
+      const mockCounts = {
+        undefined: 6, // no status returns "all"
+        [STATUS_ONLINE]: 3,
+        [STATUS_OFFLINE]: 2,
+        [STATUS_STALE]: 1,
+      };
+
+      return this.$scopedSlots.default({
+        count: mockCounts[this.variables.status],
+      });
+    },
+  };
+
   const createComponent = ({ props = {}, mountFn = shallowMount, ...options } = {}) => {
     wrapper = mountFn(RunnerStats, {
       propsData: {
@@ -25,22 +41,7 @@ describe('RunnerStats', () => {
         ...props,
       },
       stubs: {
-        RunnerCount: {
-          ...RunnerCount,
-          data() {
-            // return a count for each status
-            const mockCounts = {
-              undefined: 6, // no status returns "all"
-              [STATUS_ONLINE]: 3,
-              [STATUS_OFFLINE]: 2,
-              [STATUS_STALE]: 1,
-            };
-
-            return {
-              count: mockCounts[this.variables.status],
-            };
-          },
-        },
+        RunnerCount: RunnerCountStub,
       },
       ...options,
     });
@@ -83,11 +84,10 @@ describe('RunnerStats', () => {
       mountFn: mount,
       stubs: {
         RunnerCount: {
-          ...RunnerCount,
-          data() {
-            return {
+          render() {
+            return this.$scopedSlots.default({
               count: 0,
-            };
+            });
           },
         },
       },

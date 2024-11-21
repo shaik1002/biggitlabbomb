@@ -72,8 +72,7 @@ export default {
         fields.push({
           key: 'updated_at',
           label: this.showUpdatedAt ? __('Last updated') : '',
-          thAlignRight: true,
-          thClass: 'gl-hidden d-sm-table-cell',
+          thClass: 'gl-hidden d-sm-table-cell gl-text-right',
           tdClass: '!gl-border-b-0 gl-text-right gl-hidden d-sm-table-cell !gl-align-middle',
         });
       }
@@ -121,7 +120,7 @@ export default {
         v-if="item.configured"
         v-gl-tooltip
         :name="item.active ? 'status-success' : 'status-paused'"
-        :variant="item.active ? 'success' : 'subtle'"
+        :class="item.active ? 'gl-text-green-500' : 'gl-text-gray-500'"
         :title="getStatusTooltipTitle(item)"
       />
     </template>

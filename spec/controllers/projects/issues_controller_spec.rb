@@ -182,14 +182,6 @@ RSpec.describe Projects::IssuesController, :request_store, feature_category: :te
       end
     end
 
-    context 'when use_work_items_view is enabled' do
-      it 'displays the work item view' do
-        user.user_preference.update!(use_work_items_view: true)
-        get :show, params: { namespace_id: project.namespace, project_id: project, id: issue.iid }
-        expect(response).to render_template 'projects/work_items/show'
-      end
-    end
-
     context 'when issue is of type task' do
       let(:query) { {} }
 
@@ -1519,7 +1511,7 @@ RSpec.describe Projects::IssuesController, :request_store, feature_category: :te
       })
     end
 
-    let(:emoji_name) { AwardEmoji::THUMBS_UP }
+    let(:emoji_name) { 'thumbsup' }
 
     it "toggles the award emoji" do
       expect do
@@ -1902,9 +1894,8 @@ RSpec.describe Projects::IssuesController, :request_store, feature_category: :te
 
         context 'user is a guest' do
           let(:json_response_note_ids) do
-            json_response
-              .flat_map { |discussion| discussion["notes"] }
-              .map { |note| note["id"].to_i }
+            json_response.collect { |discussion| discussion["notes"] }.flatten
+              .collect { |note| note["id"].to_i }
           end
 
           before do

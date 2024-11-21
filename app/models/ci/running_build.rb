@@ -17,7 +17,9 @@ module Ci
     enum runner_type: ::Ci::Runner.runner_types
 
     def self.upsert_build!(build)
-      raise ArgumentError, 'build has not been picked by a runner' if build.runner.nil?
+      if build.runner.nil?
+        raise ArgumentError, 'build has not been picked by a runner'
+      end
 
       # Owner namespace of the runner that executed the build
       runner_owner_namespace_id = build.runner.owner_runner_namespace.namespace_id if build.runner.group_type?

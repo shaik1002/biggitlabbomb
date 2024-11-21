@@ -13,7 +13,7 @@ module Mutations
         description: 'ID of the container repository.'
 
       field :container_repository,
-        Types::ContainerRegistry::ContainerRepositoryType,
+        Types::ContainerRepositoryType,
         null: false,
         description: 'Container repository policy after scheduling the deletion.'
 

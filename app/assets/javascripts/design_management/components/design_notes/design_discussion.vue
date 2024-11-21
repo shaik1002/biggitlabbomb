@@ -3,7 +3,6 @@ import { GlButton, GlLink, GlTooltipDirective, GlFormCheckbox } from '@gitlab/ui
 import * as Sentry from '~/sentry/sentry_browser_wrapper';
 import { createAlert } from '~/alert';
 import { __, s__ } from '~/locale';
-import highlightCurrentUser from '~/behaviors/markdown/highlight_current_user';
 import DiscussionReplyPlaceholder from '~/notes/components/discussion_reply_placeholder.vue';
 import { updateGlobalTodoCount } from '~/sidebar/utils';
 import { confirmAction } from '~/lib/utils/confirm_via_gl_modal/confirm_via_gl_modal';
@@ -162,16 +161,6 @@ export default {
       return this.isFormRendered && this.discussionWithOpenForm === this.discussion.id;
     },
   },
-  mounted() {
-    this.$nextTick(() => {
-      highlightCurrentUser(this.$el.querySelectorAll('.gfm-project_member'));
-    });
-  },
-  updated() {
-    this.$nextTick(() => {
-      highlightCurrentUser(this.$el.querySelectorAll('.gfm-project_member'));
-    });
-  },
   methods: {
     onDone({ data: { createNote } }) {
       if (hasErrors(createNote)) {
@@ -302,7 +291,7 @@ export default {
   <div class="design-discussion-wrapper" @click="$emit('update-active-discussion')">
     <design-note-pin :is-resolved="discussion.resolved" :label="discussion.index" />
     <ul
-      class="design-discussion gl-border gl-relative gl-list-none gl-rounded-base gl-border-section gl-p-0"
+      class="design-discussion bordered-box gl-relative gl-list-none gl-p-0"
       :class="{ 'gl-bg-blue-50': isDiscussionActive }"
       data-testid="design-discussion-content"
     >

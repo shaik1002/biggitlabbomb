@@ -6,6 +6,8 @@ import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
 import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 import ArchivedFilter from '~/search/sidebar/components/archived_filter/index.vue';
 
+import { archivedFilterData } from '~/search/sidebar/components/archived_filter/data';
+
 Vue.use(Vuex);
 
 describe('ArchivedFilter', () => {
@@ -44,7 +46,7 @@ describe('ArchivedFilter', () => {
 
     it('renders the divider', () => {
       expect(findTitle().exists()).toBe(true);
-      expect(findTitle().text()).toBe('Archived');
+      expect(findTitle().text()).toBe(archivedFilterData.headerLabel);
     });
 
     it('wraps the label element with a tooltip', () => {
@@ -65,7 +67,7 @@ describe('ArchivedFilter', () => {
 
     it("doesn't render the divider", () => {
       expect(findTitle().exists()).toBe(true);
-      expect(findTitle().text()).toBe('Archived');
+      expect(findTitle().text()).toBe(archivedFilterData.headerLabel);
     });
 
     it('wraps the label element with a tooltip', () => {

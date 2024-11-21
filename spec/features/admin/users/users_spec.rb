@@ -2,13 +2,13 @@
 
 require 'spec_helper'
 
-RSpec.describe 'Admin::Users', :with_current_organization, feature_category: :user_management do
+RSpec.describe 'Admin::Users', feature_category: :user_management do
   include Features::AdminUsersHelpers
   include Spec::Support::Helpers::ModalHelpers
   include ListboxHelpers
 
   let_it_be(:user, reload: true) { create(:omniauth_user, provider: 'twitter', extern_uid: '123456') }
-  let_it_be(:admin) { create(:admin, organizations: [current_organization]) }
+  let_it_be(:admin) { create(:admin) }
 
   before do
     sign_in(admin)
@@ -417,18 +417,6 @@ RSpec.describe 'Admin::Users', :with_current_organization, feature_category: :us
       end
     end
 
-    context 'when instance has multiple organizations', :js do
-      let_it_be(:organization) { create(:organization, name: 'New Organization', users: [admin]) }
-
-      it 'creates user in the selected organization' do
-        within_testid 'organization-section' do
-          select_from_listbox 'New Organization', from: 'Default'
-        end
-
-        expect { click_button 'Create user' }.to change { organization.users.count }.by(1)
-      end
-    end
-
     context 'with new users set to external enabled' do
       context 'with regex to match internal user email address set', :js do
         before do
@@ -558,13 +546,13 @@ RSpec.describe 'Admin::Users', :with_current_organization, feature_category: :us
 
       visit new_admin_user_identity_path(user)
 
-      check_breadcrumb('New identity')
+      check_breadcrumb('New Identity')
 
       visit admin_user_identities_path(user)
 
       find('.table').find(:link, 'Edit').click
 
-      check_breadcrumb('Edit')
+      check_breadcrumb('Edit Identity')
     end
 
     def check_breadcrumb(content)

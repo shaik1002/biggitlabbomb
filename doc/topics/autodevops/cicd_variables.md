@@ -26,7 +26,6 @@ Use these variables to customize and deploy your build.
 | `AUTO_DEVOPS_BUILD_IMAGE_EXTRA_ARGS`    | Extra arguments to be passed to the `docker build` command. Using quotes doesn't prevent word splitting. [More details](customize.md#pass-arguments-to-docker-build). |
 | `AUTO_DEVOPS_BUILD_IMAGE_FORWARDED_CI_VARIABLES` | A [comma-separated list of CI/CD variable names](customize.md#forward-cicd-variables-to-the-build-environment) to be forwarded to the build environment (the buildpack builder or `docker build`). |
 | `AUTO_DEVOPS_BUILD_IMAGE_CNB_PORT`      | In GitLab 15.0 and later, port exposed by the generated Docker image. Set to `false` to prevent exposing any ports. Defaults to `5000`. |
-| `AUTO_DEVOPS_BUILD_IMAGE_CONTEXT`       | Used to set the build context directory for Dockerfile and Cloud Native Buildpacks. Defaults to the root directory. |
 | `AUTO_DEVOPS_CHART`                     | Helm Chart used to deploy your apps. Defaults to the one [provided by GitLab](https://gitlab.com/gitlab-org/cluster-integration/auto-deploy-image/-/tree/master/assets/auto-deploy-app). |
 | `AUTO_DEVOPS_CHART_REPOSITORY`          | Helm Chart repository used to search for charts. Defaults to `https://charts.gitlab.io`. |
 | `AUTO_DEVOPS_CHART_REPOSITORY_NAME`     | Used to set the name of the Helm repository. Defaults to `gitlab`. |
@@ -87,9 +86,9 @@ Use these variables to integrate CI/CD with PostgreSQL databases.
 | `POSTGRES_CHART_REPOSITORY`             | Helm Chart repository used to search for PostgreSQL chart. Defaults to `https://raw.githubusercontent.com/bitnami/charts/eb5f9a9513d987b519f0ecd732e7031241c50328/bitnami`. |
 | `POSTGRES_CHART_VERSION`                | Helm Chart version used for PostgreSQL chart. Defaults to `8.2.1`. |
 
-## Job-skipping variables
+## Job-disabling variables
 
- Use these variables to skip specific types of CI/CD jobs. When skipped, the CI/CD jobs don't get created or run.
+Use these variables to disable CI/CD jobs.
 
 | **Job name**                           | **CI/CD variable**              | **GitLab version**    | **Description** |
 |----------------------------------------|---------------------------------|-----------------------|-----------------|
@@ -305,25 +304,25 @@ You can run the rollout jobs in any order. To scale down, rerun a
 lower percentage job.
 
 After you run the `rollout 100%` job, you cannot scale down, and must
-[roll back your deployment](../../ci/environments/deployments.md#retry-or-roll-back-a-deployment).
+[roll back your deployment](../../ci/environments/index.md#retry-or-roll-back-a-deployment).
 
 ### Example incremental rollout configurations
 
 Without `INCREMENTAL_ROLLOUT_MODE` and without `STAGING_ENABLED`:
 
-![Staging and rollout disabled](img/rollout_staging_disabled_v11_0.png)
+![Staging and rollout disabled](img/rollout_staging_disabled.png)
 
 Without `INCREMENTAL_ROLLOUT_MODE` and with `STAGING_ENABLED`:
 
-![Staging enabled](img/staging_enabled_v11_0.png)
+![Staging enabled](img/staging_enabled.png)
 
 With `INCREMENTAL_ROLLOUT_MODE` set to `manual` and without `STAGING_ENABLED`:
 
-![Rollout enabled](img/rollout_enabled_v10_8.png)
+![Rollout enabled](img/rollout_enabled.png)
 
 With `INCREMENTAL_ROLLOUT_MODE` set to `manual` and with `STAGING_ENABLED`:
 
-![Rollout and staging enabled](img/rollout_staging_enabled_v11_0.png)
+![Rollout and staging enabled](img/rollout_staging_enabled.png)
 
 ## Timed incremental rollout to production
 

@@ -75,7 +75,7 @@ class NotificationService
     end
   end
 
-  def bot_resource_access_token_about_to_expire(bot_user, token_name, params = {})
+  def bot_resource_access_token_about_to_expire(bot_user, token_name)
     recipients = bot_user.resource_bot_owners_and_maintainers.select { |user| user.can?(:receive_notifications) }
     resource = bot_user.resource_bot_resource
 
@@ -85,8 +85,7 @@ class NotificationService
       mailer.bot_resource_access_token_about_to_expire_email(
         recipient,
         resource,
-        token_name,
-        params
+        token_name
       ).deliver_later
     end
   end
@@ -100,12 +99,12 @@ class NotificationService
 
   # Notify the owner of the personal access token, when it is about to expire
   # And mark the token with about_to_expire_delivered
-  def access_token_about_to_expire(user, token_names, params = {})
+  def access_token_about_to_expire(user, token_names)
     return unless user.can?(:receive_notifications)
 
     log_info("Notifying User about expiring tokens", user)
 
-    mailer.access_token_about_to_expire_email(user, token_names, params).deliver_later
+    mailer.access_token_about_to_expire_email(user, token_names).deliver_later
   end
 
   # Notify the user when at least one of their personal access tokens has expired today
@@ -138,10 +137,10 @@ class NotificationService
 
   # Notify a user when a previously unknown IP or device is used to
   # sign in to their account
-  def unknown_sign_in(user, ip, time, request_info)
+  def unknown_sign_in(user, ip, time)
     return unless user.can?(:receive_notifications)
 
-    mailer.unknown_sign_in_email(user, ip, time, country: request_info.country, city: request_info.city).deliver_later
+    mailer.unknown_sign_in_email(user, ip, time).deliver_later
   end
 
   # Notify a user when a wrong 2FA OTP has been entered to
@@ -513,6 +512,12 @@ class NotificationService
     recipients.each { |recipient| deliver_access_request_email(recipient, member) }
   end
 
+  def decline_access_request(member)
+    return true unless member.notifiable?(:subscription)
+
+    mailer.member_access_denied_email(member.real_source_type, member.source_id, member.user_id).deliver_later
+  end
+
   def decline_invite(member)
     # Must always send, regardless of project/namespace configuration since it's a
     # response to the user's action.
@@ -693,18 +698,6 @@ class NotificationService
     return if project.emails_disabled?
 
     mailer.send(:repository_cleanup_failure_email, project, user, error).deliver_later
-  end
-
-  def repository_rewrite_history_success(project, user)
-    return if project.emails_disabled?
-
-    mailer.repository_rewrite_history_success_email(project, user).deliver_later
-  end
-
-  def repository_rewrite_history_failure(project, user, error)
-    return if project.emails_disabled?
-
-    mailer.repository_rewrite_history_failure_email(project, user, error).deliver_later
   end
 
   def remote_mirror_update_failed(remote_mirror)

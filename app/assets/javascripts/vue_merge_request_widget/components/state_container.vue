@@ -103,28 +103,28 @@ export default {
           class="media-body gl-leading-normal"
         >
           <slot></slot>
-        </div>
-        <div
-          :class="{
-            'state-container-action-buttons gl-flex-wrap lg:gl-justify-end': !actions.length,
-            'gl-pt-3 md:gl-pt-0': hasActionsSlot,
-          }"
-          class="gl-font-size-0 gl-flex gl-gap-3"
-        >
-          <slot name="actions">
-            <actions v-if="actions.length" :tertiary-buttons="actions" />
-          </slot>
+          <div
+            :class="{
+              'state-container-action-buttons gl-flex-wrap lg:gl-justify-end': !actions.length,
+              'gl-pt-3 md:gl-pt-0': hasActionsSlot,
+            }"
+            class="gl-font-size-0 gl-flex gl-gap-3"
+          >
+            <slot name="actions">
+              <actions v-if="actions.length" :tertiary-buttons="actions" />
+            </slot>
+          </div>
         </div>
         <div
           v-if="isCollapsible"
           :class="{ 'md:gl-hidden': !collapseOnDesktop }"
-          class="gl-border-l gl-ml-3 gl-h-6 gl-pl-3"
+          class="gl-ml-3 gl-h-6 gl-border-l-1 gl-border-gray-100 gl-pl-3 gl-border-l-solid"
         >
           <gl-button
             v-gl-tooltip
             :title="collapsed ? expandDetailsTooltip : collapseDetailsTooltip"
             :aria-label="collapsed ? expandDetailsTooltip : collapseDetailsTooltip"
-            :icon="collapsed ? 'chevron-lg-down' : 'chevron-lg-up'"
+            :icon="collapsed ? 'chevron-down' : 'chevron-up'"
             category="tertiary"
             size="small"
             class="gl-align-top"

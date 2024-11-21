@@ -34,11 +34,6 @@ export default {
       type: Boolean,
       required: true,
     },
-    title: {
-      type: String,
-      required: false,
-      default: '',
-    },
   },
   data() {
     return {
@@ -70,7 +65,7 @@ export default {
 <template>
   <gl-form-group>
     <template #label>
-      {{ title || config.title }}
+      {{ config.title }}
       <gl-link class="has-tooltip" title="More information" :href="helpLink">
         <gl-icon name="question-o" class="vertical-align-middle" />
       </gl-link>

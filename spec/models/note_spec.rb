@@ -34,7 +34,6 @@ RSpec.describe Note, feature_category: :team_planning do
 
     it { is_expected.to have_one(:note_metadata).inverse_of(:note).class_name('Notes::NoteMetadata') }
     it { is_expected.to belong_to(:review).inverse_of(:notes) }
-    it { is_expected.to have_many(:events) }
   end
 
   describe 'modules' do
@@ -99,14 +98,6 @@ RSpec.describe Note, feature_category: :team_planning do
 
     context 'when noteable is an abuse report' do
       subject { build(:note, noteable: build_stubbed(:abuse_report), project: nil, namespace: nil) }
-
-      it 'is not valid without project or namespace' do
-        is_expected.to be_invalid
-      end
-    end
-
-    context 'when noteable is a wiki page' do
-      subject { build(:note, noteable: build_stubbed(:wiki_page_meta), project: nil, namespace: nil) }
 
       it 'is not valid without project or namespace' do
         is_expected.to be_invalid
@@ -209,7 +200,7 @@ RSpec.describe Note, feature_category: :team_planning do
         end
 
         context 'when noteable is not allowed to have confidential notes' do
-          let_it_be(:noteable) { create(:project_snippet) }
+          let_it_be(:noteable) { create(:snippet) }
 
           it 'can not be set confidential' do
             expect(subject).not_to be_valid
@@ -1404,12 +1395,6 @@ RSpec.describe Note, feature_category: :team_planning do
     end
   end
 
-  describe '#for_wiki_page?' do
-    it 'returns true for a wiki_page' do
-      expect(build(:note_on_wiki_page).for_wiki_page?).to be_truthy
-    end
-  end
-
   describe '#for_design' do
     it 'is true when the noteable is a design' do
       note = build(:note, noteable: build(:design))
@@ -1447,10 +1432,6 @@ RSpec.describe Note, feature_category: :team_planning do
 
     it 'returns alert_management_alert for an alert note' do
       expect(build(:note_on_alert).noteable_ability_name).to eq('alert_management_alert')
-    end
-
-    it 'returns wiki page for a wiki page note' do
-      expect(build(:note_on_wiki_page).noteable_ability_name).to eq('wiki_page')
     end
   end
 

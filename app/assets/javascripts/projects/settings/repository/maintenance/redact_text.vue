@@ -28,11 +28,9 @@ const i18n = {
   ),
   modalConfirm: s__('ProjectMaintenance|To confirm, enter the following:'),
   redactTextError: s__('ProjectMaintenance|Something went wrong while redacting text.'),
-  scheduledRedactionSuccessAlertTitle: s__(
-    'ProjectMaintenance|Text redaction removal is scheduled.',
-  ),
-  scheduledSuccessAlertContent: s__(
-    'ProjectMaintenance|You will receive an email notification when the process is complete. To remove old versions from the repository, run housekeeping.',
+  successAlertTitle: s__('ProjectMaintenance|Text redacted'),
+  successAlertContent: s__(
+    'ProjectMaintenance|To remove old versions from the repository, run housekeeping.',
   ),
   successAlertButtonText: s__('ProjectMaintenance|Go to housekeeping'),
 };
@@ -116,8 +114,8 @@ export default {
     },
     generateSuccessAlert() {
       createAlert({
-        title: this.$options.i18n.scheduledRedactionSuccessAlertTitle,
-        message: this.$options.i18n.scheduledSuccessAlertContent,
+        title: i18n.successAlertTitle,
+        message: i18n.successAlertContent,
         variant: VARIANT_WARNING,
         primaryButton: {
           text: i18n.successAlertButtonText,

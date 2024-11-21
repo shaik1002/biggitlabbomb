@@ -54,7 +54,7 @@ module Integrations
 
       docs_link = ActionController::Base.helpers.link_to(
         '',
-        Rails.application.routes.url_helpers.help_page_url('user/project/integrations/google_play.md'),
+        Rails.application.routes.url_helpers.help_page_url('user/project/integrations/google_play'),
         target: '_blank',
         rel: 'noopener noreferrer'
       )

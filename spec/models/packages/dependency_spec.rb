@@ -20,7 +20,6 @@ RSpec.describe Packages::Dependency, type: :model, feature_category: :package_re
 
     it { is_expected.to validate_presence_of(:name) }
     it { is_expected.to validate_presence_of(:version_pattern) }
-    it { is_expected.to validate_presence_of(:project_id) }
 
     context 'uniqueness' do
       let_it_be(:project) { create(:project) }
@@ -64,13 +63,17 @@ RSpec.describe Packages::Dependency, type: :model, feature_category: :package_re
       create(:packages_dependency, name: 'foo', version_pattern: '~1.0.0', project: project)
     end
 
+    let_it_be(:package_dependency2) do
+      create(:packages_dependency, name: 'bar', version_pattern: '~2.5.0', project: nil)
+    end
+
     let_it_be(:package_dependency_diff_project) do
       create(:packages_dependency, name: 'bar', version_pattern: '~2.5.0', project: project2)
     end
 
-    let_it_be(:expected_ids) { [package_dependency1.id] }
+    let_it_be(:expected_ids) { [package_dependency1.id, package_dependency2.id] }
 
-    let(:names_and_version_patterns) { build_names_and_version_patterns(package_dependency1) }
+    let(:names_and_version_patterns) { build_names_and_version_patterns(package_dependency1, package_dependency2) }
     let(:chunk_size) { 50 }
     let(:rows_limit) { 50 }
 
@@ -100,7 +103,7 @@ RSpec.describe Packages::Dependency, type: :model, feature_category: :package_re
     context 'with a name bigger than column size' do
       let_it_be(:big_name) { 'a' * (Packages::Dependency::MAX_STRING_LENGTH + 1) }
 
-      let(:names_and_version_patterns) { build_names_and_version_patterns(package_dependency1).merge(big_name => '~1.0.0') }
+      let(:names_and_version_patterns) { build_names_and_version_patterns(package_dependency1, package_dependency2).merge(big_name => '~1.0.0') }
 
       it { is_expected.to match_array(expected_ids) }
     end
@@ -108,7 +111,7 @@ RSpec.describe Packages::Dependency, type: :model, feature_category: :package_re
     context 'with a version pattern bigger than column size' do
       let_it_be(:big_version_pattern) { 'a' * (Packages::Dependency::MAX_STRING_LENGTH + 1) }
 
-      let(:names_and_version_patterns) { build_names_and_version_patterns(package_dependency1).merge('test' => big_version_pattern) }
+      let(:names_and_version_patterns) { build_names_and_version_patterns(package_dependency1, package_dependency2).merge('test' => big_version_pattern) }
 
       it { is_expected.to match_array(expected_ids) }
     end
@@ -121,28 +124,28 @@ RSpec.describe Packages::Dependency, type: :model, feature_category: :package_re
     end
 
     context 'with parameters size' do
-      let_it_be(:package_dependency2) do
+      let_it_be(:package_dependency3) do
         create(:packages_dependency, name: 'foo3', version_pattern: '~1.5.3', project: project)
       end
 
-      let_it_be(:package_dependency3) do
+      let_it_be(:package_dependency4) do
         create(:packages_dependency, name: 'foo4', version_pattern: '~1.5.4', project: project)
       end
 
-      let_it_be(:package_dependency4) do
+      let_it_be(:package_dependency5) do
         create(:packages_dependency, name: 'foo5', version_pattern: '~1.5.5', project: project)
       end
 
-      let_it_be(:package_dependency5) do
+      let_it_be(:package_dependency6) do
         create(:packages_dependency, name: 'foo6', version_pattern: '~1.5.6', project: project)
       end
 
-      let_it_be(:package_dependency6) do
+      let_it_be(:package_dependency7) do
         create(:packages_dependency, name: 'foo7', version_pattern: '~1.5.7', project: project)
       end
 
-      let(:expected_ids) { [package_dependency1.id, package_dependency2.id, package_dependency3.id, package_dependency4.id, package_dependency5.id, package_dependency6.id] }
-      let(:names_and_version_patterns) { build_names_and_version_patterns(package_dependency1, package_dependency2, package_dependency3, package_dependency4, package_dependency5, package_dependency6) }
+      let(:expected_ids) { [package_dependency1.id, package_dependency2.id, package_dependency3.id, package_dependency4.id, package_dependency5.id, package_dependency6.id, package_dependency7.id] }
+      let(:names_and_version_patterns) { build_names_and_version_patterns(package_dependency1, package_dependency2, package_dependency3, package_dependency4, package_dependency5, package_dependency6, package_dependency7) }
 
       context 'above the chunk size' do
         let(:chunk_size) { 2 }
@@ -163,13 +166,17 @@ RSpec.describe Packages::Dependency, type: :model, feature_category: :package_re
       create(:packages_dependency, name: 'foo', version_pattern: '~1.0.0', project: project)
     end
 
+    let_it_be(:package_dependency2) do
+      create(:packages_dependency, name: 'bar', version_pattern: '~2.5.0', project: nil)
+    end
+
     let_it_be(:package_dependency_diff_project) do
       create(:packages_dependency, name: 'bar', version_pattern: '~2.5.0', project: project2)
     end
 
-    let_it_be(:expected_array) { [package_dependency1] }
+    let_it_be(:expected_array) { [package_dependency1, package_dependency2] }
 
-    let(:names_and_version_patterns) { build_names_and_version_patterns(package_dependency1) }
+    let(:names_and_version_patterns) { build_names_and_version_patterns(package_dependency1, package_dependency2) }
 
     subject do
       described_class.for_package_project_id_names_and_version_patterns(project.id, names_and_version_patterns)
@@ -200,6 +207,17 @@ RSpec.describe Packages::Dependency, type: :model, feature_category: :package_re
 
     it 'returns orphaned dependency records' do
       expect(described_class.orphaned).to contain_exactly(*orphaned_dependencies)
+    end
+  end
+
+  # TODO: remove the update operation when all packages dependencies have a `project_id`.
+  # https://gitlab.com/gitlab-org/gitlab/-/issues/481541
+  describe '.without_project' do
+    let_it_be(:dependency_1) { create(:packages_dependency, project: nil) }
+    let_it_be(:dependency_2) { create(:packages_dependency) }
+
+    it 'returns dependency records without project' do
+      expect(described_class.without_project).to contain_exactly(dependency_1)
     end
   end
 

@@ -19,15 +19,16 @@ import { slugify } from '~/lib/utils/text_utility';
 import DropdownKeyboardNavigation from '~/vue_shared/components/dropdown_keyboard_navigation.vue';
 
 import { I18N } from '~/vue_shared/global_search/constants';
+import LabelDropdownItems from './label_dropdown_items.vue';
+
 import {
   FIRST_DROPDOWN_INDEX,
   SEARCH_BOX_INDEX,
-  SEARCH_INPUT_DESCRIPTION,
   SEARCH_RESULTS_DESCRIPTION,
-  LABEL_FILTER_HEADER,
+  SEARCH_INPUT_DESCRIPTION,
   LABEL_FILTER_PARAM,
-} from '../../constants';
-import LabelDropdownItems from './label_dropdown_items.vue';
+  LABEL_FILTER_HEADER,
+} from './data';
 
 import { trackSelectCheckbox, trackOpenDropdown } from './tracking';
 
@@ -58,7 +59,6 @@ export default {
     ...mapState(['searchLabelString', 'query', 'urlQuery', 'aggregations']),
     ...mapGetters([
       'filteredLabels',
-      'labelAggregationBuckets',
       'filteredUnselectedLabels',
       'filteredAppliedSelectedLabels',
       'appliedSelectedLabels',
@@ -83,12 +83,9 @@ export default {
       return this.$refs.searchLabelInputBox?.$el.querySelector('[role=searchbox]');
     },
     combinedSelectedFilters() {
-      const appliedSelectedLabelKeys = this.appliedSelectedLabels.map((label) => label.title);
+      const appliedSelectedLabelKeys = this.appliedSelectedLabels.map((label) => label.key);
       const { labels = [] } = this.query;
-
-      const uniqueResults = uniq([...appliedSelectedLabelKeys, ...labels]);
-
-      return uniqueResults;
+      return uniq([...appliedSelectedLabelKeys, ...labels]);
     },
     searchLabels: {
       get() {
@@ -100,7 +97,7 @@ export default {
     },
     selectedLabels: {
       get() {
-        return this.convertLabelNamesToIds(this.combinedSelectedLabels);
+        return this.combinedSelectedLabels;
       },
       set(value) {
         const labelName = this.getLabelNameById(value);
@@ -162,20 +159,12 @@ export default {
     },
     getLabelNameById(labelIds) {
       const labelNames = labelIds.map((id) => {
-        const label = this.labelAggregationBuckets.find((filteredLabel) => {
+        const label = this.filteredLabels.find((filteredLabel) => {
           return filteredLabel.key === String(id);
         });
         return label?.title;
       });
       return labelNames;
-    },
-    convertLabelNamesToIds(labelNames) {
-      const labels = labelNames.map((labelName) =>
-        this.labelAggregationBuckets.find((label) => {
-          return label.title === labelName;
-        }),
-      );
-      return labels.map((label) => label.key);
     },
   },
   FIRST_DROPDOWN_INDEX,
@@ -251,7 +240,7 @@ export default {
       v-if="isFocused"
       v-outside.click.focusin="closeDropdown"
       data-testid="header-search-dropdown-menu"
-      class="header-search-dropdown-menu gl-absolute gl-z-2 gl-mt-3 !gl-w-full !gl-min-w-full !gl-max-w-none gl-overflow-y-auto gl-rounded-base gl-border-1 gl-border-solid gl-border-dropdown gl-bg-white gl-shadow-x0-y2-b4-s0"
+      class="header-search-dropdown-menu gl-absolute gl-z-2 gl-mt-3 !gl-w-full !gl-min-w-full !gl-max-w-none gl-overflow-y-auto gl-rounded-base gl-border-1 gl-border-solid gl-border-gray-200 gl-bg-white gl-shadow-x0-y2-b4-s0"
     >
       <div class="header-search-dropdown-content gl-py-2">
         <dropdown-keyboard-navigation
@@ -270,7 +259,6 @@ export default {
               <label-dropdown-items
                 v-if="hasSelectedLabels"
                 :labels="filteredAppliedSelectedLabels"
-                data-testid="selected-labels-checkboxes"
               />
               <gl-dropdown-divider v-if="hasSelectedLabels && hasUnselectedLabels" />
               <label-dropdown-items v-if="hasUnselectedLabels" :labels="filteredUnselectedLabels" />

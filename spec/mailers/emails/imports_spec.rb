@@ -91,9 +91,7 @@ RSpec.describe Emails::Imports, feature_category: :importers do
     let(:user) { build_stubbed(:user) }
     let(:group) { build_stubbed(:group) }
     let(:source_user) do
-      build_stubbed(
-        :import_source_user, :awaiting_approval, :with_reassigned_by_user, namespace: group, reassign_to_user: user
-      )
+      build_stubbed(:import_source_user, :with_reassigned_by_user, namespace: group, reassign_to_user: user)
     end
 
     subject { Notify.import_source_user_reassign('user_id') }
@@ -111,7 +109,7 @@ RSpec.describe Emails::Imports, feature_category: :importers do
       is_expected.to have_content(
         "Reassigned by: #{source_user.reassigned_by_user.name} (@#{source_user.reassigned_by_user.username})"
       )
-      is_expected.to have_body_text(import_source_user_url(source_user.reassignment_token))
+      is_expected.to have_body_text(import_source_user_url(source_user))
     end
 
     it_behaves_like 'appearance header and footer enabled'

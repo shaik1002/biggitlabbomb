@@ -1,5 +1,9 @@
 @import 'mixins_and_variables_and_functions';
 
+.compare-versions-container {
+  min-width: 0;
+}
+
 .diff-comment-avatar-holders {
   position: absolute;
   margin-left: -$gl-padding;
@@ -125,13 +129,6 @@
   .vue-recycle-scroller__item-wrapper {
     overflow: visible;
   }
-
-  .diff-file {
-    &.diff-file-is-active,
-    &:has(*:not(textarea):focus-visible) {
-      box-shadow: 0 0 0 2px var(--gl-border-color-strong);
-    }
-  }
 }
 
 .diff-grid {
@@ -144,6 +141,10 @@
   .diff-grid-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
+
+    &.diff-grid-row-full {
+      grid-template-columns: 1fr;
+    }
   }
 
   .diff-grid-left,
@@ -172,7 +173,7 @@
     grid-template-columns: 1fr 1fr;
 
     .content + .content {
-      @apply gl-border-t;
+      @include gl-border-t;
     }
 
     .notes-content {
@@ -272,8 +273,21 @@
   }
 }
 
+.tree-list-scroll {
+  max-height: 100%;
+  padding-bottom: $grid-size;
+  overflow-y: scroll;
+  overflow-x: auto;
+}
+
 .tree-list-gutter {
   height: $grid-size;
+}
+
+.tree-list-clear-icon {
+  right: 10px;
+  left: auto;
+  line-height: 0;
 }
 
 .file-row-header {
@@ -312,11 +326,15 @@
   @include media-breakpoint-down(sm) {
     align-items: initial;
     flex-direction: column;
+
+    .dropdown .mini-pipeline-graph-dropdown-menu.dropdown-menu {
+      transform: initial;
+    }
   }
 
   .coverage {
     font-size: 12px;
-    @apply gl-text-subtle;
+    color: var(--gray-500, $gray-500);
     line-height: initial;
   }
 }
@@ -325,7 +343,25 @@
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  justify-content: space-between;
+
+  @include media-breakpoint-up(xs) {
+    flex-wrap: nowrap;
+    white-space: nowrap;
+  }
+
+  @container mr-widget-extension (max-width: 600px) {
+    flex-direction: column;
+    align-items: flex-start;
+
+    .deployment-info {
+      margin-bottom: $gl-padding-8;
+    }
+
+    // stylelint-disable-next-line gitlab/no-gl-class
+    .gl-button {
+      margin-left: 0;
+    }
+  }
 
   > *:not(:last-child) {
     margin-right: 0.3em;
@@ -336,9 +372,19 @@
   }
 
   .deployment-info {
-    white-space: nowrap;display: grid;
+    flex: 1;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    min-width: 100px;
+
+    display: grid;
     grid-template-columns: max-content minmax(0, max-content) max-content;
     grid-gap: $gl-spacing-scale-2;
+
+    @include media-breakpoint-up(xs) {
+      min-width: 0;
+      max-width: 100%;
+    }
   }
 
   .dropdown-menu {
@@ -410,7 +456,9 @@
 }
 
 .mr-section-container {
-  @apply gl-bg-section gl-border gl-border-section gl-rounded-base;
+  border: 1px solid var(--gl-border-color-default);
+  border-radius: $gl-border-radius-base;
+  background: var(--white, $white);
 
   &:not(:first-child) {
     @apply gl-mt-5;
@@ -450,6 +498,10 @@
     border-radius: $gl-border-radius-base;
   }
 
+  .mr-widget-alert-container + .mr-widget-section {
+    border-top: 0;
+  }
+
   .commits-list {
     > li {
       padding: $gl-padding;
@@ -484,6 +536,13 @@
     font-size: $gl-font-size;
   }
 
+  .accept-merge-holder {
+    .accept-action {
+      display: inline-block;
+      float: left;
+    }
+  }
+
   .ci-widget {
     color: var(--gl-text-color-default);
     display: flex;
@@ -503,6 +562,10 @@
 
   .mr-widget-icon {
     font-size: 22px;
+  }
+
+  .mr-loading-icon {
+    margin: 3px 0;
   }
 
   .normal {
@@ -525,7 +588,7 @@
   }
 
   .label-branch {
-    @apply gl-font-monospace;
+    @include gl-font-monospace;
     overflow: hidden;
     word-break: break-all;
   }
@@ -576,6 +639,11 @@
       margin: 0 0 0 10px;
     }
 
+    .state-label {
+      font-weight: $gl-font-weight-bold;
+      padding-right: 10px;
+    }
+
     .danger {
       color: var(--red-500, $red-500);
     }
@@ -583,6 +651,14 @@
     .dropdown-menu {
       li a {
         padding: 5px;
+      }
+
+      .merge-opt-icon {
+        line-height: 1.5;
+      }
+
+      .merge-opt-title {
+        margin-left: 8px;
       }
     }
 
@@ -608,6 +684,29 @@
       }
     }
 
+    &.mr-widget-empty-state {
+      line-height: 20px;
+      padding: $gl-padding;
+
+      .artwork {
+
+        @include media-breakpoint-down(md) {
+          margin-bottom: $gl-padding;
+        }
+      }
+
+      .text {
+        p {
+          margin-top: $gl-padding;
+        }
+
+        .highlight {
+          margin: 0 0 $gl-padding;
+          font-weight: $gl-font-weight-bold;
+        }
+      }
+    }
+
     &.mr-pipeline-suggest {
       border-radius: $gl-border-radius-base;
       line-height: 20px;
@@ -616,6 +715,19 @@
       .circle-icon-container {
         color: var(--gray-100, $gray-100);
       }
+    }
+  }
+
+  .ci-coverage {
+    float: right;
+  }
+
+  .stop-env-container {
+    color: var(--gl-text-color-default);
+    float: right;
+
+    a {
+      color: var(--gl-text-color-default);
     }
   }
 }
@@ -645,7 +757,8 @@
 }
 
 .mr-widget-extension {
-  @apply gl-bg-subtle gl-border-t gl-border-t-section;
+  border-top: 1px solid var(--gl-border-color-default);
+  background-color: var(--gray-10, $gray-10);
   container-name: mr-widget-extension;
   container-type: inline-size;
   // Adds a fix for the view app dropdown not showing up
@@ -654,7 +767,7 @@
   z-index: 1;
 
   &.clickable:hover {
-    @apply gl-bg-strong;
+    background-color: var(--gray-50, $gray-50);
     cursor: pointer;
   }
 }
@@ -846,29 +959,6 @@
   .gl-toggle-label {
     font-weight: $gl-font-weight-normal;
   }
-}
-
-.mr-widget-status-icon-neutral,
-.mr-widget-status-icon-notice {
-  color: var(--gl-status-neutral-icon-color);
-}
-
-.mr-widget-status-icon-warning {
-  color: var(--gl-status-warning-icon-color);
-}
-
-.mr-widget-status-icon-failed,
-.mr-widget-status-icon-error {
-  color: var(--gl-status-danger-icon-color);
-}
-
-.mr-widget-status-icon-success {
-  color: var(--gl-status-success-icon-color);
-}
-
-.mr-widget-status-icon-info,
-.mr-widget-status-icon-scheduled {
-  color: var(--gl-status-info-icon-color);
 }
 
 .mr-widget-status-icon-level-1::before {

@@ -61,11 +61,10 @@ module Emails
     # rubocop: enable CodeReuse/ActiveRecord
 
     # resource owners are sent mail about expiring access tokens which belong to a bot user
-    def bot_resource_access_token_about_to_expire_email(recipient, resource, token_name, params = {})
-      params = params.with_indifferent_access
+    def bot_resource_access_token_about_to_expire_email(recipient, resource, token_name)
       @user = recipient
       @token_name = token_name
-      @days_to_expire = params.fetch(:days_to_expire, PersonalAccessToken::DAYS_TO_EXPIRE)
+      @days_to_expire = PersonalAccessToken::DAYS_TO_EXPIRE
       @resource = resource
       if resource.is_a?(Group)
         @target_url = group_settings_access_tokens_url(resource)
@@ -93,30 +92,18 @@ module Emails
       @target_url = user_settings_personal_access_tokens_url
       @token_name = token_name
 
-      email_with_layout(
-        to: @user.notification_email_or_default,
-        subject: subject(_("A new personal access token has been created"))
-      )
+      email_with_layout(to: @user.notification_email_or_default, subject: subject(_("A new personal access token has been created")))
     end
 
-    def access_token_about_to_expire_email(user, token_names, params = {})
+    def access_token_about_to_expire_email(user, token_names)
       return unless user
-
-      params = params.with_indifferent_access
 
       @user = user
       @token_names = token_names
       @target_url = user_settings_personal_access_tokens_url
-      @days_to_expire = params.fetch(:days_to_expire, PersonalAccessToken::DAYS_TO_EXPIRE)
+      @days_to_expire = PersonalAccessToken::DAYS_TO_EXPIRE
 
-      email_with_layout(
-        to: @user.notification_email_or_default,
-        subject: subject(
-          _("Your personal access tokens will expire in %{days_to_expire} days or less") % {
-            days_to_expire: @days_to_expire
-          }
-        )
-      )
+      email_with_layout(to: @user.notification_email_or_default, subject: subject(_("Your personal access tokens will expire in %{days_to_expire} days or less") % { days_to_expire: @days_to_expire }))
     end
 
     def access_token_expired_email(user, token_names = [])
@@ -126,10 +113,7 @@ module Emails
       @token_names = token_names
       @target_url = user_settings_personal_access_tokens_url
 
-      email_with_layout(
-        to: @user.notification_email_or_default,
-        subject: subject(_("Your personal access tokens have expired"))
-      )
+      email_with_layout(to: @user.notification_email_or_default, subject: subject(_("Your personal access tokens have expired")))
     end
 
     def access_token_revoked_email(user, token_name, source = nil)
@@ -140,10 +124,7 @@ module Emails
       @target_url = user_settings_personal_access_tokens_url
       @source = source
 
-      email_with_layout(
-        to: @user.notification_email_or_default,
-        subject: subject(_("Your personal access token has been revoked"))
-      )
+      email_with_layout(to: @user.notification_email_or_default, subject: subject(_("Your personal access token has been revoked")))
     end
 
     def ssh_key_expired_email(user, fingerprints)
@@ -166,11 +147,9 @@ module Emails
       mail_with_locale(to: @user.notification_email_or_default, subject: subject(_("Your SSH key is expiring soon.")))
     end
 
-    def unknown_sign_in_email(user, ip, time, request_info = {})
+    def unknown_sign_in_email(user, ip, time)
       @user = user
       @ip = ip
-      @city = request_info[:city]
-      @country = request_info[:country]
       @time = time
       @target_url = edit_user_settings_password_url
 
@@ -186,12 +165,7 @@ module Emails
 
       email_with_layout(
         to: @user.notification_email_or_default,
-        subject: subject(
-          _("Attempted sign in to %{host} using an incorrect verification code") % {
-            host: Gitlab.config.gitlab.host
-          }
-        )
-      )
+        subject: subject(_("Attempted sign in to %{host} using an incorrect verification code") % { host: Gitlab.config.gitlab.host }))
     end
 
     def disabled_two_factor_email(user)
@@ -199,10 +173,7 @@ module Emails
 
       @user = user
 
-      email_with_layout(
-        to: @user.notification_email_or_default,
-        subject: subject(_("Two-factor authentication disabled"))
-      )
+      email_with_layout(to: @user.notification_email_or_default, subject: subject(_("Two-factor authentication disabled")))
     end
 
     def new_email_address_added_email(user, email)
@@ -222,12 +193,7 @@ module Emails
 
       email_with_layout(
         to: @user.notification_email_or_default,
-        subject: subject(
-          s_("Achievements|%{namespace_full_path} awarded you the %{achievement_name} achievement") % {
-            namespace_full_path: @achievement.namespace.full_path, achievement_name: @achievement.name
-          }
-        )
-      )
+        subject: subject(s_("Achievements|%{namespace_full_path} awarded you the %{achievement_name} achievement") % { namespace_full_path: @achievement.namespace.full_path, achievement_name: @achievement.name }))
     end
   end
 end

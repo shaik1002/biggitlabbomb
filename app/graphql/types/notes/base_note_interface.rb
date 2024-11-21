@@ -7,8 +7,6 @@ module Types
 
       implements Types::ResolvableInterface
 
-      include MarkupHelper
-
       field :author, Types::UserType,
         null: true,
         description: 'User who wrote the note.'

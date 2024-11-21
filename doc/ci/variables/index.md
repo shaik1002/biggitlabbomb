@@ -57,44 +57,35 @@ value with the [`variables`](../yaml/index.md#variables) keyword.
 Variables saved in the `.gitlab-ci.yml` file are visible to all users with access to
 the repository, and should store only non-sensitive project configuration. For example,
 the URL of a database saved in a `DATABASE_URL` variable. Sensitive variables containing values
-like secrets or keys should be [added in the UI](#define-a-cicd-variable-in-the-ui).
+like secrets or keys should be [stored in project settings](#define-a-cicd-variable-in-the-ui).
 
-You can define `variables` in a job or at the top level of the `.gitlab-ci.yml` file.
+You can use `variables` in a job or at the top level of the `.gitlab-ci.yml` file.
 If the variable is defined:
 
-- In a job, only that job can use it. You can use the variable in the job's `script`, `before_script`, or `after_script` sections,
-  and also with some [job keywords](../yaml/index.md#job-keywords), but not [global keywords](../yaml/index.md#global-keywords).
-- In a global (top-level) `variables` section, it acts as a default variable for all jobs.
-  Each global variable is made available to every job in the pipeline, except when the job already has a variable
-  defined with the same name. The variable defined in the job [takes precedence](../variables/index.md#cicd-variable-precedence),
-  so you cannot use the value of the global variable with the same name in the job.
-
-  Like job variables, you cannot use global variables as values for other global keywords.
+- At the top level, it's globally available and all jobs can use it.
+- In a job, only that job can use it.
 
 For example:
 
 ```yaml
 variables:
-  ALL_JOBS_VAR: "A global variable"
+  GLOBAL_VAR: "A global variable"
 
 job1:
   variables:
-    JOB1_VAR: "Job 1 variable"
+    JOB_VAR: "A job variable"
   script:
-    - echo "Variables are '$ALL_JOBS_VAR' and '$JOB1_VAR'"
+    - echo "Variables are '$GLOBAL_VAR' and '$JOB_VAR'"
 
 job2:
-  variables:
-    ALL_JOBS_VAR: "Different value than global"
-    JOB2_VAR: "Job 2 variable"
   script:
-    - echo "Variables are '$ALL_JOBS_VAR', '$JOB2_VAR', and '$JOB1_VAR'"
+    - echo "Variables are '$GLOBAL_VAR' and '$JOB_VAR'"
 ```
 
 In this example:
 
-- `job1` outputs: `Variables are 'A global variable' and 'Job 1 variable'`
-- `job2` outputs: `Variables are 'Different value than global', 'Job 2 variable', and ''`
+- `job1` outputs `Variables are 'A global variable' and 'A job variable'`
+- `job2` outputs `Variables are 'A global variable' and ''`
 
 Use the [`value` and `description`](../yaml/index.md#variablesdescription) keywords
 to define [variables that are prefilled](../pipelines/index.md#prefill-variables-in-manual-pipelines)
@@ -119,7 +110,7 @@ job1:
 
 Sensitive variables like tokens or passwords should be stored in the settings in the UI,
 not [in the `.gitlab-ci.yml` file](#define-a-cicd-variable-in-the-gitlab-ciyml-file).
-Add CI/CD variables in the UI:
+Define CI/CD variables in the UI:
 
 - For a project [in the project's settings](#for-a-project).
 - For all projects in a group [in the group's setting](#for-a-group).
@@ -137,8 +128,8 @@ all variables become available to the pipeline.
 
 ### For a project
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/362227) in GitLab 15.7, projects can have a maximum of 200 CI/CD variables.
-> - [Updated](https://gitlab.com/gitlab-org/gitlab/-/issues/373289) in GitLab 15.9, projects can have a maximum of 8000 CI/CD variables.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/362227) in GitLab 15.7, projects can define a maximum of 200 CI/CD variables.
+> - [Updated](https://gitlab.com/gitlab-org/gitlab/-/issues/373289) in GitLab 15.9, projects can define a maximum of 8000 CI/CD variables.
 
 You can add CI/CD variables to a project's settings.
 
@@ -157,19 +148,22 @@ To add or update variables in the project settings:
    - **Type**: `Variable` (default) or [`File`](#use-file-type-cicd-variables).
    - **Environment scope**: Optional. **All (default)** (`*`), a specific [environment](../environments/index.md#types-of-environments),
      or a wildcard [environment scope](../environments/index.md#limit-the-environment-scope-of-a-cicd-variable).
-   - **Protect variable** Optional. If selected, the variable is only available in pipelines
-     that run on [protected branches](../../user/project/repository/branches/protected.md)
-     or [protected tags](../../user/project/protected_tags.md).
-   - **Visibility**: Select **Visible** (default), [**Masked**](#mask-a-cicd-variable),
-     or [**Masked and hidden**](#hide-a-cicd-variable) (only available for new variables).
+   - **Protect variable** Optional. If selected, the variable is only available
+     in pipelines that run on [protected branches](../../user/project/repository/branches/protected.md) or [protected tags](../../user/project/protected_tags.md).
+   - **Visibility**:
+      - **Visible**: The variable's **Value** is visible in job logs and shown in variables settings.
+      - **Masked**: The variable's **Value** is masked in job logs, but it is still shown in variables settings.
+        The variable fails to save if the value does not meet the [masking requirements](#mask-a-cicd-variable).
+      - **Masked and hidden**: The variable's **Value** is masked in job logs, and it will not be shown in variables settings.
+        The variable fails to save if the value does not meet the [masking requirements](#mask-a-cicd-variable).
 
 After you create a variable, you can use it in the pipeline configuration
 or in [job scripts](#use-cicd-variables-in-job-scripts).
 
 ### For a group
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/362227) in GitLab 15.7, groups can have a maximum of 200 CI/CD variables.
-> - [Updated](https://gitlab.com/gitlab-org/gitlab/-/issues/373289) in GitLab 15.9, groups can have a maximum of 30000 CI/CD variables.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/362227) in GitLab 15.7, groups can define a maximum of 200 CI/CD variables.
+> - [Updated](https://gitlab.com/gitlab-org/gitlab/-/issues/373289) in GitLab 15.9, groups can define a maximum of 30000 CI/CD variables.
 
 You can make a CI/CD variable available to all projects in a group.
 
@@ -186,11 +180,14 @@ To add a group variable:
    - **Key**: Must be one line, with no spaces, using only letters, numbers, or `_`.
    - **Value**: No limitations.
    - **Type**: `Variable` (default) or [`File`](#use-file-type-cicd-variables).
-   - **Protect variable** Optional. If selected, the variable is only available in pipelines
-     that run on [protected branches](../../user/project/repository/branches/protected.md)
-     or [protected tags](../../user/project/protected_tags.md).
-   - **Visibility**: Select **Visible** (default), [**Masked**](#mask-a-cicd-variable),
-     or [**Masked and hidden**](#hide-a-cicd-variable) (only available for new variables).
+   - **Protect variable** Optional. If selected, the variable is only available
+     in pipelines that run on protected branches or tags.
+   - **Visibility**:
+      - **Visible**: The variable's **Value** is visible in job logs and shown in variables settings.
+      - **Masked**: The variable's **Value** is masked in job logs, but it is still shown in variables settings.
+        The variable fails to save if the value does not meet the [masking requirements](#mask-a-cicd-variable).
+      - **Masked and hidden**: The variable's **Value** is masked in job logs, and it will not be shown in variables settings.
+        The variable fails to save if the value does not meet the [masking requirements](#mask-a-cicd-variable).
 
 The group variables that are available in a project are listed in the project's
 **Settings > CI/CD > Variables** section. Variables from [subgroups](../../user/group/subgroups/index.md)
@@ -232,11 +229,12 @@ To add an instance variable:
    - **Value**: The value is limited to 10,000 characters, but also bounded by any limits in the
      runner's operating system.
    - **Type**: `Variable` (default) or [`File`](#use-file-type-cicd-variables).
-   - **Protect variable** Optional. If selected, the variable is only available in pipelines
-     that run on [protected branches](../../user/project/repository/branches/protected.md)
-     or [protected tags](../../user/project/protected_tags.md).
-   - **Visibility**: Select **Visible** (default), [**Masked**](#mask-a-cicd-variable),
-     or [**Masked and hidden**](#hide-a-cicd-variable) (only available for new variables).
+   - **Protect variable** Optional. If selected, the variable is only available
+     in pipelines that run on protected branches or tags.
+   - **Visibility**:
+      - **Visible**: The variable's **Value** is visible in job logs and shown in variables settings.
+      - **Masked**: The variable's **Value** is masked in job logs, but it is still shown in variables settings.
+        The variable fails to save if the value does not meet the [masking requirements](#mask-a-cicd-variable).
 
 ## CI/CD variable security
 
@@ -294,19 +292,18 @@ consider using [external secrets](../secrets/index.md) and [file type variables]
 to prevent commands such as `env`/`printenv` from printing secret variables.
 
 You can mask a project, group, or instance CI/CD variable so the value of the variable
-does not display in job logs. When a masked CI/CD variable would be displayed in a job log,
-the value is replaced with `[masked]` to prevent the value from being exposed.
+does not display in job logs.
 
 Prerequisites:
 
-- You must have the same role or access level as required to [add a CI/CD variable in the UI](#define-a-cicd-variable-in-the-ui).
+- You must have the same role or access level as required to [define a CI/CD variable in the UI](#define-a-cicd-variable-in-the-ui).
 
 To mask a variable:
 
 1. For the group, project, or in the **Admin** area, select **Settings > CI/CD**.
 1. Expand **Variables**.
 1. Next to the variable you want to protect, select **Edit**.
-1. Under **Visibility**, select **Mask variable**.
+1. Select the **Mask variable** checkbox.
 1. Select **Update variable**.
 
 The method used to mask variables [limits what can be included in a masked variable](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/13784#note_106756757).
@@ -315,7 +312,7 @@ The value of the variable must:
 - Be a single line with no spaces.
 - Be 8 characters or longer.
 - Not match the name of an existing predefined or custom CI/CD variable.
-- Not include non-alphanumeric characters other than `@`, `_`, `-`, `:`, or `+`.
+- Not include non-alpha-numeric characters other than `@`, `_`, `-`, `:`, or `+`.
 
 Additionally, if [variable expansion](#prevent-cicd-variable-expansion) is enabled,
 the value can contain only:
@@ -325,8 +322,7 @@ the value can contain only:
 
 Masking a variable automatically masks the value anywhere in a job log. If another
 variable has the same value, that value is also masked, including when a variable
-references a masked variable. The string `[MASKED]` is shown instead of the value,
-possibly with some trailing `x` characters.
+references a masked variable.
 
 Different versions of [GitLab Runner](../runners/index.md) have different masking limitations:
 
@@ -335,25 +331,6 @@ Different versions of [GitLab Runner](../runners/index.md) have different maskin
 | v14.1.0 and earlier | Masking of large secrets (greater than 4 KiB) could potentially be [revealed](https://gitlab.com/gitlab-org/gitlab-runner/-/issues/28128). No sensitive URL parameter masking. |
 | v14.2.0 to v15.3.0  | The tail of a large secret (greater than 4 KiB) could potentially be [revealed](https://gitlab.com/gitlab-org/gitlab-runner/-/issues/28128). No sensitive URL parameter masking. |
 | v15.7.0 and later   | Secrets could be revealed when `CI_DEBUG_SERVICES` is enabled. For details, read about [service container logging](../services/index.md#capturing-service-container-logs). |
-
-### Hide a CI/CD variable
-
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/29674) in GitLab 17.4 [with a flag](../../administration/feature_flags.md) named `ci_hidden_variables`. Enabled by default.
-> - [Generally available](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/165843) in GitLab 17.6. Feature flag `ci_hidden_variables` removed.
-
-In addition to masking, you can also prevent the value of CI/CD variables from being revealed
-in the **CI/CD** settings page. Hiding a variable is only possible when creating a new variable,
-you cannot update an existing variable to be hidden.
-
-Prerequisites:
-
-- You must have the same role or access level as required to [add a CI/CD variable in the UI](#define-a-cicd-variable-in-the-ui).
-- The variable value must match the [requirements for masked variables](#mask-a-cicd-variable).
-
-To hide a variable, select **Masked and hidden** in the **Visibility** section when
-you [add a new CI/CD variable in the UI](#define-a-cicd-variable-in-the-ui).
-After you save the variable, the variable can be used in CI/CD pipelines, but cannot
-be revealed in the UI again.
 
 ### Protect a CI/CD variable
 
@@ -365,7 +342,7 @@ or [protected tags](../../user/project/protected_tags.md).
 
 Prerequisites:
 
-- You must have the same role or access level as required to [add a CI/CD variable in the UI](#define-a-cicd-variable-in-the-ui).
+- You must have the same role or access level as required to [define a CI/CD variable in the UI](#define-a-cicd-variable-in-the-ui).
 
 To set a variable as protected:
 
@@ -504,7 +481,7 @@ job_name:
 
 [Service containers](../docker/using_docker_images.md) can use CI/CD variables, but
 by default can only access [variables saved in the `.gitlab-ci.yml` file](#define-a-cicd-variable-in-the-gitlab-ciyml-file).
-Variables [added in the GitLab UI](#define-a-cicd-variable-in-the-ui) are not available to
+Variables [set in the GitLab UI](#define-a-cicd-variable-in-the-ui) are not available to
 service containers, because service containers are not trusted by default.
 
 To make a UI-defined variable available in a service container, you can re-assign
@@ -685,24 +662,6 @@ job1:
         done
 ```
 
-### As part of a string
-
-You can use variables as part of a string. You can surround the variables with curly brackets (`{}`)
-to help distinguish the variable name from the surrounding text. Without curly brackets,
-the adjacent text is interpreted as part of the variable name. For example:
-
-```yaml
-job:
-  variables:
-    FLAGS: '-al'
-    DIR: 'path/to/directory'
-    LS_CMD: 'ls "$FLAGS"'
-    CD_CMD: 'cd "${DIR}_files"'
-  script:
-    - 'eval "$LS_CMD"'  # Executes 'ls -al'
-    - 'eval "$CD_CMD"'  # Executes 'cd path/to/directory_files'
-```
-
 ## Use CI/CD variables in other variables
 
 You can use variables inside other variables:
@@ -740,7 +699,7 @@ disable variable expansion for the variable
 
 Prerequisites:
 
-- You must have the same role or access level as required to [add a CI/CD variable in the UI](#define-a-cicd-variable-in-the-ui).
+- You must have the same role or access level as required to [define a CI/CD variable in the UI](#define-a-cicd-variable-in-the-ui).
 
 To disable variable expansion for the variable:
 
@@ -762,7 +721,7 @@ The order of precedence for variables is (from highest to lowest):
 
 1. [Pipeline execution policy variables](../../user/application_security/policies/pipeline_execution_policies.md#cicd-variables).
 1. [Scan execution policy variables](../../user/application_security/policies/scan_execution_policies.md).
-1. [Pipeline variables](#use-pipeline-variables). These variables all have the same precedence:
+1. Pipeline variables. These variables all have the same precedence:
    - [Variables passed to downstream pipelines](../pipelines/downstream_pipelines.md#pass-cicd-variables-to-a-downstream-pipeline).
    - [Trigger variables](../triggers/index.md#pass-cicd-variables-in-the-api-call).
    - [Scheduled pipeline variables](../pipelines/schedules.md#add-a-pipeline-schedule).
@@ -797,67 +756,53 @@ job1:
 In this example, `job1` outputs `The variable is 'secure'` because variables defined in jobs in the `.gitlab-ci.yml` file
 have higher precedence than variables defined globally in the `.gitlab-ci.yml` file.
 
-## Use pipeline variables
+### Override a defined CI/CD variable
 
-Pipeline variables are variables that are specified when running a new pipeline.
-
-Prerequisites:
-
-- You must have the Developer role in the project.
-
-You can specify a pipeline variable when you:
+You can override the value of a variable, including [predefined variables](predefined_variables.md), when you:
 
 - [Run a pipeline manually](../pipelines/index.md#run-a-pipeline-manually) in the UI.
 - Create a pipeline by using [the `pipelines` API endpoint](../../api/pipelines.md#create-a-new-pipeline).
-- Create a pipeline by using [the `triggers` API endpoint](../triggers/index.md#pass-cicd-variables-in-the-api-call).
 - Use [push options](../../topics/git/commit.md#push-options-for-gitlab-cicd).
-- Pass variables to a downstream pipeline by using either the [`variables` keyword](../pipelines/downstream_pipelines.md#pass-cicd-variables-to-a-downstream-pipeline),
-  [`trigger:forward` keyword](../yaml/index.md#triggerforward) or [`dotenv` variables](../pipelines/downstream_pipelines.md#pass-dotenv-variables-created-in-a-job).
-- Specify variables when creating a [pipeline schedule](../pipelines/schedules.md#add-a-pipeline-schedule).
+- Trigger a pipeline by using [the `triggers` API endpoint](../triggers/index.md#pass-cicd-variables-in-the-api-call).
+- Pass variables to a downstream pipeline [by using the `variable` keyword](../pipelines/downstream_pipelines.md#pass-cicd-variables-to-a-downstream-pipeline)
+  or [by using `dotenv` variables](../pipelines/downstream_pipelines.md#pass-dotenv-variables-created-in-a-job).
 - Specify variables when [running a manual job](../pipelines/index.md#run-a-pipeline-manually).
 
-These variables have [higher precedence](#cicd-variable-precedence) and can override
-other defined variables, including [predefined variables](predefined_variables.md).
-
-WARNING:
 You should avoid overriding predefined variables in most cases, as it can cause the pipeline to behave unexpectedly.
 
-### Restrict pipeline variables
+### Restrict who can override variables
 
-You can limit who can run pipelines with pipeline variables to specific user roles.
-To limit the use of pipeline variables to only the Maintainer role and higher:
+You can limit the ability to override variables to only users with at least the Maintainer role.
+When other users try to run a pipeline with overridden variables, they receive the
+`Insufficient permissions to set pipeline variables` error message.
 
-- Use [the projects API](../../api/projects.md#edit-a-project) to enable the `restrict_user_defined_variables` setting.
-  The setting is `disabled` by default.
-
-When users with the Developer role or lower try to [use pipeline variables](#use-pipeline-variables),
-they receive the `Insufficient permissions to set pipeline variables` error message.
+Enable this feature by using [the projects API](../../api/projects.md#edit-project)
+to enable the `restrict_user_defined_variables` setting. The setting is `disabled` by default.
 
 If you [store your CI/CD configurations in a different repository](../../ci/pipelines/settings.md#specify-a-custom-cicd-configuration-file),
 use this setting for control over the environment the pipeline runs in.
 
-#### Set a minimum role for pipeline variables
+#### By minimum role
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/440338) in GitLab 17.1
 
-When [pipeline variables are restricted](#restrict-pipeline-variables), you can also
-set a specific minimum [role](../../user/permissions.md#roles) that can run pipelines
-with pipeline variables.
+When the `restrict_user_defined_variables` option is enabled, you can specify which
+[roles](../../user/permissions.md#roles) can override variables with the
+`ci_pipeline_variables_minimum_override_role` setting.
 
-Prerequisites:
+To change the setting, use [the projects API](../../api/projects.md#edit-project)
+to modify `ci_pipeline_variables_minimum_override_role` to one of:
 
-- You must have the Maintainer role in the project. If the minimum role was previously set to `owner`
-  or `no_one_allowed`, then you must have the Owner role in the project.
-
-To change the setting, use [the projects API](../../api/projects.md#edit-a-project)
-to set `ci_pipeline_variables_minimum_override_role` to one of:
-
-- `no_one_allowed`: No pipelines can run with pipeline variables.
-- `owner`: Only users with the Owner role can run pipelines with pipeline variables.
-  You must have the Owner role for the project to change the setting to this value.
-- `maintainer`: Only users with at least the Maintainer role can run pipelines with pipeline variables.
+- `owner`: Only users with the Owner role can override variables. You must have the Owner
+  role for the project to change the setting to this value.
+- `maintainer`: Only users with at least the Maintainer role can override variables.
   Default when not specified.
-- `developer`: Only users with at least the Developer role can run pipelines with pipeline variables.
+- `developer`: Only users with at least the Developer role can override variables.
+- `no_one_allowed`: Users cannot override variables.
+
+If you set the minimum role to `owner`, only users with at least the `owner` role
+can update the `ci_pipeline_variables_minimum_override_role` and `restrict_user_defined_variables`
+settings.
 
 ## Exporting variables
 
@@ -948,7 +893,7 @@ When the runner executes the job:
 You can list all variables available to a script with the `export` command
 in Bash or `dir env:` in PowerShell. This exposes the values of **all** available
 variables, which can be a [security risk](#cicd-variable-security).
-[Masked variables](#mask-a-cicd-variable) display as `[MASKED]`.
+[Masked variables](#mask-a-cicd-variable) display as `[masked]`.
 
 For example, with Bash:
 
@@ -965,13 +910,13 @@ export CI_JOB_ID="50"
 export CI_COMMIT_SHA="1ecfd275763eff1d6b4844ea3168962458c9f27a"
 export CI_COMMIT_SHORT_SHA="1ecfd275"
 export CI_COMMIT_REF_NAME="main"
-export CI_REPOSITORY_URL="https://gitlab-ci-token:[MASKED]@example.com/gitlab-org/gitlab.git"
+export CI_REPOSITORY_URL="https://gitlab-ci-token:[masked]@example.com/gitlab-org/gitlab.git"
 export CI_COMMIT_TAG="1.0.0"
 export CI_JOB_NAME="spec:other"
 export CI_JOB_STAGE="test"
 export CI_JOB_MANUAL="true"
 export CI_JOB_TRIGGERED="true"
-export CI_JOB_TOKEN="[MASKED]"
+export CI_JOB_TOKEN="[masked]"
 export CI_PIPELINE_ID="1000"
 export CI_PIPELINE_IID="10"
 export CI_PAGES_DOMAIN="gitlab.io"
@@ -1095,65 +1040,3 @@ WARNING:
 If you add `CI_DEBUG_TRACE` as a local variable to runners, debug logs generate and are visible
 to all users with access to job logs. The permission levels are not checked by the runner,
 so you should only use the variable in GitLab itself.
-
-### "argument list too long"
-
-This issue occurs when the combined length of all CI/CD variables defined for a job exceeds the limit imposed by the
-shell where the job executes. This includes the names and values of pre-defined and user defined variables. This limit
-is typically referred to as `ARG_MAX`, and is shell and operating system dependent. This issue also occurs when the
-content of a single [File-type](#use-file-type-cicd-variables) variable exceeds `ARG_MAX`.
-
-For more information, see [issue 392406](https://gitlab.com/gitlab-org/gitlab/-/issues/392406#note_1414219596).
-
-As a workaround you can either:
-
-- Use [File-type](#use-file-type-cicd-variables) CI/CD variables for large environment variables where possible.
-- If a single large variable is larger than `ARG_MAX`, try using [Secure Files](../secure_files/index.md), or
-  bring the file to the job through some other mechanism.
-
-### Global variable doesn't expand in job variable of the same name
-
-You cannot use a global variable's value in a job variable of the same name. A global variable
-is only made available to a job when the job does not have a variable defined with the same name.
-If the job has a variable with the same name, the job's variable takes precedence
-and the global variable is not available in the job.
-
-For example, these two samples are equivalent:
-
-- In this sample, `$MY_VAR` has no value because it's not defined anywhere:
-
-  ```yaml
-  Job-with-variable:
-    variables:
-      MY_VAR: $MY_VAR
-    script: echo "Value is '$MY_VAR'"
-  ```
-
-- In this sample, `$MY_VAR` has no value because the global variable with the same name
-  is not available in the job:
-
-  ```yaml
-  variables:
-    MY_VAR: "Global value"
-
-  Job-with-same-name-variable:
-    variables:
-      MY_VAR: $MY_VAR
-    script: echo "Value is '$MY_VAR'"
-  ```
-
-In both cases, the echo command outputs `Value is '$MY_VAR'`.
-
-In general, you should use the global variable directly in a job rather than reassigning its value to a new variable.
-If you need to do this, use variables with different names instead. For example:
-
-```yaml
-variables:
-  MY_VAR1: "Global value1"
-  MY_VAR2: "Global value2"
-
-overwrite-same-name:
-  variables:
-    MY_VAR2_FROM_GLOBALS: $MY_VAR2
-  script: echo "Values are '$MY_VAR1' and '$MY_VAR2_FROM_GLOBALS'"
-```

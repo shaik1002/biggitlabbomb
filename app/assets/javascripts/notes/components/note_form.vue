@@ -359,11 +359,7 @@ export default {
     </div>
     <div class="flash-container"></div>
     <form :data-line-code="lineCode" class="edit-note common-note-form js-quick-submit gfm-form">
-      <comment-field-layout
-        :is-internal-note="discussionNote.internal"
-        :note="updatedNoteBody"
-        :noteable-data="getNoteableData"
-      >
+      <comment-field-layout :noteable-data="getNoteableData" :is-internal-note="isInternalNote">
         <markdown-editor
           ref="markdownEditor"
           :value="updatedNoteBody"

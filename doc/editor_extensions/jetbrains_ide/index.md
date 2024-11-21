@@ -16,6 +16,15 @@ like IntelliJ, PyCharm, GoLand, Webstorm, and Rubymine. The plugin supports thes
 While coding, accept Code Suggestions by pressing <kbd>Tab</kbd>. To dismiss Code Suggestions,
 press <kbd>Escape</kbd>.
 
+This JetBrains plugin adds an icon to your IDE's status bar:
+
+| Icon | Status | Meaning |
+| :--- | :----- | :------ |
+| **{tanuki-ai}** | **Ready** | You've configured and enabled GitLab Duo, and you're using a language that supports Code Suggestions. |
+| **{tanuki-ai-off}** | **Not configured** | You haven't entered a personal access token, or you're using a language that Code Suggestions doesn't support. |
+| ![The status icon for fetching Code Suggestions.](../img/code_suggestions_loading_v17_4.svg) | **Loading suggestion** | GitLab Duo is fetching Code Suggestions for you. |
+| ![The status icon for a Code Suggestions error.](../img/code_suggestions_error_v17_4.svg) | **Error** | GitLab Duo has encountered an error. |
+
 ## Download the extension
 
 Download the plugin from the [JetBrains Plugin Marketplace](https://plugins.jetbrains.com/plugin/22325-gitlab-duo).
@@ -43,7 +52,7 @@ To enable the plugin:
 1. In your IDE, on the top bar, select your IDE's name, then select **Settings**.
 1. On the left sidebar, select **Plugins**.
 1. Select the **GitLab Duo** plugin, and select **Install**.
-1. Select **OK** or **Save**.
+1. Select **OK**.
 
 To configure the plugin in your IDE after you enable it:
 
@@ -56,7 +65,7 @@ To configure the plugin in your IDE after you enable it:
 1. For **GitLab Personal Access Token**, paste in the personal access token you created. The token is not displayed,
    nor is it accessible to others.
 1. Select **Verify setup**.
-1. Select **OK** or **Save**.
+1. Select **OK**.
 
 ### Enable experimental or beta features
 
@@ -101,7 +110,7 @@ To use a custom SSL certificate with GitLab Duo:
 1. On the left sidebar, expand **Tools**, then select **GitLab Duo**.
 1. Under **Connection**, enter the **URL to GitLab instance**.
 1. To verify your connection, select **Verify setup**.
-1. Select **OK** or **Save**.
+1. Select **OK**.
 
 If your IDE detects a non-trusted SSL certificate:
 
@@ -152,7 +161,18 @@ From the IDE:
 1. Select **Integrate with 1Password CLI**.
 1. Optional. For **Secret reference**, paste the secret reference you copied from 1Password.
 1. Optional. To verify your credentials, select **Verify setup**.
-1. Select **OK** or **Save**.
+1. Select **OK**.
+
+## Toggle sending open tabs as context
+
+By default, the Code Suggestions use the files open in your IDE for context.
+To enable or disable this feature in your IDE:
+
+1. Go to your IDE's top menu bar and select **Settings**.
+1. On the left sidebar, expand **Tools**, then select **GitLab Duo**.
+1. Expand **GitLab Language Server**.
+1. Under **Code Completion**, select or clear **Send open tabs as context**.
+1. Select **OK**.
 
 ## Report issues with the plugin
 
@@ -175,9 +195,6 @@ built-in error reporting tool:
 
 ## Related topics
 
-- [Code Suggestions](../../user/project/repository/code_suggestions/index.md)
-- [JetBrains troubleshooting](jetbrains_troubleshooting.md)
-- [GitLab Language Server documentation](../language_server/index.md)
 - [About the Create:Editor Extensions Group](https://handbook.gitlab.com/handbook/engineering/development/dev/create/editor-extensions/)
 - [Open issues for this plugin](https://gitlab.com/gitlab-org/editor-extensions/gitlab-jetbrains-plugin/-/issues/)
 - [Plugin documentation](https://gitlab.com/gitlab-org/editor-extensions/gitlab-jetbrains-plugin/-/blob/main/README.md)

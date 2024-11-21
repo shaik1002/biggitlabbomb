@@ -378,18 +378,15 @@ following:
 bundle exec rake tanuki_emoji:aliases
 ```
 
-To import the fallback Emoji images, run the following:
-
-```shell
-bundle exec rake tanuki_emoji:import
-```
-
-To update the Emoji digests file (used for Emoji autocomplete) based on the currently
-available Emoji, run the following:
+To update the Emoji digests file (used for Emoji autocomplete), run the
+following:
 
 ```shell
 bundle exec rake tanuki_emoji:digests
 ```
+
+This updates the file `fixtures/emojis/digests.json` based on the currently
+available Emoji.
 
 To generate a sprite file containing all the Emoji, run:
 
@@ -397,7 +394,10 @@ To generate a sprite file containing all the Emoji, run:
 bundle exec rake tanuki_emoji:sprite
 ```
 
-See [How to update Emojis](fe_guide/emojis.md) for detailed instructions.
+If new emoji are added, the sprite sheet may change size. To compensate for
+such changes, first generate the `emoji.png` sprite sheet with the above Rake
+task, then check the dimensions of the new sprite sheet and update the
+`SPRITESHEET_WIDTH` and `SPRITESHEET_HEIGHT` constants accordingly.
 
 ## Update project templates
 
@@ -500,7 +500,7 @@ To edit the content, you may need to edit the following:
   which is then used by the `rake` task described earlier.
 
 `@parsed_schema` is an instance variable that the `graphql-docs` gem expects to have available.
-`Gitlab::Graphql::Docs::Helper` defines the `object` method we use. This is also where you
+`Gitlab::Graphql::Docs::Helper` defines the `object` method we currently use. This is also where you
 should implement any new methods for new types you'd like to display.
 
 ### Update machine-readable schema files

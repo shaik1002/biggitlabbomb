@@ -1,10 +1,8 @@
 # frozen_string_literal: true
 
-# covered by ./accessibility_spec.rb
-
 require 'spec_helper'
 
-RSpec.describe 'Dashboard > User filters todos', :js, feature_category: :notifications do
+RSpec.describe 'Dashboard > User filters todos', :js, feature_category: :team_planning do
   let(:user_1)    { create(:user, username: 'user_1', name: 'user_1') }
   let(:user_2)    { create(:user, username: 'user_2', name: 'user_2') }
 

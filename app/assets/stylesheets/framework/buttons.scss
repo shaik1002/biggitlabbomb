@@ -11,6 +11,10 @@
   }
 }
 
+@mixin btn-middle {
+  @include btn-default;
+}
+
 @mixin btn-outline($background, $text, $border, $hover-background, $hover-text, $hover-border, $active-background, $active-border, $active-text) {
   background-color: $background;
   color: $text;
@@ -71,6 +75,18 @@
   }
 }
 
+@mixin btn-blue {
+  @include btn-color($blue-500, $blue-600, $blue-600, $blue-700, $blue-700, $blue-800, $white-contrast);
+}
+
+@mixin btn-red {
+  @include btn-color($red-500, $red-600, $red-600, $red-700, $red-700, $red-800, $white-contrast);
+}
+
+@mixin btn-white {
+  @include btn-color($white, $gray-200, $gray-50, $gray-200, $gray-100, $gray-300, $gl-text-color);
+}
+
 @mixin btn-with-margin {
   margin-left: $gl-spacing-scale-3;
   float: left;
@@ -82,7 +98,7 @@
 
 .btn {
   @include btn-default;
-  @include btn-color($white, $gray-200, $gray-50, $gray-200, $gray-100, $gray-300, $gl-text-color);
+  @include btn-white;
 
   color: $gl-text-color;
   white-space: nowrap;
@@ -104,7 +120,7 @@
   }
 
   &.btn-danger {
-    @include btn-color($red-500, $red-600, $red-600, $red-700, $red-700, $red-800, $white-contrast);
+    @include btn-red;
   }
 
   &.btn-grouped {
@@ -126,7 +142,7 @@
 }
 
 .btn-transparent {
-  color: var(--gl-button-default-primary-foreground-color-default);
+  color: $gl-text-color-secondary;
   background-color: transparent;
   border: 0;
 
@@ -147,7 +163,7 @@
 .input-group-prepend,
 .input-group-append {
   .btn {
-    @include btn-default;
+    @include btn-middle;
 
     &:hover {
       outline: none;
@@ -166,6 +182,35 @@
   }
 }
 
+.clone-dropdown-btn a {
+  color: $gray-700;
+
+  &:hover {
+    text-decoration: none;
+  }
+}
+
+.btn-inverted {
+  &-secondary {
+    @include btn-outline($white, $blue-500, $blue-500, $blue-100, $blue-700, $blue-500, $blue-200, $blue-600, $blue-800);
+  }
+}
+
+.btn-blank {
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+
+  &:hover,
+  &:active,
+  &:focus {
+    outline: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+}
+
 // All disabled buttons, regardless of color, type, etc
 .btn.disabled,
 .btn[disabled],
@@ -176,7 +221,7 @@ fieldset[disabled] .btn,
   &:hover {
     background-color: $gray-10;
     border-color: $gray-100;
-    @apply gl-text-disabled;
+    color: $gl-text-color-disabled;
     opacity: 1;
     text-decoration: none;
     cursor: default;
@@ -186,7 +231,7 @@ fieldset[disabled] .btn,
     }
 
     i {
-      @apply gl-text-disabled;
+      color: $gl-text-color-disabled;
     }
   }
 }

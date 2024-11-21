@@ -15,8 +15,7 @@
 #
 # Situation
 # - `Project` has many `Ci::BuildTraceChunk` through `Ci::Build`
-# - `Ci::BuildTraceChunk` stores associated data in Redis,
-#    so it relies on `dependent: :destroy` and `before_destroy` for the deletion
+# - `Ci::BuildTraceChunk` stores associated data in Redis, so it relies on `dependent: :destroy` and `before_destroy` for the deletion
 #
 # How to use
 # - Define `use_fast_destroy :build_trace_chunks` in `Project` model.

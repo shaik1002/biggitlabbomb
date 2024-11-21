@@ -5,10 +5,7 @@ module API
     include PaginationParams
     include Helpers::CustomAttributes
 
-    before do
-      authenticate_non_get!
-      set_current_organization
-    end
+    before { authenticate_non_get! }
 
     helpers Helpers::GroupsHelpers
 
@@ -623,7 +620,7 @@ The following criteria must be met:
   - Personal access token
   - Group access token
   - Project access token
-  - Group deploy token
+  - Group Deploy Token
   - User feed token
 
 This feature is gated by the :group_agnostic_token_revocation feature flag.

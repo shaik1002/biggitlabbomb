@@ -32,7 +32,7 @@ With the Value Streams Dashboard, you can:
 - Identify downward trends early on.
 - Understand security exposure.
 - Drill down into individual projects or metrics to take actions for improvement.
-- Understand the impact of adding AI to the software development lifecycle (SDLC) and demonstrate the return on investment (ROI) of investments in GitLab Duo.
+- Understand the impact of adding AI to the software development life cycle (SDLC) and demonstrate the return on investment (ROI) of investments in GitLab Duo.
 
 For a click-through demo, see [the Value Stream Management product tour](https://gitlab.navattic.com/vsm).
 
@@ -42,7 +42,11 @@ If you upgrade to the Ultimate tier, you get access to historical data, and can 
 
 ## Value Streams Dashboard panels
 
-The Value Streams Dashboard panels have a default configuration, but you can also [customize the dashboard panels](#customize-the-dashboard-panels).
+The Value Streams Dashboard panels have a default configuration, but you can also [customize the dashboard panels](#customize-the-dashboard-panels). The Value Streams Dashboard includes four panels:
+
+- Overview
+- DevSecOps metrics comparison
+- DORA Performers score
 
 ### Overview panel
 
@@ -68,19 +72,15 @@ For more information, see [epic 10417](https://gitlab.com/groups/gitlab-org/-/ep
 NOTE:
 To view metrics on the Overview panel, the [background aggregation](#enable-or-disable-overview-background-aggregation) must be enabled.
 
-### DevSecOps metrics comparison panels
+### DevSecOps metrics comparison panel
 
 > - Contributor count metric at the group level [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/433353) to GitLab.com in GitLab 16.9.
 
-The DevSecOps metrics comparison panels display metrics for a group or project
+The DevSecOps metrics comparison displays DORA4, vulnerability, and flow metrics for a group or project
 in the month-to-date, last month, the month before, and the past 180 days.
-These visualizations help you understand whether the key DevSecOps metrics improve month over month. The Value Stream Dashboard displays three DevSecOps metric comparison panels:
+This visualization helps you understand whether the key DevSecOps metrics improve month over month.
 
-- Lifecycle metrics
-- DORA metrics
-- Security metrics
-
-In each comparison panel, you can:
+In the comparison panel, you can:
 
 - Compare the performance between groups, projects, and teams at a glance.
 - Identify the teams and projects that are the largest value contributors, overperforming, or underperforming.
@@ -94,15 +94,15 @@ The sparkline for the past six months represents value trends over this time per
 The sparkline color ranges from blue to green, where green indicates a positive trend, and blue indicates a negative trend.
 Sparklines help you identify patterns in metric trends (such as seasonal changes) over time.
 
-#### Filter a DevSecOps metrics comparison panel by labels
+#### Filter the DevSecOps metrics comparison panel by labels
 
 Label filters are appended as query parameters to the URL of the drill-down report of each eligible metric and automatically applied.
-If a comparison panel from the configuration file is enabled with `filters.labels`, the drill-down links inherit the labels from the panel filter.
+If the comparison panel from the configuration file is enabled with `filters.labels`, the drill-down links inherit the labels from the panel filter.
 
 ```yaml
 panels:
-  - title: 'Group dora metrics'
-    visualization: vsd_dora_metrics_table
+  - title: 'Group dora and issue metrics'
+    visualization: dora_chart
     queryOverrides:
       namespace: my-dora-group
       filters:
@@ -110,9 +110,6 @@ panels:
           - in_development
           - in_review
 ```
-
-NOTE:
-Only labels that exactly match the specified filters are applied.
 
 ### DORA Performers score panel
 
@@ -200,7 +197,6 @@ To view the Value Streams Dashboard:
 ### View the Value Streams Dashboard for a project
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/137483) in GitLab 16.7 [with a flag](../../administration/feature_flags.md) named `project_analytics_dashboard_dynamic_vsd`. Disabled by default.
-> - Feature flag `project_analytics_dashboard_dynamic_vsd` [removed](https://gitlab.com/gitlab-org/gitlab/-/issues/441207) in GitLab 17.5.
 
 Prerequisites:
 
