@@ -254,7 +254,7 @@
   padding: 0 $gl-padding;
   background-color: $gray-10;
   border: 0;
-  @apply gl-text-subtle;
+  color: $gl-text-color-secondary;
   display: flex;
   align-items: center;
   border-bottom: 1px solid $border-color;
@@ -522,7 +522,7 @@
     }
 
     .no-value {
-      @apply gl-text-subtle;
+      color: $gl-text-color-secondary;
     }
 
     .sidebar-collapsed-icon {
@@ -623,10 +623,10 @@
       width: 100%;
       height: $sidebar-toggle-height;
       text-align: center;
-      @apply gl-text-subtle;
+      color: $gl-text-color-secondary;
 
       > svg {
-        @apply gl-fill-icon-subtle;
+        fill: $gl-text-color-secondary;
       }
 
       &:hover:not(.disabled),
@@ -812,7 +812,7 @@
     svg {
       width: 16px;
       height: 16px;
-      @apply gl-fill-icon-subtle;
+      fill: $gl-text-color-secondary;
     }
 
     &:hover svg {

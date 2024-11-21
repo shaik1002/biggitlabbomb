@@ -77,19 +77,20 @@ module Gitlab
       end
 
       def create_approval!(project_id, merge_request_id, user_id, submitted_at)
-        approval = Approval.create(
+        approval_attributes = {
           merge_request_id: merge_request_id,
           user_id: user_id,
           created_at: submitted_at,
-          updated_at: submitted_at,
-          importing: true
+          updated_at: submitted_at
+        }
+
+        result = ::Approval.insert(
+          approval_attributes,
+          returning: [:id],
+          unique_by: [:user_id, :merge_request_id]
         )
 
-        return unless approval.persisted?
-
-        note = add_approval_system_note!(project_id, merge_request_id, user_id, submitted_at)
-
-        [approval, note]
+        add_approval_system_note!(project_id, merge_request_id, user_id, submitted_at) if result.rows.present?
       end
 
       def add_approval_system_note!(project_id, merge_request_id, user_id, submitted_at)

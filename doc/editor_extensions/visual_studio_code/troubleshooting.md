@@ -8,7 +8,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 If you encounter any issues with the GitLab Workflow extension for VS Code, or have feature requests for it:
 
-1. Check the [extension documentation](index.md)
+1. Check the [extension documentation](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/blob/main/README.md)
    for known issues and solutions.
 1. Report bugs or request features in the
    [`gitlab-vscode-extension` issue queue](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues).
@@ -44,8 +44,8 @@ Request failed: Can't add GitLab account for https://gitlab.com. Check your inst
 Fetching resource from https://gitlab.com/api/v4/personal_access_tokens/self failed
 ```
 
-You must [enable proxy authentication](../language_server/index.md#enable-proxy-authentication)
-for the GitLab Language Server.
+GitLab Duo Code Suggestions does not support authenticated proxies. For the proposed feature,
+see [issue 1234](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/1234) in the extension's project.
 
 ## Configure self-signed certificates
 
@@ -64,7 +64,7 @@ Prerequisites:
 | `gitlab.certKey`| null    | Unsupported. See [epic 6244](https://gitlab.com/groups/gitlab-org/-/epics/6244). If your self-managed GitLab instance requires a custom certificate or key pair, set this option to point to your certificate key file. See `gitlab.cert`. |
 | `gitlab.ignoreCertificateErrors` | false   | Unsupported. See [epic 6244](https://gitlab.com/groups/gitlab-org/-/epics/6244). If you use a self-managed GitLab instance with no SSL certificate, or have certificate issues that prevent you from using the extension, set this option to `true` to ignore certificate errors. |
 
-## Disable Code Suggestions
+## Disable code suggestions
 
 Code completion is enabled by default. To disable it:
 
@@ -193,15 +193,3 @@ A workaround exists for Ubuntu users who use versions of VS Code earlier than 1.
 
 If you use VS Code version 1.68.0 or later, re-installation might not be possible. However, you can still run
 the last three steps to re-authenticate.
-
-## Set token with environment variables
-
-If you often delete your VS Code storage, such as in Gitpod containers, you can create environment variables
-before starting VS Code. If you set the token in a
-[VS Code environment variable](https://code.visualstudio.com/docs/editor/variables-reference#_environment-variables),
-you don't have to set a personal access token each time you delete your VS Code storage. Set these variables:
-
-- `GITLAB_WORKFLOW_INSTANCE_URL`: Your GitLab instance URL, like `https://gitlab.com`.
-- `GITLAB_WORKFLOW_TOKEN`: Your personal access token, which you created [during setup](index.md#set-up-the-gitlab-workflow-extension).
-
-The token configured in an environment variable is overridden if you configure a token for the same GitLab instance in the extension.

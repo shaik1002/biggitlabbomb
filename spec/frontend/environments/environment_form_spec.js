@@ -240,7 +240,7 @@ describe('~/environments/components/form.vue', () => {
     it('renders a disabled "Name" field', () => {
       const nameInput = wrapper.findByLabelText('Name');
 
-      expect(nameInput.attributes().disabled).toBe('disabled');
+      expect(nameInput.attributes().disabled).toEqual(expect.any(String));
       expect(nameInput.element.value).toBe('test');
     });
 

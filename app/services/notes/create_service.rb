@@ -4,9 +4,7 @@ module Notes
   class CreateService < ::Notes::BaseService
     include IncidentManagement::UsageData
 
-    def execute(
-      skip_capture_diff_note_position: false, skip_merge_status_trigger: false, executing_user: nil,
-      importing: false)
+    def execute(skip_capture_diff_note_position: false, skip_merge_status_trigger: false, executing_user: nil)
       Gitlab::Database::QueryAnalyzers::PreventCrossDatabaseModification.temporary_ignore_tables_in_transaction(
         %w[
           notes
@@ -31,7 +29,7 @@ module Notes
         execute_quick_actions(note) do |only_commands|
           note.check_for_spam(action: :create, user: current_user) if check_for_spam?(only_commands)
 
-          after_commit(note) unless importing
+          after_commit(note)
 
           note_saved = note.with_transaction_returning_status do
             break false if only_commands
@@ -80,6 +78,7 @@ module Notes
       content, update_params, message, command_names = quick_actions_service.execute(note, quick_action_options)
       only_commands = content.empty?
       note.note = content
+      note.command_names = command_names
 
       yield(only_commands)
 
@@ -124,22 +123,22 @@ module Notes
     end
 
     def do_commands(note, update_params, message, command_names, only_commands)
-      status = ::Notes::QuickActionsStatus.new(
-        command_names: command_names&.flatten,
-        commands_only: only_commands)
-      status.add_message(message)
-
-      note.quick_actions_status = status
-
       return if quick_actions_service.commands_executed_count.to_i == 0
 
       update_error = quick_actions_update_errors(note, update_params)
       if update_error
         note.errors.add(:validation, update_error)
-        status.add_error(update_error)
+        message = update_error
       end
 
-      status.add_error(_('Failed to apply commands.')) if only_commands && message.blank?
+      # We must add the error after we call #save because errors are reset
+      # when #save is called
+      if only_commands
+        note.errors.add(:commands_only, message.presence || _('Failed to apply commands.'))
+        note.errors.add(:command_names, command_names.flatten)
+        # Allow consumers to detect problems applying commands
+        note.errors.add(:commands, _('Failed to apply commands.')) unless message.present?
+      end
     end
 
     def quick_actions_update_errors(note, params)

@@ -24,7 +24,7 @@ export default {
   tokenInputId: 'new-access-token',
   inject: ['accessTokenType'],
   data() {
-    return { errors: null, alert: null, newToken: null };
+    return { errors: null, infoAlert: null, newToken: null };
   },
   computed: {
     alertInfoMessage() {
@@ -77,7 +77,7 @@ export default {
   },
   methods: {
     beforeDisplayResults() {
-      this.alert?.dismiss();
+      this.infoAlert?.dismiss();
       this.$refs.container.scrollIntoView(false);
 
       this.errors = null;
@@ -90,12 +90,8 @@ export default {
     onError(event) {
       this.beforeDisplayResults();
 
-      const [{ errors, message }] = convertEventDetail(event);
+      const [{ errors }] = convertEventDetail(event);
       this.errors = errors;
-
-      if (message) {
-        this.alert = createAlert({ message });
-      }
 
       this.enableSubmitButton();
     },
@@ -105,7 +101,7 @@ export default {
       const [{ newToken }] = convertEventDetail(event);
       this.newToken = newToken;
 
-      this.alert = createAlert({ message: this.alertInfoMessage, variant: VARIANT_INFO });
+      this.infoAlert = createAlert({ message: this.alertInfoMessage, variant: VARIANT_INFO });
 
       // Selectively reset all input fields except for the date picker.
       // The form token creation is not controlled by Vue.
@@ -129,7 +125,7 @@ export default {
 
 <template>
   <dom-element-listener
-    selector=".js-token-card"
+    :selector="$options.FORM_SELECTOR"
     @[$options.EVENT_ERROR]="onError"
     @[$options.EVENT_SUCCESS]="onSuccess"
   >

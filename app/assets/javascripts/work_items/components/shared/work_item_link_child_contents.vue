@@ -10,6 +10,7 @@ import {
   GlTooltip,
   GlTooltipDirective,
 } from '@gitlab/ui';
+import { escapeRegExp } from 'lodash';
 import { __, s__, sprintf } from '~/locale';
 import { isScopedLabel } from '~/lib/utils/common_utils';
 import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
@@ -17,7 +18,7 @@ import WorkItemLinkChildMetadata from 'ee_else_ce/work_items/components/shared/w
 import RichTimestampTooltip from '../rich_timestamp_tooltip.vue';
 import WorkItemTypeIcon from '../work_item_type_icon.vue';
 import WorkItemStateBadge from '../work_item_state_badge.vue';
-import { canRouterNav, findLinkedItemsWidget, getDisplayReference } from '../../utils';
+import { findLinkedItemsWidget, getDisplayReference } from '../../utils';
 import {
   STATE_OPEN,
   WIDGET_TYPE_ASSIGNEES,
@@ -132,8 +133,8 @@ export default {
     stateTimestampTypeText() {
       return this.isChildItemOpen ? this.$options.i18n.created : this.$options.i18n.closed;
     },
-    childItemTypeIconVariant() {
-      return this.isChildItemOpen ? 'default' : 'subtle';
+    childItemTypeColorClass() {
+      return this.isChildItemOpen ? 'gl-text-subtle' : 'gl-text-disabled';
     },
     displayLabels() {
       return this.showLabels && this.labels.length;
@@ -164,16 +165,12 @@ export default {
       if (e.metaKey || e.ctrlKey) {
         return;
       }
-      const shouldDefaultNavigate =
-        this.preventRouterNav ||
-        !canRouterNav({
-          fullPath: this.workItemFullPath,
-          webUrl: workItem.webUrl,
-          isGroup: this.isGroup,
-          issueAsWorkItem: this.issueAsWorkItem,
-        });
+      const escapedFullPath = escapeRegExp(this.workItemFullPath);
+      // eslint-disable-next-line no-useless-escape
+      const regex = new RegExp(`groups\/${escapedFullPath}\/-\/(work_items|epics)\/\\d+`);
+      const isWorkItemPath = regex.test(workItem.webUrl);
 
-      if (shouldDefaultNavigate) {
+      if (!(isWorkItemPath || this.issueAsWorkItem) || this.preventRouterNav) {
         this.$emit('click', e);
       } else {
         e.preventDefault();
@@ -195,10 +192,7 @@ export default {
     data-testid="links-child"
   >
     <div ref="stateIcon" class="gl-cursor-help">
-      <work-item-type-icon
-        :icon-variant="childItemTypeIconVariant"
-        :work-item-type="childItemType"
-      />
+      <work-item-type-icon :color-class="childItemTypeColorClass" :work-item-type="childItemType" />
       <gl-tooltip :target="() => $refs.stateIcon">
         {{ childItemType }}
       </gl-tooltip>

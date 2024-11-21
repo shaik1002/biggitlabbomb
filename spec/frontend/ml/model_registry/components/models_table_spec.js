@@ -51,7 +51,7 @@ describe('ModelsTable', () => {
       {
         key: 'actions',
         label: '',
-        tdClass: 'lg:gl-w-px gl-whitespace-nowrap !gl-p-3 gl-text-right',
+        tdClass: 'lg:gl-w-px gl-whitespace-nowrap',
         thClass: 'lg:gl-w-px gl-whitespace-nowrap',
       },
     ]);

@@ -101,9 +101,9 @@ describe('Project Feature Settings', () => {
       ({ disabledInput, value, options, isDisabled }) => {
         wrapper = mountComponent({ disabledInput, value, options });
 
-        const expected = isDisabled ? 'disabled' : undefined;
+        const expected = isDisabled ? expect.any(String) : undefined;
 
-        expect(wrapper.find('select').attributes('disabled')).toBe(expected);
+        expect(wrapper.find('select').attributes('disabled')).toEqual(expected);
       },
     );
 

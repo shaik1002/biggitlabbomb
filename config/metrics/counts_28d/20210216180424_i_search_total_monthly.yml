@@ -3,8 +3,6 @@ data_category: optional
 key_path: redis_hll_counters.search.i_search_total_monthly
 description: Calculated unique users to perform Basic or Advanced searches by month
 product_group: global_search
-product_categories:
-- global_search
 value_type: number
 status: active
 time_frame: 28d
@@ -16,6 +14,10 @@ options:
 distribution:
 - ce
 - ee
+tier:
+- free
+- premium
+- ultimate
 tiers:
 - free
 - premium

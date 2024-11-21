@@ -33,7 +33,7 @@ Read more in the Helm documentation about these topics:
 
 To authenticate to the Helm repository, you need either:
 
-- A [personal access token](../../../api/rest/authentication.md#personalprojectgroup-access-tokens) with the scope set to `api`.
+- A [personal access token](../../../api/rest/index.md#personalprojectgroup-access-tokens) with the scope set to `api`.
 - A [deploy token](../../project/deploy_tokens/index.md) with the scope set to `read_package_registry`, `write_package_registry`, or both.
 - A [CI/CD job token](../../../ci/jobs/ci_job_token.md).
 
@@ -85,11 +85,12 @@ To publish a Helm package automated through [GitLab CI/CD](../../../ci/index.md)
 For example:
 
 ```yaml
+image: curlimages/curl:latest
+
 stages:
   - upload
 
 upload:
-  image: curlimages/curl:latest
   stage: upload
   script:
     - 'curl --fail-with-body --request POST --user gitlab-ci-token:$CI_JOB_TOKEN --form "chart=@mychart-0.1.0.tgz" "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/helm/api/<channel>/charts"'

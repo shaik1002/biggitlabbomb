@@ -1,5 +1,5 @@
 <script>
-import { GlButton, GlSprintf, GlLink, GlFormCheckbox, GlFormSelect, GlToggle } from '@gitlab/ui';
+import { GlButton, GlIcon, GlSprintf, GlLink, GlFormCheckbox, GlToggle } from '@gitlab/ui';
 import SecretManagerSettings from 'ee_component/pages/projects/shared/permissions/components/secret_manager_settings.vue';
 import ConfirmDanger from '~/vue_shared/components/confirm_danger/confirm_danger.vue';
 import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
@@ -114,10 +114,10 @@ export default {
     ProjectSettingRow,
     CascadingLockIcon,
     GlButton,
+    GlIcon,
     GlSprintf,
     GlLink,
     GlFormCheckbox,
-    GlFormSelect,
     GlToggle,
     ConfirmDanger,
     SecretManagerSettings,
@@ -634,31 +634,39 @@ export default {
         "
       >
         <div class="project-feature-controls gl-mx-0 gl-my-3 gl-flex gl-items-center">
-          <gl-form-select
-            v-model="visibilityLevel"
-            :disabled="!canChangeVisibilityLevel"
-            name="project[visibility_level]"
-            data-testid="project-visibility-dropdown"
-          >
-            <option
-              :value="$options.VISIBILITY_LEVEL_PRIVATE_INTEGER"
-              :disabled="!visibilityAllowed($options.VISIBILITY_LEVEL_PRIVATE_INTEGER)"
+          <div class="select-wrapper gl-grow">
+            <select
+              v-model="visibilityLevel"
+              :disabled="!canChangeVisibilityLevel"
+              name="project[visibility_level]"
+              class="form-control select-control"
+              data-testid="project-visibility-dropdown"
             >
-              {{ s__('ProjectSettings|Private') }}
-            </option>
-            <option
-              :value="$options.VISIBILITY_LEVEL_INTERNAL_INTEGER"
-              :disabled="!visibilityAllowed($options.VISIBILITY_LEVEL_INTERNAL_INTEGER)"
-            >
-              {{ s__('ProjectSettings|Internal') }}
-            </option>
-            <option
-              :value="$options.VISIBILITY_LEVEL_PUBLIC_INTEGER"
-              :disabled="!visibilityAllowed($options.VISIBILITY_LEVEL_PUBLIC_INTEGER)"
-            >
-              {{ s__('ProjectSettings|Public') }}
-            </option>
-          </gl-form-select>
+              <option
+                :value="$options.VISIBILITY_LEVEL_PRIVATE_INTEGER"
+                :disabled="!visibilityAllowed($options.VISIBILITY_LEVEL_PRIVATE_INTEGER)"
+              >
+                {{ s__('ProjectSettings|Private') }}
+              </option>
+              <option
+                :value="$options.VISIBILITY_LEVEL_INTERNAL_INTEGER"
+                :disabled="!visibilityAllowed($options.VISIBILITY_LEVEL_INTERNAL_INTEGER)"
+              >
+                {{ s__('ProjectSettings|Internal') }}
+              </option>
+              <option
+                :value="$options.VISIBILITY_LEVEL_PUBLIC_INTEGER"
+                :disabled="!visibilityAllowed($options.VISIBILITY_LEVEL_PUBLIC_INTEGER)"
+              >
+                {{ s__('ProjectSettings|Public') }}
+              </option>
+            </select>
+            <gl-icon
+              name="chevron-down"
+              data-hidden="true"
+              class="gl-absolute gl-right-3 gl-top-3 gl-text-gray-500"
+            />
+          </div>
         </div>
         <span
           v-if="!visibilityAllowed(visibilityLevel)"
@@ -845,7 +853,7 @@ export default {
           s__('ProjectSettings|Every project can have its own space to store its Docker images')
         "
       >
-        <div v-if="showContainerRegistryPublicNote" class="gl-text-subtle">
+        <div v-if="showContainerRegistryPublicNote" class="text-muted">
           <gl-sprintf
             :message="
               s__(

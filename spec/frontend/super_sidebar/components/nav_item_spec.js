@@ -212,15 +212,6 @@ describe('NavItem component', () => {
     });
   });
 
-  it('applies correct aria-label', () => {
-    const titleString = 'Hello, world!';
-    createWrapper({
-      item: { title: titleString },
-    });
-
-    expect(findLink().attributes('aria-label')).toEqual(titleString);
-  });
-
   it('applies custom link classes', () => {
     const customClass = 'customClass';
     createWrapper({

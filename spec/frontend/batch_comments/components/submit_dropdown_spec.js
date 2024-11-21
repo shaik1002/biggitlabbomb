@@ -180,9 +180,9 @@ describe('Batch comments submit dropdown', () => {
   });
 
   it.each`
-    canApprove | exists        | existsText
-    ${true}    | ${undefined}  | ${'shows'}
-    ${false}   | ${'disabled'} | ${'hides'}
+    canApprove | exists                | existsText
+    ${true}    | ${undefined}          | ${'shows'}
+    ${false}   | ${expect.any(String)} | ${'hides'}
   `(
     '$existsText approve checkbox if can_approve is $canApprove',
     async ({ canApprove, exists }) => {
@@ -192,7 +192,7 @@ describe('Batch comments submit dropdown', () => {
 
       await waitForPromises();
 
-      expect(wrapper.findAll('input').at(1).attributes('disabled')).toBe(exists);
+      expect(wrapper.findAll('input').at(1).attributes('disabled')).toEqual(exists);
     },
   );
 
@@ -226,8 +226,8 @@ describe('Batch comments submit dropdown', () => {
 
     await waitForPromises();
 
-    expect(wrapper.find('.custom-control-input[value="approved"]').attributes('disabled')).toBe(
-      'disabled',
+    expect(wrapper.find('.custom-control-input[value="approved"]').attributes('disabled')).toEqual(
+      expect.any(String),
     );
   });
 

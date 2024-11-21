@@ -156,11 +156,6 @@ module Types
       null: true,
       description: 'Indicates if a project is a catalog resource.'
 
-    field :explore_catalog_path, GraphQL::Types::String,
-      experiment: { milestone: '17.6' },
-      null: true,
-      description: 'Path to the project catalog resource.'
-
     field :public_jobs, GraphQL::Types::Boolean,
       null: true,
       description: 'Indicates if there is public access to pipelines and job details of the project, ' \
@@ -529,7 +524,7 @@ module Types
       experiment: { milestone: '16.10' },
       resolver: Resolvers::ProjectContainerRegistryProtectionRulesResolver
 
-    field :container_repositories, Types::ContainerRegistry::ContainerRepositoryType.connection_type,
+    field :container_repositories, Types::ContainerRepositoryType.connection_type,
       null: true,
       description: 'Container repositories of the project.',
       resolver: Resolvers::ContainerRepositoriesResolver
@@ -570,12 +565,6 @@ module Types
       null: true,
       description: 'The CI Job Tokens scope of access.',
       resolver: Resolvers::Ci::JobTokenScopeResolver
-
-    field :ci_job_token_scope_allowlist, Types::Ci::JobTokenScope::AllowlistType,
-      null: true,
-      experiment: { milestone: '17.6' },
-      description: 'List of CI job token scopes where the project is the source.',
-      resolver: Resolvers::Ci::JobTokenScopeAllowlistResolver
 
     field :ci_job_token_auth_logs, Types::Ci::JobTokenAuthLogType.connection_type,
       null: true,
@@ -843,12 +832,6 @@ module Types
       end
 
       Gitlab::Graphql::Lazy.with_value(lazy_catalog_resource, &:present?)
-    end
-
-    def explore_catalog_path
-      return unless project.catalog_resource
-
-      Gitlab::Routing.url_helpers.explore_catalog_path(project.catalog_resource)
     end
 
     def statistics

@@ -301,7 +301,7 @@ module Groups
     end
 
     def update_pending_builds
-      ::Ci::PendingBuilds::UpdateGroupWorker.perform_async(group.id, pending_builds_params.stringify_keys)
+      ::Ci::PendingBuilds::UpdateGroupWorker.perform_async(group.id, pending_builds_params)
     end
 
     def pending_builds_params

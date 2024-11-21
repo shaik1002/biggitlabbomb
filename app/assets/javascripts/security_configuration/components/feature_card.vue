@@ -1,7 +1,10 @@
 <script>
 import { GlButton, GlCard, GlIcon, GlLink } from '@gitlab/ui';
 import { __, s__, sprintf } from '~/locale';
-import { REPORT_TYPE_SAST_IAC } from '~/vue_shared/security_reports/constants';
+import {
+  REPORT_TYPE_BREACH_AND_ATTACK_SIMULATION,
+  REPORT_TYPE_SAST_IAC,
+} from '~/vue_shared/security_reports/constants';
 import ManageViaMr from '~/vue_shared/security_configuration/components/manage_via_mr.vue';
 import FeatureCardBadge from './feature_card_badge.vue';
 
@@ -84,7 +87,10 @@ export default {
       return Boolean(shouldDisplay && this.feature.badge?.text);
     },
     hasEnabledStatus() {
-      return this.isNotSastIACTemporaryHack;
+      return (
+        this.isNotSastIACTemporaryHack &&
+        this.feature.type !== REPORT_TYPE_BREACH_AND_ATTACK_SIMULATION
+      );
     },
     showSecondaryConfigurationHelpPath() {
       return Boolean(this.available && this.feature.secondary?.configurationHelpPath);

@@ -245,7 +245,7 @@ export default {
       class="gl-border-b gl-border-section gl-bg-section gl-p-5 gl-pt-4"
       data-testid="crud-form"
     >
-      <slot name="form" :hide-form="hideForm"></slot>
+      <slot name="form"></slot>
     </div>
 
     <div
@@ -262,7 +262,7 @@ export default {
 
       <div
         v-if="$scopedSlots.pagination"
-        class="crud-pagination gl-border-t gl-flex gl-justify-center gl-border-t-section gl-p-5"
+        class="crud-pagination gl-border-t gl-flex gl-justify-center gl-p-5"
         data-testid="crud-pagination"
       >
         <slot name="pagination"></slot>

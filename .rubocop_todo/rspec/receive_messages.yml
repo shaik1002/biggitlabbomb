@@ -1,6 +1,7 @@
 ---
 # Cop supports --autocorrect.
 RSpec/ReceiveMessages:
+  Details: grace period
   Exclude:
     - 'ee/spec/bin/custom_ability_spec.rb'
     - 'ee/spec/components/namespaces/storage/limit_alert_component_spec.rb'
@@ -171,6 +172,8 @@ RSpec/ReceiveMessages:
     - 'ee/spec/services/merge_requests/mergeability/check_path_locks_service_spec.rb'
     - 'ee/spec/services/resource_access_tokens/create_service_spec.rb'
     - 'ee/spec/services/search/elastic/cluster_reindexing_service_spec.rb'
+    - 'ee/spec/services/search/global_service_spec.rb'
+    - 'ee/spec/services/search/group_service_spec.rb'
     - 'ee/spec/services/search/index_repair_service_spec.rb'
     - 'ee/spec/services/search/project_service_spec.rb'
     - 'ee/spec/services/search/rake_task_executor_service_spec.rb'
@@ -196,6 +199,7 @@ RSpec/ReceiveMessages:
     - 'ee/spec/support/shared_examples/models/concerns/verifiable_replicator_shared_examples.rb'
     - 'ee/spec/support/shared_examples/services/audit_events/streaming/headers_operations_shared_examples.rb'
     - 'ee/spec/support/shared_examples/services/base_sync_service_shared_examples.rb'
+    - 'ee/spec/support/shared_examples/views/subscription_shared_examples.rb'
     - 'ee/spec/views/admin/application_settings/_elasticsearch_form.html.haml_spec.rb'
     - 'ee/spec/views/admin/dashboard/index.html.haml_spec.rb'
     - 'ee/spec/views/devise/registrations/new.html.haml_spec.rb'
@@ -444,6 +448,7 @@ RSpec/ReceiveMessages:
     - 'spec/requests/api/helpers_spec.rb'
     - 'spec/requests/api/maven_packages_spec.rb'
     - 'spec/requests/api/search_spec.rb'
+    - 'spec/requests/api/virtual_registries/packages/maven_spec.rb'
     - 'spec/requests/projects/google_cloud/databases_controller_spec.rb'
     - 'spec/requests/projects/google_cloud/service_accounts_controller_spec.rb'
     - 'spec/requests/projects/redirect_controller_spec.rb'

@@ -59,7 +59,6 @@ Note the following:
 - Pipeline execution policies remain in effect even if the project lacks a CI/CD configuration file.
 - The order of the policies matters for the applied suffix.
 - If any policy applied to a given project has `suffix: never`, the pipeline fails if another job with the same name is already present in the pipeline.
-- Pipeline execution policies are enforced on all branches and pipeline sources. You can use [workflow rules](../../../ci/yaml/workflow.md) to control when pipeline execution policies are enforced.
 
 ### Job naming best practice
 
@@ -117,26 +116,6 @@ stages and the reserved stages.
 When enforcing pipeline execution policies over projects whose CI/CD configuration you do not
 control, you should define jobs in the `.pipeline-policy-pre` and `.pipeline-policy-post` stages.
 These stages are always available, regardless of any project's CI/CD configuration.
-
-When you use the `override_project_ci` [pipeline strategy](#pipeline-strategies) with multiple
-pipeline execution policies and with custom stages, the stages must be defined in the same relative order
-to be compatible with each other:
-
-Valid configuration example:
-
-```yaml
-  - `override-policy-1` stages: `[build, test, policy-test, deploy]`
-  - `override-policy-2` stages: `[test, deploy]`
-```
-
-Invalid configuration example:
-
-```yaml
-  - `override-policy-1` stages: `[build, test, policy-test, deploy]`
-  - `override-policy-2` stages: `[deploy, test]`
-```
-
-The pipeline fails if one or more `override_project_ci` policies has an invalid `stages` configuration.
 
 ### `content` type
 
@@ -219,13 +198,12 @@ compliance_job:
  ...
 ```
 
-> Jobs from the project configuration that are defined for a custom
-> `stage` are excluded from the final pipeline.
-> To include a job in the final configuration, you can:
->
-> - Use [stages](../../../ci/yaml/index.md#stages) to define custom stages in the pipeline execution policy configuration.
-> - Use a [default pipeline stage](../../../ci/yaml/index.md#stages)
-> - Use a reserved stage (`.pipeline-policy-pre` or `.pipeline-policy-post`).
+NOTE:
+Jobs from the project configuration that are defined for a custom
+`stage` are excluded from the final pipeline.
+To include a job in the final configuration, define it for a
+[default pipeline stage](../../../ci/yaml/index.md#stages) or a reserved
+stage (`.pipeline-policy-pre` or `.pipeline-policy-post`).
 
 ## CI/CD variables
 
@@ -319,7 +297,7 @@ include:
   - project: $CI_PROJECT_PATH
     ref: $CI_COMMIT_SHA
     file: $CI_CONFIG_PATH
-  - template: Jobs/Secret-Detection.gitlab-ci.yml
+  - template: Security/Secret-Detection.gitlab-ci.yml
 ```
 
 In the project's `.gitlab-ci.yml`, you can define `before_script` for the scanner:

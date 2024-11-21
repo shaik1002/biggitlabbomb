@@ -40,11 +40,11 @@ describe('DynamicField', () => {
 
   describe('template', () => {
     describe.each`
-      isInheriting | editable | disabled      | readonly | checkboxLabel
-      ${true}      | ${true}  | ${'disabled'} | ${true}  | ${undefined}
-      ${false}     | ${true}  | ${undefined}  | ${false} | ${'Custom checkbox label'}
-      ${true}      | ${false} | ${'disabled'} | ${true}  | ${undefined}
-      ${false}     | ${false} | ${'disabled'} | ${false} | ${'Custom checkbox label'}
+      isInheriting | editable | disabled              | readonly | checkboxLabel
+      ${true}      | ${true}  | ${expect.any(String)} | ${true}  | ${undefined}
+      ${false}     | ${true}  | ${undefined}          | ${false} | ${'Custom checkbox label'}
+      ${true}      | ${false} | ${expect.any(String)} | ${true}  | ${undefined}
+      ${false}     | ${false} | ${expect.any(String)} | ${false} | ${'Custom checkbox label'}
     `(
       'dynamic field, when isInheriting = `$isInheriting` and editable = `$editable`',
       ({ isInheriting, editable, disabled, readonly, checkboxLabel }) => {
@@ -62,7 +62,7 @@ describe('DynamicField', () => {
 
           it(`renders GlFormCheckbox, which ${isInheriting ? 'is' : 'is not'} disabled`, () => {
             expect(findGlFormCheckbox().exists()).toBe(true);
-            expect(findGlFormCheckbox().find('[type=checkbox]').attributes('disabled')).toBe(
+            expect(findGlFormCheckbox().find('[type=checkbox]').attributes('disabled')).toEqual(
               disabled,
             );
           });
@@ -96,7 +96,7 @@ describe('DynamicField', () => {
           it(`renders GlFormSelect, which ${isInheriting ? 'is' : 'is not'} disabled`, () => {
             expect(findGlFormSelect().exists()).toBe(true);
             expect(findGlFormSelect().findAll('option')).toHaveLength(2);
-            expect(findGlFormSelect().find('select').attributes('disabled')).toBe(disabled);
+            expect(findGlFormSelect().find('select').attributes('disabled')).toEqual(disabled);
           });
 
           it('does not render other types of input', () => {

@@ -55,7 +55,6 @@ export default {
     deleteErrorMessage: s__(
       'Projects|An error occurred deleting the project. Please refresh the page to try again.',
     ),
-    ciCatalogBadge: s__('CiCatalog|CI/CD Catalog project'),
   },
   truncateTextToggleButtonProps: { class: '!gl-text-sm' },
   components: {
@@ -297,15 +296,6 @@ export default {
                     variant="subtle"
                   />
                 </div>
-                <div v-if="project.isCatalogResource" class="gl-px-2">
-                  <gl-badge
-                    icon="catalog-checkmark"
-                    variant="info"
-                    data-testid="ci-catalog-badge"
-                    :href="project.exploreCatalogPath"
-                    >{{ $options.i18n.ciCatalogBadge }}</gl-badge
-                  >
-                </div>
                 <div class="gl-px-2">
                   <gl-badge
                     v-if="shouldShowAccessLevel"
@@ -378,7 +368,6 @@ export default {
             :href="starsHref"
             :aria-label="$options.i18n.stars"
             class="gl-text-secondary"
-            data-testid="stars-btn"
           >
             <gl-icon name="star-o" />
             <span>{{ starCount }}</span>
@@ -389,7 +378,6 @@ export default {
             :href="forksHref"
             :aria-label="$options.i18n.forks"
             class="gl-text-secondary"
-            data-testid="forks-btn"
           >
             <gl-icon name="fork" />
             <span>{{ forksCount }}</span>
@@ -400,7 +388,6 @@ export default {
             :href="mergeRequestsHref"
             :aria-label="$options.i18n.mergeRequests"
             class="gl-text-secondary"
-            data-testid="mrs-btn"
           >
             <gl-icon name="merge-request" />
             <span>{{ openMergeRequestsCount }}</span>
@@ -411,7 +398,6 @@ export default {
             :href="issuesHref"
             :aria-label="$options.i18n.issues"
             class="gl-text-secondary"
-            data-testid="issues-btn"
           >
             <gl-icon name="issues" />
             <span>{{ openIssuesCount }}</span>

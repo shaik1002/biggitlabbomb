@@ -4,8 +4,6 @@ module Routing
   module PseudonymizationHelper
     PSEUDONOMIZED_NAMESPACE = "namespace"
     PSEUDONOMIZED_PROJECT = "project"
-    PSEUDONOMIZED_GROUP = "group"
-    PSEUDONOMIZED_ID = "id"
 
     class MaskHelper
       QUERY_PARAMS_TO_NOT_MASK = %w[
@@ -111,27 +109,19 @@ module Routing
       return unless params && params[:controller]
       return if params[:action] == "route_not_found"
 
-      original_id = params[:id]
-
       case params[:controller]
       when 'groups'
         params[:id] = PSEUDONOMIZED_NAMESPACE
       when 'projects'
         params[:id] = PSEUDONOMIZED_PROJECT
+        params[:namespace_id] = PSEUDONOMIZED_NAMESPACE
       else
-        params[:id] = PSEUDONOMIZED_ID if params[:id]
+        params[:project_id] = PSEUDONOMIZED_PROJECT if params[:project_id]
+        params[:namespace_id] = PSEUDONOMIZED_NAMESPACE if params[:namespace_id]
       end
-
-      params[:project_id] = PSEUDONOMIZED_PROJECT if params[:project_id]
-      params[:group_id] = PSEUDONOMIZED_GROUP if params[:group_id]
-      params[:namespace_id] = PSEUDONOMIZED_NAMESPACE if params[:namespace_id]
 
       masked_query_params = masked_query_params(URI.parse(url))
 
-      Gitlab::Routing.url_helpers.url_for(params.merge(params: masked_query_params))
-    rescue ActionController::UrlGenerationError
-      # If URL cannot be constructed with placeholder, use original ID
-      params[:id] = original_id
       Gitlab::Routing.url_helpers.url_for(params.merge(params: masked_query_params))
     end
 

@@ -8,8 +8,6 @@ class UsersController < ApplicationController
   include ControllerWithCrossProjectAccessCheck
   include Gitlab::NoteableMetadata
 
-  FOLLOWERS_FOLLOWING_USERS_PER_PAGE = 21
-
   requires_cross_project_access show: false,
     groups: false,
     projects: false,
@@ -30,17 +28,7 @@ class UsersController < ApplicationController
   before_action only: [:exists] do
     check_rate_limit!(:username_exists, scope: request.ip)
   end
-  before_action only: [
-    :show,
-    :activity,
-    :groups,
-    :projects,
-    :contributed,
-    :starred,
-    :snippets,
-    :followers,
-    :following
-  ] do
+  before_action only: [:show, :activity, :groups, :projects, :contributed, :starred, :snippets, :followers, :following] do
     push_frontend_feature_flag(:profile_tabs_vue, current_user)
   end
 
@@ -142,13 +130,13 @@ class UsersController < ApplicationController
 
   def followers
     present_users do
-      @user_followers = user.followers.page(params[:page]).per(FOLLOWERS_FOLLOWING_USERS_PER_PAGE)
+      @user_followers = user.followers.page(params[:page])
     end
   end
 
   def following
     present_users do
-      @user_following = user.followees.page(params[:page]).per(FOLLOWERS_FOLLOWING_USERS_PER_PAGE)
+      @user_following = user.followees.page(params[:page])
     end
   end
 
@@ -163,15 +151,7 @@ class UsersController < ApplicationController
       format.json do
         projects = yield
 
-        pager_json(
-          "shared/projects/_list",
-          projects.count,
-          projects: projects,
-          skip_pagination: skip_pagination,
-          skip_namespace: skip_namespace,
-          compact_mode: compact_mode,
-          card_mode: card_mode
-        )
+        pager_json("shared/projects/_list", projects.count, projects: projects, skip_pagination: skip_pagination, skip_namespace: skip_namespace, compact_mode: compact_mode, card_mode: card_mode)
       end
     end
   end

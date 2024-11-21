@@ -8,10 +8,11 @@ module QA
       include Runtime::Fixtures
       include Support::Helpers::MaskToken
 
-      let!(:personal_access_token) { Runtime::UserStore.test_user.current_personal_access_token }
-      let!(:project) { create(:project, name: 'npm-group-publish') }
-      let!(:group) { project.group }
+      let!(:personal_access_token) { Resource::PersonalAccessToken.fabricate_via_api!.token }
+
+      let!(:group) { create(:group) }
       let!(:registry_scope) { group.sandbox.name }
+      let!(:project) { create(:project, name: 'npm-group-publish', group: group) }
       let!(:another_project) { create(:project, name: 'npm-group-install', group: group) }
       let!(:runner) do
         create(:group_runner,

@@ -126,7 +126,7 @@
 }
 
 .btn-transparent {
-  color: var(--gl-button-default-primary-foreground-color-default);
+  color: $gl-text-color-secondary;
   background-color: transparent;
   border: 0;
 

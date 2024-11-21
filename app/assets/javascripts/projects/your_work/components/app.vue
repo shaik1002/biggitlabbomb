@@ -222,13 +222,9 @@ export default {
       <template #title>
         <div class="gl-flex gl-items-center gl-gap-2" data-testid="projects-dashboard-tab-title">
           <span>{{ tab.text }}</span>
-          <gl-badge
-            v-if="shouldShowCountBadge(tab)"
-            size="sm"
-            class="gl-tab-counter-badge"
-            data-testid="tab-counter-badge"
-            >{{ numberToMetricPrefix(tabCount(tab)) }}</gl-badge
-          >
+          <gl-badge v-if="shouldShowCountBadge(tab)" size="sm" class="gl-tab-counter-badge">{{
+            numberToMetricPrefix(tabCount(tab))
+          }}</gl-badge>
         </div>
       </template>
 

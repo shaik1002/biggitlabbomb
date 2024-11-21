@@ -169,6 +169,4 @@ rm ~/.local/share/nvim/gitlab-code-suggestions-language-server-*
 
 ## Related topics
 
-- [Neovim troubleshooting](neovim_troubleshooting.md)
 - [View source code](https://gitlab.com/gitlab-org/editor-extensions/gitlab.vim)
-- [GitLab Language Server documentation](../language_server/index.md)

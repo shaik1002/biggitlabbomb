@@ -29,7 +29,7 @@ Depending on which limits you have configured, you can see:
 - Size limits
 
 Because this page is visible to everybody, unauthenticated users only see the
-information that is relevant to them.
+the information that is relevant to them.
 
 To visit the instance configuration page:
 
@@ -288,7 +288,7 @@ Plan.default.actual_limits.update!(group_hooks: 100)
 
 Set the limit to `0` to disable it.
 
-The default maximum number of webhooks is `100` per project and `50` per group. Webhooks in a subgroup do not count towards the webhook limit of their parent group.
+The default maximum number of webhooks is `100` per project and `50` per group. Webhooks in a child group do not count towards the webhook limit of their parent group.
 
 For GitLab.com, see the [webhook limits for GitLab.com](../user/gitlab_com/index.md#webhooks).
 

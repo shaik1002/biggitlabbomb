@@ -88,7 +88,7 @@ describe('CiCdCatalogWrapper', () => {
         });
 
         it('renders button as disabled', () => {
-          expect(findSettingsButton().attributes('disabled')).toBe('disabled');
+          expect(findSettingsButton().attributes('disabled')).toEqual(expect.any(String));
         });
       });
 

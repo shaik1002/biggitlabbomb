@@ -1,11 +1,7 @@
 const { spawnSync } = require('node:child_process');
-const { readFile, open } = require('node:fs/promises');
+const { readFile } = require('node:fs/promises');
 const parser = require('fast-xml-parser');
-const defaultChalk = require('chalk');
 const { getLocalQuarantinedFiles } = require('./jest_vue3_quarantine_utils');
-
-// Always use basic color output
-const chalk = new defaultChalk.constructor({ level: 1 });
 
 async function parseJUnitReport() {
   let junit;
@@ -54,22 +50,16 @@ async function parseJUnitReport() {
 }
 
 function reportPassingSpecsShouldBeUnquarantined(passed) {
-  const docsLink =
-    // eslint-disable-next-line no-restricted-syntax
-    'https://docs.gitlab.com/ee/development/testing_guide/testing_vue3.html#quarantine-list';
-  console.warn(' ');
+  console.log(' ');
   console.warn(
-    `The following ${passed.length} spec file(s) now pass(es) under Vue 3, and so must be removed from quarantine:`,
+    `Congratulations, the following ${passed.length} spec file(s) now pass(es) under Vue 3!`,
   );
-  console.warn(' ');
+  console.log(' ');
   console.warn(passed.join('\n'));
-  console.warn(' ');
+  console.log(' ');
   console.warn(
-    chalk.red(
-      `To fix this job, remove the file(s) listed above from the file ${chalk.underline('scripts/frontend/quarantined_vue3_specs.txt')}.`,
-    ),
+    'To allow the pipeline to pass, please remove the file(s) from quarantine in scripts/frontend/quarantined_vue3_specs.txt.',
   );
-  console.warn(`For more information, please see ${docsLink}.`);
 }
 
 async function changedFiles() {
@@ -85,12 +75,6 @@ async function changedFiles() {
 }
 
 async function main() {
-  const filesThatChanged = await changedFiles();
-  const jestStdout = (await open('jest_stdout', 'w')).createWriteStream();
-  const jestStderr = (await open('jest_stderr', 'w')).createWriteStream();
-
-  console.log('Running quarantined specs...');
-
   // Note: we don't care what Jest's exit code is.
   //
   // If it's zero, then either:
@@ -109,7 +93,7 @@ async function main() {
       'jest.config.js',
       '--ci',
       '--findRelatedTests',
-      ...filesThatChanged,
+      ...(await changedFiles()),
       '--passWithNoTests',
       // Explicitly have one shard, so that the `shard` method of the sequencer is called.
       '--shard=1/1',
@@ -118,7 +102,7 @@ async function main() {
       '--logHeapUsage',
     ],
     {
-      stdio: ['inherit', jestStdout, jestStderr],
+      stdio: 'inherit',
       env: {
         ...process.env,
         VUE_VERSION: '3',

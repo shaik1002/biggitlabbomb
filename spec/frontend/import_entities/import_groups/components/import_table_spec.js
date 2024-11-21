@@ -371,7 +371,7 @@ describe('import table', () => {
 
     it('disables the import target input', () => {
       const firstRow = wrapper.find('tbody tr');
-      expect(findTargetNamespaceInput(firstRow).attributes('disabled')).toBe('disabled');
+      expect(findTargetNamespaceInput(firstRow).attributes('disabled')).toEqual(expect.any(String));
     });
   });
 

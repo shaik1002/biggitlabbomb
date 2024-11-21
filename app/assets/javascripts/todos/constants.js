@@ -36,8 +36,6 @@ export const TODO_EMPTY_TITLE_POOL = [
 ];
 
 export const STATUS_BY_TAB = [['pending'], ['done'], ['pending', 'done']];
-export const TAB_PENDING = 0;
-export const TAB_DONE = 1;
 export const TAB_ALL = 2;
 
 /**
@@ -49,5 +47,3 @@ export const INSTRUMENT_TODO_SORT_CHANGE = 'sort_todo_list';
 export const INSTRUMENT_TODO_FILTER_CHANGE = 'filter_todo_list';
 
 export const INSTRUMENT_TAB_LABELS = ['status_pending', 'status_done', 'status_all'];
-
-export const TODO_WAIT_BEFORE_RELOAD = 1 * 1000; // 1 seconds

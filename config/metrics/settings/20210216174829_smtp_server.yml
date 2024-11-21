@@ -3,8 +3,6 @@ data_category: optional
 key_path: mail.smtp_server
 description: The value of the SMTP server that is used
 product_group: activation
-product_categories:
-- onboarding
 value_type: number
 status: active
 time_frame: all
@@ -12,6 +10,10 @@ data_source: system
 distribution:
 - ce
 - ee
+tier:
+- free
+- premium
+- ultimate
 tiers:
 - free
 - premium

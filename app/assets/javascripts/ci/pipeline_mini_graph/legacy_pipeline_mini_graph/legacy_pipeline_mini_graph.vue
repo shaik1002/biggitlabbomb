@@ -1,7 +1,8 @@
 <script>
 import { GlIcon, GlTooltipDirective } from '@gitlab/ui';
+import { convertToGraphQLId } from '~/graphql_shared/utils';
+import { TYPENAME_CI_PIPELINE, TYPENAME_CI_STAGE } from '~/graphql_shared/constants';
 import CiIcon from '~/vue_shared/components/ci_icon/ci_icon.vue';
-import { normalizeDownstreamPipelines, normalizeStages } from '../utils';
 import DownstreamPipelines from '../downstream_pipelines.vue';
 import PipelineStages from '../pipeline_stages.vue';
 /**
@@ -19,7 +20,7 @@ export default {
     GlIcon,
     PipelineStages,
   },
-  arrowStyles: ['arrow-icon gl-inline-block gl-mx-1 !gl-align-middle'],
+  arrowStyles: ['arrow-icon gl-inline-block gl-mx-1 gl-text-gray-500 !gl-align-middle'],
   directives: {
     GlTooltip: GlTooltipDirective,
   },
@@ -53,10 +54,31 @@ export default {
   emits: ['miniGraphStageClick'],
   computed: {
     formattedDownstreamPipelines() {
-      return normalizeDownstreamPipelines(this.downstreamPipelines);
+      return this.downstreamPipelines.map((p) => {
+        return {
+          detailedStatus: p?.details?.status || p.detailedStatus,
+          id: convertToGraphQLId(TYPENAME_CI_PIPELINE, p.id),
+          path: p.path,
+          project: {
+            fullPath: p.project.full_path,
+            name: p.project.name,
+          },
+        };
+      });
     },
     formattedStages() {
-      return normalizeStages(this.stages);
+      return this.stages.map((s) => {
+        const { id, name, status } = s;
+        return {
+          id: convertToGraphQLId(TYPENAME_CI_STAGE, id),
+          detailedStatus: {
+            icon: status.icon,
+            label: status.label,
+            tooltip: status.tooltip,
+          },
+          name,
+        };
+      });
     },
     hasDownstreamPipelines() {
       return Boolean(this.downstreamPipelines.length);
@@ -84,7 +106,6 @@ export default {
       :class="$options.arrowStyles"
       name="arrow-right"
       data-testid="upstream-arrow-icon"
-      variant="subtle"
     />
     <pipeline-stages
       :is-merge-train="isMergeTrain"
@@ -96,7 +117,6 @@ export default {
       :class="$options.arrowStyles"
       name="arrow-right"
       data-testid="downstream-arrow-icon"
-      variant="subtle"
     />
     <downstream-pipelines
       v-if="hasDownstreamPipelines"

@@ -3,8 +3,6 @@ data_category: optional
 key_path: usage_activity_by_stage_monthly.manage.projects_imported.bitbucket_server
 description: Count of projects imported from Bitbucket Server
 product_group: import_and_integrate
-product_categories:
-- importers
 value_type: number
 status: removed
 time_frame: 28d
@@ -12,6 +10,10 @@ data_source: database
 distribution:
 - ce
 - ee
+tier:
+- free
+- premium
+- ultimate
 tiers:
 - free
 - premium

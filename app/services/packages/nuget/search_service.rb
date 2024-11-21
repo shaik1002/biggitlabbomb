@@ -101,7 +101,13 @@ module Packages
       strong_memoize_attr :base_matching_package_names
 
       def nuget_packages
-        ::Packages::Nuget::Package.installable.has_version
+        if Feature.enabled?(:nuget_extract_nuget_package_model, Feature.current_request)
+          ::Packages::Nuget::Package.installable.has_version
+        else
+          Packages::Package.nuget
+                           .installable
+                           .has_version
+        end
       end
 
       def project_ids_cte
@@ -149,7 +155,11 @@ module Packages
       end
 
       def packages_class
-        ::Packages::Nuget::Package
+        if Feature.enabled?(:nuget_extract_nuget_package_model, Feature.current_request)
+          ::Packages::Nuget::Package
+        else
+          ::Packages::Package
+        end
       end
 
       class Result

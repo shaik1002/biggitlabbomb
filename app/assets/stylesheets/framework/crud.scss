@@ -92,7 +92,7 @@ $crud-header-min-height: px-to-rem(49px);
 .crud-pagination {
   margin-top: -1px;
 
-  &:not(:has(> .gl-pagination, > .crud-pagination-container)) {
+  &:not(:has(> .gl-pagination)) {
     display: none;
   }
 
@@ -100,7 +100,6 @@ $crud-header-min-height: px-to-rem(49px);
     margin-top: 0;
   }
 
-  .gl-pagination ul,
   .pagination {
     margin-bottom: 0;
   }

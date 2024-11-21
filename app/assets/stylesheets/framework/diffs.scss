@@ -48,6 +48,17 @@ $diff-file-header: 41px;
         top: calc(#{$calc-application-header-height} + #{$mr-sticky-header-height} + #{$diff-file-header} - #{$gl-border-size-1});
       }
 
+      &::before {
+        content: '';
+        position: absolute;
+        top: -1px;
+        left: -11px;
+        width: 10px;
+        height: calc(100% + 1px);
+        @apply gl-bg-default;
+        pointer-events: none;
+      }
+
       &.is-commit,
       &.is-compare,
       &.is-wiki {
@@ -641,6 +652,12 @@ table.code {
     position: absolute;
     top: 5px;
     right: 15px;
+  }
+}
+
+.files {
+  .diff-file:not(.is-virtual-scrolling):last-child {
+    margin-bottom: 0;
   }
 }
 

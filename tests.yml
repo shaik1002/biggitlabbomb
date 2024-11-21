@@ -305,9 +305,7 @@ mapping:
 
   # ultimate trials
   - source: 'ee/app/controllers/gitlab_subscriptions/trials_controller\.rb'
-    test:
-    - 'ee/spec/features/gitlab_subscriptions/trials/creation_*_spec.rb'
-    - ee/spec/features/gitlab_subscriptions/trials/access_denied_spec.rb
+    test: 'ee/spec/features/gitlab_subscriptions/trials/creation_*_spec.rb'
 
   # duo pro trials
   - source: 'ee/app/controllers/gitlab_subscriptions/trials/duo_pro_controller\.rb'

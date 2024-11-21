@@ -19,6 +19,7 @@ export default {
   },
   inject: ['fullPath'],
   apollo: {
+    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     ciCdSettings: {
       query: getCiJobTokenPermissionsQuery,
       variables() {
@@ -45,7 +46,6 @@ export default {
       allowPushToRepo: false,
       isUpdating: false,
       projectName: '',
-      ciCdSettings: null,
     };
   },
   computed: {

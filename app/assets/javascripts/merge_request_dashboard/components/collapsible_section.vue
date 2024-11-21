@@ -68,7 +68,7 @@ export default {
     is-collapsible
     :collapsed="!open"
     :toggle-aria-label="toggleButtonLabel"
-    :body-class="{ '!gl-mx-0 gl-mb-0': hasMergeRequests }"
+    :body-class="{ '!gl-mx-0 gl-mb-0': count }"
   >
     <template #title>
       {{ title }}

@@ -224,9 +224,7 @@ class ApplicationController < BaseActionController
   end
 
   def after_sign_in_path_for(resource)
-    redirect_location = stored_location_for(:redirect)
-    redirect_location ||= stored_location_for(resource) if resource.present?
-    redirect_location || root_path
+    stored_location_for(:redirect) || stored_location_for(resource) || root_path
   end
 
   def after_sign_out_path_for(resource)

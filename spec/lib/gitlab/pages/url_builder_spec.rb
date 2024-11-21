@@ -85,8 +85,24 @@ RSpec.describe Gitlab::Pages::UrlBuilder, feature_category: :pages do
         end
       end
 
+      context 'when not using pages_unique_domain' do
+        subject(:pages_url) { builder.pages_url(with_unique_domain: false) }
+
+        context 'when pages_unique_domain_enabled is false' do
+          let(:unique_domain_enabled) { false }
+
+          it { is_expected.to eq('http://group.example.com/project') }
+        end
+
+        context 'when pages_unique_domain_enabled is true' do
+          let(:unique_domain_enabled) { true }
+
+          it { is_expected.to eq('http://group.example.com/project') }
+        end
+      end
+
       context 'when using pages_unique_domain' do
-        subject(:pages_url) { builder.pages_url }
+        subject(:pages_url) { builder.pages_url(with_unique_domain: true) }
 
         context 'when pages_unique_domain_enabled is false' do
           let(:unique_domain_enabled) { false }
@@ -133,8 +149,24 @@ RSpec.describe Gitlab::Pages::UrlBuilder, feature_category: :pages do
         end
       end
 
+      context 'when not using pages_unique_domain' do
+        subject(:pages_url) { builder.pages_url(with_unique_domain: false) }
+
+        context 'when pages_unique_domain_enabled is false' do
+          let(:unique_domain_enabled) { false }
+
+          it { is_expected.to eq('http://example.com/group/project') }
+        end
+
+        context 'when pages_unique_domain_enabled is true' do
+          let(:unique_domain_enabled) { true }
+
+          it { is_expected.to eq('http://example.com/group/project') }
+        end
+      end
+
       context 'when using pages_unique_domain' do
-        subject(:pages_url) { builder.pages_url }
+        subject(:pages_url) { builder.pages_url(with_unique_domain: true) }
 
         context 'when pages_unique_domain_enabled is false' do
           let(:unique_domain_enabled) { false }

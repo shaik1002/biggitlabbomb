@@ -62,7 +62,7 @@ describe('JiraIssuesFields', () => {
         } else {
           it('renders enable checkbox as disabled', () => {
             expect(findEnableCheckbox().exists()).toBe(true);
-            expect(findEnableCheckboxDisabled()).toBe('disabled');
+            expect(findEnableCheckboxDisabled()).toEqual(expect.any(String));
           });
         }
       },
@@ -87,7 +87,7 @@ describe('JiraIssuesFields', () => {
         it('disables checkbox', () => {
           createComponent({ isInheriting: true });
 
-          expect(findEnableCheckboxDisabled()).toBe('disabled');
+          expect(findEnableCheckboxDisabled()).toEqual(expect.any(String));
         });
       });
 

@@ -260,7 +260,7 @@ describe('TokenAccess component', () => {
 
       await waitForPromises();
 
-      expect(findAddProjectBtn().attributes('disabled')).toBe('disabled');
+      expect(findAddProjectBtn().attributes('disabled')).toEqual(expect.any(String));
     });
   });
 });

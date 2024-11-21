@@ -63,7 +63,7 @@ gem 'responders', '~> 3.0' # rubocop:todo Gemfile/MissingFeatureCategory
 gem 'sprockets', '~> 3.7.0' # rubocop:todo Gemfile/MissingFeatureCategory
 gem 'sprockets-rails', '~>  3.5.1' # rubocop:todo Gemfile/MissingFeatureCategory
 
-gem 'view_component', '~> 3.20.0' # rubocop:todo Gemfile/MissingFeatureCategory
+gem 'view_component', '~> 3.17.0' # rubocop:todo Gemfile/MissingFeatureCategory
 
 # Supported DBs
 gem 'pg', '~> 1.5.6', feature_category: :database
@@ -234,9 +234,9 @@ gem 'seed-fu', '~> 2.3.7' # rubocop:todo Gemfile/MissingFeatureCategory
 gem 'elasticsearch-model', '~> 7.2', feature_category: :global_search
 gem 'elasticsearch-rails', '~> 7.2', require: 'elasticsearch/rails/instrumentation', feature_category: :global_search
 gem 'elasticsearch-api', '7.17.11', feature_category: :global_search
-gem 'aws-sdk-core', '~> 3.213.0' # rubocop:todo Gemfile/MissingFeatureCategory
+gem 'aws-sdk-core', '~> 3.211.0' # rubocop:todo Gemfile/MissingFeatureCategory
 gem 'aws-sdk-cloudformation', '~> 1' # rubocop:todo Gemfile/MissingFeatureCategory
-gem 'aws-sdk-s3', '~> 1.172.0' # rubocop:todo Gemfile/MissingFeatureCategory
+gem 'aws-sdk-s3', '~> 1.169.0' # rubocop:todo Gemfile/MissingFeatureCategory
 gem 'faraday-typhoeus', '~> 1.1', feature_category: :global_search
 gem 'faraday_middleware-aws-sigv4', '~> 1.0.1', feature_category: :global_search
 # Used with Elasticsearch to support http keep-alive connections
@@ -247,7 +247,7 @@ gem 'html-pipeline', '~> 2.14.3', feature_category: :markdown
 gem 'deckar01-task_list', '2.3.4', feature_category: :markdown
 gem 'gitlab-markup', '~> 1.9.0', require: 'github/markup', feature_category: :markdown
 gem 'commonmarker', '~> 0.23.10', feature_category: :markdown
-gem 'kramdown', '~> 2.4.0', feature_category: :markdown
+gem 'kramdown', '~> 2.3.1', feature_category: :markdown
 gem 'RedCloth', '~> 4.3.3', feature_category: :markdown
 gem 'org-ruby', '~> 0.9.12', feature_category: :markdown
 gem 'creole', '~> 0.5.0', feature_category: :markdown
@@ -480,7 +480,7 @@ group :development do
 
   gem 'listen', '~> 3.7' # rubocop:todo Gemfile/MissingFeatureCategory
 
-  gem 'ruby-lsp', "~> 0.21.0", require: false, feature_category: :tooling
+  gem 'ruby-lsp', "~> 0.19.0", require: false, feature_category: :tooling
 
   gem 'ruby-lsp-rails', "~> 0.3.6", feature_category: :tooling
 

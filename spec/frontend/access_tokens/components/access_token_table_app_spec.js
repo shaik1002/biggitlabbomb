@@ -29,7 +29,6 @@ describe('~/access_tokens/components/access_token_table_app', () => {
       expires_at: null,
       revoked: false,
       revoke_path: '/-/user_settings/personal_access_tokens/1/revoke',
-      rotate_path: '/-/user_settings/personal_access_tokens/1/rotate',
       role: 'Maintainer',
     },
     {
@@ -42,7 +41,6 @@ describe('~/access_tokens/components/access_token_table_app', () => {
       expires_at: new Date().toISOString(),
       revoked: false,
       revoke_path: '/-/user_settings/personal_access_tokens/2/revoke',
-      rotate_path: '/-/user_settings/personal_access_tokens/2/rotate',
       role: 'Maintainer',
     },
   ];
@@ -183,29 +181,18 @@ describe('~/access_tokens/components/access_token_table_app', () => {
       expect(cells.at(3).text()).toBe('Never');
       expect(cells.at(4).text()).toBe('Never');
       expect(cells.at(5).text()).toBe('Maintainer');
-      let buttons = cells.at(6).findAllComponents(GlButton);
-      expect(buttons).toHaveLength(2);
-      expect(buttons.at(0).attributes()).toMatchObject({
+      let button = cells.at(6).findComponent(GlButton);
+      expect(button.attributes()).toMatchObject({
         'aria-label': 'Revoke',
         'data-testid': 'revoke-button',
         href: '/-/user_settings/personal_access_tokens/1/revoke',
         'data-confirm': sprintf(
-          'Are you sure you want to revoke the %{accessTokenType} "%{tokenName}"? This action cannot be undone. Any tools that rely on this access token will stop working.',
+          'Are you sure you want to revoke the %{accessTokenType} "%{tokenName}"? This action cannot be undone.',
+
           { accessTokenType, tokenName: 'a' },
         ),
       });
-      expect(buttons.at(0).props('category')).toBe('tertiary');
-      expect(buttons.at(1).attributes()).toMatchObject({
-        'aria-label': 'Rotate',
-        'data-testid': 'rotate-button',
-        href: '/-/user_settings/personal_access_tokens/1/rotate',
-        'data-confirm': sprintf(
-          'Are you sure you want to rotate the %{accessTokenType} "%{tokenName}"? This action cannot be undone. Any tools that rely on this access token will stop working.',
-          { accessTokenType, tokenName: 'a' },
-        ),
-        'data-remote': '', // this attribute is necessary for the correct functioning of the button
-      });
-      expect(buttons.at(1).props('category')).toBe('tertiary');
+      expect(button.props('category')).toBe('tertiary');
 
       // Second row
       expect(cells.at(7).text()).toBe('b');
@@ -214,23 +201,17 @@ describe('~/access_tokens/components/access_token_table_app', () => {
       expect(cells.at(10).text()).not.toBe('Never');
       expect(cells.at(11).text()).toBe('Expired');
       expect(cells.at(12).text()).toBe('Maintainer');
-      buttons = cells.at(13).findAllComponents(GlButton);
-      expect(buttons.at(0).attributes('href')).toBe(
-        '/-/user_settings/personal_access_tokens/2/revoke',
-      );
-      expect(buttons.at(0).props('category')).toBe('tertiary');
-      expect(buttons.at(1).attributes('href')).toBe(
-        '/-/user_settings/personal_access_tokens/2/rotate',
-      );
-      expect(buttons.at(1).props('category')).toBe('tertiary');
+      button = cells.at(13).findComponent(GlButton);
+      expect(button.attributes('href')).toBe('/-/user_settings/personal_access_tokens/2/revoke');
+      expect(button.props('category')).toBe('tertiary');
     });
 
-    describe('when revoke_path and rotate_path are', () => {
+    describe('when revoke_path is', () => {
       describe('absent in all tokens', () => {
         it('should not include `Action` column', () => {
           createComponent({
             initialActiveAccessTokens: defaultActiveAccessTokens.map(
-              ({ revoke_path, rotate_path, ...rest }) => rest,
+              ({ revoke_path, ...rest }) => rest,
             ),
             showRole: true,
             backendPagination,
@@ -246,39 +227,22 @@ describe('~/access_tokens/components/access_token_table_app', () => {
         });
       });
 
-      it.each([
-        { revoke_path: null, rotate_path: null },
-        { revoke_path: undefined, rotate_path: undefined },
-      ])('%p in some tokens, does not show revoke and rotate buttons', (input) => {
-        createComponent({
-          initialActiveAccessTokens: [
-            defaultActiveAccessTokens.map((data) => ({ ...data, ...input }))[0],
-            defaultActiveAccessTokens[1],
-          ],
-          showRole: true,
-          backendPagination,
-        });
+      it.each([{ revoke_path: null }, { revoke_path: undefined }])(
+        '%p in some tokens, does not show revoke button',
+        (input) => {
+          createComponent({
+            initialActiveAccessTokens: [
+              defaultActiveAccessTokens.map((data) => ({ ...data, ...input }))[0],
+              defaultActiveAccessTokens[1],
+            ],
+            showRole: true,
+            backendPagination,
+          });
 
-        expect(findHeaders().at(6).text()).toBe('Action');
-        expect(findCells().at(6).findComponent(GlButton).exists()).toBe(false);
-      });
-
-      it.each([
-        { revoke_path: '/-/user_settings/personal_access_tokens/1/revoke', rotate_path: null },
-        { revoke_path: null, rotate_path: '/-/user_settings/personal_access_tokens/1/rotate' },
-      ])(`%p in some tokens, shows revoke or rotate button`, (input) => {
-        createComponent({
-          initialActiveAccessTokens: [
-            defaultActiveAccessTokens.map((data) => ({ ...data, ...input }))[0],
-            defaultActiveAccessTokens[1],
-          ],
-          showRole: true,
-          backendPagination,
-        });
-
-        expect(findHeaders().at(6).text()).toBe('Action');
-        expect(findCells().at(6).findComponent(GlButton).exists()).toBe(true);
-      });
+          expect(findHeaders().at(6).text()).toBe('Action');
+          expect(findCells().at(6).findComponent(GlButton).exists()).toBe(false);
+        },
+      );
     });
   });
 

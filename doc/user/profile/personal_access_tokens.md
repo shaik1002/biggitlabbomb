@@ -12,7 +12,7 @@ DETAILS:
 
 Personal access tokens can be an alternative to [OAuth2](../../api/oauth2.md) and used to:
 
-- Authenticate with the [GitLab API](../../api/rest/authentication.md#personalprojectgroup-access-tokens).
+- Authenticate with the [GitLab API](../../api/rest/index.md#personalprojectgroup-access-tokens).
 - Authenticate with Git using HTTP Basic Authentication.
 
 In both cases, you authenticate with a personal access token in place of your password. Username is not evaluated as part of the authentication process.
@@ -32,9 +32,9 @@ Though required, GitLab usernames are ignored when authenticating with a persona
 There is an [issue for tracking](https://gitlab.com/gitlab-org/gitlab/-/issues/212953) to make GitLab
 use the username.
 
-For examples of how you can use a personal access token to authenticate with the API, see the [API documentation](../../api/rest/authentication.md#personalprojectgroup-access-tokens).
+For examples of how you can use a personal access token to authenticate with the API, see the [API documentation](../../api/rest/index.md#personalprojectgroup-access-tokens).
 
-Alternately, GitLab administrators can use the API to create [impersonation tokens](../../api/rest/authentication.md#impersonation-tokens).
+Alternately, GitLab administrators can use the API to create [impersonation tokens](../../api/rest/index.md#impersonation-tokens).
 Use impersonation tokens to automate authentication as a specific user.
 
 ## Create a personal access token
@@ -81,20 +81,15 @@ WARNING:
 Personal access tokens must be treated carefully. Read our [token security considerations](../../security/tokens/index.md#security-considerations)
 for guidance on managing personal access tokens (for example, setting a short expiry and using minimal scopes).
 
-## Revoke or rotate a personal access token
+## Revoke a personal access token
 
-> - Ability to use the UI to rotate a personal access token [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/241523) in GitLab 17.7.
-
-At any time, you can use the UI to revoke or, in GitLab 17.7 and later, rotate a personal access token.
+At any time, you can revoke a personal access token.
 
 1. On the left sidebar, select your avatar.
 1. Select **Edit profile**.
 1. On the left sidebar, select **Access tokens**.
-1. In the **Active personal access tokens** area, for the relevant token, select **Revoke** (**{remove}**) or **Rotate** (**{retry}**).
-1. On the confirmation dialog, select **Revoke** or **Rotate**.
-
-   WARNING:
-   These actions cannot be undone. Any tools that rely on a revoked or rotated access token will stop working.
+1. In the **Active personal access tokens** area, select **Revoke** for the relevant token.
+1. On the confirmation dialog, select **Revoke**.
 
 ## Disable personal access tokens
 

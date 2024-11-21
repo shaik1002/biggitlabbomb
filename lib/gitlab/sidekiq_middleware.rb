@@ -47,7 +47,6 @@ module Gitlab
         # so we can compare the latest WAL location against replica
         chain.add ::Gitlab::SidekiqMiddleware::DuplicateJobs::Server
         chain.add ::Gitlab::Database::LoadBalancing::SidekiqServerMiddleware
-        chain.add ::Gitlab::SidekiqMiddleware::ResourceUsageLimit::Server
         chain.add ::Gitlab::SidekiqMiddleware::SkipJobs if skip_jobs
       end
     end
@@ -57,8 +56,6 @@ module Gitlab
     # eg: `config.client_middleware(&Gitlab::SidekiqMiddleware.client_configurator)`
     def self.client_configurator
       ->(chain) do
-        # ConcurrencyLimit::Resume needs to be first and before Labkit and ConcurrencyLimit::Client
-        chain.add ::Gitlab::SidekiqMiddleware::ConcurrencyLimit::Resume
         chain.add ::Gitlab::SidekiqMiddleware::WorkerContext::Client # needs to be before the Labkit middleware
         chain.add ::Labkit::Middleware::Sidekiq::Client
         # Sidekiq Client Middleware should be placed before DuplicateJobs::Client middleware,

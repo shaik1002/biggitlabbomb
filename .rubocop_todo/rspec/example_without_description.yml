@@ -1,5 +1,6 @@
 ---
 RSpec/ExampleWithoutDescription:
+  Details: grace period
   Exclude:
     - 'ee/spec/bin/custom_ability_spec.rb'
     - 'ee/spec/components/gitlab_subscriptions/discover_duo_pro_component_spec.rb'
@@ -290,6 +291,7 @@ RSpec/ExampleWithoutDescription:
     - 'spec/initializers/gitlab_http_spec.rb'
     - 'spec/initializers/google_cloud_profiler_spec.rb'
     - 'spec/keeps/helpers/postgres_ai_spec.rb'
+    - 'spec/lib/api/entities/virtual_registries/packages/maven/cached_response_spec.rb'
     - 'spec/lib/banzai/filter/commit_trailers_filter_spec.rb'
     - 'spec/lib/banzai/pipeline/incident_management/timeline_event_pipeline_spec.rb'
     - 'spec/lib/banzai/pipeline_spec.rb'
@@ -476,6 +478,7 @@ RSpec/ExampleWithoutDescription:
     - 'spec/models/users/banned_user_spec.rb'
     - 'spec/models/users/phone_number_validation_spec.rb'
     - 'spec/models/users/project_callout_spec.rb'
+    - 'spec/models/virtual_registries/packages/maven/cached_response_spec.rb'
     - 'spec/models/virtual_registries/packages/maven/registry_spec.rb'
     - 'spec/models/virtual_registries/packages/maven/registry_upstream_spec.rb'
     - 'spec/models/virtual_registries/packages/maven/upstream_spec.rb'

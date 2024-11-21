@@ -108,15 +108,7 @@ class GroupsFinder < UnionFinder
     groups = filter_group_ids(groups)
     groups = exclude_group_ids(groups)
     groups = by_visibility(groups)
-    groups = by_ids(groups)
-    groups = top_level_only(groups)
     by_search(groups)
-  end
-
-  def by_ids(items)
-    ids = params[:ids]
-    items = items.id_in(ids) if ids
-    items
   end
 
   def by_organization(groups)
@@ -134,10 +126,6 @@ class GroupsFinder < UnionFinder
     else
       by_parent_children(groups, params[:parent])
     end
-  end
-
-  def top_level_only(groups)
-    params[:top_level_only].present? ? groups.by_parent(nil) : groups
   end
 
   def by_parent_descendants(groups, parent)

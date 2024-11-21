@@ -32,7 +32,6 @@ class SchemaRegenerator
 
   def initialize(options)
     @rollback_testing = options.delete(:rollback_testing)
-    @init_schema_loading = options.delete(:init_schema_loading)
   end
 
   def execute
@@ -196,7 +195,7 @@ class SchemaRegenerator
   ##
   # Run rake task to setup the database.
   def setup_db
-    run_rake_task(@init_schema_loading ? 'db:create' : 'db:setup')
+    run_rake_task 'db:setup'
   end
 
   ##
@@ -292,11 +291,6 @@ if $PROGRAM_NAME == __FILE__
   OptionParser.new do |opts|
     opts.on("-r", "--rollback-testing", String, "Enable rollback testing") do
       options[:rollback_testing] = true
-    end
-
-    opts.on("-i", "--init-schema-loading", String,
-      "Enable clean migrations starting from the beginning - loading init_structure.sql") do
-      options[:init_schema_loading] = true
     end
 
     opts.on("-h", "--help", "Prints this help") do

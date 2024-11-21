@@ -1,6 +1,7 @@
 /* eslint-disable import/no-commonjs */
 const Vue = require('vue');
 const VTU = require('@vue/test-utils');
+const omit = require('lodash/omit');
 const { installCompat: installVTUCompat, fullCompatConfig } = require('vue-test-utils-compat');
 
 function getComponentName(component) {
@@ -82,7 +83,8 @@ if (global.document) {
   }).mount(document.createElement('div'));
 
   Vue.configureCompat(compatConfig);
-  installVTUCompat(VTU, fullCompatConfig, compatH);
+
+  installVTUCompat(VTU, omit(fullCompatConfig, ['WRAPPER_ATTRIBUTES_DISABLED']), compatH);
 
   jest.mock('vue', () => {
     const actualVue = jest.requireActual('vue');
@@ -116,9 +118,7 @@ if (global.document) {
       install: jest.fn(),
     },
     Portal: {},
-    PortalTarget: {
-      template: '<div>PORTAL-TARGET</div>',
-    },
+    PortalTarget: {},
     MountingPortal: {
       template: '<h1>MOUNTING-PORTAL</h1>',
     },

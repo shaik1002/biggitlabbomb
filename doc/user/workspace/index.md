@@ -247,17 +247,6 @@ However, the volume provisioned for the workspace still exists.
 
 To delete the provisioned volume, you must terminate the workspace.
 
-## Automatic workspace stop and termination
-
-> - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/14910) in GitLab 17.6.
-
-By default, a workspace automatically:
-
-- Stops 36 hours after the workspace was last started or restarted.
-  For more information, see [`max_active_hours_before_stop`](gitlab_agent_configuration.md#max_active_hours_before_stop).
-- Terminates 722 hours after the workspace was last stopped.
-  For more information, see [`max_stopped_hours_before_termination`](gitlab_agent_configuration.md#max_stopped_hours_before_termination).
-
 ## Arbitrary user IDs
 
 You can provide your own container image, which can run as any Linux user ID.

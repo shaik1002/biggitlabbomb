@@ -51,15 +51,6 @@ const emptySupportMap = {
   horseRacing: false,
   flag: false,
   skinToneModifier: false,
-  15.1: false,
-  '15.0': false,
-  '14.0': false,
-  13.1: false,
-  '13.0': false,
-  12.1: false,
-  '12.0': false,
-  '11.0': false,
-  '10.0': false,
   '9.0': false,
   '8.0': false,
   '7.0': false,
@@ -536,10 +527,6 @@ describe('emoji', () => {
   });
 
   describe('isEmojiUnicodeSupported', () => {
-    beforeEach(() => {
-      gon.emoji_backend_version = EMOJI_VERSION;
-    });
-
     it('should gracefully handle empty string with unicode support', () => {
       const isSupported = isEmojiUnicodeSupported({ '1.0': true }, '', '1.0');
 
@@ -549,7 +536,7 @@ describe('emoji', () => {
     it('should gracefully handle empty string without unicode support', () => {
       const isSupported = isEmojiUnicodeSupported({}, '', '1.0');
 
-      expect(isSupported).toBe(false);
+      expect(isSupported).toBeUndefined();
     });
 
     it('bomb(6.0) with 6.0 support', () => {
@@ -586,189 +573,6 @@ describe('emoji', () => {
       );
 
       expect(isSupported).toBe(false);
-    });
-
-    it('bomb(6.0) without 6.0 but with backend support', () => {
-      gon.emoji_backend_version = EMOJI_VERSION + 1;
-      const emojiKey = 'bomb';
-      const unicodeSupportMap = emptySupportMap;
-      const isSupported = isEmojiUnicodeSupported(
-        unicodeSupportMap,
-        emojiFixtureMap[emojiKey].moji,
-        emojiFixtureMap[emojiKey].unicodeVersion,
-      );
-
-      expect(isSupported).toBe(true);
-    });
-
-    it('bomb(6.0) without 6.0 with empty backend version', () => {
-      gon.emoji_backend_version = null;
-      const emojiKey = 'bomb';
-      const unicodeSupportMap = emptySupportMap;
-      const isSupported = isEmojiUnicodeSupported(
-        unicodeSupportMap,
-        emojiFixtureMap[emojiKey].moji,
-        emojiFixtureMap[emojiKey].unicodeVersion,
-      );
-
-      expect(isSupported).toBe(false);
-    });
-
-    it('expressionless(6.1)', () => {
-      const emojiKey = 'expressionless';
-      const unicodeSupportMap = { ...emptySupportMap, 6.1: true };
-      const isSupported = isEmojiUnicodeSupported(
-        unicodeSupportMap,
-        emojiFixtureMap[emojiKey].moji,
-        emojiFixtureMap[emojiKey].unicodeVersion,
-      );
-
-      expect(isSupported).toBe(true);
-    });
-
-    it('spy(7.0)', () => {
-      const emojiKey = 'spy';
-      const unicodeSupportMap = { ...emptySupportMap, '7.0': true };
-      const isSupported = isEmojiUnicodeSupported(
-        unicodeSupportMap,
-        emojiFixtureMap[emojiKey].moji,
-        emojiFixtureMap[emojiKey].unicodeVersion,
-      );
-
-      expect(isSupported).toBe(true);
-    });
-
-    it('metal(8.0)', () => {
-      const emojiKey = 'metal';
-      const unicodeSupportMap = { ...emptySupportMap, '8.0': true };
-      const isSupported = isEmojiUnicodeSupported(
-        unicodeSupportMap,
-        emojiFixtureMap[emojiKey].moji,
-        emojiFixtureMap[emojiKey].unicodeVersion,
-      );
-
-      expect(isSupported).toBe(true);
-    });
-
-    it('rofl(9.0)', () => {
-      const emojiKey = 'rofl';
-      const unicodeSupportMap = { ...emptySupportMap, '9.0': true };
-      const isSupported = isEmojiUnicodeSupported(
-        unicodeSupportMap,
-        emojiFixtureMap[emojiKey].moji,
-        emojiFixtureMap[emojiKey].unicodeVersion,
-      );
-
-      expect(isSupported).toBe(true);
-    });
-
-    it('face_vomiting(10.0)', () => {
-      const emojiKey = 'face_vomiting';
-      const unicodeSupportMap = { ...emptySupportMap, '10.0': true };
-      const isSupported = isEmojiUnicodeSupported(
-        unicodeSupportMap,
-        emojiFixtureMap[emojiKey].moji,
-        emojiFixtureMap[emojiKey].unicodeVersion,
-      );
-
-      expect(isSupported).toBe(true);
-    });
-
-    it('man superhero(11.0)', () => {
-      const emojiKey = 'man_superhero';
-      const unicodeSupportMap = { ...emptySupportMap, '11.0': true };
-      const isSupported = isEmojiUnicodeSupported(
-        unicodeSupportMap,
-        emojiFixtureMap[emojiKey].moji,
-        emojiFixtureMap[emojiKey].unicodeVersion,
-      );
-
-      expect(isSupported).toBe(true);
-    });
-
-    it('person standing(12.0)', () => {
-      const emojiKey = 'person_standing';
-      const unicodeSupportMap = { ...emptySupportMap, '12.0': true };
-      const isSupported = isEmojiUnicodeSupported(
-        unicodeSupportMap,
-        emojiFixtureMap[emojiKey].moji,
-        emojiFixtureMap[emojiKey].unicodeVersion,
-      );
-
-      expect(isSupported).toBe(true);
-    });
-
-    it('person: red hair(12.1)', () => {
-      const emojiKey = 'person_red_hair';
-      const unicodeSupportMap = { ...emptySupportMap, 12.1: true };
-      const isSupported = isEmojiUnicodeSupported(
-        unicodeSupportMap,
-        emojiFixtureMap[emojiKey].moji,
-        emojiFixtureMap[emojiKey].unicodeVersion,
-      );
-
-      expect(isSupported).toBe(true);
-    });
-
-    it('people hugging(13.0)', () => {
-      const emojiKey = 'people_hugging';
-      const unicodeSupportMap = { ...emptySupportMap, '13.0': true };
-      const isSupported = isEmojiUnicodeSupported(
-        unicodeSupportMap,
-        emojiFixtureMap[emojiKey].moji,
-        emojiFixtureMap[emojiKey].unicodeVersion,
-      );
-
-      expect(isSupported).toBe(true);
-    });
-
-    it('face_with_spiral_eyes(13.1)', () => {
-      const emojiKey = 'face_with_spiral_eyes';
-      const unicodeSupportMap = { ...emptySupportMap, 13.1: true };
-      const isSupported = isEmojiUnicodeSupported(
-        unicodeSupportMap,
-        emojiFixtureMap[emojiKey].moji,
-        emojiFixtureMap[emojiKey].unicodeVersion,
-      );
-
-      expect(isSupported).toBe(true);
-    });
-
-    it('coral(14.0)', () => {
-      const emojiKey = 'coral';
-      const unicodeSupportMap = { ...emptySupportMap, '14.0': true };
-      const isSupported = isEmojiUnicodeSupported(
-        unicodeSupportMap,
-        emojiFixtureMap[emojiKey].moji,
-        emojiFixtureMap[emojiKey].unicodeVersion,
-      );
-
-      expect(isSupported).toBe(true);
-    });
-
-    it('jellyfish(15.0)', () => {
-      const emojiKey = 'jellyfish';
-      const unicodeSupportMap = { ...emptySupportMap, '15.0': true };
-      const isSupported = isEmojiUnicodeSupported(
-        unicodeSupportMap,
-        emojiFixtureMap[emojiKey].moji,
-        emojiFixtureMap[emojiKey].unicodeVersion,
-      );
-
-      expect(isSupported).toBe(true);
-    });
-
-    it('lime(15.1)', () => {
-      gon.emoji_backend_version = null;
-      const emojiKey = 'lime';
-      const unicodeSupportMap = { ...emptySupportMap, 15.1: true };
-      const isSupported = isEmojiUnicodeSupported(
-        unicodeSupportMap,
-        emojiFixtureMap[emojiKey].moji,
-        emojiFixtureMap[emojiKey].unicodeVersion,
-      );
-
-      expect(isSupported).toBe(true);
     });
 
     it('construction_worker_tone5(8.0) without skin tone modifier support', () => {
@@ -982,12 +786,12 @@ describe('emoji', () => {
       ],
       [
         'searching by partial description',
-        'sym',
+        'ment',
         [
           {
-            name: 'atom',
+            name: 'grey_question',
             field: 'd',
-            score: 32,
+            score: 16777216,
           },
         ],
       ],
@@ -1029,7 +833,7 @@ describe('emoji', () => {
         [
           {
             name: 'star',
-            field: 'd',
+            field: 'name',
             score: NEUTRAL_INTENT_MULTIPLIER,
           },
           {
@@ -1058,6 +862,7 @@ describe('emoji', () => {
     ])('should return a correct result when %s', (_, query, searchResult) => {
       const expected = searchResult.map((item) => {
         const { field, score, name } = item;
+
         return {
           emoji: getEmojiMap()[name],
           field,

@@ -24,18 +24,10 @@ export const getSinglePolicySchema = async ({ namespacePath, namespaceType, poli
     const { data: schemaForMultiplePolicies } = await axios.get(
       getSecurityPolicySchemaUrl({ namespacePath, namespaceType }),
     );
-
-    const { securityPoliciesNewYamlFormat } = window.gon?.features || {};
-
-    const { properties: schemaProperties, $defs: defsProperties } = schemaForMultiplePolicies;
-    const validationProperties = securityPoliciesNewYamlFormat
-      ? schemaProperties
-      : schemaProperties[policyType]?.items?.properties;
-    const defsValidationProperties = securityPoliciesNewYamlFormat
-      ? defsProperties[policyType]
-      : defsProperties[policyType]?.items?.properties;
-
-    const properties = validationProperties || defsValidationProperties || {};
+    const properties =
+      schemaForMultiplePolicies.properties[policyType]?.items?.properties ||
+      schemaForMultiplePolicies.$defs[policyType]?.items?.properties ||
+      {};
 
     return {
       title: schemaForMultiplePolicies.title,
