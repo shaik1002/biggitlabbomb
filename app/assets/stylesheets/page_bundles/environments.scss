@@ -8,7 +8,7 @@
 
     .external-url,
     .dropdown-new {
-      @apply gl-text-subtle;
+      color: var(--gray-500, $gray-500);
     }
 
     .build-link,
@@ -18,14 +18,14 @@
 
     .folder-icon {
       margin-right: 3px;
-      @apply gl-fill-icon-subtle;
+      color: var(--gray-500, $gray-500);
       display: inline-block;
       vertical-align: text-top;
     }
 
     .folder-name {
       cursor: pointer;
-      @apply gl-text-subtle;
+      color: var(--gray-500, $gray-500);
       display: inline-block;
     }
 

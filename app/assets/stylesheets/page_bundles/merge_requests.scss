@@ -126,14 +126,10 @@
     overflow: visible;
   }
 
-
-  div:has(> .diff-file-is-active) {
-    box-shadow: 0 0 0 1px var(--gl-focus-ring-outer-color);
-    border-radius: #{$border-radius + $gl-spacing-scale-1};
-    padding: $gl-spacing-scale-1;
-
-    .diff-file-is-active {
-      margin-bottom: 0;
+  .diff-file {
+    &.diff-file-is-active,
+    &:has(*:not(textarea):focus-visible) {
+      box-shadow: 0 0 0 2px var(--gl-border-color-strong);
     }
   }
 }
@@ -320,7 +316,7 @@
 
   .coverage {
     font-size: 12px;
-    @apply gl-text-subtle;
+    color: var(--gray-500, $gray-500);
     line-height: initial;
   }
 }
