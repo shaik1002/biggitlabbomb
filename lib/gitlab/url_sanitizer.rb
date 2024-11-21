@@ -14,7 +14,7 @@ module Gitlab
       #{URI::REGEXP::PATTERN::USERINFO}@#{URI::REGEXP::PATTERN::HOST}:
       (?!\b\d+\b) # use word boundaries to ensure no standalone digits after the colon
     }x
-    # URI::DEFAULT_PARSER.make_regexp will only match URLs with schemes or
+    # URI::RFC2396_PARSER.make_regexp will only match URLs with schemes or
     # relative URLs. This section will match schemeless URIs with userinfo
     # e.g. user:pass@gitlab.com but will not match scp-style URIs e.g.
     # user@server:path/to/file)
@@ -24,7 +24,7 @@ module Gitlab
     # encoded as foo:b%3Fr@gitlab.com
     URI_REGEXP = %r{
     (?:
-       #{URI::DEFAULT_PARSER.make_regexp(ALLOWED_SCHEMES)}
+       #{URI::RFC2396_PARSER.make_regexp(ALLOWED_SCHEMES)}
      |
        (?# negative lookahead before the schemeless matcher ensures this isn't an SCP-style URL)
        (?!#{SCP_REGEX})
