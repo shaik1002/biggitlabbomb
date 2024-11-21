@@ -6,6 +6,7 @@ class Import::BulkImportsController < ApplicationController
   before_action :ensure_bulk_import_enabled
   before_action :verify_blocked_uri, only: :status
   before_action :bulk_import, only: [:history, :failures]
+  before_action :set_current_organization, only: :create
 
   feature_category :importers
   urgency :low
@@ -66,7 +67,7 @@ class Import::BulkImportsController < ApplicationController
         entry.delete(:destination_name)
       end
 
-      ::BulkImports::CreateService.new(current_user, entry, credentials).execute
+      ::BulkImports::CreateService.new(current_user, entry, credentials, fallback_organization: Current.organization).execute
     end
 
     render json: responses.map { |response| { success: response.success?, id: response.payload[:id], message: response.message } }
