@@ -23,6 +23,8 @@ import HighlightWorker from '~/vue_shared/components/source_viewer/workers/highl
 import initAmbiguousRefModal from '~/ref/init_ambiguous_ref_modal';
 import { InternalEvents } from '~/tracking';
 import { initFindFileShortcut } from '~/projects/behaviors';
+import initHeaderApp from '~/repository/init_header_app';
+import createRouter from '~/repository/router';
 
 Vue.use(Vuex);
 Vue.use(VueApollo);
@@ -31,8 +33,6 @@ Vue.use(VueRouter);
 const apolloProvider = new VueApollo({
   defaultClient: createDefaultClient(),
 });
-
-const router = new VueRouter({ mode: 'history' });
 
 const viewBlobEl = document.querySelector('#js-view-blob-app');
 
@@ -81,6 +81,9 @@ if (viewBlobEl) {
     canDownloadCode,
     ...dataset
   } = viewBlobEl.dataset;
+  const router = createRouter(projectPath, originalBranch);
+
+  initHeaderApp(router);
 
   // eslint-disable-next-line no-new
   new Vue({

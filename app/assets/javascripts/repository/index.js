@@ -199,7 +199,7 @@ export default function setupVueRepositoryList() {
     });
   };
 
-  initHeaderApp();
+  initHeaderApp(router);
   initCodeDropdown();
   initLastCommitApp();
   initBlobControlsApp();

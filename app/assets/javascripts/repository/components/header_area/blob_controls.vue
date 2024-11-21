@@ -46,7 +46,7 @@ export default {
         return {
           projectPath: this.projectPath,
           filePath: this.filePath,
-          ref: this.ref,
+          ref: this.currentRef || this.ref,
           refType: getRefType(this.refType),
         };
       },
@@ -64,6 +64,11 @@ export default {
       required: true,
     },
     refType: {
+      type: String,
+      required: false,
+      default: null,
+    },
+    currentRef: {
       type: String,
       required: false,
       default: null,

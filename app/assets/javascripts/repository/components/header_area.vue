@@ -183,6 +183,6 @@ export default {
     </div>
 
     <!-- Blob controls -->
-    <blob-controls :project-path="projectPath" :ref-type="getRefType" />
+    <blob-controls :project-path="projectPath" :ref-type="getRefType" :current-ref="currentRef" />
   </section>
 </template>

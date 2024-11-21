@@ -1,10 +1,11 @@
 import Vue from 'vue';
 import { parseBoolean } from '~/lib/utils/common_utils';
 import apolloProvider from './graphql';
+import projectShortPathQuery from './queries/project_short_path.query.graphql';
 import HeaderArea from './components/header_area.vue';
 import createRouter from './router';
 
-export default function initHeaderApp(isReadmeView = false) {
+export default function initHeaderApp(router, isReadmeView = false) {
   const headerEl = document.getElementById('js-repository-blob-header-app');
   if (headerEl) {
     const {
@@ -28,7 +29,18 @@ export default function initHeaderApp(isReadmeView = false) {
       projectRootPath,
       comparePath,
       projectPath,
+      projectShortPath
     } = headerEl.dataset;
+
+    if (projectShortPath)
+      // This query is used in the breadcrumbs component, in future we can refactor it to rather pass it as a prop
+      apolloProvider.clients.defaultClient.cache.writeQuery({
+        query: projectShortPathQuery,
+        data: {
+          projectShortPath,
+        },
+      });
+
 
     // eslint-disable-next-line no-new
     new Vue({
@@ -48,11 +60,12 @@ export default function initHeaderApp(isReadmeView = false) {
         uploadPath: breadcrumbsUploadPath,
         newDirPath: breadcrumbsNewDirPath,
         projectRootPath,
+        projectShortPath,
         comparePath,
         isReadmeView,
       },
       apolloProvider,
-      router: createRouter(projectPath, escapedRef),
+      router: router || createRouter(projectPath, escapedRef),
       render(h) {
         return h(HeaderArea, {
           props: {
