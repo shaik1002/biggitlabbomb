@@ -69,11 +69,12 @@ RSpec.describe AccessTokensHelper, feature_category: :system_access do
   describe '#expires_at_field_data', :freeze_time do
     it 'returns expected hash' do
       expect(helper.expires_at_field_data).to eq({
-        min_date: 1.day.from_now.iso8601
+        min_date: 1.day.from_now.iso8601,
+        max_date: PersonalAccessToken::MAX_PERSONAL_ACCESS_TOKEN_LIFETIME_IN_DAYS.days.from_now.iso8601
       })
     end
 
-    context 'when require_personal_access_token_expiry is true' do
+    context 'when require_personal_access_token_expiry is false' do
       before do
         stub_application_setting(require_personal_access_token_expiry: false)
       end
