@@ -8,18 +8,22 @@ import { ACTIVE_DISCUSSION_SOURCE_TYPES } from '../constants';
 import { extractDiscussions } from '../utils';
 import updateActiveDiscussionMutation from '../graphql/client/update_active_design_discussion.mutation.graphql';
 import DesignDiscussion from '../design_notes/design_discussion.vue';
+import DesignNoteSignedOut from '../design_notes/design_note_signed_out.vue';
 import DesignDescription from './design_description.vue';
 
 export default {
+  isLoggedIn: isLoggedIn(),
   components: {
     DesignDescription,
     DesignDisclosure,
     DesignDiscussion,
+    DesignNoteSignedOut,
     GlAccordion,
     GlAccordionItem,
     GlSkeletonLoader,
     GlEmptyState,
   },
+  inject: ['registerPath', 'signInPath'],
   props: {
     design: {
       type: Object,
@@ -37,10 +41,18 @@ export default {
       type: Boolean,
       required: true,
     },
+    markdownPreviewPath: {
+      type: String,
+      required: true,
+    },
+    isCommentFormPresent: {
+      type: Boolean,
+      required: true,
+    },
   },
   data() {
     return {
-      isLoggedIn: isLoggedIn(),
+      discussionWithOpenForm: '',
     };
   },
   computed: {
@@ -87,9 +99,15 @@ export default {
         },
       });
     },
+    updateDiscussionWithOpenForm(id) {
+      this.discussionWithOpenForm = id;
+    },
   },
   i18n: {
-    resolveCommentsToggleText: s__('DesignManagement|Resolved Comments'),
+    resolveCommentsToggleText: s__('DesignManagement|Resolved threads'),
+    newDiscussionText: s__(
+      `DesignManagement|Click on the image where you'd like to add a new comment.`,
+    ),
   },
   EMPTY_DISCUSSION_URL,
 };
@@ -108,9 +126,22 @@ export default {
             {{ unresolvedDiscussionsCount }}
           </h3>
           <gl-empty-state
-            v-if="isLoggedIn && unresolvedDiscussions.length === 0"
+            v-if="
+              $options.isLoggedIn && unresolvedDiscussions.length === 0 && !isCommentFormPresent
+            "
             data-testid="new-discussion-disclaimer"
             :svg-path="$options.EMPTY_DISCUSSION_URL"
+          >
+            <template #description>
+              {{ $options.i18n.newDiscussionText }}
+            </template>
+          </gl-empty-state>
+          <design-note-signed-out
+            v-if="!$options.isLoggedIn"
+            class="gl-mb-4"
+            :register-path="registerPath"
+            :sign-in-path="signInPath"
+            :is-add-discussion="true"
           />
           <design-discussion
             v-for="discussion in unresolvedDiscussions"
@@ -118,10 +149,21 @@ export default {
             :discussion="discussion"
             :design-id="$route.params.id"
             :noteable-id="design.id"
+            :markdown-preview-path="markdownPreviewPath"
+            :register-path="registerPath"
+            :sign-in-path="signInPath"
+            :resolved-discussions-expanded="resolvedDiscussionsExpanded"
+            :discussion-with-open-form="discussionWithOpenForm"
             data-testid="unresolved-discussion"
+            @create-note-error="$emit('onDesignDiscussionError', $event)"
+            @update-note-error="$emit('updateNoteError', $event)"
+            @delete-note-error="$emit('deleteNoteError', $event)"
+            @resolve-discussion-error="$emit('resolveDiscussionError', $event)"
             @update-active-discussion="updateActiveDesignDiscussion(discussion.notes[0].id)"
+            @open-form="updateDiscussionWithOpenForm"
           />
-          <gl-accordion v-if="hasResolvedDiscussions" :header-level="3" class="gl-mb-5">
+          <slot name="reply-form"></slot>
+          <gl-accordion v-if="hasResolvedDiscussions" :header-level="3" class="gl-my-5">
             <gl-accordion-item
               v-model="isResolvedDiscussionsExpanded"
               :title="resolvedDiscussionsTitle"
@@ -133,13 +175,20 @@ export default {
                 :discussion="discussion"
                 :design-id="$route.params.id"
                 :noteable-id="design.id"
+                :markdown-preview-path="markdownPreviewPath"
+                :register-path="registerPath"
+                :sign-in-path="signInPath"
                 :resolved-discussions-expanded="resolvedDiscussionsExpanded"
+                :discussion-with-open-form="discussionWithOpenForm"
                 data-testid="resolved-discussion"
+                @error="$emit('onDesignDiscussionError', $event)"
+                @update-note-error="$emit('updateNoteError', $event)"
+                @delete-note-error="$emit('deleteNoteError', $event)"
                 @update-active-discussion="updateActiveDesignDiscussion(discussion.notes[0].id)"
+                @open-form="updateDiscussionWithOpenForm"
               />
             </gl-accordion-item>
           </gl-accordion>
-          <slot name="reply-form"></slot>
         </template>
       </div>
     </template>

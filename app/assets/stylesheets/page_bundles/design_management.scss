@@ -2,6 +2,7 @@
 
 $design-pin-diameter: 28px;
 $design-pin-diameter-sm: 24px;
+$design-pin-diameter-xs: 20px;
 $t-gray-a-16-design-pin: rgba($black, 0.16);
 
 .layout-page.design-detail-layout {
@@ -64,8 +65,8 @@ $t-gray-a-16-design-pin: rgba($black, 0.16);
 
 .design-note-pin {
   display: flex;
-  height: $design-pin-diameter;
-  width: $design-pin-diameter;
+  height: $design-pin-diameter-xs;
+  width: $design-pin-diameter-xs;
   box-sizing: content-box;
   @apply gl-bg-purple-500 dark:gl-bg-purple-700;
   color: var(--white, $white);

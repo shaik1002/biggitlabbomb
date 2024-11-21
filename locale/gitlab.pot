@@ -1447,6 +1447,9 @@ msgstr ""
 msgid "%{time_ago}"
 msgstr ""
 
+msgid "%{timeago} in pipeline %{pipeline}"
+msgstr ""
+
 msgid "%{timebox_type} does not support burnup charts"
 msgstr ""
 
@@ -19430,6 +19433,9 @@ msgstr ""
 msgid "DesignManagement|Could not add a new comment. Please try again."
 msgstr ""
 
+msgid "DesignManagement|Could not award emoji. Please try again."
+msgstr ""
+
 msgid "DesignManagement|Could not create new discussion. Please try again."
 msgstr ""
 
@@ -19437,6 +19443,9 @@ msgid "DesignManagement|Could not delete comment. Please try again."
 msgstr ""
 
 msgid "DesignManagement|Could not find design."
+msgstr ""
+
+msgid "DesignManagement|Could not resolve comment. Please try again."
 msgstr ""
 
 msgid "DesignManagement|Could not update comment. Please try again."
@@ -19502,6 +19511,9 @@ msgid "DesignManagement|Resolve thread"
 msgstr ""
 
 msgid "DesignManagement|Resolved Comments"
+msgstr ""
+
+msgid "DesignManagement|Resolved threads"
 msgstr ""
 
 msgid "DesignManagement|Save changes"
@@ -20710,6 +20722,9 @@ msgid "DuoProTrial|Start your free Duo Pro trial"
 msgstr ""
 
 msgid "DuoProTrial|Start your free GitLab Duo Pro trial"
+msgstr ""
+
+msgid "DuoProTrial|Start your free GitLab Duo Pro trial on %{group_name}"
 msgstr ""
 
 msgid "DuoProTrial|Test Generation"
@@ -53491,9 +53506,6 @@ msgstr ""
 msgid "Start time"
 msgstr ""
 
-msgid "Start your Free Ultimate and GitLab Duo Enterprise Trial"
-msgstr ""
-
 msgid "Start your free trial"
 msgstr ""
 
@@ -58602,6 +58614,12 @@ msgid "Trial|Select state or province"
 msgstr ""
 
 msgid "Trial|Start free Ultimate + GitLab Duo Enterprise trial"
+msgstr ""
+
+msgid "Trial|Start your free Ultimate and GitLab Duo Enterprise trial"
+msgstr ""
+
+msgid "Trial|Start your free Ultimate and GitLab Duo Enterprise trial on %{group_name}"
 msgstr ""
 
 msgid "Trial|State or province"
