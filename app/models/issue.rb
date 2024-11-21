@@ -364,10 +364,16 @@ class Issue < ApplicationRecord
     super
   end
 
-  def work_item_type_id=(work_item_type_id)
-    self.correct_work_item_type_id = WorkItems::Type.find_by(id: work_item_type_id)&.correct_id
+  def work_item_type_id=(input_work_item_type_id)
+    work_item_type = if Feature.enabled?(:issues_set_correct_work_item_type_id, :instance)
+                       WorkItems::Type.find_by_correct_id_with_fallback(input_work_item_type_id)
+                     else
+                       WorkItems::Type.find_by(id: input_work_item_type_id)
+                     end
 
-    super
+    self.correct_work_item_type_id = work_item_type&.correct_id
+
+    super(work_item_type&.id)
   end
 
   def work_item_type=(work_item_type)
