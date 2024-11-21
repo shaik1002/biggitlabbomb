@@ -22,6 +22,7 @@ import {
   WIDGET_TYPE_HIERARCHY,
   WIDGET_TYPE_PARTICIPANTS,
   WIDGET_TYPE_PROGRESS,
+  WIDGET_TYPE_ROLLEDUP_DATES,
   WIDGET_TYPE_START_AND_DUE_DATE,
   WIDGET_TYPE_TIME_TRACKING,
   WIDGET_TYPE_LABELS,
@@ -34,7 +35,6 @@ import {
   NEW_WORK_ITEM_IID,
   WIDGET_TYPE_CURRENT_USER_TODOS,
   WIDGET_TYPE_LINKED_ITEMS,
-  STATE_CLOSED,
 } from '../constants';
 import workItemByIidQuery from './work_item_by_iid.query.graphql';
 import getWorkItemTreeQuery from './work_item_tree.query.graphql';
@@ -192,7 +192,7 @@ export const addHierarchyChild = ({ cache, id, workItem, atIndex = null }) => {
   });
 };
 
-export const addHierarchyChildren = ({ cache, id, workItem, childrenIds }) => {
+export const addHierarchyChildren = ({ cache, id, workItem, newItemsToAddCount }) => {
   const queryArgs = {
     query: getWorkItemTreeQuery,
     variables: {
@@ -212,14 +212,10 @@ export const addHierarchyChildren = ({ cache, id, workItem, childrenIds }) => {
 
       const existingChildren = findHierarchyWidgetChildren(draftState?.workItem);
 
-      const childrenToAdd = newChildren.filter((item) => {
-        return childrenIds.includes(item.id);
-      });
+      const childrenToAdd = newChildren.slice(0, newItemsToAddCount);
 
       for (const item of childrenToAdd) {
-        if (item.state === STATE_CLOSED) {
-          existingChildren.push(item);
-        } else {
+        if (item) {
           existingChildren.unshift(item);
         }
       }
@@ -308,6 +304,7 @@ export const setNewWorkItemCache = async (
     WIDGET_TYPE_ASSIGNEES,
     WIDGET_TYPE_LABELS,
     WIDGET_TYPE_WEIGHT,
+    WIDGET_TYPE_ROLLEDUP_DATES,
     WIDGET_TYPE_MILESTONE,
     WIDGET_TYPE_ITERATION,
     WIDGET_TYPE_START_AND_DUE_DATE,
@@ -414,6 +411,19 @@ export const setNewWorkItemCache = async (
         });
       }
 
+      if (widgetName === WIDGET_TYPE_ROLLEDUP_DATES) {
+        widgets.push({
+          type: 'ROLLEDUP_DATES',
+          dueDate: null,
+          dueDateFixed: null,
+          dueDateIsFixed: null,
+          startDate: null,
+          startDateFixed: null,
+          startDateIsFixed: null,
+          __typename: 'WorkItemWidgetRolledupDates',
+        });
+      }
+
       if (widgetName === WIDGET_TYPE_MILESTONE) {
         widgets.push({
           type: 'MILESTONE',
@@ -435,8 +445,6 @@ export const setNewWorkItemCache = async (
           type: 'START_AND_DUE_DATE',
           dueDate: null,
           startDate: null,
-          isFixed: false,
-          rollUp: false,
           __typename: 'WorkItemWidgetStartAndDueDate',
         });
       }
@@ -565,7 +573,7 @@ export const setNewWorkItemCache = async (
                 id: newWorkItemPath,
                 fullPath,
                 name: newWorkItemPath,
-                __typename: 'Namespace',
+                __typename: 'Namespace', // eslint-disable-line @gitlab/require-i18n-strings
               },
               author: {
                 id: currentUserId,
@@ -589,13 +597,12 @@ export const setNewWorkItemCache = async (
                 setWorkItemMetadata: true,
                 createNote: true,
                 adminWorkItemLink: true,
-                markNoteAsInternal: true,
                 __typename: 'WorkItemPermissions',
               },
               widgets,
               __typename: 'WorkItem',
             },
-            __typename: 'Namespace',
+            __typename: 'Namespace', // eslint-disable-line @gitlab/require-i18n-strings
           },
         },
   });

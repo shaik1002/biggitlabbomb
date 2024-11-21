@@ -8,7 +8,7 @@ import {
   GlFormSelect,
 } from '@gitlab/ui';
 import * as Sentry from '~/sentry/sentry_browser_wrapper';
-import { getPreferredLocales, s__, sprintf } from '~/locale';
+import { __, getPreferredLocales, s__, sprintf } from '~/locale';
 import { capitalizeFirstCharacter } from '~/lib/utils/text_utility';
 import { fetchPolicies } from '~/lib/graphql';
 import { addHierarchyChild, setNewWorkItemCache } from '~/work_items/graphql/cache_utils';
@@ -30,7 +30,7 @@ import {
   NEW_WORK_ITEM_GID,
   WIDGET_TYPE_LABELS,
   WIDGET_TYPE_WEIGHT,
-  WIDGET_TYPE_START_AND_DUE_DATE,
+  WIDGET_TYPE_ROLLEDUP_DATES,
   WIDGET_TYPE_CRM_CONTACTS,
   WIDGET_TYPE_LINKED_ITEMS,
   WIDGET_TYPE_ITERATION,
@@ -111,11 +111,6 @@ export default {
       required: false,
       default: null,
     },
-    stickyFormSubmit: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
     relatedItem: {
       type: Object,
       required: false,
@@ -130,11 +125,9 @@ export default {
       isRelatedToItem: true,
       error: null,
       workItemTypes: [],
-      selectedProjectFullPath: this.fullPath || null,
+      selectedProjectFullPath: null,
       selectedWorkItemTypeId: null,
       loading: false,
-      initialLoadingWorkItem: true,
-      initialLoadingWorkItemTypes: true,
       showWorkItemTypeSelect: false,
     };
   },
@@ -149,13 +142,10 @@ export default {
         };
       },
       skip() {
-        return this.skipWorkItemQuery;
+        return !this.fullPath || !this.selectedWorkItemTypeName;
       },
       update(data) {
         return data?.workspace?.workItem ?? {};
-      },
-      result() {
-        this.initialLoadingWorkItem = false;
       },
       error() {
         this.error = i18n.fetchError;
@@ -178,7 +168,6 @@ export default {
         return data.workspace?.workItemTypes?.nodes;
       },
       async result() {
-        this.initialLoadingWorkItemTypes = false;
         if (!this.workItemTypes?.length) {
           return;
         }
@@ -215,12 +204,7 @@ export default {
       return newWorkItemFullPath(this.fullPath, this.selectedWorkItemTypeName);
     },
     isLoading() {
-      return (
-        this.initialLoadingWorkItemTypes || (this.initialLoadingWorkItem && !this.skipWorkItemQuery)
-      );
-    },
-    skipWorkItemQuery() {
-      return !this.fullPath || !this.selectedWorkItemTypeName;
+      return this.$apollo.queries.workItemTypes.loading || this.$apollo.queries.workItem.loading;
     },
     hasWidgets() {
       return this.workItem?.widgets?.length > 0;
@@ -334,8 +318,20 @@ export default {
       const descriptionWidget = findWidget(WIDGET_TYPE_DESCRIPTION, this.workItem);
       return descriptionWidget?.description || this.description;
     },
-    workItemStartAndDueDate() {
-      return findWidget(WIDGET_TYPE_START_AND_DUE_DATE, this.workItem);
+    workItemRolledupDates() {
+      return findWidget(WIDGET_TYPE_ROLLEDUP_DATES, this.workItem);
+    },
+    workItemDueDateFixed() {
+      return this.workItemRolledupDates?.dueDateFixed;
+    },
+    workItemStartDateFixed() {
+      return this.workItemRolledupDates?.startDateFixed;
+    },
+    workItemDueDateIsFixed() {
+      return this.workItemRolledupDates?.dueDateIsFixed;
+    },
+    workItemStartDateIsFixed() {
+      return this.workItemRolledupDates?.startDateIsFixed;
     },
     workItemIterationId() {
       return this.workItemIteration?.iteration?.id;
@@ -398,6 +394,11 @@ export default {
         return;
       }
 
+      if (this.showProjectSelector && !this.selectedProjectFullPath) {
+        this.error = __('Please select a project.');
+        return;
+      }
+
       this.loading = true;
 
       const workItemCreateInput = {
@@ -454,11 +455,12 @@ export default {
         };
       }
 
-      if (this.isWidgetSupported(WIDGET_TYPE_START_AND_DUE_DATE)) {
-        workItemCreateInput.startAndDueDateWidget = {
-          isFixed: this.workItemStartAndDueDate.isFixed,
-          startDate: this.workItemStartAndDueDate.startDate,
-          dueDate: this.workItemStartAndDueDate.dueDate,
+      if (this.isWidgetSupported(WIDGET_TYPE_ROLLEDUP_DATES)) {
+        workItemCreateInput.rolledupDatesWidget = {
+          dueDateIsFixed: this.workItemDueDateIsFixed,
+          startDateIsFixed: this.workItemStartDateIsFixed,
+          startDateFixed: this.workItemStartDateFixed,
+          dueDateFixed: this.workItemDueDateFixed,
         };
       }
 
@@ -674,14 +676,16 @@ export default {
               @error="$emit('error', $event)"
             />
             <work-item-rolledup-dates
-              v-if="workItemStartAndDueDate"
+              v-if="workItemRolledupDates"
               class="work-item-attributes-item"
               :can-update="canUpdate"
               :full-path="fullPath"
-              :start-date="workItemStartAndDueDate.startDate"
-              :due-date="workItemStartAndDueDate.dueDate"
-              :is-fixed="workItemStartAndDueDate.isFixed"
-              :should-roll-up="workItemStartAndDueDate.rollUp"
+              :due-date-is-fixed="workItemRolledupDates.dueDateIsFixed"
+              :due-date-fixed="workItemRolledupDates.dueDateFixed"
+              :due-date-inherited="workItemRolledupDates.dueDate"
+              :start-date-is-fixed="workItemRolledupDates.startDateIsFixed"
+              :start-date-fixed="workItemRolledupDates.startDateFixed"
+              :start-date-inherited="workItemRolledupDates.startDate"
               :work-item-type="selectedWorkItemTypeName"
               :work-item="workItem"
               @error="$emit('error', $event)"
@@ -713,11 +717,7 @@ export default {
               @error="$emit('error', $event)"
             />
           </aside>
-          <div
-            v-if="!stickyFormSubmit"
-            class="gl-col-start-1 gl-flex gl-gap-3 gl-py-3"
-            data-testid="form-buttons"
-          >
+          <div class="gl-col-start-1 gl-flex gl-gap-3 gl-py-3">
             <gl-button
               variant="confirm"
               :loading="loading"
@@ -730,25 +730,6 @@ export default {
               {{ __('Cancel') }}
             </gl-button>
           </div>
-        </div>
-        <!-- stick to bottom and put the Confim button on the right -->
-        <!-- bg-overlap to match modal bg -->
-        <div
-          v-if="stickyFormSubmit"
-          class="gl-border-t gl-sticky gl-bottom-0 gl-z-1 -gl-mx-5 gl-flex gl-justify-end gl-gap-3 gl-bg-overlap gl-px-5 gl-py-3"
-          data-testid="form-buttons"
-        >
-          <gl-button type="button" data-testid="cancel-button" @click="handleCancelClick">
-            {{ __('Cancel') }}
-          </gl-button>
-          <gl-button
-            variant="confirm"
-            :loading="loading"
-            data-testid="create-button"
-            @click="createWorkItem"
-          >
-            {{ createWorkItemText }}
-          </gl-button>
         </div>
       </div>
     </template>

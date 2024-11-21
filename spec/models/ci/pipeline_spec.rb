@@ -752,13 +752,8 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep, feature_category: 
   describe '.order_id_desc' do
     subject(:pipelines_ordered_by_id) { described_class.order_id_desc }
 
-    let_it_be(:older_pipeline) { create(:ci_pipeline, project: project) }
-    let_it_be(:newest_pipeline) { create(:ci_pipeline, project: project) }
-
-    it 'only returns the pipelines ordered by id' do
-      expect(newest_pipeline.id).to be > older_pipeline.id
-      expect(pipelines_ordered_by_id).to eq([newest_pipeline, older_pipeline])
-    end
+    let(:older_pipeline) { create(:ci_pipeline, id: 99, project: project) }
+    let(:newest_pipeline) { create(:ci_pipeline, id: 100, project: project) }
 
     it 'only returns the pipelines ordered by id' do
       expect(pipelines_ordered_by_id).to eq([newest_pipeline, older_pipeline])
@@ -1822,7 +1817,7 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep, feature_category: 
 
     describe 'auto merge' do
       context 'when auto merge is enabled' do
-        let_it_be_with_reload(:merge_request) { create(:merge_request, :merge_when_checks_pass) }
+        let_it_be_with_reload(:merge_request) { create(:merge_request, :merge_when_pipeline_succeeds) }
         let_it_be_with_reload(:pipeline) do
           create(:ci_pipeline, :running,
             project: merge_request.source_project, ref: merge_request.source_branch, sha: merge_request.diff_head_sha)
@@ -2827,16 +2822,16 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep, feature_category: 
         let(:refs) { %w[first_ref second_ref third_ref] }
 
         before do
-          create(:ci_empty_pipeline, status: :success, ref: 'first_ref', sha: 'sha')
-          create(:ci_empty_pipeline, status: :success, ref: 'second_ref', sha: 'sha')
+          create(:ci_empty_pipeline, id: 1001, status: :success, ref: 'first_ref', sha: 'sha')
+          create(:ci_empty_pipeline, id: 1002, status: :success, ref: 'second_ref', sha: 'sha')
         end
 
         let!(:latest_successful_pipeline_for_first_ref) do
-          create(:ci_empty_pipeline, status: :success, ref: 'first_ref', sha: 'sha')
+          create(:ci_empty_pipeline, id: 2001, status: :success, ref: 'first_ref', sha: 'sha')
         end
 
         let!(:latest_successful_pipeline_for_second_ref) do
-          create(:ci_empty_pipeline, status: :success, ref: 'second_ref', sha: 'sha')
+          create(:ci_empty_pipeline, id: 2002, status: :success, ref: 'second_ref', sha: 'sha')
         end
 
         it 'returns the latest successful pipeline for both refs' do
@@ -5835,19 +5830,52 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep, feature_category: 
   describe '.current_partition_value' do
     subject { described_class.current_partition_value }
 
-    context 'when current ci_partition exists' do
+    context 'when not using ci partitioning automation' do
       before do
-        create(:ci_partition, :current, id: 1000)
+        stub_feature_flags(ci_partitioning_automation: false)
       end
 
-      it 'return the current partition value' do
-        expect(subject).to eq(1000)
+      it { is_expected.to eq(102) }
+
+      it 'accepts an optional argument' do
+        expect(described_class.current_partition_value(build_stubbed(:project))).to eq(102)
+      end
+
+      it 'returns 100 when the flags are disabled' do
+        stub_feature_flags(ci_current_partition_value_101: false)
+        stub_feature_flags(ci_current_partition_value_102: false)
+
+        is_expected.to eq(100)
+      end
+
+      it 'returns 101 when the 102 flag is disabled' do
+        stub_feature_flags(ci_current_partition_value_102: false)
+
+        is_expected.to eq(101)
+      end
+
+      it 'returns 102 when the 101 flag is disabled' do
+        stub_feature_flags(ci_current_partition_value_101: false)
+
+        is_expected.to eq(102)
       end
     end
 
-    context 'when current ci_partition does not exist' do
-      it 'return the default initial value' do
-        expect(subject).to eq(100)
+    context 'when using ci partitioning automation' do
+      context 'when current ci_partition exists' do
+        before do
+          create(:ci_partition, :current)
+        end
+
+        it 'return the current partition value' do
+          expect(subject).to eq(Ci::Partition.current.id)
+        end
+      end
+
+      context 'when current ci_partition does not exist' do
+        it 'return the default initial value' do
+          expect(subject).to eq(102)
+        end
       end
     end
   end
@@ -6021,6 +6049,28 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep, feature_category: 
             expect { subject }.not_to raise_error
           end
         end
+      end
+    end
+  end
+
+  describe 'routing table switch' do
+    context 'with ff disabled' do
+      before do
+        stub_feature_flags(described_class::ROUTING_FEATURE_FLAG => false)
+      end
+
+      it 'uses the legacy table' do
+        expect(described_class.table_name).to eq('ci_pipelines')
+      end
+    end
+
+    context 'with ff enabled' do
+      before do
+        stub_feature_flags(described_class::ROUTING_FEATURE_FLAG => true)
+      end
+
+      it 'uses the routing table' do
+        expect(described_class.table_name).to eq('p_ci_pipelines')
       end
     end
   end

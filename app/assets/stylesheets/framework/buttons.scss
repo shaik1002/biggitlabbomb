@@ -126,7 +126,7 @@
 }
 
 .btn-transparent {
-  color: var(--gl-button-default-primary-foreground-color-default);
+  color: $gl-text-color-secondary;
   background-color: transparent;
   border: 0;
 
@@ -176,7 +176,7 @@ fieldset[disabled] .btn,
   &:hover {
     background-color: $gray-10;
     border-color: $gray-100;
-    @apply gl-text-disabled;
+    color: $gl-text-color-disabled;
     opacity: 1;
     text-decoration: none;
     cursor: default;
@@ -186,7 +186,7 @@ fieldset[disabled] .btn,
     }
 
     i {
-      @apply gl-text-disabled;
+      color: $gl-text-color-disabled;
     }
   }
 }

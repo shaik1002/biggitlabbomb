@@ -217,7 +217,8 @@ module QA
         end
 
         def click_diffs_tab
-          click_element('diffs-tab')
+          # Do not wait for spinner due to https://gitlab.com/gitlab-org/gitlab/-/issues/398584
+          click_element('diffs-tab', skip_finished_loading_check: true)
         end
 
         def click_pipeline_link
@@ -358,7 +359,8 @@ module QA
         # then check again if it's ready to merge. For example, it will refresh if a new change was pushed and the page
         # needs to be refreshed to show the change.
         #
-        def wait_until_ready_to_merge
+        # @param [Boolean] transient_test true if the current test is a transient test (default: false)
+        def wait_until_ready_to_merge(transient_test: false)
           wait_until(message: "Waiting for ready to merge", sleep_interval: 1) do
             # changes in mr are rendered async, because of that mr can sometimes show no changes and there will be no
             # merge button, in such case we must retry loop otherwise find_element will raise ElementNotFound error
@@ -368,6 +370,10 @@ module QA
 
             # If the widget shows "Merge blocked: new changes were just added" we can refresh the page and check again
             next false if has_element?('head-mismatch-content', wait: 1)
+
+            # Stop waiting if we're in a transient test. By this point we're in an unexpected state and should let the
+            # test fail so we can investigate. If we're not in a transient test we keep trying until we reach timeout.
+            next true unless transient_test
 
             QA::Runtime::Logger.debug("MR widget text: #{mr_widget_text}")
 
@@ -402,9 +408,11 @@ module QA
           end
         end
 
-        def try_to_merge!(wait_for_no_auto_merge: true)
+        def try_to_merge!
+          # Revisit after merge page re-architect is done https://gitlab.com/gitlab-org/gitlab/-/issues/300042
+          # To remove page refresh logic if possible
           wait_until_ready_to_merge
-          wait_until { !find_element('merge-button').text.include?('auto-merge') } if wait_for_no_auto_merge # rubocop:disable Rails/NegateInclude -- Wait for text auto-merge to change
+          wait_until { !find_element('merge-button').text.include?('auto-merge') } # rubocop:disable Rails/NegateInclude
 
           click_element('merge-button')
         end

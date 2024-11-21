@@ -1,5 +1,5 @@
 ---
-stage: Software Supply Chain Security
+stage: Govern
 group: Pipeline Security
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
@@ -184,8 +184,9 @@ generate and sign provenance for your npm packages in a GitLab CI/CD pipeline.
 Example content to be added to `.gitlab-ci.yml` file:
 
 ```yaml
+image: node:latest
+
 build:
-  image: node:latest
   id_tokens:
     SIGSTORE_ID_TOKEN:
       aud: sigstore

@@ -6,7 +6,6 @@ const fieldAliases = {
   health: 'healthStatus',
   label: 'labels',
   updated: 'updatedAt',
-  description: 'descriptionHtml',
 };
 
 export const getFieldAlias = (fieldName) => fieldAliases[fieldName] || fieldName;

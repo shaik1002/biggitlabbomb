@@ -34,7 +34,9 @@ RSpec.describe 'Editing file blob', :js, feature_category: :source_code_manageme
       # there may be no diff and nothing to render.
       fill_editor(content: "class NextFeature#{object_id}\\nend\\n")
 
-      click_button 'Commit changes' if commit_changes
+      if commit_changes
+        click_button 'Commit changes'
+      end
     end
 
     def fill_editor(content: 'class NextFeature\\nend\\n')

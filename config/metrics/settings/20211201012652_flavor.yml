@@ -5,8 +5,6 @@ description: What PostgreSQL flavor is being used. Possible values are
   "Azure Database for PostgreSQL - Single Server", "Azure Database for PostgreSQL - Flexible Server",
   "AlloyDB for PostgreSQL", or "null".
 product_group: database
-product_categories:
-- database
 value_type: string
 status: active
 milestone: "14.6"
@@ -17,6 +15,10 @@ data_category: optional
 distribution:
 - ce
 - ee
+tier:
+- free
+- premium
+- ultimate
 tiers:
 - free
 - premium

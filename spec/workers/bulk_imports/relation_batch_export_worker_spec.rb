@@ -4,7 +4,7 @@ require 'spec_helper'
 
 RSpec.describe BulkImports::RelationBatchExportWorker, feature_category: :importers do
   let_it_be(:user) { create(:user) }
-  let_it_be_with_reload(:batch) { create(:bulk_import_export_batch) }
+  let_it_be(:batch) { create(:bulk_import_export_batch) }
 
   let(:job_args) { [user.id, batch.id] }
 
@@ -68,22 +68,6 @@ RSpec.describe BulkImports::RelationBatchExportWorker, feature_category: :import
           perform
         end
       end
-
-      context 'when the export batch job was interrupted' do
-        before do
-          batch.start!
-        end
-
-        it 'starts the export and does not schedule it for later' do
-          expect(described_class).not_to receive(:perform_in).with(described_class::PERFORM_DELAY, user.id, batch.id)
-
-          expect_next_instance_of(BulkImports::RelationBatchExportService) do |instance|
-            expect(instance).to receive(:execute)
-          end
-
-          perform
-        end
-      end
     end
   end
 
@@ -101,16 +85,6 @@ RSpec.describe BulkImports::RelationBatchExportWorker, feature_category: :import
 
       expect(batch.reload.failed?).to eq(true)
       expect(batch.error.size).to eq(255)
-    end
-  end
-
-  describe '.sidekiq_interruptions_exhausted' do
-    it 'sets export status to failed' do
-      job = { 'args' => job_args }
-
-      described_class.interruptions_exhausted_block.call(job)
-      expect(batch.reload).to be_failed
-      expect(batch.error).to eq('Export process reached the maximum number of interruptions')
     end
   end
 end

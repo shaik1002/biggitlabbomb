@@ -26,9 +26,6 @@ export default {
   apollo: {
     packagesCleanupPolicy: {
       query: packagesCleanupPolicyQuery,
-      context: {
-        batchKey: 'PackageRegistryProjectSettings',
-      },
       variables() {
         return {
           projectPath: this.projectPath,

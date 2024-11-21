@@ -25,7 +25,7 @@ module Types
         field :project, Types::ProjectType,
           null: true,
           description: 'Project the value stream belongs to, returns empty if it belongs to a group.',
-          experiment: { milestone: '15.6' }
+          alpha: { milestone: '15.6' }
 
         field :stages,
           null: true,

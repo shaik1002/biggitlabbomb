@@ -188,10 +188,6 @@ Instead of **agnostic**, use **platform-independent** or **vendor-neutral**.
 
 Use **AI**. Do not spell out **artificial intelligence**.
 
-## AI gateway
-
-Use lowercase for **AI gateway** and do not hyphenate.
-
 ## AI Impact Dashboard
 
 Use title case for **AI Impact Dashboard**.
@@ -297,17 +293,17 @@ Use **authenticated user** instead of other variations, like **signed in user** 
 Try to use the most suitable preposition when using **authenticate** as a verb.
 
 Use **authenticate with** when referring to a system or provider that
-performs the authentication, like a token or a service like OAuth.
+performs the authentication, like a token or a service like OAuth. 
 
 For example:
-
+  
 - Authenticate with a deploy token.
 - Authenticate with your credentials.
 - Authenticate with OAuth.
 - The runner uses an authentication token to authenticate with GitLab.
 
 Use **authenticate against** when referring to a resource that contains
-credentials that are checked for validation.
+credentials that are checked for validation. 
 
 For example:
 
@@ -580,7 +576,7 @@ For more information, see [epic 2150](https://gitlab.com/groups/gitlab-com/-/epi
 
 ## configuration
 
-When you edit a collection of settings, call it a **configuration**.
+When you update a collection of settings, call it a **configuration**.
 
 ## configure
 
@@ -812,17 +808,6 @@ Instead of:
 
 Do not use **easily**. If the user doesn't find the process to be easy, we lose their trust.
 
-## edit
-
-Use **edit** for UI documentation and user actions.
-
-Use **update** for API documentation and programmatic changes.
-
-For example:
-
-- To edit your profile settings, select **Edit**.
-- Use this endpoint to update user permissions.
-
 ## e.g.
 
 Do not use Latin abbreviations. Use **for example**, **such as**, **for instance**, or **like** instead. ([Vale](../testing/vale.md) rule: [`LatinTerms.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/.vale/gitlab_base/LatinTerms.yml))
@@ -897,11 +882,11 @@ Try to avoid **etc.**. Be as specific as you can. Do not use
 
 Use:
 
-- You can edit objects, like merge requests and issues.
+- You can update objects, like merge requests and issues.
 
 Instead of:
 
-- You can edit objects, like merge requests, issues, etc.
+- You can update objects, like merge requests, issues, etc.
 
 ## expand
 
@@ -1941,8 +1926,8 @@ Use **resolution** when the troubleshooting solution fixes the issue permanently
 A resolution usually involves file and code changes to correct the problem.
 For example:
 
-- To resolve this issue, edit the `.gitlab-ci.yml` file.
-- One resolution is to edit the `.gitlab-ci.yml` file.
+- To resolve this issue, update the `.gitlab-ci.yml` file.
+- One resolution is to update the `.gitlab-ci.yml` file.
 
 See also [workaround](#workaround).
 
@@ -1990,7 +1975,7 @@ Use:
 
 Instead of:
 
-- You must have the Owner role of the group.
+- You must have the Owner role for the group.
 
 Do not use **roles** and [**permissions**](#permissions) interchangeably. Each user is assigned a role. Each role includes a set of permissions.
 
@@ -2353,12 +2338,6 @@ You **turn on** or **turn off** a toggle. For example:
 
 - Turn on the **blah** toggle.
 
-## top-level group
-
-Use lowercase for **top-level group** (hyphenated).
-
-Do not use **root group**.
-
 ## TFA, two-factor authentication
 
 Use [**2FA** and **two-factor authentication**](#2fa-two-factor-authentication) instead.
@@ -2400,7 +2379,7 @@ Use **update** for installing a newer **patch** version of the software only. Fo
 
 - Update GitLab from 14.9 to 14.9.1.
 
-Do not use **update** for any other case. Instead, use **[upgrade](#upgrade)** or **[edit](#edit)**.
+Do not use **update** for any other case. Instead, use **upgrade**.
 
 ## upgrade
 

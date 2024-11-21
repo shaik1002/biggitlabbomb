@@ -1,6 +1,7 @@
 ---
 # Cop supports --autocorrect.
 Style/ArgumentsForwarding:
+  Details: grace period
   Exclude:
     - 'app/controllers/admin/users_controller.rb'
     - 'app/controllers/application_controller.rb'

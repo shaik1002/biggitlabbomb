@@ -64,15 +64,13 @@ RSpec.describe Analytics::CycleAnalytics::StageAggregation, type: :model, featur
     it_behaves_like 'has cursor fields', Issue
     it_behaves_like 'has cursor fields', MergeRequest
 
-    describe '#refresh_last_run', :freeze_time do
-      it 'updates last_run_at column' do
-        expect { aggregation.refresh_last_run }.to change { aggregation.last_run_at }.to(Time.current)
-      end
-    end
+    describe '#refresh_last_run' do
+      it 'updates the run_at column' do
+        freeze_time do
+          aggregation.refresh_last_run
 
-    describe '#complete', :freeze_time do
-      it 'updates last_completed_at column' do
-        expect { aggregation.complete }.to change { aggregation.last_completed_at }.to(Time.current)
+          expect(aggregation.last_run_at).to eq(Time.current)
+        end
       end
     end
 
@@ -86,29 +84,6 @@ RSpec.describe Analytics::CycleAnalytics::StageAggregation, type: :model, featur
           processed_records: [20, 30]
         )
       end
-    end
-  end
-
-  describe '.load_batch' do
-    let_it_be(:namespace) { create(:group) }
-    let_it_be(:new_aggregation) { create(:cycle_analytics_stage_aggregation, namespace: namespace) }
-    let_it_be(:aggregation_with_run) do
-      create(:cycle_analytics_stage_aggregation, namespace: namespace, last_run_at: 1.day.ago)
-    end
-
-    let_it_be(:aggregation_with_old_run) do
-      create(:cycle_analytics_stage_aggregation, namespace: namespace, last_run_at: 10.days.ago)
-    end
-
-    let_it_be(:disabled_aggregation) { create(:cycle_analytics_stage_aggregation, :disabled, namespace: namespace) }
-    let_it_be(:completed_aggregation) { create(:cycle_analytics_stage_aggregation, :completed, namespace: namespace) }
-
-    it 'returns incomplete enabled aggregations sorted by last run' do
-      expect(described_class.load_batch.to_a).to eq([new_aggregation, aggregation_with_old_run, aggregation_with_run])
-    end
-
-    it 'respects limit param' do
-      expect(described_class.load_batch(2).to_a).to eq([new_aggregation, aggregation_with_old_run])
     end
   end
 end

@@ -107,7 +107,7 @@ In manually-triggered pipelines, the **New pipeline** page displays all pipeline
 that have a `description` defined in the `.gitlab-ci.yml` file. The description displays
 below the variable.
 
-You can change the prefilled value, which [overrides the value](../variables/index.md#use-pipeline-variables) for that single pipeline run.
+You can change the prefilled value, which [overrides the value](../variables/index.md#override-a-defined-cicd-variable) for that single pipeline run.
 Any variables overridden by using this process are [expanded](../variables/index.md#prevent-cicd-variable-expansion)
 and not [masked](../variables/index.md#mask-a-cicd-variable).
 If you do not define a `value` for the variable in the configuration file, the variable name is still listed,
@@ -198,7 +198,7 @@ allow you to require manual interaction before moving forward in the pipeline.
 You can do this straight from the pipeline graph. Select **Run** (**{play}**) to execute that particular job.
 
 For example, your pipeline can start automatically, but require a manual action to
-[deploy to production](../environments/deployments.md#configure-manual-deployments).
+[deploy to production](../environments/index.md#configure-manual-deployments).
 In the example below, the `production` stage has a job with a manual action:
 
 ![Pipelines example](img/manual_pipeline_v14_2.png)
@@ -262,17 +262,11 @@ runners do not use regular runners, they must be [tagged](../yaml/index.md#tags)
 Review the [deployment safety](../environments/deployment_safety.md)
 page for additional security recommendations for securing your pipelines.
 
-<!--- start_remove The following content will be removed on remove_date: '2025-08-15' -->
-
-## Trigger a pipeline when an upstream project is rebuilt (deprecated)
+## Trigger a pipeline when an upstream project is rebuilt
 
 DETAILS:
 **Tier:** Premium, Ultimate
 **Offering:** GitLab.com, Self-managed, GitLab Dedicated
-
-WARNING:
-This feature was [deprecated](https://gitlab.com/gitlab-org/gitlab/-/issues/501460) in GitLab 17.6
-and is planned for removal in 18.0. Use [CI/CD jobs with pipeline trigger tokens](../../ci/triggers/index.md#use-a-cicd-job) instead. This is a breaking change.
 
 You can set up your project to automatically trigger a pipeline based on tags in a different project.
 When a new tag pipeline in the subscribed project finishes, it triggers a pipeline on your project's default branch,
@@ -297,8 +291,6 @@ To trigger the pipeline when the upstream project is rebuilt:
 The maximum number of upstream pipeline subscriptions is 2 by default, for both the upstream and
 downstream projects. On self-managed instances, an administrator can change this
 [limit](../../administration/instance_limits.md#number-of-cicd-subscriptions-to-a-project).
-
-<!--- end_remove -->
 
 ## How pipeline duration is calculated
 
@@ -487,15 +479,11 @@ running pipeline job. This ref can be created even after the associated branch o
 deleted. It's therefore useful in some features such as [automatically stopping an environment](../environments/index.md#stopping-an-environment),
 and [merge trains](../pipelines/merge_trains.md) that might run pipelines after branch deletion.
 
-<!--- start_remove The following content will be removed on remove_date: '2025-08-15' -->
-
 ## Troubleshooting
 
 ### Pipeline subscriptions continue after user deletion
 
 When a user [deletes their GitLab.com account](../../user/profile/account/delete_account.md#delete-your-own-account),
-the deletion does not occur for seven days. During this period, any [pipeline subscriptions created by that user](#trigger-a-pipeline-when-an-upstream-project-is-rebuilt-deprecated)
+the deletion does not occur for seven days. During this period, any [pipeline subscriptions created by that user](#trigger-a-pipeline-when-an-upstream-project-is-rebuilt)
 continue to run with the user's original permissions. To prevent unauthorized pipeline executions,
 immediately update pipeline subscription settings for the deleted user.
-
-<!--- end_remove -->

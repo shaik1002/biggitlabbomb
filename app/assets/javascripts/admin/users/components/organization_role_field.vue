@@ -8,7 +8,8 @@ export default {
   i18n: {
     label: __('Role'),
   },
-  inputId: 'user_organization_access_level',
+  inputName: 'user[organization_access_level]',
+  inputId: 'user[organization_access_level]',
   roleListboxItems: [
     {
       text: __('User'),
@@ -20,21 +21,9 @@ export default {
     },
   ],
   components: { GlFormGroup, GlCollapsibleListbox },
-  props: {
-    initialAccessLevel: {
-      type: String,
-      required: false,
-      default: ACCESS_LEVEL_DEFAULT,
-    },
-    inputName: {
-      type: String,
-      required: false,
-      default: 'user[organization_access_level]',
-    },
-  },
   data() {
     return {
-      accessLevel: this.initialAccessLevel,
+      roleAccessLevel: ACCESS_LEVEL_DEFAULT,
     };
   },
 };
@@ -43,11 +32,16 @@ export default {
 <template>
   <gl-form-group :label="$options.i18n.label">
     <gl-collapsible-listbox
-      v-model="accessLevel"
+      v-model="roleAccessLevel"
       block
       toggle-class="gl-form-input-xl"
       :items="$options.roleListboxItems"
     />
-    <input :id="$options.inputId" :name="inputName" :value="accessLevel" type="hidden" />
+    <input
+      :id="$options.inputId"
+      :name="$options.inputName"
+      :value="roleAccessLevel"
+      type="hidden"
+    />
   </gl-form-group>
 </template>

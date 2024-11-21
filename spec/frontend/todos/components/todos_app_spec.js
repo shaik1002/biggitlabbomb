@@ -39,9 +39,7 @@ describe('TodosApp', () => {
   const findGlTabs = () => wrapper.findComponent(GlTabs);
   const findFilterBar = () => wrapper.findComponent(TodosFilterBar);
   const findMarkAllDoneButton = () => wrapper.findComponent(TodosMarkAllDoneButton);
-  const findRefreshButton = () => wrapper.findByTestId('refresh-todos');
   const findPendingTodosCount = () => wrapper.findByTestId('pending-todos-count');
-  const findTodoItemListContainer = () => wrapper.findByTestId('todo-item-list-container');
 
   it('should have a tracking event for each tab', () => {
     expect(STATUS_BY_TAB.length).toBe(INSTRUMENT_TAB_LABELS.length);
@@ -98,19 +96,6 @@ describe('TodosApp', () => {
     expect(todosCountsQuerySuccessHandler).toHaveBeenCalledTimes(2);
   });
 
-  it('refreshes count and list', async () => {
-    createComponent();
-    await waitForPromises();
-
-    expect(todosCountsQuerySuccessHandler).toHaveBeenCalledTimes(1);
-    expect(todosQuerySuccessHandler).toHaveBeenCalledTimes(1);
-
-    findRefreshButton().vm.$emit('click', new Event('click'));
-
-    expect(todosCountsQuerySuccessHandler).toHaveBeenCalledTimes(2);
-    expect(todosQuerySuccessHandler).toHaveBeenCalledTimes(2);
-  });
-
   it('shows the pending todos count once it has been fetched', async () => {
     createComponent();
 
@@ -121,84 +106,6 @@ describe('TodosApp', () => {
     expect(findPendingTodosCount().text()).toBe(
       String(getPendingTodosCountResponse.data.currentUser.todos.count),
     );
-  });
-
-  it('refetches todos when page becomes visible again', async () => {
-    createComponent();
-
-    // Wait and account for initial query
-    await waitForPromises();
-    expect(todosQuerySuccessHandler).toHaveBeenCalledTimes(1);
-    expect(todosCountsQuerySuccessHandler).toHaveBeenCalledTimes(1);
-
-    // Make sure we don't refetch when document became hidden
-    jest.spyOn(document, 'hidden', 'get').mockReturnValue(true);
-    document.dispatchEvent(new Event('visibilitychange'));
-    await waitForPromises();
-    expect(todosQuerySuccessHandler).toHaveBeenCalledTimes(1);
-    expect(todosCountsQuerySuccessHandler).toHaveBeenCalledTimes(1);
-
-    // Expect refetch when document becomes visible
-    jest.spyOn(document, 'hidden', 'get').mockReturnValue(false);
-    document.dispatchEvent(new Event('visibilitychange'));
-    await waitForPromises();
-    expect(todosQuerySuccessHandler).toHaveBeenCalledTimes(2);
-    expect(todosCountsQuerySuccessHandler).toHaveBeenCalledTimes(2);
-  });
-
-  it('refetches todos one second after the cursor leaves the list of todos', async () => {
-    jest.useFakeTimers();
-    createComponent();
-
-    // Wait and account for initial query
-    await waitForPromises();
-    expect(todosQuerySuccessHandler).toHaveBeenCalledTimes(1);
-    expect(todosCountsQuerySuccessHandler).toHaveBeenCalledTimes(1);
-
-    // Simulate interacting with a todo item then mousing out of the list zone
-    wrapper.vm.handleItemChanged(1, true);
-    const list = findTodoItemListContainer();
-    list.trigger('mouseleave');
-
-    // Should refresh the count, but not the list
-    await waitForPromises();
-    expect(todosQuerySuccessHandler).toHaveBeenCalledTimes(1);
-    expect(todosCountsQuerySuccessHandler).toHaveBeenCalledTimes(2);
-
-    // Run out the clock
-    jest.advanceTimersByTime(1000 + 50); // 1s + some jitter
-
-    // Refreshes the count and the list
-    await waitForPromises();
-    expect(todosQuerySuccessHandler).toHaveBeenCalledTimes(2);
-    expect(todosCountsQuerySuccessHandler).toHaveBeenCalledTimes(3);
-  });
-
-  it('does not refresh todos after the cursor leaves the list of todos if nothing changed', async () => {
-    jest.useFakeTimers();
-    createComponent();
-
-    // Wait and account for initial query
-    await waitForPromises();
-    expect(todosQuerySuccessHandler).toHaveBeenCalledTimes(1);
-    expect(todosCountsQuerySuccessHandler).toHaveBeenCalledTimes(1);
-
-    // Simulate NOT interacting with a todo item then mousing out of the list zone
-    const list = findTodoItemListContainer();
-    list.trigger('mouseleave');
-
-    // Should not update anything
-    await waitForPromises();
-    expect(todosQuerySuccessHandler).toHaveBeenCalledTimes(1);
-    expect(todosCountsQuerySuccessHandler).toHaveBeenCalledTimes(1);
-
-    // Run out the clock
-    jest.advanceTimersByTime(1000 + 50); // 1s + some jitter
-
-    // Should not update anything
-    await waitForPromises();
-    expect(todosQuerySuccessHandler).toHaveBeenCalledTimes(1);
-    expect(todosCountsQuerySuccessHandler).toHaveBeenCalledTimes(1);
   });
 
   it('passes the default status to the filter bar', () => {

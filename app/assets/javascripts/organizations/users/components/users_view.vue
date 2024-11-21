@@ -1,10 +1,5 @@
 <script>
-import {
-  GlLoadingIcon,
-  GlKeysetPagination,
-  GlCollapsibleListbox,
-  GlTooltipDirective,
-} from '@gitlab/ui';
+import { GlLoadingIcon, GlKeysetPagination, GlCollapsibleListbox } from '@gitlab/ui';
 import { createAlert } from '~/alert';
 import UsersTable from '~/vue_shared/components/users_table/users_table.vue';
 import {
@@ -24,10 +19,6 @@ export default {
       'Organization|An error occurred updating the organization role. Please try again.',
     ),
     successMessage: s__('Organization|Organization role was updated successfully.'),
-    disabledRoleListboxTooltipText: s__('Organization|Organizations must have at least one owner.'),
-  },
-  directives: {
-    GlTooltip: GlTooltipDirective,
   },
   components: {
     GlLoadingIcon,
@@ -99,7 +90,6 @@ export default {
         }
 
         this.$toast.show(this.$options.i18n.successMessage);
-        this.$emit('role-change');
       } catch (error) {
         createAlert({ message: this.$options.i18n.errorMessage, error, captureError: true });
       } finally {
@@ -108,14 +98,6 @@ export default {
     },
     roleListboxItemText(accessLevel) {
       return this.$options.roleListboxItems.find((item) => item.value === accessLevel).text;
-    },
-    isRoleListboxDisabled(user) {
-      return user.isLastOwner;
-    },
-    roleListboxTooltip(user) {
-      return this.isRoleListboxDisabled(user)
-        ? this.$options.i18n.disabledRoleListboxTooltipText
-        : null;
     },
   },
 };
@@ -132,21 +114,14 @@ export default {
         :column-widths="$options.usersTable.columnWidths"
       >
         <template #organization-role="{ user }">
-          <div
-            v-gl-tooltip="{ disabled: !roleListboxTooltip(user), title: roleListboxTooltip(user) }"
-            class="gl-rounded-base focus:gl-focus"
-            :tabindex="isRoleListboxDisabled(user) && 0"
-          >
-            <gl-collapsible-listbox
-              :disabled="isRoleListboxDisabled(user)"
-              :selected="user.accessLevel.stringValue"
-              block
-              toggle-class="gl-form-input-xl"
-              :items="$options.roleListboxItems"
-              :loading="roleListboxLoadingStates.includes(user.gid)"
-              @select="onRoleSelect($event, user)"
-            />
-          </div>
+          <gl-collapsible-listbox
+            :selected="user.accessLevel.stringValue"
+            block
+            toggle-class="gl-form-input-xl"
+            :items="$options.roleListboxItems"
+            :loading="roleListboxLoadingStates.includes(user.gid)"
+            @select="onRoleSelect($event, user)"
+          />
         </template>
       </users-table>
       <div class="gl-flex gl-justify-center">

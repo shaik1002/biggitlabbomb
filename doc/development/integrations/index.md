@@ -21,8 +21,8 @@ if you need clarification or spot any outdated information.
 
 1. Add a new model in `app/models/integrations` extending from `Integration`.
    - For example, `Integrations::FooBar` in `app/models/integrations/foo_bar.rb`.
-   - For certain types of integrations, you can include these base modules (or inherit from them if they are classes):
-     - `Integrations::Base::ChatNotification`
+   - For certain types of integrations, you can also build on these base classes:
+     - `Integrations::BaseChatNotification`
      - `Integrations::BaseCi`
      - `Integrations::BaseIssueTracker`
      - `Integrations::BaseMonitoring`
@@ -107,11 +107,11 @@ The following events are supported for integrations:
 
 | Event type                                                                                     | Default | Value                | Trigger |
 |:-----------------------------------------------------------------------------------------------|:--------|:---------------------|:--|
-| Alert event                                                                                    |         | `alert`              | A new, unique alert is recorded. |
+| Alert event                                                                                    |         | `alert`              | A a new, unique alert is recorded. |
 | Commit event                                                                                   | ✓       | `commit`             | A commit is created or updated. |
 | [Deployment event](../../user/project/integrations/webhook_events.md#deployment-events)        |         | `deployment`         | A deployment starts or finishes. |
-| [Work item event](../../user/project/integrations/webhook_events.md#work-item-events)          | ✓       | `issue`              | An issue is created, updated, or closed. |
-| [Confidential issue event](../../user/project/integrations/webhook_events.md#work-item-events) | ✓       | `confidential_issue` | A confidential issue is created, updated, or closed. |
+| [Issue event](../../user/project/integrations/webhook_events.md#issue-events)                  | ✓       | `issue`              | An issue is created, updated, or closed. |
+| [Confidential issue event](../../user/project/integrations/webhook_events.md#issue-events)     | ✓       | `confidential_issue` | A confidential issue is created, updated, or closed. |
 | [Job event](../../user/project/integrations/webhook_events.md#job-events)                      |         | `job` | |
 | [Merge request event](../../user/project/integrations/webhook_events.md#merge-request-events)  | ✓       | `merge_request`      | A merge request is created, updated, or merged. |
 | [Comment event](../../user/project/integrations/webhook_events.md#comment-events)              |         | `comment`            | A new comment is added. |
@@ -152,7 +152,7 @@ end
 
 #### Masking channel values
 
-Integrations that [include from `Integrations::Base::ChatNotification`](#define-the-integration) can hide the
+Integrations that [inherit from `Integrations::BaseChatNotification`](#define-the-integration) can hide the
 values of their channel input fields. Integrations should hide these values whenever the
 fields contain sensitive information such as auth tokens.
 

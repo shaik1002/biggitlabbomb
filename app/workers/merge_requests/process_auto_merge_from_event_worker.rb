@@ -19,6 +19,8 @@ module MergeRequests
         return
       end
 
+      return unless Feature.enabled?(:merge_when_checks_pass, merge_request.project)
+
       AutoMergeService.new(merge_request.project, merge_request.merge_user)
                       .process(merge_request)
     end

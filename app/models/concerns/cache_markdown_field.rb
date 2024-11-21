@@ -117,10 +117,8 @@ module CacheMarkdownField
         refresh_markdown_cache
       else
         # Invalidated due to stale HTML cache
-        # This could happen when the Markdown cache version is bumped
-        # or when a model is imported and the HTML is empty.
-        # We persist the updated HTML here so that subsequent calls
-        # to this method do not have to regenerate the HTML again.
+        # This could happen when the Markdown cache version is bumped or when a model is imported and the HTML is empty.
+        # We persist the updated HTML here so that subsequent calls to this method do not have to regenerate the HTML again.
         refresh_markdown_cache!
       end
     end
@@ -135,9 +133,7 @@ module CacheMarkdownField
 
     # rubocop:disable Gitlab/ModuleWithInstanceVariables -- acceptable use case
     # See https://docs.gitlab.com/ee/development/module_with_instance_variables.html#acceptable-use
-    @latest_cached_markdown_version ||= Gitlab::MarkdownCache.latest_cached_markdown_version(
-      local_version: local_version
-    )
+    @latest_cached_markdown_version ||= Gitlab::MarkdownCache.latest_cached_markdown_version(local_version: local_version)
     # rubocop:enable Gitlab/ModuleWithInstanceVariables
   end
 

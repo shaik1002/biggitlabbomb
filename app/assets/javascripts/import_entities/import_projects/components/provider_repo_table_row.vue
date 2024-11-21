@@ -34,14 +34,13 @@ export default {
   directives: {
     GlTooltip: GlTooltipDirective,
   },
-  inject: {
-    userNamespace: {
-      default: null,
-    },
-  },
   props: {
     repo: {
       type: Object,
+      required: true,
+    },
+    userNamespace: {
+      type: String,
       required: true,
     },
     optionalStages: {
@@ -67,11 +66,6 @@ export default {
 
     displayFullPath() {
       return this.repo.importedProject?.fullPath.replace(/^\//, '');
-    },
-
-    showMembershipsWarning() {
-      const userNamespaceSelected = this.importTarget.targetNamespace === this.userNamespace;
-      return this.isImportNotStarted && userNamespaceSelected;
     },
 
     isFinished() {
@@ -158,10 +152,7 @@ export default {
     },
   },
 
-  helpPath: helpPagePath('/user/project/import/github'),
-  membershipsHelpPath: helpPagePath('user/project/import/index', {
-    anchor: 'user-contribution-and-membership-mapping',
-  }),
+  helpUrl: helpPagePath('/user/project/import/github.md'),
 };
 </script>
 
@@ -172,7 +163,7 @@ export default {
     :data-qa-source-project="repo.importSource.fullName"
   >
     <td>
-      <gl-link :href="repo.importSource.providerLink" target="_blank" data-testid="provider-link"
+      <gl-link :href="repo.importSource.providerLink" target="_blank" data-testid="providerLink"
         >{{ repo.importSource.fullName }}
         <gl-icon v-if="repo.importSource.providerLink" name="external-link" />
       </gl-link>
@@ -229,7 +220,7 @@ export default {
               'ImportProjects|Imported files will be kept. You can import this repository again later.',
             )
           }}
-          <gl-link :href="$options.helpPath" target="_blank">{{ __('Learn more.') }}</gl-link>
+          <gl-link :href="$options.helpUrl" target="_blank">{{ __('Learn more.') }}</gl-link>
         </div>
       </gl-tooltip>
       <gl-button
@@ -249,23 +240,6 @@ export default {
       >
         {{ importButtonText }}
       </gl-button>
-      <gl-tooltip :target="() => $refs.membershipsWarning.$el">
-        {{
-          s__(
-            'ImportProjects|Importing a project into a personal namespace results in all contributions being mapped to the same bot user. To map contributions to real users, import projects into a group instead.',
-          )
-        }}
-        <gl-link :href="$options.membershipsHelpPath" target="_blank">{{
-          __('Learn more.')
-        }}</gl-link>
-      </gl-tooltip>
-      <gl-icon
-        v-show="showMembershipsWarning"
-        ref="membershipsWarning"
-        name="warning"
-        class="gl-ml-3 gl-text-orange-500"
-        data-testid="memberships-warning"
-      />
       <gl-icon
         v-if="isFinished"
         v-gl-tooltip

@@ -114,19 +114,15 @@ RSpec.describe 'Database schema',
       ci_resources: %w[project_id],
       p_ci_pipelines: %w[partition_id auto_canceled_by_partition_id auto_canceled_by_id],
       p_ci_runner_machine_builds: %w[project_id],
-      ci_runner_taggings: %w[runner_id sharding_key_id], # The sharding_key_id value is meant to populate the partitioned table, no other usage. The runner_id FK exists at the partition level
-      ci_runner_taggings_instance_type: %w[sharding_key_id], # This field is always NULL in this partition
       ci_runners: %w[sharding_key_id], # This value is meant to populate the partitioned table, no other usage
-      ci_runners_e59bb2812d: %w[sharding_key_id], # This field is only used in the partitions, and has the appropriate FKs
-      instance_type_ci_runners_e59bb2812d: %w[creator_id sharding_key_id], # No need for LFKs on partition, already handled on ci_runners_e59bb2812d routing table.
-      group_type_ci_runners_e59bb2812d: %w[creator_id sharding_key_id], # No need for LFKs on partition, already handled on ci_runners_e59bb2812d routing table.
-      project_type_ci_runners_e59bb2812d: %w[creator_id sharding_key_id], # No need for LFKs on partition, already handled on ci_runners_e59bb2812d routing table.
       ci_runner_machines: %w[sharding_key_id], # This value is meant to populate the partitioned table, no other usage
       ci_runner_machines_687967fa8a: %w[runner_id sharding_key_id], # This field is only used in the partitions, and has the appropriate FKs. runner_id temporarily ignored due to incident 18792
       instance_type_ci_runner_machines_687967fa8a: %w[runner_id sharding_key_id], # This field is always NULL in this partition. runner_id temporarily ignored due to incident 18792
       group_type_ci_runner_machines_687967fa8a: %w[runner_id sharding_key_id], # No need for LFK, rows will be deleted by the FK to ci_runners. runner_id temporarily ignored due to incident 18792
       project_type_ci_runner_machines_687967fa8a: %w[runner_id sharding_key_id], # No need for LFK, rows will be deleted by the FK to ci_runners. runner_id temporarily ignored due to incident 18792
       ci_runner_projects: %w[runner_id],
+      ci_runners_e59bb2812d: %w[sharding_key_id], # This field is only used in the partitions, and has the appropriate FKs
+      instance_type_ci_runners_e59bb2812d: %w[sharding_key_id], # This field is always NULL in this partition
       ci_sources_pipelines: %w[partition_id source_partition_id source_job_id],
       ci_sources_projects: %w[partition_id],
       ci_stages: %w[partition_id project_id pipeline_id],
@@ -246,11 +242,8 @@ RSpec.describe 'Database schema',
       ai_testing_terms_acceptances: %w[user_id], # testing terms only have 1 entry, and if the user is deleted the record should remain
       namespace_settings: %w[early_access_program_joined_by_id], # isn't used inside product itself. Only through Snowflake
       workspaces_agent_config_versions: %w[item_id], # polymorphic associations
-      work_item_types: %w[correct_id old_id], # temporary columns that are not foreign keys
-      instance_integrations: %w[project_id group_id inherit_from_id], # these columns are not used in instance integrations
-      group_scim_identities: %w[temp_source_id], # temporary column that is not a foreign key
-      group_scim_auth_access_tokens: %w[temp_source_id], # temporary column that is not a foreign key
-      subscription_user_add_on_assignment_versions: %w[item_id user_id purchase_id] # Managed by paper_trail gem, no need for FK on the historical data
+      work_item_types: %w[correct_id], # temporary column that is not a foreign key
+      instance_integrations: %w[project_id group_id inherit_from_id] # these columns are not used in instance integrations
     }.with_indifferent_access.freeze
   end
 
@@ -425,8 +418,7 @@ RSpec.describe 'Database schema',
         "Releases::Evidence" => %w[summary],
         "Vulnerabilities::Finding::Evidence" => %w[data], # Validation work in progress
         "Ai::DuoWorkflows::Checkpoint" => %w[checkpoint metadata], # https://gitlab.com/gitlab-org/gitlab/-/issues/468632
-        "RemoteDevelopment::WorkspacesAgentConfigVersion" => %w[object object_changes], # Managed by paper_trail gem
-        "GitlabSubscriptions::UserAddOnAssignmentVersion" => %w[object] # Managed by paper_trail gem
+        "RemoteDevelopment::WorkspacesAgentConfigVersion" => %w[object object_changes] # Managed by paper_trail gem
       }.freeze
     end
 

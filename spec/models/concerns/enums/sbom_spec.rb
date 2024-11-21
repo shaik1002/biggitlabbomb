@@ -28,7 +28,6 @@ RSpec.describe Enums::Sbom, feature_category: :dependency_management do
       'unknown-pkg-manager' | 0
       'Python (unknown)'    | 0
       :swift                | 15
-      :conda                | 16
     end
 
     with_them do
@@ -63,7 +62,6 @@ RSpec.describe Enums::Sbom, feature_category: :dependency_management do
       'deb'      | false
       'wolfi'    | false
       'swift'    | true
-      'conda'    | true
     end
 
     with_them do
@@ -93,7 +91,6 @@ RSpec.describe Enums::Sbom, feature_category: :dependency_management do
       'cbl-mariner' | true
       'wolfi'       | true
       :swift        | false
-      :conda        | false
     end
 
     with_them do

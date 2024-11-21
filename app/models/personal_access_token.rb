@@ -71,11 +71,7 @@ class PersonalAccessToken < ApplicationRecord
   validate :expires_at_before_instance_max_expiry_date, on: :create
 
   def revoke!
-    if persisted?
-      update_columns(revoked: true, updated_at: Time.zone.now)
-    else
-      self.revoked = true
-    end
+    update!(revoked: true)
   end
 
   def active?

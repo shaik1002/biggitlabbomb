@@ -1,5 +1,5 @@
 ---
-stage: Security Risk Management
+stage: Govern
 group: Security Policies
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
@@ -143,7 +143,6 @@ the following sections and tables provide an alternative.
 | `approval_settings` | `object`           | false    |                 | Project settings that the policy overrides.              |
 | `fallback_behavior` | `object`           | false    |                 | Settings that affect invalid or unenforceable rules.     |
 | `policy_scope`      | `object` of [`policy_scope`](index.md#scope) | false |  | Defines the scope of the policy based on the projects, groups, or compliance framework labels you specify. |
-| `policy_tuning`     | `object`           | false    |                 | (Experimental) Settings that affect policy comparison logic.     |
 
 ## `scan_finding` rule type
 
@@ -264,7 +263,7 @@ The settings set in the policy overwrite settings in the project.
 | Field                               | Type                  | Required | Possible values                                               | Applicable rule type | Description |
 |-------------------------------------|-----------------------|----------|---------------------------------------------------------------|----------------------|-------------|
 | `block_branch_modification`         | `boolean`             | false    | `true`, `false`                                               | All                  | When enabled, prevents a user from removing a branch from the protected branches list, deleting a protected branch, or changing the default branch if that branch is included in the security policy. This ensures users cannot remove protection status from a branch to merge vulnerable code. Enforced based on `branches`, `branch_type` and `policy_scope` and regardless of detected vulnerabilities. |
-| `block_group_branch_modification`   | `boolean` or `object` | false    | `true`, `false`, `{ enabled: boolean, exceptions: [{ id: Integer}] }` | All                  | When enabled, prevents a user from removing group-level protected branches on every group the policy applies to. If `block_branch_modification` is `true`, implicitly defaults to `true`. Add top-level groups that support [group-level protected branches](../../../user/project/repository/branches/protected.md#for-all-projects-in-a-group) as `exceptions` |
+| `block_group_branch_modification`   | `boolean` or `object` | false    | `true`, `false`, `{ enabled: boolean, exceptions: [string] }` | All                  | When enabled, prevents a user from removing group-level protected branches on every group the policy applies to. If `block_branch_modification` is `true`, implicitly defaults to `true`. Enforced based on `branches`, `branch_type` and `policy_scope` and regardless of detected vulnerabilities. Add top-level groups that support [group-level protected branches](../../../user/project/repository/branches/protected.md#for-all-projects-in-a-group) as `exceptions` |
 | `prevent_approval_by_author`        | `boolean`             | false    | `true`, `false`                                               | `Any merge request`  | When enabled, merge request authors cannot approve their own MRs. This ensures code authors cannot introduce vulnerabilities and approve code to merge. |
 | `prevent_approval_by_commit_author` | `boolean`             | false    | `true`, `false`                                               | `Any merge request`  | When enabled, users who have contributed code to the MR are ineligible for approval. This ensures code committers cannot introduce vulnerabilities and approve code to merge. |
 | `remove_approvals_with_new_commit`  | `boolean`             | false    | `true`, `false`                                               | `Any merge request`  | When enabled, if an MR receives all necessary approvals to merge, but then a new commit is added, new approvals are required. This ensures new commits that may include vulnerabilities cannot be introduced. |
@@ -282,55 +281,6 @@ On self-managed GitLab, by default the `fallback_behavior` field is available. T
 | Field  | Type     | Required | Possible values    | Description                                                                                                          |
 |--------|----------|----------|--------------------|----------------------------------------------------------------------------------------------------------------------|
 | `fail` | `string` | false    | `open` or `closed` | `closed` (default): Invalid or unenforceable rules of a policy require approval. `open`: Invalid or unenforceable rules of a policy do not require approval. |
-
-## `policy_tuning`
-
-| Field  | Type     | Required | Possible values    | Description                                                                                                          |
-|--------|----------|----------|--------------------|----------------------------------------------------------------------------------------------------------------------|
-| `unblock_rules_using_execution_policies` | `boolean` | false    | `true`, `false` | When enabled, approval rules become optional when scan artifacts are missing from the target branch and a scan is required by a scan execution policy. This option only works with an existing scan execution policy that has matching scanners. |
-
-### Example `policy.yml` in a security policy project that uses `policy_tuning`
-
-```yaml
-scan_execution_policy:
-- name: Enforce dependency scanning
-  description: ''
-  enabled: true
-  policy_scope:
-    projects:
-      excluding: []
-  rules:
-  - type: pipeline
-    branch_type: all
-  actions:
-  - scan: dependency_scanning
-approval_policy:
-- name: Dependency scanning approvals
-  description: ''
-  enabled: true
-  policy_scope:
-    projects:
-      excluding: []
-  rules:
-  - type: scan_finding
-    scanners:
-    - dependency_scanning
-    vulnerabilities_allowed: 0
-    severity_levels: []
-    vulnerability_states: []
-    branch_type: protected
-  actions:
-  - type: require_approval
-    approvals_required: 1
-    role_approvers:
-    - developer
-  - type: send_bot_message
-    enabled: true
-  fallback_behavior:
-    fail: closed
-  policy_tuning:
-    unblock_rules_using_execution_policies: true
-```
 
 ## Policy scope schema
 

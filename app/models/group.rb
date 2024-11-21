@@ -108,7 +108,7 @@ class Group < Namespace
   has_many :contacts, class_name: 'CustomerRelations::Contact', inverse_of: :group, dependent: :delete_all # rubocop:disable Cop/ActiveRecordDependent
   has_one :crm_settings, class_name: 'Group::CrmSettings', inverse_of: :group
   # Groups for which this is the source of CRM contacts/organizations
-  has_many :crm_targets, class_name: 'Group::CrmSettings', inverse_of: :source_group, foreign_key: 'source_group_id'
+  has_many :crm_targets, class_name: 'Group::CrmSettings', inverse_of: :source_group
 
   has_many :cluster_groups, class_name: 'Clusters::Group'
   has_many :clusters, through: :cluster_groups, class_name: 'Clusters::Cluster'
@@ -980,10 +980,6 @@ class Group < Namespace
     feature_flag_enabled_for_self_or_ancestor?(:glql_integration)
   end
 
-  def wiki_comments_feature_flag_enabled?
-    feature_flag_enabled_for_self_or_ancestor?(:wiki_comments, type: :wip)
-  end
-
   # Note: this method is overridden in EE to check the work_item_epics feature flag  which also enables this feature
   def namespace_work_items_enabled?
     ::Feature.enabled?(:namespace_level_work_items, self, type: :development)
@@ -1074,18 +1070,6 @@ class Group < Namespace
     crm_targets.present?
   end
   strong_memoize_attr :crm_group?
-
-  def has_issues_with_contacts?
-    CustomerRelations::IssueContact.joins(:issue).where(issue: { project_id: Project.where(namespace_id: self_and_descendant_ids) }).exists?
-  end
-
-  def delete_contacts
-    CustomerRelations::Contact.where(group_id: id).delete_all
-  end
-
-  def delete_organizations
-    CustomerRelations::Organization.where(group_id: id).delete_all
-  end
 
   private
 

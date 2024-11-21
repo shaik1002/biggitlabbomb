@@ -67,7 +67,6 @@ describe('WorkItemDrawer', () => {
         reportAbusePath: '',
         groupPath: '',
         hasSubepicsFeature: false,
-        hasLinkedItemsEpicsFeature: true,
         isGroup,
         glFeatures: {
           workItemsViewPreference,
@@ -284,9 +283,8 @@ describe('WorkItemDrawer', () => {
       expect(visitUrl).toHaveBeenCalledWith('test');
     });
 
-    it('calls `router.push` when link is a group level work item and we are at the group level', () => {
+    it('calls `router.push` when link is a work item path', () => {
       createComponent({
-        isGroup: true,
         activeItem: {
           iid: '1',
           webUrl: '/groups/gitlab-org/gitlab/-/work_items/1',
@@ -299,53 +297,13 @@ describe('WorkItemDrawer', () => {
       expect(mockRouterPush).toHaveBeenCalledWith({ name: 'workItem', params: { iid: '1' } });
     });
 
-    it('does not call `router.push` when link is a group level work item and we are at the project level', () => {
-      createComponent({
-        isGroup: false,
-        activeItem: {
-          iid: '1',
-          webUrl: '/groups/gitlab-org/gitlab/-/work_items/1',
-          fullPath: 'gitlab-org/gitlab',
-        },
-      });
-      findLinkButton().vm.$emit('click', new MouseEvent('click'));
-
-      expect(visitUrl).toHaveBeenCalledWith('/groups/gitlab-org/gitlab/-/work_items/1');
-      expect(mockRouterPush).not.toHaveBeenCalled();
-    });
-
-    it('calls `router.push` when issue as work item view is enabled and work item is in same project', () => {
-      createComponent({
-        isGroup: false,
-        workItemsViewPreference: true,
-        activeItem: {
-          iid: '1',
-          webUrl: '/gitlab-org/gitlab/-/work_items/1',
-          fullPath: 'gitlab-org/gitlab',
-        },
-      });
+    it('calls `router.push` when issue as work item view is enabled', () => {
+      createComponent({ isGroup: false, workItemsViewPreference: true });
 
       findLinkButton().vm.$emit('click', new MouseEvent('click'));
 
       expect(visitUrl).not.toHaveBeenCalled();
       expect(mockRouterPush).toHaveBeenCalledWith({ name: 'workItem', params: { iid: '1' } });
-    });
-
-    it('does not call `router.push` when issue as work item view is enabled and work item is in different project', () => {
-      createComponent({
-        isGroup: false,
-        workItemsViewPreference: true,
-        activeItem: {
-          iid: '1',
-          webUrl: '/gitlab-org/gitlab-other/-/work_items/1',
-          fullPath: 'gitlab-org/gitlab',
-        },
-      });
-
-      findLinkButton().vm.$emit('click', new MouseEvent('click'));
-
-      expect(visitUrl).toHaveBeenCalledWith('/gitlab-org/gitlab-other/-/work_items/1');
-      expect(mockRouterPush).not.toHaveBeenCalled();
     });
   });
 

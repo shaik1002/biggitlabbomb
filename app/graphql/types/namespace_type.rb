@@ -64,12 +64,12 @@ module Types
       Types::TimeTracking::TimelogCategoryType.connection_type,
       null: true,
       description: "Timelog categories for the namespace.",
-      experiment: { milestone: '15.3' }
+      alpha: { milestone: '15.3' }
 
     field :achievements,
       Types::Achievements::AchievementType.connection_type,
       null: true,
-      experiment: { milestone: '15.8' },
+      alpha: { milestone: '15.8' },
       description: "Achievements for the namespace. " \
         "Returns `null` if the `achievements` feature flag is disabled.",
       extras: [:lookahead],
@@ -77,20 +77,20 @@ module Types
 
     field :achievements_path, GraphQL::Types::String,
       null: true,
-      experiment: { milestone: '17.0' },
+      alpha: { milestone: '17.0' },
       description: "Path for the namespace's achievements. " \
         "Returns `null` if the namespace is not a group, or the `achievements` feature flag is disabled."
 
     field :work_item, Types::WorkItemType,
       null: true,
       resolver: Resolvers::Namespaces::WorkItemResolver,
-      experiment: { milestone: '16.10' },
+      alpha: { milestone: '16.10' },
       description: 'Find a work item by IID directly associated with the namespace(project or group).  Returns ' \
         '`null` for group level work items if the `namespace_level_work_items` feature flag is disabled.'
 
     field :work_item_types, Types::WorkItems::TypeType.connection_type,
       resolver: Resolvers::WorkItems::TypesResolver,
-      experiment: { milestone: '17.2' },
+      alpha: { milestone: '17.2' },
       description: 'Work item types available to the namespace.'
 
     field :pages_deployments, Types::PagesDeploymentType.connection_type, null: true,
@@ -100,7 +100,7 @@ module Types
 
     field :import_source_users, Import::SourceUserType.connection_type,
       null: true,
-      experiment: { milestone: '17.2' },
+      alpha: { milestone: '17.2' },
       resolver: Resolvers::Import::SourceUsersResolver,
       description: 'Import source users of the namespace. This field can only be resolved for one namespace in any ' \
         'single request.' do
@@ -112,13 +112,7 @@ module Types
       null: true,
       description: 'Data needed to render the sidebar for the namespace.',
       method: :itself,
-      experiment: { milestone: '17.6' }
-
-    field :work_item_description_templates,
-      Types::WorkItems::DescriptionTemplateType.connection_type,
-      resolver: Resolvers::WorkItems::DescriptionTemplatesResolver,
-      null: true, experiment: { milestone: '17.6' },
-      description: 'Work item description templates available to the namespace.'
+      alpha: { milestone: '17.6' }
 
     markdown_field :description_html, null: true
 

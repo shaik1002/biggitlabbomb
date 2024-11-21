@@ -5,13 +5,12 @@ require 'spec_helper'
 RSpec.describe Gitlab::Database::AlterCellSequencesRange, feature_category: :database do
   describe '#execute' do
     let(:connection) { ApplicationRecord.connection }
-    let(:alter_cell_sequences_range) { described_class.new(*params, logger: logger) }
+    let(:alter_cell_sequences_range) { described_class.new(*params) }
     let(:params) { [minval, maxval, connection] }
     let(:minval) { 100_000 }
     let(:maxval) { 200_000 }
     let(:default_min) { 1 }
     let(:default_max) { (2**63) - 1 }
-    let(:logger) { instance_double(Gitlab::AppLogger, info: nil) }
 
     subject(:execute) { alter_cell_sequences_range.execute }
 
@@ -29,16 +28,14 @@ RSpec.describe Gitlab::Database::AlterCellSequencesRange, feature_category: :dat
         execute
 
         if minval.present?
-          incorrect_min = Gitlab::Database::PostgresSequence.where.not(seq_min: minval)
-          expect(incorrect_min).to be_empty
+          incorrect_min = "SELECT sequencename FROM pg_sequences WHERE min_value != #{minval}"
+          expect(connection.select_rows(incorrect_min).flatten).to be_empty
         end
 
         if maxval.present?
-          incorrect_max = Gitlab::Database::PostgresSequence.where.not(seq_max: maxval)
-          expect(incorrect_max).to be_empty
+          incorrect_max = "SELECT sequencename FROM pg_sequences WHERE max_value != #{maxval}"
+          expect(connection.select_rows(incorrect_max).flatten).to be_empty
         end
-
-        expect(logger).to have_received(:info).with(match('Altered cell sequence')).at_least(:once)
       end
     end
 

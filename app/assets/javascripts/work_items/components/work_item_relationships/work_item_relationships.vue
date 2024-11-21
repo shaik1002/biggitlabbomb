@@ -307,7 +307,6 @@ export default {
     :title="$options.i18n.title"
     :is-loading="isLoading"
     is-collapsible
-    persist-collapsed-state
     data-testid="work-item-relationships"
   >
     <template #count>

@@ -102,10 +102,6 @@ module Gitlab
           data['gitlab_schema']
         end
 
-        def table_size
-          data['table_size'] || 'unknown'
-        end
-
         def sharding_key
           data['sharding_key']
         end

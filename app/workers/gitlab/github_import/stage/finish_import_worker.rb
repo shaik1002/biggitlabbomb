@@ -61,7 +61,10 @@ module Gitlab
         end
 
         def placeholder_reference_store
-          @placeholder_reference_store ||= project.placeholder_reference_store
+          @placeholder_reference_store ||= ::Import::PlaceholderReferences::Store.new(
+            import_source: ::Import::SOURCE_GITHUB,
+            import_uid: project.import_state.id
+          )
         end
       end
     end

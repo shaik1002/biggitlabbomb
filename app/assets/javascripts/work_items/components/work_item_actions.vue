@@ -36,7 +36,6 @@ import {
   I18N_WORK_ITEM_COPY_CREATE_NOTE_EMAIL,
   I18N_WORK_ITEM_ERROR_COPY_REFERENCE,
   I18N_WORK_ITEM_ERROR_COPY_EMAIL,
-  I18N_WORK_ITEM_NEW_RELATED_ITEM,
   TEST_ID_LOCK_ACTION,
   TEST_ID_REPORT_ABUSE,
   TEST_ID_NEW_RELATED_WORK_ITEM,
@@ -227,7 +226,6 @@ export default {
           I18N_WORK_ITEM_ERROR_COPY_EMAIL,
           this.workItemType,
         ),
-        newRelatedItemLabel: sprintfWorkItem(I18N_WORK_ITEM_NEW_RELATED_ITEM, this.workItemType),
       };
     },
     areYouSureDeleteMessage() {
@@ -460,11 +458,11 @@ export default {
       />
 
       <gl-disclosure-dropdown-item
-        v-if="canCreateRelatedItem && canUpdate"
+        v-if="canCreateRelatedItem && canUpdate && isEpic"
         :data-testid="$options.newRelatedItemTestId"
         @action="isCreateWorkItemModalVisible = true"
       >
-        <template #list-item>{{ i18n.newRelatedItemLabel }}</template>
+        <template #list-item>{{ __('New related Epic') }}</template>
       </gl-disclosure-dropdown-item>
 
       <gl-disclosure-dropdown-item
@@ -549,10 +547,8 @@ export default {
     <create-work-item-modal
       :visible="isCreateWorkItemModalVisible"
       :related-item="relatedItemData"
-      :work-item-type-name="workItemType.toUpperCase()"
-      :show-project-selector="!isEpic"
+      :work-item-type-name="$options.WORK_ITEM_TYPE_ENUM_EPIC"
       hide-button
-      @workItemCreated="$emit('workItemCreated')"
       @hideModal="isCreateWorkItemModalVisible = false"
     />
   </div>

@@ -13,8 +13,8 @@ RSpec.describe 'new tables missing sharding_key', feature_category: :cell do
       'merge_request_diff_commits_b5377a7a34', # has a desired sharding key instead
       'merge_request_diff_files_99208b8fac', # has a desired sharding key instead
       'ml_model_metadata', # has a desired sharding key instead.
-      'p_ci_pipeline_variables', # has a desired sharding key instead
-      'sbom_occurrences_vulnerabilities' # has desired sharding key instead
+      'p_ci_pipeline_variables', # https://gitlab.com/gitlab-org/gitlab/-/issues/436360
+      'sbom_occurrences_vulnerabilities' # https://gitlab.com/gitlab-org/gitlab/-/issues/432900
     ]
   end
 
@@ -61,11 +61,9 @@ RSpec.describe 'new tables missing sharding_key', feature_category: :cell do
       'ci_namespace_monthly_usages.namespace_id', # https://gitlab.com/gitlab-org/gitlab/-/issues/321400
       'ci_job_artifacts.project_id',
       'ci_namespace_monthly_usages.namespace_id', # https://gitlab.com/gitlab-org/gitlab/-/issues/321400
-      'ci_pipeline_chat_data.project_id',
       'ci_builds_metadata.project_id',
       'ci_deleted_objects.project_id', # LFK already present on p_ci_builds and cascade delete all ci resources
       'p_ci_job_annotations.project_id', # LFK already present on p_ci_builds and cascade delete all ci resources
-      'p_ci_pipelines_config.project_id', # LFK already present on p_ci_pipelines and cascade delete all ci resources
       'ldap_group_links.group_id',
       'namespace_descendants.namespace_id',
       'p_batched_git_ref_updates_deletions.project_id',
@@ -81,9 +79,7 @@ RSpec.describe 'new tables missing sharding_key', feature_category: :cell do
       'analytics_cycle_analytics_merge_request_stage_events.group_id',
       # This is event log table for gitlab_subscriptions and should not be deleted.
       # See more: https://gitlab.com/gitlab-org/gitlab/-/issues/462598#note_1949768698
-      'gitlab_subscription_histories.namespace_id',
-      # allowed as it points to itself
-      'organizations.id'
+      'gitlab_subscription_histories.namespace_id'
     ]
   end
 
@@ -173,7 +169,7 @@ RSpec.describe 'new tables missing sharding_key', feature_category: :cell do
     sql = <<~SQL
       SELECT c.table_name,
         CASE WHEN c.column_default IS NOT NULL THEN 'has default' ELSE NULL END,
-        CASE WHEN c.is_nullable::boolean THEN 'nullable / not null constraint missing' ELSE NULL END,
+        CASE WHEN c.is_nullable::boolean THEN 'nullable' ELSE NULL END,
         CASE WHEN fk.name IS NULL THEN 'no foreign key' ELSE NULL END
       FROM information_schema.columns c
       LEFT JOIN postgres_foreign_keys fk
@@ -187,6 +183,7 @@ RSpec.describe 'new tables missing sharding_key', feature_category: :cell do
     # To add a table to this list, create an issue under https://gitlab.com/groups/gitlab-org/-/epics/11670.
     # Use https://gitlab.com/gitlab-org/gitlab/-/issues/476206 as an example.
     work_in_progress = {
+      "dependency_list_exports" => 'https://gitlab.com/gitlab-org/gitlab/-/issues/476208',
       "namespaces" => 'https://gitlab.com/gitlab-org/gitlab/-/issues/476209',
       "organization_users" => 'https://gitlab.com/gitlab-org/gitlab/-/issues/476210',
       "projects" => 'https://gitlab.com/gitlab-org/gitlab/-/issues/476211',
@@ -204,16 +201,19 @@ RSpec.describe 'new tables missing sharding_key', feature_category: :cell do
     has_lfk = ->(lfks) { lfks.any? { |k| k.options[:column] == 'organization_id' && k.to_table == 'organizations' } }
 
     organization_id_columns = ApplicationRecord.connection.select_rows(sql)
-    checks = organization_id_columns.reject { |column| work_in_progress[column[0]] }
-    messages = checks.filter_map do |check|
-      table_name, *violations = check
-
-      violations.delete_if do |v|
-        (v == 'nullable / not null constraint missing' && has_null_check_constraint?(table_name, 'organization_id')) ||
-          (v == 'no foreign key' && has_lfk.call(loose_foreign_keys.fetch(table_name, {})))
+    violations = organization_id_columns.reject { |column| work_in_progress[column[0]] }
+    messages = violations.filter_map do |violation|
+      if violation[2]
+        if has_null_check_constraint?(violation[0], 'organization_id')
+          violation.delete_at(2)
+        else
+          violation[2].concat(' / not null constraint missing')
+        end
       end
 
-      "  #{table_name} - #{violations.compact.join(', ')}" if violations.any?
+      violation.delete_at(3) if violation[3] && has_lfk.call(loose_foreign_keys.fetch(violation[0], {}))
+
+      "  #{violation[0]} - #{violation[1..].compact.join(', ')}" if violation[1..].any?
     end
 
     expect(messages).to be_empty, "Expected all organization_id columns to be not nullable, have no default, " \
@@ -270,12 +270,7 @@ RSpec.describe 'new tables missing sharding_key', feature_category: :cell do
     tables_exempted_from_sharding.each do |entry|
       # See https://gitlab.com/gitlab-org/gitlab/-/issues/471182
       tables_to_be_fixed = %w[geo_nodes]
-
-      if entry.table_name.in?(tables_to_be_fixed)
-        puts "The table #{entry.table_name} needs to be fixed"
-
-        next
-      end
+      pending 'These tables need to be fixed' if entry.table_name.in?(tables_to_be_fixed)
 
       fks = referenced_foreign_keys(entry.table_name).to_a
 

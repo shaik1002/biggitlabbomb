@@ -91,11 +91,11 @@ module Gitlab
         attr_reader :connection, :migration_wrapper
 
         def find_or_create_next_batched_job(active_migration)
-          next_batch_min, next_batch_max = find_next_batch_range(active_migration)
-
-          return active_migration.batched_jobs.retriable.first if next_batch_min.nil? || next_batch_max.nil?
-
-          active_migration.create_batched_job!(next_batch_min, next_batch_max)
+          if next_batch_range = find_next_batch_range(active_migration)
+            active_migration.create_batched_job!(next_batch_range.min, next_batch_range.max)
+          else
+            active_migration.batched_jobs.retriable.first
+          end
         end
 
         def find_next_batch_range(active_migration)
@@ -116,19 +116,13 @@ module Gitlab
         end
 
         def clamped_batch_range(active_migration, next_bounds)
-          next_min, next_max = next_bounds
+          min_value, max_value = next_bounds
 
-          if active_migration.cursor?
-            return if (next_min <=> active_migration.max_cursor) > 0
+          return if min_value > active_migration.max_value
 
-            next_max = active_migration.max_cursor if (next_max <=> active_migration.max_cursor) > 0
-          else
-            return if next_min > active_migration.max_value
+          max_value = max_value.clamp(min_value, active_migration.max_value)
 
-            next_max = next_max.clamp(next_min, active_migration.max_value)
-          end
-
-          [next_min, next_max]
+          (min_value..max_value)
         end
 
         def finish_active_migration(active_migration)
@@ -144,6 +138,7 @@ module Gitlab
         def run_migration_while(migration, status)
           while migration.status_name == status
             run_migration_job(migration)
+
             migration.reload_last_job
           end
         end

@@ -148,7 +148,6 @@ class ApplicationSettingsAnalysis
       identity_verification_settings
       import_sources
       importers
-      integrations
       invisible_captcha_enabled
       issues_create_limit
       jira_connect_application_key
@@ -198,7 +197,6 @@ class ApplicationSettingsAnalysis
       repository_storages_weighted
       require_admin_approval_after_user_signup
       require_admin_two_factor_authentication
-      resource_usage_limits
       restricted_visibility_levels
       runners_registration_token
       runners_registration_token_encrypted

@@ -3,8 +3,6 @@ data_category: optional
 key_path: object_store.artifacts.object_store.enabled
 description: Whether Object Storage is enabled for Artifacts
 product_group: cloud_connector
-product_categories:
-- build
 value_type: boolean
 status: active
 time_frame: none
@@ -12,6 +10,10 @@ data_source: system
 distribution:
 - ce
 - ee
+tier:
+- free
+- premium
+- ultimate
 tiers:
 - free
 - premium

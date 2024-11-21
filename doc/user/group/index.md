@@ -24,7 +24,7 @@ For more information about creating and managing your groups, see [Manage groups
 
 ## Group hierarchy
 
-Groups are organized in a tree structure:
+Groups are organized in a tree structure: 
 
 - A **top-level group** is a group created at the "root" of the organization. An organization can have one or more top-level groups. A top-level group can contain one or more subgroups.
 - A **parent group** is a group that contains one or more subgroups.
@@ -393,7 +393,7 @@ Prerequisites:
 
 - You must have the Owner role for the group.
 - If [sign-up is disabled](../../administration/settings/sign_up_restrictions.md#disable-new-sign-ups), an administrator must add the user by email first.
-- If [administrator for role promotions](../../administration/settings/sign_up_restrictions.md#turn-on-administrator-approval-for-role-promotions) is turned on, an administrator must approve the invite.
+- If [promotion management](../../administration/settings/sign_up_restrictions.md#enable-role-promotion-approval) is enabled, an administrator must approve the invite.
 
 1. On the left sidebar, select **Search or go to** and find your group.
 1. Select **Manage > Members**.
@@ -431,7 +431,7 @@ This tab includes users who:
 
 ### View users pending promotion
 
-If [administrator approval for role promotions](../../administration/settings/sign_up_restrictions.md#turn-on-administrator-approval-for-role-promotions) is turned on, membership requests that promote existing users into a billable role require administrator approval.
+When [promotion management](../../administration/settings/sign_up_restrictions.md#enable-role-promotion-approval) is enabled, an administrator must approve the membership requests of users who would become billable users in the subscription.
 
 To view users pending promotion:
 

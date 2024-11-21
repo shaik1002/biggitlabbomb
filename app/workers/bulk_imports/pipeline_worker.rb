@@ -5,7 +5,6 @@ module BulkImports
     include ApplicationWorker
     include ExclusiveLeaseGuard
     include Gitlab::Utils::StrongMemoize
-    include Sidekiq::InterruptionsExhausted
 
     FILE_EXTRACTION_PIPELINE_PERFORM_DELAY = 10.seconds
 
@@ -24,12 +23,8 @@ module BulkImports
 
     version 2
 
-    sidekiq_retries_exhausted do |job, exception|
-      new.perform_failure(job['args'][0], job['args'][2], exception)
-    end
-
-    sidekiq_interruptions_exhausted do |job|
-      new.perform_failure(job['args'][0], job['args'][2], Import::Exceptions::SidekiqExhaustedInterruptionsError.new)
+    sidekiq_retries_exhausted do |msg, exception|
+      new.perform_failure(msg['args'][0], msg['args'][2], exception)
     end
 
     defer_on_database_health_signal(:gitlab_main, [], DEFER_ON_HEALTH_DELAY) do |job_args, schema, tables|

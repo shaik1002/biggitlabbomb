@@ -18,7 +18,6 @@ export const i18n = {
 
   NO_GROUPS_FOUND: s__('BulkImport|No groups found'),
   OWNER: __('Owner'),
-  LEARN_MORE: __('Learn more.'),
 
   features: {
     projectMigration: __('projects'),

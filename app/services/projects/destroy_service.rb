@@ -41,7 +41,7 @@ module Projects
 
       attempt_destroy(project)
 
-      execute_hooks(project)
+      system_hook_service.execute_hooks_for(project, :destroy)
       log_info("Project \"#{project.full_path}\" was deleted")
 
       publish_project_deleted_event_for(project)
@@ -152,10 +152,6 @@ module Projects
 
       project.leave_pool_repository
       destroy_project_related_records(project)
-    end
-
-    def execute_hooks(project)
-      system_hook_service.execute_hooks_for(project, :destroy)
     end
 
     def destroy_project_related_records(project)

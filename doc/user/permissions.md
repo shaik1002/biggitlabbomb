@@ -1,5 +1,5 @@
 ---
-stage: Software Supply Chain Security
+stage: Govern
 group: Authorization
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
@@ -177,23 +177,15 @@ Project permissions for [compliance](compliance/index.md) features including com
 | Action                                                                                            | Guest | Reporter | Developer | Maintainer | Owner | Notes |
 |---------------------------------------------------------------------------------------------------|:-----:|:--------:|:---------:|:----------:|:-----:|-------|
 | View [allowed and denied licenses in MR](compliance/license_scanning_of_cyclonedx_files/index.md) |   ✓   |    ✓     |     ✓     |     ✓      |   ✓   | On self-managed GitLab instances, users with the Guest role are able to perform this action only on public and internal projects (not on private projects). [External users](../administration/external_users.md) must be have at least the Reporter role, even if the project is internal. Users with the Guest role on GitLab.com are able to perform this action only on public projects because internal visibility is not available. |
-| View [audit events](compliance/audit_events.md)                                     |       |          |     ✓     |     ✓      |   ✓   | Users can only view events based on their individual actions. For more details, see the [prerequisites](compliance/audit_events.md#prerequisites). |
+| View [audit events](../administration/audit_event_reports.md)                                     |       |          |     ✓     |     ✓      |   ✓   | Users can only view events based on their individual actions. |
 | View licenses in [dependency list](application_security/dependency_list/index.md)                 |       |          |     ✓     |     ✓      |   ✓   |       |
 | Manage [audit streams](compliance/audit_event_streaming.md)                                       |       |          |           |            |   ✓   |       |
 
 ### Machine learning model registry and experiment
 
-Project permissions for [model registry](project/ml/model_registry/index.md) and [model experiments](project/ml/experiment_tracking/index.md).
+Access to the model registry is based on a combination of the user's access level for the project, the model registry, and to experiments.
 
-| Action                                                            | Guest | Reporter | Developer | Maintainer | Owner | Notes                                                                                                                                                                                     |
-|-------------------------------------------------------------------|:-----:|:--------:|:---------:|:----------:|:-----:|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|
-| View [models and versions](project/ml/model_registry/index.md)    | ✓     | ✓        | ✓         | ✓          | ✓     | Non-members can only view models and versions in public projects with the **Everyone with access** visibility level. Non-members can't view internal projects, even if they're logged in. |
-| View [model experiments](project/ml/experiment_tracking/index.md) | ✓     | ✓        | ✓         | ✓          | ✓     | Non-members can only view model experiments in public projects with the **Everyone with access** visibility level. Non-members can't view internal projects, even if they're logged in.   |
-| Create models, versions, and artifacts                            |       |          | ✓         | ✓          | ✓     | You can also upload and download artifacts with the package registry API, which uses it's own set of permissions.                                                                         |
-| Edit models, versions, and artifacts                              |       |          | ✓         | ✓          | ✓     |                                                                                                                                                                                           |
-| Create experiments and candidates                                 |       |          | ✓         | ✓          | ✓     |                                                                                                                                                                                           |
-| Edit experiments and candidates                                   |       |          | ✓         | ✓          | ✓     |                                                                                                                                                                                           |
-| Delete experiments and candidates                                 |       |          | ✓         | ✓          | ✓     |                                                                                                                                                                                           |
+More updates to this documentation are planned for GitLab 17.6.
 
 ### Monitoring
 
@@ -229,6 +221,7 @@ Project permissions for [issues](project/issues/index.md):
 | Update metadata on issues                                             |       |    ✓     |     ✓     |     ✓      |   ✓   | Metadata includes labels, assignees, milestones, epics, weight, confidentiality, time tracking, and more.<br /><br />Guest users can only set metadata when creating an issue. They cannot change the metadata on existing issues. |
 | Close / reopen issues                                                 |       |    ✓     |     ✓     |     ✓      |   ✓   | Authors and assignees can close and reopen issues even if they don't have the Reporter role. |
 | Manage [design management](project/issues/design_management.md) files |       |    ✓     |     ✓     |     ✓      |   ✓   |       |
+| View email addresses of [external participants](project/service_desk/external_participants.md) |       |    ✓     |     ✓     |     ✓      |   ✓   | Email addresses of external participants are obfuscated for Guest users and non-members. |
 | Manage [issue boards](project/issue_board.md)                         |       |    ✓     |     ✓     |     ✓      |   ✓   |       |
 | Manage [milestones](project/milestones/index.md)                      |       |    ✓     |     ✓     |     ✓      |   ✓   |       |
 | Archive or reopen [requirements](project/requirements/index.md)       |       |    ✓     |     ✓     |     ✓      |   ✓   | Authors and assignees can archive and re-open even if they don't have the Reporter role. |
@@ -446,7 +439,7 @@ Group permissions for [compliance](compliance/index.md) features including compl
 
 | Action                                                                                | Guest | Reporter | Developer | Maintainer | Owner | Notes |
 |---------------------------------------------------------------------------------------|:-----:|:--------:|:---------:|:----------:|:-----:|-------|
-| View [audit events](compliance/audit_events.md)                         |       |          |     ✓     |     ✓      |   ✓   | Users can view only events based on their individual actions. For more details, see the [prerequisites](compliance/audit_events.md#prerequisites). |
+| View [audit events](../administration/audit_event_reports.md)                         |       |          |     ✓     |     ✓      |   ✓   | Users can view only events based on their individual actions. |
 | View licenses in the [dependency list](application_security/dependency_list/index.md) |       |          |     ✓     |     ✓      |   ✓   |       |
 | View the [compliance center](compliance/compliance_center/index.md)                   |       |          |           |            |   ✓   |       |
 | Manage [compliance frameworks](group/compliance_frameworks.md)                        |       |          |           |            |   ✓   |       |
@@ -473,7 +466,7 @@ Group permissions for [group features](../user/group/index.md):
 |--------------------------------------------------------------------------------------------|-------|----------|-----------|------------|-------|-------|
 | Browse group                                                                               | ✓     | ✓        | ✓         | ✓          | ✓     |       |
 | Create project in group                                                                    |       |          | ✓         | ✓          | ✓     | Developers, Maintainers and Owners: Only if the project creation role is set at the [instance level](../administration/settings/visibility_and_access_controls.md#define-which-roles-can-create-projects) or the [group level](group/index.md#specify-who-can-add-projects-to-a-group).<br><br>Developers: Developers can push commits to the default branch of a new project only if the [default branch protection](group/manage.md#change-the-default-branch-protection-of-a-group) is set to "Partially protected" or "Not protected". |
-| View group [audit events](compliance/audit_events.md)                                                                    |       |          | ✓         | ✓          | ✓     | Developers and Maintainers can only view events based on their individual actions. For more details, see the [prerequisites](compliance/audit_events.md#prerequisites). |
+| View group audit events                                                                    |       |          | ✓         | ✓          | ✓     | Developers and Maintainers can only view events based on their individual actions. |
 | Create subgroup                                                                            |       |          |           | ✓          | ✓     | Maintainers: Only if users with the Maintainer role [can create subgroups](group/subgroups/index.md#change-who-can-create-subgroups). |
 | Edit [epic](group/epics/index.md) comments (posted by any user)                            |       |          |           | ✓          | ✓     |       |
 | Fork project into a group                                                                  |       |          |           | ✓          | ✓     |       |

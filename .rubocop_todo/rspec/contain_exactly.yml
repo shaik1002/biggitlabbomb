@@ -1,6 +1,7 @@
 ---
 # Cop supports --autocorrect.
 RSpec/ContainExactly:
+  Details: grace period
   Exclude:
     - 'ee/spec/controllers/operations_controller_spec.rb'
     - 'ee/spec/finders/billed_users_finder_spec.rb'
@@ -105,6 +106,8 @@ RSpec/ContainExactly:
     - 'spec/graphql/types/ci/pipeline_schedule_sort_enum_spec.rb'
     - 'spec/graphql/types/ci/pipeline_scope_enum_spec.rb'
     - 'spec/graphql/types/ci/pipeline_status_enum_spec.rb'
+    - 'spec/graphql/types/container_repository_cleanup_status_enum_spec.rb'
+    - 'spec/graphql/types/container_repository_status_enum_spec.rb'
     - 'spec/graphql/types/issuable_searchable_field_enum_spec.rb'
     - 'spec/graphql/types/issuable_severity_enum_spec.rb'
     - 'spec/graphql/types/merge_requests/mergeability_check_identifier_enum_spec.rb'

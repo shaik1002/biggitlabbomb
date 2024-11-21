@@ -15,7 +15,7 @@ instrumentation_class: CountMergeRequestAuthorsMetric
 distribution:
 - ce
 - ee
-tiers:
+tier:
 - free
 - premium
 - ultimate

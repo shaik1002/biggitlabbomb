@@ -169,7 +169,6 @@ export default {
     },
     handleCreated(workItem) {
       this.$toast.show(this.workItemCreatedText, {
-        autoHideDelay: 10000,
         action: {
           text: __('View details'),
           onClick: () => {
@@ -182,7 +181,7 @@ export default {
         },
       });
       this.$emit('workItemCreated', workItem);
-      if (this.workItemTypes && this.workItemTypes[0] && this.workItemTypeName) {
+      if (this.workItemTypes && this.workItemTypes[0]) {
         setNewWorkItemCache(
           this.fullPath,
           this.workItemTypes[0]?.widgetDefinitions,
@@ -236,9 +235,7 @@ export default {
     <gl-modal
       modal-id="create-work-item-modal"
       modal-class="create-work-item-modal"
-      body-class="!gl-pb-0"
       :visible="isVisible"
-      scrollable
       size="lg"
       hide-footer
       @hide="hideModal"
@@ -263,7 +260,6 @@ export default {
       <create-work-item
         :description="description"
         hide-form-title
-        sticky-form-submit
         :is-group="isGroup"
         :parent-id="parentId"
         :show-project-selector="showProjectSelector"

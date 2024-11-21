@@ -207,7 +207,6 @@ export const workItemQueryResponse = {
         adminParentLink: false,
         createNote: false,
         adminWorkItemLink: true,
-        markNoteAsInternal: true,
         __typename: 'WorkItemPermissions',
       },
       widgets: [
@@ -324,7 +323,6 @@ export const updateWorkItemMutationResponse = {
           adminParentLink: false,
           createNote: false,
           adminWorkItemLink: true,
-          markNoteAsInternal: true,
           __typename: 'WorkItemPermissions',
         },
         reference: 'test-project-path#1',
@@ -455,7 +453,6 @@ export const convertWorkItemMutationResponse = {
           adminParentLink: false,
           createNote: false,
           adminWorkItemLink: true,
-          markNoteAsInternal: true,
           __typename: 'WorkItemPermissions',
         },
         reference: 'gitlab-org/gitlab-test#1',
@@ -1164,7 +1161,6 @@ export const workItemResponseFactory = ({
   canCreateNote = false,
   adminParentLink = false,
   canAdminWorkItemLink = true,
-  canMarkNoteAsInternal = true,
   notificationsWidgetPresent = true,
   currentUserTodosWidgetPresent = true,
   awardEmojiWidgetPresent = true,
@@ -1172,6 +1168,7 @@ export const workItemResponseFactory = ({
   allowsMultipleAssignees = true,
   assigneesWidgetPresent = true,
   datesWidgetPresent = true,
+  rolledupDatesWidgetPresent = false,
   weightWidgetPresent = true,
   timeTrackingWidgetPresent = true,
   participantsWidgetPresent = true,
@@ -1247,7 +1244,6 @@ export const workItemResponseFactory = ({
         adminParentLink,
         adminWorkItemLink: canAdminWorkItemLink,
         createNote: canCreateNote,
-        markNoteAsInternal: canMarkNoteAsInternal,
         __typename: 'WorkItemPermissions',
       },
       reference: 'test-project-path#1',
@@ -1290,8 +1286,18 @@ export const workItemResponseFactory = ({
               type: 'START_AND_DUE_DATE',
               dueDate: '2022-12-31',
               startDate: '2022-01-01',
-              isFixed: false,
-              rollUp: true,
+            }
+          : { type: 'MOCK TYPE' },
+        rolledupDatesWidgetPresent
+          ? {
+              __typename: 'WorkItemWidgetRolledupDates',
+              type: 'ROLLEDUP_DATES',
+              dueDate: null,
+              dueDateFixed: null,
+              dueDateIsFixed: false,
+              startDate: null,
+              startDateFixed: null,
+              startDateIsFixed: false,
             }
           : { type: 'MOCK TYPE' },
         weightWidgetPresent
@@ -1616,7 +1622,6 @@ export const createWorkItemMutationResponse = {
           adminParentLink: false,
           createNote: false,
           adminWorkItemLink: true,
-          markNoteAsInternal: true,
           __typename: 'WorkItemPermissions',
         },
         reference: 'test-project-path#1',
@@ -1689,7 +1694,6 @@ export const workItemHierarchyNoUpdatePermissionResponse = {
         adminParentLink: false,
         createNote: false,
         adminWorkItemLink: true,
-        markNoteAsInternal: true,
         __typename: 'WorkItemPermissions',
       },
       namespace: {
@@ -2058,7 +2062,6 @@ export const workItemHierarchyResponse = {
           adminParentLink: true,
           createNote: true,
           adminWorkItemLink: true,
-          markNoteAsInternal: true,
           __typename: 'WorkItemPermissions',
         },
         author: {
@@ -2122,7 +2125,6 @@ export const workItemObjectiveWithChild = {
     adminParentLink: true,
     createNote: true,
     adminWorkItemLink: true,
-    markNoteAsInternal: true,
     __typename: 'WorkItemPermissions',
   },
   author: {
@@ -2179,7 +2181,6 @@ export const workItemObjectiveWithoutChild = {
     adminParentLink: true,
     createNote: true,
     adminWorkItemLink: true,
-    markNoteAsInternal: true,
     __typename: 'WorkItemPermissions',
   },
   author: {
@@ -2232,7 +2233,6 @@ export const workItemHierarchyTreeEmptyResponse = {
         adminParentLink: true,
         createNote: true,
         adminWorkItemLink: true,
-        markNoteAsInternal: true,
         __typename: 'WorkItemPermissions',
       },
       confidential: false,
@@ -2543,7 +2543,6 @@ export const workItemHierarchyTreeResponse = {
         adminParentLink: true,
         createNote: true,
         adminWorkItemLink: true,
-        markNoteAsInternal: true,
         __typename: 'WorkItemPermissions',
       },
       confidential: false,
@@ -2587,7 +2586,6 @@ export const workItemHierarchyTreeSingleClosedItemResponse = {
         adminParentLink: true,
         createNote: true,
         adminWorkItemLink: true,
-        markNoteAsInternal: true,
         __typename: 'WorkItemPermissions',
       },
       confidential: false,
@@ -2724,7 +2722,6 @@ export const workItemObjectiveWithClosedChild = {
     adminParentLink: true,
     createNote: true,
     adminWorkItemLink: true,
-    markNoteAsInternal: true,
     __typename: 'WorkItemPermissions',
   },
   author: {
@@ -2790,7 +2787,6 @@ export const changeWorkItemParentMutationResponse = {
           adminParentLink: true,
           createNote: true,
           adminWorkItemLink: true,
-          markNoteAsInternal: true,
           __typename: 'WorkItemPermissions',
         },
         description: null,
@@ -5218,7 +5214,6 @@ export const createWorkItemQueryResponse = {
           setWorkItemMetadata: true,
           createNote: true,
           adminWorkItemLink: true,
-          markNoteAsInternal: true,
           __typename: 'WorkItemPermissions',
         },
         widgets: [
@@ -5279,8 +5274,6 @@ export const createWorkItemQueryResponse = {
             type: 'START_AND_DUE_DATE',
             dueDate: null,
             startDate: null,
-            isFixed: null,
-            rollUp: null,
             __typename: 'WorkItemWidgetStartAndDueDate',
           },
           {
@@ -5333,6 +5326,16 @@ export const createWorkItemQueryResponse = {
             color: '#b7a0fd',
             textColor: '#1F1E24',
             __typename: 'WorkItemWidgetColor',
+          },
+          {
+            type: 'ROLLEDUP_DATES',
+            dueDate: null,
+            dueDateFixed: null,
+            dueDateIsFixed: null,
+            startDate: null,
+            startDateFixed: null,
+            startDateIsFixed: null,
+            __typename: 'WorkItemWidgetRolledupDates',
           },
           {
             type: 'PARTICIPANTS',
@@ -5507,7 +5510,6 @@ const mockUserPermissions = {
   setWorkItemMetadata: true,
   createNote: true,
   adminWorkItemLink: true,
-  markNoteAsInternal: true,
   __typename: 'WorkItemPermissions',
 };
 
@@ -5664,7 +5666,6 @@ export const workItemHierarchyNoChildrenTreeResponse = {
         adminParentLink: true,
         createNote: true,
         adminWorkItemLink: true,
-        markNoteAsInternal: true,
         __typename: 'WorkItemPermissions',
       },
       confidential: false,

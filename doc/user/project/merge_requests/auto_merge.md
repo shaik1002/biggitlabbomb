@@ -15,11 +15,9 @@ DETAILS:
 > - [Generally available](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/120922) in GitLab 16.0. Feature flag `auto_merge_labels_mr_widget` removed.
 > - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/10874) in GitLab 16.5 [with two flags](../../../administration/feature_flags.md) named `merge_when_checks_pass` and `additional_merge_when_checks_ready`. Disabled by default.
 > - [Enabled](https://gitlab.com/gitlab-org/gitlab/-/issues/412995) the flags `merge_when_checks_pass` and `additional_merge_when_checks_ready` on GitLab.com in GitLab 17.0.
-> - [Merged](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/154366) the flag `additional_merge_when_checks_ready` with `merge_when_checks_pass` in GitLab 17.1.
 > - [Enabled](https://gitlab.com/gitlab-org/gitlab/-/issues/412995) the flags `merge_when_checks_pass` by default in GitLab 17.4.
-> - Merge when checks pass [generally available](https://gitlab.com/gitlab-org/gitlab/-/issues/412995) in GitLab 17.7. Feature flag `merge_when_checks_pass` removed.
 
-If the content of a merge request is ready to merge,
+When you enable the `merge_when_checks_pass` feature flag, if the content of a merge request is ready to merge,
 you can select **Set to auto-merge**. The merge request auto-merges when all required checks complete successfully, and you don't need to remember to manually merge the merge request.
 
 After you set auto-merge, these checks must all pass before the merge request merges:
@@ -36,7 +34,6 @@ After you set auto-merge, these checks must all pass before the merge request me
 - If your project
   [requires merge requests to reference a Jira issue](../../../integration/jira/issues.md#require-associated-jira-issue-for-merge-requests-to-be-merged),
   the merge request title or description contains a Jira issue link.
-- If the merge request has a **Merge after** date set, the current time must be after the configured date.
 
 For a full list of checks and their API equivalents, see
 [Merge status](../../../api/merge_requests.md#merge-status).
@@ -177,27 +174,6 @@ To change this behavior:
    - Select **Pipelines must succeed**.
    - Select **Skipped pipelines are considered successful**.
 1. Select **Save**.
-
-## Prevent merge before a specific date
-
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/14380) in GitLab 17.6.
-
-If your merge request should not merge before a specific date and time, set a **Merge after** date.
-This value sets when the merge (or merge train) can start. The exact time of merge can vary,
-however, depending on the satisfaction of other merge checks or the length of your merge train.
-
-Prerequisites:
-
-- You must have at least the Developer role for the project.
-
-To do this:
-
-1. On the left sidebar, select **Search or go to** and find your project.
-1. Select **Code > Merge requests**.
-1. Select the merge request to edit.
-1. Select **Edit**.
-1. Find the **Merge after** input and select a date and time.
-1. Select **Save changes**.
 
 ## Troubleshooting
 

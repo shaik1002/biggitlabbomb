@@ -141,18 +141,15 @@ To access the database lab instances, you must:
 
 ```plaintext
 Host lb-bastion.db-lab.gitlab.com
-  # Typically, the username is `name` in `name@gitlab.com`.
-  # Check with the access provisioner if it is not working.
-  # If not provided, defaults to your system username.
-  User YOUR_USERNAME_HERE
-
-  # Path to your SSH key. Adjust or remove if using a different key or SSH agent.
+  User ${USER}
+  IdentitiesOnly yes
   IdentityFile ~/.ssh/id_ed25519
 
 Host *.gitlab-db-lab.internal
-  User YOUR_USERNAME_HERE  # Same as above.
+  User ${USER}
   PreferredAuthentications publickey
-  IdentityFile ~/.ssh/id_ed25519  # Same as above.
+  IdentitiesOnly yes
+  IdentityFile ~/.ssh/id_ed25519
   ProxyCommand ssh lb-bastion.db-lab.gitlab.com -W %h:%p
 ```
 

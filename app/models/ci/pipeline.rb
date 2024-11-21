@@ -19,7 +19,6 @@ module Ci
     include EachBatch
     include FastDestroyAll::Helpers
 
-    self.table_name = :p_ci_pipelines
     self.primary_key = :id
     self.sequence_name = :ci_pipelines_id_seq
 
@@ -33,13 +32,18 @@ module Ci
 
     CANCELABLE_STATUSES = (Ci::HasStatus::CANCELABLE_STATUSES + ['manual']).freeze
     UNLOCKABLE_STATUSES = (Ci::Pipeline.completed_statuses + [:manual]).freeze
+    INITIAL_PARTITION_VALUE = 100
+    SECOND_PARTITION_VALUE = 101
+    NEXT_PARTITION_VALUE = 102
+    ROUTING_FEATURE_FLAG = :pipelines_routing_table
 
     paginates_per 15
 
     sha_attribute :source_sha
     sha_attribute :target_sha
     query_constraints :id, :partition_id
-    partitionable scope: ->(_) { Ci::Pipeline.current_partition_value }, partitioned: true
+    partitionable scope: ->(pipeline) { Ci::Pipeline.current_partition_value(pipeline.project) },
+      through: { table: :p_ci_pipelines, flag: ROUTING_FEATURE_FLAG }
 
     # Ci::CreatePipelineService returns Ci::Pipeline so this is the only place
     # where we can pass additional information from the service. This accessor
@@ -583,9 +587,17 @@ module Ci
       @auto_devops_pipelines_completed_total ||= Gitlab::Metrics.counter(:auto_devops_pipelines_completed_total, 'Number of completed auto devops pipelines')
     end
 
-    def self.current_partition_value
+    def self.current_partition_value(project = nil)
       Gitlab::SafeRequestStore.fetch(:ci_current_partition_value) do
-        Ci::Partition.current&.id || Ci::Partition::INITIAL_PARTITION_VALUE
+        if Feature.enabled?(:ci_partitioning_automation, project)
+          Ci::Partition.current&.id || NEXT_PARTITION_VALUE
+        elsif Feature.enabled?(:ci_current_partition_value_102, project)
+          NEXT_PARTITION_VALUE
+        elsif Feature.enabled?(:ci_current_partition_value_101, project)
+          SECOND_PARTITION_VALUE
+        else
+          INITIAL_PARTITION_VALUE
+        end
       end
     end
 

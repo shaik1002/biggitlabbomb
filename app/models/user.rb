@@ -1067,10 +1067,6 @@ class User < ApplicationRecord
     def username_exists?(username)
       exists?(username: username)
     end
-
-    def ends_with_reserved_file_extension?(username)
-      Mime::EXTENSION_LOOKUP.keys.any? { |type| username.end_with?(".#{type}") }
-    end
   end
 
   #
@@ -1085,7 +1081,7 @@ class User < ApplicationRecord
     username
   end
 
-  def to_reference(_from = nil, target_container: nil, full: nil)
+  def to_reference(_from = nil, target_project: nil, full: nil)
     "#{self.class.reference_prefix}#{username}"
   end
 
@@ -2679,7 +2675,7 @@ class User < ApplicationRecord
   end
 
   def check_username_format
-    return if username.blank? || !self.class.ends_with_reserved_file_extension?(username)
+    return if username.blank? || Mime::EXTENSION_LOOKUP.keys.none? { |type| username.end_with?(".#{type}") }
 
     errors.add(:username, _('ending with a reserved file extension is not allowed.'))
   end

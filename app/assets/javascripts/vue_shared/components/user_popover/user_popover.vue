@@ -206,7 +206,7 @@ export default {
   >
     <template v-if="userCannotMerge" #title>
       <div class="gl-flex gl-items-center gl-pb-3" data-testid="cannot-merge">
-        <gl-icon name="warning-solid" class="gl-mr-2" variant="warning" />
+        <gl-icon name="warning-solid" class="gl-mr-2 gl-text-orange-400" />
         <span class="gl-font-normal">{{ __('Cannot merge') }}</span>
       </div>
     </template>
@@ -245,7 +245,7 @@ export default {
         <template #meta>
           <span
             v-if="hasPronouns"
-            class="gl-p-1 gl-text-sm gl-font-normal gl-text-subtle"
+            class="gl-p-1 gl-text-sm gl-font-normal gl-text-gray-500"
             data-testid="user-popover-pronouns"
             >({{ user.pronouns }})</span
           >
@@ -266,7 +266,7 @@ export default {
       </template>
       <template v-else>
         <template v-if="!isBlocked">
-          <div class="gl-text-subtle">
+          <div class="gl-text-gray-500">
             <div v-if="user.email" class="gl-mb-2 gl-flex">
               <gl-icon name="mail" class="gl-shrink-0" />
               <span ref="email" class="gl-ml-2">{{ user.email }}</span>

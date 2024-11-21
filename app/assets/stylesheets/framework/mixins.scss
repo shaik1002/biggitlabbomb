@@ -42,7 +42,7 @@
     @include clearfix;
 
     padding: 10px 0;
-    @apply gl-border-b gl-border-b-subtle;
+    border-bottom: 1px solid $gray-100;
     display: block;
     margin: 0;
 
@@ -51,10 +51,10 @@
     }
 
     &.active {
-      @apply gl-bg-subtle;
+      background: $gray-10;
 
       a {
-        @apply gl-font-bold;
+        font-weight: $gl-font-weight-bold;
       }
     }
 
@@ -349,7 +349,7 @@
 
       // Rouge `Comment` token (quoted text in email body)
       .c {
-        color: $gl-text-color-subtle;
+        color: $gl-grayish-blue;
         font-style: italic;
       }
     }

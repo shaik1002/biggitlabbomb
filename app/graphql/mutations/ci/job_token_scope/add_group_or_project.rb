@@ -21,17 +21,11 @@ module Mutations
         argument :job_token_policies, [Types::Ci::JobTokenScope::PoliciesEnum],
           required: false,
           default_value: [],
-          experiment: { milestone: '17.5' },
+          alpha: { milestone: '17.5' },
           description: 'List of policies added to the CI job token scope. Is ignored if ' \
             '`add_policies_to_ci_job_token` feature flag is disabled.'
 
-        field :ci_job_token_scope_allowlist_entry,
-          Types::Ci::JobTokenScope::AllowlistEntryType,
-          null: true,
-          experiment: { milestone: '17.6' },
-          description: "Allowlist entry for the CI job token's access scope."
-
-        field :ci_job_token_scope, # rubocop: disable GraphQL/ExtractType -- no value for now
+        field :ci_job_token_scope,
           Types::Ci::JobTokenScopeType,
           null: true,
           description: "CI job token's access scope."
@@ -50,13 +44,11 @@ module Mutations
           if result.success?
             {
               ci_job_token_scope: ::Ci::JobToken::Scope.new(project),
-              ci_job_token_scope_allowlist_entry: result.payload.values[0],
               errors: []
             }
           else
             {
               ci_job_token_scope: nil,
-              ci_job_token_scope_allowlist_entry: nil,
               errors: [result.message]
             }
           end

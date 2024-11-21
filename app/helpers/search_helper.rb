@@ -260,6 +260,10 @@ module SearchHelper
     end
   end
 
+  def should_show_work_items_as_epics_in_results?
+    ::Elastic::DataMigrationService.migration_has_finished?(:backfill_work_items)
+  end
+
   def should_show_zoekt_results?(_scope, _search_type)
     false
   end
@@ -352,11 +356,13 @@ module SearchHelper
 
   # Autocomplete results for the current user's groups
   def groups_autocomplete(term, limit = 5)
-    current_user
-      .search_on_authorized_groups(term, use_minimum_char_limit: false)
-      .order_id_desc
-      .limit(limit)
-      .map do |group|
+    scope = if Feature.enabled?(:autocomplete_group_search_optimization, current_user)
+              current_user.search_on_authorized_groups(term, use_minimum_char_limit: false)
+            else
+              current_user.authorized_groups.search(term, use_minimum_char_limit: false)
+            end
+
+    scope.order_id_desc.limit(limit).map do |group|
       {
         category: "Groups",
         id: group.id,

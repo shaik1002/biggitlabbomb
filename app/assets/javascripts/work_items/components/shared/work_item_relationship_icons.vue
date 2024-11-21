@@ -133,7 +133,7 @@ export default {
         data-testid="relationship-blocked-by-icon"
         @mouseenter="handleMouseEnter"
       >
-        <gl-icon name="entity-blocked" variant="danger" />
+        <gl-icon name="entity-blocked" class="gl-text-red-500" />
         {{ itemsBlockedBy.length }}
       </span>
       <work-item-relationship-popover
@@ -156,7 +156,7 @@ export default {
         data-testid="relationship-blocks-icon"
         @mouseenter="handleMouseEnter"
       >
-        <gl-icon name="entity-blocking" variant="warning" />
+        <gl-icon name="entity-blocking" class="gl-text-orange-500" />
         {{ itemsBlocks.length }}
       </span>
       <work-item-relationship-popover

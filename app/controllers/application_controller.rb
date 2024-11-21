@@ -118,7 +118,7 @@ class ApplicationController < BaseActionController
 
   rescue_from Gitlab::Git::ResourceExhaustedError do |e|
     response.headers.merge!(e.headers)
-    render_503(e.message)
+    render plain: e.message, status: :service_unavailable
   end
 
   rescue_from Regexp::TimeoutError do |e|
@@ -224,9 +224,7 @@ class ApplicationController < BaseActionController
   end
 
   def after_sign_in_path_for(resource)
-    redirect_location = stored_location_for(:redirect)
-    redirect_location ||= stored_location_for(resource) if resource.present?
-    redirect_location || root_path
+    stored_location_for(:redirect) || stored_location_for(resource) || root_path
   end
 
   def after_sign_out_path_for(resource)
@@ -274,13 +272,6 @@ class ApplicationController < BaseActionController
       # Prevent the Rails CSRF protector from thinking a missing .js file is a JavaScript file
       format.js { render json: '', status: :not_found, content_type: 'application/json' }
       format.any { head :not_found }
-    end
-  end
-
-  def render_503(message = nil)
-    respond_to do |format|
-      format.html { render template: "errors/service_unavailable", formats: :html, layout: "errors", status: :service_unavailable, locals: { message: message } }
-      format.any { head :service_unavailable }
     end
   end
 

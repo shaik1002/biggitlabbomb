@@ -192,6 +192,7 @@ RSpec.describe '.gitlab/ci/rules.gitlab-ci.yml', feature_category: :tooling do
         '.mailmap',
         '.prettierignore',
         '.projections.json.example',
+        '.rubocop_revert_ignores.txt',
         '.solargraph.yml.example',
         '.solargraph.yml',
         '.test_license_encryption_key.pub',

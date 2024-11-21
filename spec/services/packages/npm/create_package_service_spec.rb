@@ -34,7 +34,7 @@ RSpec.describe Packages::Npm::CreatePackageService, feature_category: :package_r
 
         expect { subject }
           .to change { Packages::Package.count }.by(1)
-          .and change { Packages::Npm::Package.count }.by(1)
+          .and change { Packages::Package.npm.count }.by(1)
           .and change { Packages::Tag.count }.by(1)
           .and change { Packages::Npm::Metadatum.count }.by(1)
       end
@@ -82,7 +82,7 @@ RSpec.describe Packages::Npm::CreatePackageService, feature_category: :package_r
 
             expect { subject }.to raise_error(ActiveRecord::RecordInvalid, /structure is too large/)
               .and not_change { Packages::Package.count }
-              .and not_change { Packages::Npm::Package.count }
+              .and not_change { Packages::Package.npm.count }
               .and not_change { Packages::Tag.count }
               .and not_change { Packages::Npm::Metadatum.count }
           end
@@ -152,7 +152,7 @@ RSpec.describe Packages::Npm::CreatePackageService, feature_category: :package_r
             end
           )
 
-          allow_next_instance_of(::Packages::Npm::Package) do |package|
+          allow_next_instance_of(::Packages::Package) do |package|
             allow(package).to receive(:create_npm_metadatum!).and_raise(invalid_npm_metadatum_error)
           end
 
@@ -171,7 +171,7 @@ RSpec.describe Packages::Npm::CreatePackageService, feature_category: :package_r
           it 'is persisted without the field' do
             expect { subject }
               .to change { Packages::Package.count }.by(1)
-              .and change { Packages::Npm::Package.count }.by(1)
+              .and change { Packages::Package.npm.count }.by(1)
               .and change { Packages::Tag.count }.by(1)
               .and change { Packages::Npm::Metadatum.count }.by(1)
             expect(package.npm_metadatum.package_json[field]).to be_blank
@@ -188,7 +188,8 @@ RSpec.describe Packages::Npm::CreatePackageService, feature_category: :package_r
     context 'when user is no project member' do
       let_it_be(:user) { create(:user) }
 
-      it_behaves_like 'returning an error service response', message: 'Unauthorized'
+      it_behaves_like 'returning a success service response'
+      it_behaves_like 'valid package'
     end
 
     context 'when scoped package not following the naming convention' do
@@ -213,16 +214,6 @@ RSpec.describe Packages::Npm::CreatePackageService, feature_category: :package_r
         it { is_expected.to have_attributes reason: :package_already_exists }
       end
 
-      context 'when npm_extract_npm_package_model is disabled' do
-        before do
-          stub_feature_flags(npm_extract_npm_package_model: false)
-        end
-
-        it_behaves_like 'returning an error service response', message: 'Package already exists.' do
-          it { is_expected.to have_attributes reason: :package_already_exists }
-        end
-      end
-
       context 'when marked as pending_destruction' do
         before do
           existing_package.pending_destruction!
@@ -231,7 +222,7 @@ RSpec.describe Packages::Npm::CreatePackageService, feature_category: :package_r
         it 'creates a new package' do
           expect { execute_service }
             .to change { Packages::Package.count }.by(1)
-            .and change { Packages::Npm::Package.count }.by(1)
+            .and change { Packages::Package.npm.count }.by(1)
             .and change { Packages::Tag.count }.by(1)
             .and change { Packages::Npm::Metadatum.count }.by(1)
         end
@@ -401,7 +392,7 @@ RSpec.describe Packages::Npm::CreatePackageService, feature_category: :package_r
         it 'does not create any npm-related package records' do
           expect { subject }
             .to not_change { Packages::Package.count }
-            .and not_change { Packages::Npm::Package.count }
+            .and not_change { Packages::Package.npm.count }
             .and not_change { Packages::Tag.count }
             .and not_change { Packages::Npm::Metadatum.count }
         end
@@ -431,7 +422,7 @@ RSpec.describe Packages::Npm::CreatePackageService, feature_category: :package_r
       end
 
       context 'with deploy token' do
-        let_it_be(:deploy_token) { create(:deploy_token, :all_scopes, projects: [project]) }
+        let_it_be(:deploy_token) { create(:deploy_token, projects: [project]) }
         let_it_be(:user) { nil }
 
         let(:service) { described_class.new(project, deploy_token, params) }

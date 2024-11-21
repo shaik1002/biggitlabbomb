@@ -1,7 +1,6 @@
 <script>
 import { GlCollapsibleListbox } from '@gitlab/ui';
 import fuzzaldrinPlus from 'fuzzaldrin-plus';
-import { debounce } from 'lodash';
 import ProjectAvatar from '~/vue_shared/components/project_avatar.vue';
 import { __, s__ } from '~/locale';
 import { STORAGE_KEY } from '~/super_sidebar/constants';
@@ -65,6 +64,7 @@ export default {
       result() {
         this.selectedProject = this.findSelectedProject(this.selectedProjectFullPath);
       },
+      debounce: SEARCH_DEBOUNCE,
     },
   },
   computed: {
@@ -129,12 +129,6 @@ export default {
 
       return items;
     },
-  },
-  created() {
-    this.debouncedSearch = debounce(this.handleSearch, SEARCH_DEBOUNCE);
-  },
-  beforeDestroy() {
-    this.debouncedSearch?.cancel();
   },
   methods: {
     handleSearch(keyword) {
@@ -221,7 +215,7 @@ export default {
     :searching="projectsLoading"
     fluid-width
     class="gl-relative"
-    @search="debouncedSearch"
+    @search="handleSearch"
     @select="handleSelect"
     @shown="handleDropdownShow"
   >

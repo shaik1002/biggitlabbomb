@@ -32,7 +32,7 @@ module Packages
 
       def packages
         ::Packages::Npm::PackageFinder
-          .new(project: project, params: { package_name: params['package_name'] })
+          .new(params['package_name'], project: project)
           .execute
       end
 

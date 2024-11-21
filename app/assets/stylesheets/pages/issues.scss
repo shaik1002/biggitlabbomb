@@ -162,7 +162,7 @@ ul.related-merge-requests > li gl-emoji {
       &.disabled {
         background-color: $gray-10;
         border-color: $gray-100;
-        @apply gl-text-disabled;
+        color: $gl-text-color-disabled;
       }
     }
   }
@@ -171,6 +171,20 @@ ul.related-merge-requests > li gl-emoji {
 .discussion-reply-holder,
 .note-edit-form {
   display: block;
+}
+
+.issue-sort-dropdown {
+  .btn-group {
+    width: 100%;
+  }
+
+  .reverse-sort-btn {
+    color: $gl-text-color-secondary;
+
+    &.disabled {
+      color: $gl-text-color-disabled;
+    }
+  }
 }
 
 @include media-breakpoint-up(sm) {

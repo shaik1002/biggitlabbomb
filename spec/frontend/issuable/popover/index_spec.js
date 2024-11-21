@@ -99,6 +99,14 @@ describe('initIssuablePopovers', () => {
   });
 
   describe('comment tooltips', () => {
+    beforeEach(() => {
+      window.gon = {
+        features: {
+          commentTooltips: true,
+        },
+      };
+    });
+
     it('calls popover mount function for comments', async () => {
       jest.spyOn(popover, 'handleIssuablePopoverMount').mockImplementation(jest.fn());
 

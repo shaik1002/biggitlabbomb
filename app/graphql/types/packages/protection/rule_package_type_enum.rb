@@ -7,21 +7,14 @@ module Types
         graphql_name 'PackagesProtectionRulePackageType'
         description 'Package type of a package protection rule resource'
 
-        value 'CONAN',
-          value: 'conan',
-          experiment: { milestone: '17.6' },
-          description: 'Packages of the Conan format. ' \
-            'Available only when feature flag `packages_protected_packages_conan` is enabled.'
-
         value 'NPM',
           value: 'npm',
           description: 'Packages of the npm format.'
 
         value 'PYPI',
           value: 'pypi',
-          experiment: { milestone: '17.6' },
-          description: 'Packages of the PyPI format. ' \
-            'Available only when feature flag `packages_protected_packages_pypi` is enabled.'
+          alpha: { milestone: '17.6' },
+          description: "Packages of the PyPI format."
       end
     end
   end

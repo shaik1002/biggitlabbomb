@@ -15,6 +15,7 @@ import {
   WIDGET_TYPE_PROGRESS,
   WIDGET_TYPE_START_AND_DUE_DATE,
   WIDGET_TYPE_TIME_TRACKING,
+  WIDGET_TYPE_ROLLEDUP_DATES,
   WIDGET_TYPE_WEIGHT,
   WIDGET_TYPE_COLOR,
   WIDGET_TYPE_CRM_CONTACTS,
@@ -119,11 +120,11 @@ export default {
     workItemLabels() {
       return this.isWidgetPresent(WIDGET_TYPE_LABELS);
     },
-    workItemStartAndDueDate() {
+    workItemDueDate() {
       return this.isWidgetPresent(WIDGET_TYPE_START_AND_DUE_DATE);
     },
-    canWorkItemRollUp() {
-      return this.workItemStartAndDueDate?.rollUp;
+    workItemRolledupDates() {
+      return this.isWidgetPresent(WIDGET_TYPE_ROLLEDUP_DATES);
     },
     workItemWeight() {
       return this.isWidgetPresent(WIDGET_TYPE_WEIGHT);
@@ -224,15 +225,17 @@ export default {
         @error="$emit('error', $event)"
       />
     </template>
-    <template v-if="canWorkItemRollUp && showRolledupDates">
+    <template v-if="workItemRolledupDates && showRolledupDates">
       <work-item-rolledup-dates
         class="work-item-attributes-item"
         :can-update="canUpdate"
         :full-path="fullPath"
-        :start-date="workItemStartAndDueDate.startDate"
-        :due-date="workItemStartAndDueDate.dueDate"
-        :is-fixed="workItemStartAndDueDate.isFixed"
-        :should-roll-up="canWorkItemRollUp"
+        :due-date-is-fixed="workItemRolledupDates.dueDateIsFixed"
+        :due-date-fixed="workItemRolledupDates.dueDateFixed"
+        :due-date-inherited="workItemRolledupDates.dueDate"
+        :start-date-is-fixed="workItemRolledupDates.startDateIsFixed"
+        :start-date-fixed="workItemRolledupDates.startDateFixed"
+        :start-date-inherited="workItemRolledupDates.startDate"
         :work-item-type="workItemType"
         :work-item="workItem"
         @error="$emit('error', $event)"
@@ -269,12 +272,12 @@ export default {
         "
       />
     </template>
-    <template v-if="workItemStartAndDueDate && !showRolledupDates">
+    <template v-if="workItemDueDate && !showRolledupDates">
       <work-item-due-date
         class="work-item-attributes-item"
         :can-update="canUpdate"
-        :due-date="workItemStartAndDueDate.dueDate"
-        :start-date="workItemStartAndDueDate.startDate"
+        :due-date="workItemDueDate.dueDate"
+        :start-date="workItemDueDate.startDate"
         :work-item-type="workItemType"
         :full-path="fullPath"
         :work-item="workItem"

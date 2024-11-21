@@ -321,6 +321,8 @@
   - 1
 - - elastic_full_index
   - 1
+- - elastic_indexing_control
+  - 1
 - - elastic_namespace_indexer
   - 1
 - - elastic_namespace_rollout
@@ -508,8 +510,6 @@
 - - members_groups_base_memberships_export
   - 1
 - - members_groups_export_detailed_memberships
-  - 1
-- - members_prune_deletions
   - 1
 - - merge
   - 5
@@ -760,8 +760,6 @@
 - - search_zoekt_index_marked_as_to_delete_event
   - 1
 - - search_zoekt_index_over_watermark_event
-  - 1
-- - search_zoekt_index_watermark_changed_event
   - 1
 - - search_zoekt_indexing_task
   - 1

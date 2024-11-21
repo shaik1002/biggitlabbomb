@@ -72,7 +72,6 @@ describe('ml/model_registry/apps/show_ml_model', () => {
     modelDetailsResolver = jest.fn().mockResolvedValue(modelDetailQuery),
     destroyMutationResolver = jest.fn().mockResolvedValue(destroyModelResponses.success),
     canWriteModelRegistry = true,
-    latestVersion = '1.0.0',
   } = {}) => {
     const requestHandlers = [
       [getModelQuery, modelDetailsResolver],
@@ -91,7 +90,7 @@ describe('ml/model_registry/apps/show_ml_model', () => {
         mlflowTrackingUrl: 'path/to/tracking',
         canWriteModelRegistry,
         maxAllowedFileSize: 99999,
-        latestVersion,
+        latestVersion: '1.0.0',
         markdownPreviewPath: '/markdown-preview',
         createModelVersionPath: 'project/path/create/model/version',
       },
@@ -164,7 +163,6 @@ describe('ml/model_registry/apps/show_ml_model', () => {
     beforeEach(() => createWrapper());
 
     it('displays version creation button', () => {
-      expect(findModelVersionCreateButton().exists()).toBe(true);
       expect(findModelVersionCreateButton().text()).toBe('Create new version');
     });
 
@@ -182,9 +180,9 @@ describe('ml/model_registry/apps/show_ml_model', () => {
 
     it('displays model edit button', () => {
       expect(findModelEditButton().props()).toMatchObject({
+        variant: 'confirm',
         category: 'primary',
       });
-      expect(findModelEditButton().text()).toBe('Edit');
     });
 
     describe('when user has no permission to write model registry', () => {
@@ -325,19 +323,11 @@ describe('ml/model_registry/apps/show_ml_model', () => {
       expect(findAvatar().props('src')).toBe('path/to/avatar');
     });
 
-    describe('latest version', () => {
-      it('displays sidebar latest version link', () => {
-        expect(findLatestVersionLink().attributes('href')).toBe(
-          '/root/test-project/-/ml/models/1/versions/5000',
-        );
-        expect(findLatestVersionLink().text()).toBe('1.0.4999');
-      });
-
-      it('does not display sidebar latest version link when model does not have a latest version', () => {
-        createWrapper({ latestVersion: null });
-        expect(findLatestVersionLink().exists()).toBe(false);
-        expect(wrapper.findByTestId('latest-version-label').exists()).toBe(false);
-      });
+    it('displays sidebar latest version link', () => {
+      expect(findLatestVersionLink().attributes('href')).toBe(
+        '/root/test-project/-/ml/models/1/versions/5000',
+      );
+      expect(findLatestVersionLink().text()).toBe('1.0.4999');
     });
 
     it('displays sidebar version count', () => {

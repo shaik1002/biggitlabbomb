@@ -104,13 +104,7 @@ export default {
     WorkItemAbuseModal,
   },
   mixins: [glFeatureFlagMixin()],
-  inject: [
-    'fullPath',
-    'reportAbusePath',
-    'groupPath',
-    'hasSubepicsFeature',
-    'hasLinkedItemsEpicsFeature',
-  ],
+  inject: ['fullPath', 'reportAbusePath', 'groupPath', 'hasSubepicsFeature'],
   props: {
     isModal: {
       type: Boolean,
@@ -380,9 +374,7 @@ export default {
       return !this.isModal && !this.editMode && !this.isDrawer;
     },
     workItemLinkedItems() {
-      return this.workItemType === WORK_ITEM_TYPE_VALUE_EPIC
-        ? this.isWidgetPresent(WIDGET_TYPE_LINKED_ITEMS) && this.hasLinkedItemsEpicsFeature
-        : this.isWidgetPresent(WIDGET_TYPE_LINKED_ITEMS);
+      return this.isWidgetPresent(WIDGET_TYPE_LINKED_ITEMS);
     },
     showWorkItemTree() {
       return this.isWidgetPresent(WIDGET_TYPE_HIERARCHY) && this.allowedChildTypes?.length > 0;
@@ -439,9 +431,6 @@ export default {
     }
   },
   methods: {
-    handleWorkItemCreated() {
-      this.$apollo.queries.workItem.refetch();
-    },
     enableEditMode() {
       this.editMode = true;
     },
@@ -775,7 +764,6 @@ export default {
                 @promotedToObjective="$emit('promotedToObjective', iid)"
                 @workItemStateUpdated="$emit('workItemStateUpdated')"
                 @toggleReportAbuseModal="toggleReportAbuseModal"
-                @workItemCreated="handleWorkItemCreated"
               />
             </div>
             <gl-button

@@ -712,6 +712,14 @@ RSpec.describe Project, factory_default: :keep, feature_category: :groups_and_pr
     it { is_expected.to validate_numericality_of(:max_artifacts_size).only_integer.is_greater_than(0) }
     it { is_expected.to validate_length_of(:suggestion_commit_message).is_at_most(255) }
 
+    context 'when require_organization_on_project feature is disabled' do
+      before do
+        stub_feature_flags(require_organization_on_project: false)
+      end
+
+      it { is_expected.not_to validate_presence_of(:organization) }
+    end
+
     it 'validates name is case-sensitively unique within the scope of namespace_id' do
       project = create(:project)
 
@@ -4429,7 +4437,7 @@ RSpec.describe Project, factory_default: :keep, feature_category: :groups_and_pr
     let_it_be(:project) { create(:project) }
 
     it 'updates commit count' do
-      expect(ProjectCacheWorker).to receive(:perform_async).with(project.id, [], %w[commit_count])
+      expect(ProjectCacheWorker).to receive(:perform_async).with(project.id, [], [:commit_count])
 
       project.after_repository_change_head
     end
@@ -6164,7 +6172,7 @@ RSpec.describe Project, factory_default: :keep, feature_category: :groups_and_pr
       expect(project).to receive(:reset_counters_and_iids)
       expect(project).to receive(:after_create_default_branch)
       expect(project).to receive(:refresh_markdown_cache!)
-      expect(ProjectCacheWorker).to receive(:perform_async).with(project.id, [], %w[repository_size wiki_size])
+      expect(ProjectCacheWorker).to receive(:perform_async).with(project.id, [], [:repository_size, :wiki_size])
       expect(DetectRepositoryLanguagesWorker).to receive(:perform_async).with(project.id)
       expect(AuthorizedProjectUpdate::ProjectRecalculateWorker).to receive(:perform_async).with(project.id)
 
@@ -9010,16 +9018,6 @@ RSpec.describe Project, factory_default: :keep, feature_category: :groups_and_pr
     end
   end
 
-  describe '#wiki_comments_feature_flag_enabled?' do
-    let_it_be(:group_project) { create(:project, :in_subgroup) }
-
-    it_behaves_like 'checks parent group and self feature flag' do
-      let(:feature_flag_method) { :wiki_comments_feature_flag_enabled? }
-      let(:feature_flag) { :wiki_comments }
-      let(:subject_project) { group_project }
-    end
-  end
-
   describe '#work_items_beta_feature_flag_enabled?' do
     let_it_be(:group_project) { create(:project, :in_subgroup) }
 
@@ -9701,20 +9699,6 @@ RSpec.describe Project, factory_default: :keep, feature_category: :groups_and_pr
       it 'returns the group.crm_group' do
         expect(project.crm_group).to be(group.crm_group)
       end
-    end
-  end
-
-  describe '#placeholder_reference_store' do
-    context 'when the project has an import state' do
-      let(:project) { build(:project, import_state: build(:import_state)) }
-
-      it { expect(project.placeholder_reference_store).to be_a(::Import::PlaceholderReferences::Store) }
-    end
-
-    context 'when the project has no import state' do
-      let(:project) { build(:project, import_state: nil) }
-
-      it { expect(project.placeholder_reference_store).to be_nil }
     end
   end
 end

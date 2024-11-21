@@ -342,7 +342,6 @@ export default {
     :anchor-id="widgetName"
     :is-loading="isLoadingChildren && !fetchNextPageInProgress"
     is-collapsible
-    persist-collapsed-state
     data-testid="work-item-tree"
   >
     <template #count>

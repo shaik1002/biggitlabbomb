@@ -129,7 +129,7 @@ To resolve the vulnerability:
 1. Select outside the filter field. The vulnerability severity totals and list of matching vulnerabilities are updated.
 1. Select the SAST vulnerability you want resolved.
    - A blue icon is shown next to vulnerabilities that support Vulnerability Resolution.
-1. In the upper-right corner, select **Resolve with AI**. If this project is a public project be aware that creating an MR will publicly expose the vulnerablity and offered resolution. To create the MR privately, please [create a private fork](../../../user/project/merge_requests/confidential.md), and repeat this process.
+1. In the upper-right corner, select **Resolve with AI**.
 1. Add an additional commit to the MR. This forces a new pipeline to run.
 1. After the pipeline is complete, on the [pipeline security tab](../vulnerability_report/pipeline.md#view-vulnerabilities-in-a-pipeline), confirm that the vulnerability no longer appears.
 1. On the vulnerability report, [manually update the vulnerability](../vulnerability_report/index.md#change-status-of-vulnerabilities).
@@ -286,13 +286,14 @@ The **Code flow** tab shows:
 
 A vulnerability's status can be:
 
-- **Needs triage**: The default state for a newly discovered vulnerability.
+- **Detected**: The default state for a newly discovered vulnerability. Appears as "Needs triage" in the UI.
 - **Confirmed**: A user has seen this vulnerability and confirmed it to be accurate.
-- **Dismissed**: A user has evaluated this vulnerability and [dismissed it](#vulnerability-dismissal-reasons).
-  Dismissed vulnerabilities are ignored if detected in subsequent scans.
+- **Dismissed**: A user has seen this vulnerability and dismissed it for one of the available
+  [reasons](#vulnerability-dismissal-reasons). Dismissed vulnerabilities are ignored if detected in
+  subsequent scans.
 - **Resolved**: The vulnerability has been fixed or is no longer present. If a resolved
   vulnerability is reintroduced and detected again, its record is reinstated and its status set to
-  **Needs triage**.
+  detected.
 
 A vulnerability typically goes through the following lifecycle:
 

@@ -48,7 +48,7 @@ describe('Issue title suggestions item component', () => {
       createComponent();
 
       expect(findIcon().props('name')).toBe('issue-open-m');
-      expect(findIcon().attributes('class')).toMatch('gl-fill-icon-success');
+      expect(findIcon().attributes('class')).toMatch('gl-text-green-500');
     });
 
     it('renders created timeago', () => {
@@ -68,7 +68,7 @@ describe('Issue title suggestions item component', () => {
       });
 
       expect(findIcon().props('name')).toBe('issue-close');
-      expect(findIcon().attributes('class')).toMatch('gl-fill-icon-info');
+      expect(findIcon().attributes('class')).toMatch('gl-text-blue-500');
     });
 
     it('renders closed timeago', () => {

@@ -731,19 +731,19 @@ variables:
 
 workflow:
   rules:
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
       variables:
         DEPLOY_VARIABLE: "deploy-production"  # Override globally-defined DEPLOY_VARIABLE
-    - if: $CI_COMMIT_BRANCH =~ /feature/
+    - if: $CI_COMMIT_REF_NAME =~ /feature/
       variables:
         IS_A_FEATURE: "true"                  # Define a new variable.
-    - if: $CI_COMMIT_BRANCH                   # Run the pipeline in other cases
+    - when: always                            # Run the pipeline in other cases
 
 job1:
   variables:
     DEPLOY_VARIABLE: "job1-default-deploy"
   rules:
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
       variables:                                   # Override DEPLOY_VARIABLE defined
         DEPLOY_VARIABLE: "job1-deploy-production"  # at the job level.
     - when: on_success                             # Run the job in other cases
@@ -1488,8 +1488,7 @@ job:
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/145206) in GitLab 16.11.
 
-Use `artifacts:access` to determine who can access the job artifacts from the GitLab UI
-or API. This option does not prevent you from forwarding artifacts to downstream pipelines.
+Use `artifacts:access` to determine who can access the job artifacts.
 
 You cannot use [`artifacts:public`](#artifactspublic) and `artifacts:access` in the same job.
 
@@ -2451,16 +2450,18 @@ and is a little more flexible and readable.
 
 ```yaml
 .tests:
+  script: rake test
   stage: test
-  image: ruby:3.0
+  only:
+    refs:
+      - branches
 
 rspec:
   extends: .tests
   script: rake rspec
-
-rubocop:
-  extends: .tests
-  script: bundle exec rubocop
+  only:
+    variables:
+      - $RSPEC
 ```
 
 In this example, the `rspec` job uses the configuration from the `.tests` template job.
@@ -2470,18 +2471,17 @@ When creating the pipeline, GitLab:
 - Merges the `.tests` content with the `rspec` job.
 - Doesn't merge the values of the keys.
 
-The combined configuration is equivalent to these jobs:
+The result is this `rspec` job:
 
 ```yaml
 rspec:
-  stage: test
-  image: ruby:3.0
   script: rake rspec
-
-rubocop:
   stage: test
-  image: ruby:3.0
-  script: bundle exec rubocop
+  only:
+    refs:
+      - branches
+    variables:
+      - $RSPEC
 ```
 
 **Additional details**:
@@ -5496,17 +5496,14 @@ Use `variables` to define [CI/CD variables](../variables/index.md#define-a-cicd-
 **Keyword type**: Global and job keyword. You can use it at the global level,
 and also at the job level.
 
-You can use variables defined in a job in the job's `script`, `before_script`, or `after_script` sections,
-and also with some [job keywords](#job-keywords), but not [global keywords](#global-keywords).
-Check the **Possible inputs** section of each job keyword to see if it supports variables.
+If you define `variables` as a [global keyword](#keywords), it behaves like default variables
+for all jobs. Each variable is copied to every job configuration when the pipeline is created.
+If the job already has that variable defined, the [job-level variable takes precedence](../variables/index.md#cicd-variable-precedence).
 
-Variables defined in a global (top-level) `variables` section act as default variables
-for all jobs. Each global variable is made available to every job in the pipeline, except when the job already has a variable
-defined with the same name. The variable defined in the job [takes precedence](../variables/index.md#cicd-variable-precedence),
-so the value of the global variable with the same name cannot be used in the job.
-
-Like job variables, you cannot use global variables as values for other global keywords,
-like [`include`](includes.md#use-variables-with-include).
+Variables defined at the global-level cannot be used as inputs for other global keywords
+like [`include`](includes.md#use-variables-with-include). These variables can only
+be used at the job-level, in `script`, `before_script`, or `after_script` sections,
+and in some job keywords like [`rules`](../jobs/job_rules.md#cicd-variable-expressions).
 
 **Possible inputs**: Variable name and value pairs:
 
@@ -5531,27 +5528,18 @@ deploy_job:
 deploy_review_job:
   stage: deploy
   variables:
-    DEPLOY_SITE: "https://dev.example.com/"
     REVIEW_PATH: "/review"
   script:
     - deploy-review-script --url $DEPLOY_SITE --path $REVIEW_PATH
   environment: production
 ```
 
-In this example:
-
-- `deploy_job` has no variables defined. The global `DEPLOY_SITE` variable is copied to the job
-  and can be used in the `script` section.
-- `deploy_review_job` already has a `DEPLOY_SITE` variable defined, so the global `DEPLOY_SITE`
-  is not copied to the job. The job also has a `REVIEW_PATH` job-level variable defined.
-  Both job-level variables can be used in the `script` section.
-
 **Additional details**:
 
 - All YAML-defined variables are also set to any linked [Docker service containers](../services/index.md).
 - YAML-defined variables are meant for non-sensitive project configuration. Store sensitive information
   in [protected variables](../variables/index.md#protect-a-cicd-variable) or [CI/CD secrets](../secrets/index.md).
-- [Manual pipeline variables](../variables/index.md#use-pipeline-variables)
+- [Manual pipeline variables](../variables/index.md#override-a-defined-cicd-variable)
   and [scheduled pipeline variables](../pipelines/schedules.md#add-a-pipeline-schedule)
   are not passed to downstream pipelines by default. Use [trigger:forward](#triggerforward)
   to forward these variables to downstream pipelines.

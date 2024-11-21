@@ -314,7 +314,7 @@ export default {
               cache,
               id: this.issuableGid,
               workItem,
-              childrenIds: this.workItemsToAdd.map((wi) => wi.id),
+              newItemsToAddCount: this.workItemsToAdd?.length,
             }),
         })
         .then(({ data }) => {

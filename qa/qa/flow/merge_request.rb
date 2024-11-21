@@ -7,12 +7,7 @@ module QA
 
       def enable_merge_trains
         Page::Project::Menu.perform(&:go_to_merge_request_settings)
-        Page::Project::Settings::MergeRequest.perform(&:enable_merge_trains)
-      end
-
-      def enable_merged_results_pipelines
-        Page::Project::Menu.perform(&:go_to_merge_request_settings)
-        Page::Project::Settings::MergeRequest.perform(&:enable_merged_results)
+        Page::Project::Settings::MergeRequest.perform(&:enable_merge_train)
       end
 
       # Opens the form to create a new merge request.

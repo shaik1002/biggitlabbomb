@@ -18,6 +18,12 @@ RSpec.describe Gitlab::InstrumentationHelper, :clean_gitlab_redis_repository_cac
       described_class.init_instrumentation_data
     end
 
+    it 'includes DB counts' do
+      subject
+
+      expect(payload).to include(db_count: 0, db_cached_count: 0, db_write_count: 0)
+    end
+
     context 'when Gitaly calls are made' do
       it 'adds Gitaly and Redis data' do
         project = create(:project)
@@ -176,11 +182,14 @@ RSpec.describe Gitlab::InstrumentationHelper, :clean_gitlab_redis_repository_cac
     it 'includes DB counts' do
       subject
 
-      expect(payload).to include(db_main_cached_count: 0,
-        db_main_count: 0,
-        db_main_write_count: 0,
-        db_main_wal_count: 0,
-        db_main_wal_cached_count: 0)
+      expect(payload).to include(db_replica_count: 0,
+        db_replica_cached_count: 0,
+        db_primary_count: 0,
+        db_primary_cached_count: 0,
+        db_primary_wal_count: 0,
+        db_replica_wal_count: 0,
+        db_primary_wal_cached_count: 0,
+        db_replica_wal_cached_count: 0)
     end
 
     context 'when replica caught up search was made' do
@@ -281,31 +290,6 @@ RSpec.describe Gitlab::InstrumentationHelper, :clean_gitlab_redis_repository_cac
           :exclusive_lock_wait_duration_s,
           :exclusive_lock_hold_duration_s
         )
-      end
-    end
-
-    context 'for middleware path traversal check' do
-      let(:duration) { 0.123456789 }
-      let(:expected_logged_duration) { 0.123457 }
-
-      before do
-        ::Gitlab::Instrumentation::Middleware::PathTraversalCheck.duration = duration
-      end
-
-      it 'includes the duration in the payload' do
-        subject
-
-        expect(payload).to include(path_traversal_check_duration_s: expected_logged_duration)
-      end
-
-      context 'with a 0 duration' do
-        let(:duration) { 0 }
-
-        it 'does not include the duration in the payload' do
-          subject
-
-          expect(payload).not_to include(:path_traversal_check_duration_s)
-        end
       end
     end
   end

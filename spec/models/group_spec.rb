@@ -3919,13 +3919,6 @@ RSpec.describe Group, feature_category: :groups_and_projects do
     end
   end
 
-  describe '#wiki_comments_feature_flag_enabled?' do
-    it_behaves_like 'checks self and root ancestor feature flag' do
-      let(:feature_flag) { :wiki_comments }
-      let(:feature_flag_method) { :wiki_comments_feature_flag_enabled? }
-    end
-  end
-
   describe '#supports_lock_on_merge?' do
     it_behaves_like 'checks self and root ancestor feature flag' do
       let(:feature_flag) { :enforce_locked_labels_on_merge }
@@ -4100,35 +4093,6 @@ RSpec.describe Group, feature_category: :groups_and_projects do
 
       it 'returns the root group if no groups in the hierarchy have a source_group_id' do
         expect(child_group.crm_group).to eq(root_group)
-      end
-    end
-  end
-
-  describe '#has_issues_with_contacts?' do
-    context 'when group has no issues with contacts' do
-      it 'returns false' do
-        expect(group.has_issues_with_contacts?).to be_falsey
-      end
-    end
-
-    context 'when group has issues with contacts' do
-      let!(:issue) { create(:issue, project: create(:project, group: group)) }
-      let!(:contact) { create(:contact, group: group) }
-      let!(:issue_contact) { create(:issue_customer_relations_contact, issue: issue, contact: contact) }
-
-      it 'returns true' do
-        expect(group.has_issues_with_contacts?).to be_truthy
-      end
-    end
-
-    context 'when a subgroup has issues with contacts' do
-      let!(:subgroup) { create(:group, parent: group) }
-      let!(:issue) { create(:issue, project: create(:project, group: subgroup)) }
-      let!(:contact) { create(:contact, group: group) }
-      let!(:issue_contact) { create(:issue_customer_relations_contact, issue: issue, contact: contact) }
-
-      it 'returns true' do
-        expect(group.has_issues_with_contacts?).to be_truthy
       end
     end
   end

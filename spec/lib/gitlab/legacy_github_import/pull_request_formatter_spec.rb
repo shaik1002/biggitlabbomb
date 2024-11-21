@@ -501,7 +501,9 @@ RSpec.describe Gitlab::LegacyGithubImport::PullRequestFormatter, :clean_gitlab_r
 
   describe '#create!', :aggregate_failures, :clean_gitlab_redis_shared_state do
     let(:raw_data) { base_data.merge(assignee: octocat) }
-    let(:store) { project.placeholder_reference_store }
+    let(:store) do
+      Import::PlaceholderReferences::Store.new(import_source: imported_from, import_uid: project.import_state.id)
+    end
 
     it 'saves the pull_request and assignees' do
       pull_request.create!

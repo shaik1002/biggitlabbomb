@@ -203,7 +203,7 @@ export default {
   },
   i18n: {
     createModelVersionLinkTitle: s__('MlModelRegistry|Create new version'),
-    editModelButtonLabel: s__('MlModelRegistry|Edit'),
+    editModelButtonLabel: s__('MlModelRegistry|Edit model'),
     tabModelCardTitle: s__('MlModelRegistry|Model card'),
     tabVersionsTitle: s__('MlModelRegistry|Versions'),
     versionCountTitle: s__('MlModelRegistry|Total versions'),
@@ -249,6 +249,7 @@ export default {
             <gl-button
               v-if="canWriteModelRegistry"
               data-testid="edit-model-button"
+              variant="confirm"
               :href="editModelPath"
               >{{ $options.i18n.editModelButtonLabel }}</gl-button
             >
@@ -263,7 +264,6 @@ export default {
             <actions-dropdown>
               <delete-model-disclosure-dropdown-item
                 v-if="canWriteModelRegistry"
-                :model="model"
                 @confirm-deletion="deleteModel"
               />
             </actions-dropdown>
@@ -305,9 +305,9 @@ export default {
                 </gl-link>
               </div>
             </div>
-            <div v-if="showModelLatestVersion" class="gl-mt-5" data-testid="latest-version-label">
+            <div class="gl-mt-5">
               <div class="gl-text-lg gl-font-bold">{{ $options.i18n.latestVersionTitle }}</div>
-              <div class="gl-pt-2 gl-text-gray-500">
+              <div v-if="showModelLatestVersion" class="gl-pt-2 gl-text-gray-500">
                 <gl-link
                   data-testid="sidebar-latest-version-link"
                   :href="model.latestVersion._links.showPath"
