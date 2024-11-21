@@ -19406,6 +19406,9 @@ msgstr ""
 msgid "DesignManagement|Are you sure you want to cancel creating this comment?"
 msgstr ""
 
+msgid "DesignManagement|Are you sure you want to cancel editing the description?"
+msgstr ""
+
 msgid "DesignManagement|Are you sure you want to cancel editing this comment?"
 msgstr ""
 
@@ -39863,6 +39866,9 @@ msgid "Password|To be satisfied"
 msgstr ""
 
 msgid "Password|cannot use common phrases (e.g. \"password\")"
+msgstr ""
+
+msgid "Password|must be between 8-128 characters"
 msgstr ""
 
 msgid "Password|requires at least one lowercase letter"
@@ -64957,9 +64963,6 @@ msgid "banned user already exists"
 msgstr ""
 
 msgid "before"
-msgstr ""
-
-msgid "beta"
 msgstr ""
 
 msgid "blocks"
