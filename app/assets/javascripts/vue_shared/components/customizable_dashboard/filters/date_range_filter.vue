@@ -120,8 +120,7 @@ export default {
         v-gl-tooltip
         :title="s__('Analytics|Dates and times are displayed in the UTC timezone')"
         name="information-o"
-        class="gl-mb-3 gl-min-w-5 gl-self-end"
-        variant="subtle"
+        class="gl-mb-3 gl-min-w-5 gl-self-end gl-text-gray-500"
       />
     </div>
   </div>

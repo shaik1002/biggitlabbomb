@@ -56,7 +56,6 @@ export default {
   },
   data() {
     return {
-      number: undefined,
       hasAppeared: false,
     };
   },

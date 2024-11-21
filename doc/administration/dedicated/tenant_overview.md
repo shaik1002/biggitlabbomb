@@ -11,46 +11,40 @@ DETAILS:
 **Tier:** Ultimate
 **Offering:** GitLab Dedicated
 
-Monitor your GitLab Dedicated instance details, maintenance windows, and configuration status in Switchboard.
+The Overview page in Switchboard provides essential information about your GitLab Dedicated instance, including:
 
-## View your instance details
-
-To access your instance details:
-
-1. Sign in to [Switchboard](https://console.gitlab-dedicated.com/).
-1. Select your tenant.
-
-The **Overview** page displays:
-
-- Any pending configuration changes
+- Whether there are pending configuration changes
 - When the instance was updated
-- Instance details
+- Instance attributes
 - Maintenance windows
 - Hosted runners
 
-## Tenant overview
+To view details about your instance:
 
-The top section shows important information about your tenant, including:
+- Sign in to [Switchboard](https://console.gitlab-dedicated.com/).
+
+## Instance attributes
+
+This section provides important information about your tenant, including:
 
 - Tenant name and URL
+- AWS regions for data storage and backup
 - Total Git repository capacity
-- Current GitLab version
 - Reference architecture
 - Maintenance window
-- AWS regions for data storage and backup
+- Current GitLab version
 
 ## Maintenance windows
 
-The **Maintenance windows** section displays the:
+This section displays the:
 
-- Next scheduled maintenance window
-- Most recent completed maintenance window
-- Most recent emergency maintenance window (if applicable)
-- Upcoming GitLab version upgrade
+- Next scheduled maintenance window.
+- Last completed maintenance window.
+- Most recent emergency maintenance window (if applicable).
+- Upcoming GitLab version upgrade.
 
-NOTE:
-Switchboard shows upcoming GitLab version upgrades one week before their scheduled maintenance window. For more information, see [Maintenance windows](../../administration/dedicated/maintenance.md#maintenance-windows).
+For more information, see [Maintenance windows](../../administration/dedicated/maintenance.md#maintenance-windows).
 
 ## Hosted runners
 
-The **Hosted runners** section shows the [hosted runners](../../administration/dedicated/hosted_runners.md) associated with your instance.
+This section shows the [hosted runners](../../administration/dedicated/hosted_runners.md) associated with your instance.

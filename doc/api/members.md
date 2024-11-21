@@ -46,7 +46,7 @@ GET /projects/:id/members
 | Attribute        | Type              | Required | Description |
 |------------------|-------------------|----------|-------------|
 | `id`             | integer or string | yes      | The ID or [URL-encoded path of the project or group](rest/index.md#namespaced-paths). |
-| `query`          | string            | no       | Filters results based on a given name, email, or username. Use partial values to widen the scope of the query. |
+| `query`          | string            | no       | A query string to search for members. |
 | `user_ids`       | array of integers | no       | Filter the results on the given user IDs. |
 | `skip_users`     | array of integers | no       | Filter skipped users out of the results. |
 | `show_seat_info` | boolean           | no       | Show seat information for users. |
@@ -143,7 +143,7 @@ GET /projects/:id/members/all
 | Attribute        | Type              | Required | Description |
 |------------------|-------------------|----------|-------------|
 | `id`             | integer or string | yes      | The ID or [URL-encoded path of the project or group](rest/index.md#namespaced-paths). |
-| `query`          | string            | no       | Filters results based on a given name, email, or username. Use partial values to widen the scope of the query. |
+| `query`          | string            | no       | A query string to search for members. |
 | `user_ids`       | array of integers | no       | Filter the results on the given user IDs. |
 | `show_seat_info` | boolean           | no       | Show seat information for users. |
 | `state`          | string            | no       | Filter results by member state, one of `awaiting` or `active`. Premium and Ultimate only. |
@@ -431,10 +431,10 @@ Prerequisites:
 - This API endpoint works on top-level groups only. It does not work on subgroups.
 - This API endpoint requires permission to administer memberships for the group.
 
-Lists all projects and groups a user is a member of. Only projects and groups in the group hierarchy
-are included. For instance, if the requested group is `Top-Level Group`, and the requested user is a direct member
-of both `Top-Level Group / Subgroup One` and `Other Group / Subgroup Two`, then only `Top-Level Group / Subgroup One`
-is returned, because `Other Group / Subgroup Two` is not in the `Top-Level Group` hierarchy.
+Lists all projects and groups a user is a member of. Only projects and groups within the group hierarchy
+are included. For instance, if the requested group is `Root Group`, and the requested user is a direct member
+of both `Root Group / Sub Group One` and `Other Group / Sub Group Two`, then only `Root Group / Sub Group One`
+is returned, because `Other Group / Sub Group Two` is not within the `Root Group` hierarchy.
 
 This API endpoint takes [pagination](rest/index.md#pagination) parameters `page` and `per_page` to restrict
 the list of memberships.
@@ -460,7 +460,7 @@ Example response:
   {
     "id": 168,
     "source_id": 131,
-    "source_full_name": "Top-Level Group / Subgroup One",
+    "source_full_name": "Root Group / Sub Group One",
     "source_members_url": "https://gitlab.example.com/groups/root-group/sub-group-one/-/group_members",
     "created_at": "2021-03-31T17:28:44.812Z",
     "expires_at": "2022-03-21",
@@ -472,7 +472,7 @@ Example response:
   {
     "id": 169,
     "source_id": 63,
-    "source_full_name": "Top-Level Group / Subgroup One / My Project",
+    "source_full_name": "Root Group / Sub Group One / My Project",
     "source_members_url": "https://gitlab.example.com/root-group/sub-group-one/my-project/-/project_members",
     "created_at": "2021-03-31T17:29:14.934Z",
     "expires_at": null,
@@ -498,8 +498,8 @@ Prerequisites:
 - This API endpoint works on top-level groups only. It does not work on subgroups.
 - This API endpoint requires permission to administer memberships for the group.
 
-Lists all projects and groups that a user is a member of, that have been invited to the requested top-level group.
-For instance, if the requested group is `Top-Level Group`, and the requested user is a direct member of `Other Group / Subgroup Two`, which was invited to `Top-Level Group`, then only `Other Group / Subgroup Two` is returned.
+Lists all projects and groups that a user is a member of, that have been invited to the requested root group.
+For instance, if the requested group is `Root Group`, and the requested user is a direct member of `Other Group / Sub Group Two`, which was invited to `Root Group`, then only `Other Group / Sub Group Two` is returned.
 
 The response lists only indirect memberships. Direct memberships are not included.
 
@@ -526,7 +526,7 @@ Example response:
   {
     "id": 168,
     "source_id": 132,
-    "source_full_name": "Invited Group / Subgroup One",
+    "source_full_name": "Invited Group / Sub Group One",
     "source_members_url": "https://gitlab.example.com/groups/invited-group/sub-group-one/-/group_members",
     "created_at": "2021-03-31T17:28:44.812Z",
     "expires_at": "2022-03-21",
@@ -543,7 +543,7 @@ Example response:
 Removes a billable member from a group and its subgroups and projects.
 
 The user does not need to be a group member to qualify for removal.
-For example, if the user was added directly to a project in the group, you can
+For example, if the user was added directly to a project within the group, you can
 still use this API to remove them.
 
 ```plaintext
@@ -848,7 +848,7 @@ Example response:
 Removes a user from a group or project where the user has been explicitly assigned a role.
 
 The user needs to be a group member to qualify for removal.
-For example, if the user was added directly to a project in the group but not this
+For example, if the user was added directly to a project within the group but not this
 group explicitly, you cannot use this API to remove them. See
 [Remove a billable member from a group](#remove-a-billable-member-from-a-group) for an alternative approach.
 
@@ -883,7 +883,7 @@ PUT /groups/:id/members/:member_id/approve
 
 | Attribute   | Type              | Required | Description |
 |-------------|-------------------|----------|-------------|
-| `id`        | integer or string | yes      | The ID or [URL-encoded path of the top-level group](rest/index.md#namespaced-paths). |
+| `id`        | integer or string | yes      | The ID or [URL-encoded path of the root group](rest/index.md#namespaced-paths). |
 | `member_id` | integer           | yes      | The ID of the member. |
 
 Example request:
@@ -903,7 +903,7 @@ POST /groups/:id/members/approve_all
 
 | Attribute | Type              | Required | Description |
 |-----------|-------------------|----------|-------------|
-| `id`      | integer or string | yes      | The ID or [URL-encoded path of the top-level group](rest/index.md#namespaced-paths). |
+| `id`      | integer or string | yes      | The ID or [URL-encoded path of the root group](rest/index.md#namespaced-paths). |
 
 Example request:
 
@@ -922,7 +922,7 @@ Prerequisites:
 - This API endpoint works on top-level groups only. It does not work on subgroups.
 - This API endpoint requires permission to administer members for the group.
 
-This request returns all matching group and project members from all groups and projects in the top-level group's hierarchy.
+This request returns all matching group and project members from all groups and projects in the root group's hierarchy.
 
 When the member is an invited user that has not signed up for a GitLab account yet, the invited email address is returned.
 

@@ -6458,9 +6458,6 @@ msgstr ""
 msgid "Analytics|Dashboards are created by editing the projects dashboard files."
 msgstr ""
 
-msgid "Analytics|Data explorer"
-msgstr ""
-
 msgid "Analytics|Data table"
 msgstr ""
 
@@ -6611,7 +6608,7 @@ msgstr ""
 msgid "Analytics|Use ClickHouse for supported analytics reports. Available when %{link_start}ClickHouse is configured%{link_end}."
 msgstr ""
 
-msgid "Analytics|Use the data explorer to create custom visualizations. After you save a visualization, you can add it to a dashboard."
+msgid "Analytics|Use the visualization designer to create custom visualizations. After you save a visualization, you can add it to a dashboard."
 msgstr ""
 
 msgid "Analytics|View available dashboards"
@@ -6621,6 +6618,9 @@ msgid "Analytics|View metrics only for users who have consented to activity trac
 msgstr ""
 
 msgid "Analytics|Visualization"
+msgstr ""
+
+msgid "Analytics|Visualization designer"
 msgstr ""
 
 msgid "Analytics|Visualization title"
@@ -10413,6 +10413,12 @@ msgstr ""
 msgid "Busy"
 msgstr ""
 
+msgid "Buy Storage"
+msgstr ""
+
+msgid "Buy compute minutes"
+msgstr ""
+
 msgid "Buy more compute minutes"
 msgstr ""
 
@@ -11312,6 +11318,9 @@ msgstr ""
 msgid "Checking username availability..."
 msgstr ""
 
+msgid "Checkout"
+msgstr ""
+
 msgid "Checkout|$%{pricePerUserPerYear} per user per year"
 msgstr ""
 
@@ -11575,6 +11584,9 @@ msgid "Checkout|Your subscription will be applied to this group"
 msgstr ""
 
 msgid "Checkout|Zip code"
+msgstr ""
+
+msgid "Checkout|a storage subscription"
 msgstr ""
 
 msgid "Checkout|company or team"
@@ -12313,7 +12325,7 @@ msgstr ""
 msgid "CloneWorkItem|Cannot clone work item between Projects and Groups."
 msgstr ""
 
-msgid "CloneWorkItem|Cannot clone work item due to insufficient permissions."
+msgid "CloneWorkItem|Cannot clone work item due to insufficient permissions!"
 msgstr ""
 
 msgid "CloneWorkItem|Cannot clone work item to target namespace as it is pending deletion."
@@ -20445,9 +20457,6 @@ msgstr ""
 msgid "DuoChat|project"
 msgstr ""
 
-msgid "DuoCodeReview|:wave: There's nothing for me to review."
-msgstr ""
-
 msgid "DuoCodeReview|Hey :wave: I'm starting to review your merge request and I will let you know when I'm finished."
 msgstr ""
 
@@ -21798,9 +21807,6 @@ msgstr ""
 msgid "Environments|Stop"
 msgstr ""
 
-msgid "Environments|Stop %{environmentName}"
-msgstr ""
-
 msgid "Environments|Stop environment"
 msgstr ""
 
@@ -21808,6 +21814,9 @@ msgid "Environments|Stop environments that have not been updated since the speci
 msgstr ""
 
 msgid "Environments|Stop unused environments"
+msgstr ""
+
+msgid "Environments|Stopping %{environmentName}"
 msgstr ""
 
 msgid "Environments|Synced"
@@ -23267,9 +23276,6 @@ msgid "Failed to remove user identity."
 msgstr ""
 
 msgid "Failed to remove user key."
-msgstr ""
-
-msgid "Failed to request a review because no user was specified."
 msgstr ""
 
 msgid "Failed to retrieve page"
@@ -24930,6 +24936,9 @@ msgid "GitLab Duo"
 msgstr ""
 
 msgid "GitLab Duo Pro seats"
+msgstr ""
+
+msgid "GitLab Duo didn't find any reviewable files. Code Review request skipped."
 msgstr ""
 
 msgid "GitLab Duo experiment and beta features"
@@ -29845,7 +29854,7 @@ msgstr ""
 msgid "InviteMembersModal|%{linkStart}Read more%{linkEnd} about access expiration"
 msgstr ""
 
-msgid "InviteMembersModal|%{linkStart}Read more%{linkEnd} about role permissions. You can change this later."
+msgid "InviteMembersModal|%{linkStart}Read more%{linkEnd} about role permissions"
 msgstr ""
 
 msgid "InviteMembersModal|Access expiration date (optional)"
@@ -29914,7 +29923,7 @@ msgstr ""
 msgid "InviteMembersModal|Select a role"
 msgstr ""
 
-msgid "InviteMembersModal|Select from existing GitLab usernames or enter email addresses"
+msgid "InviteMembersModal|Select members or type email addresses"
 msgstr ""
 
 msgid "InviteMembersModal|Show less"
@@ -30780,9 +30789,6 @@ msgid "JiraConnect|Group successfully linked"
 msgstr ""
 
 msgid "JiraConnect|Groups are the GitLab groups and subgroups you link to this Jira instance."
-msgstr ""
-
-msgid "JiraConnect|Jira Connect Additional Audience URL"
 msgstr ""
 
 msgid "JiraConnect|Jira Connect Application ID"
@@ -35477,10 +35483,7 @@ msgstr ""
 msgid "MoveWorkItem|Cannot move work item between Projects and Groups."
 msgstr ""
 
-msgid "MoveWorkItem|Cannot move work item due to insufficient permissions."
-msgstr ""
-
-msgid "MoveWorkItem|Cannot move work item to same project or group it originates from."
+msgid "MoveWorkItem|Cannot move work item due to insufficient permissions!"
 msgstr ""
 
 msgid "MoveWorkItem|Cannot move work item to target namespace as it is pending deletion."
@@ -46517,9 +46520,6 @@ msgstr ""
 msgid "Request a new one"
 msgstr ""
 
-msgid "Request a review"
-msgstr ""
-
 msgid "Request changes"
 msgstr ""
 
@@ -46553,9 +46553,6 @@ msgstr ""
 msgid "Requested %{time_ago}"
 msgstr ""
 
-msgid "Requested a review from %{reviewer_users_sentence}."
-msgstr ""
-
 msgid "Requested design version does not exist."
 msgstr ""
 
@@ -46569,9 +46566,6 @@ msgid "Requests"
 msgstr ""
 
 msgid "Requests a Duo Code Review"
-msgstr ""
-
-msgid "Requests a review from %{reviewer_users_sentence}."
 msgstr ""
 
 msgid "Requests for pages at %{code_start}%{help_text_url}%{code_end} redirect to the URL. The destination must meet certain requirements. %{docs_link_start}Learn more%{docs_link_end}."
@@ -55229,9 +55223,6 @@ msgstr ""
 msgid "The GitLab user to which the Jira user %{jiraDisplayName} will be mapped"
 msgstr ""
 
-msgid "The Hangouts Chat webhook (for example, `https://chat.googleapis.com/v1/spaces...`)."
-msgstr ""
-
 msgid "The ID of the application."
 msgstr ""
 
@@ -55263,9 +55254,6 @@ msgid "The URL should start with http:// or https://"
 msgstr ""
 
 msgid "The URLs for connecting to Elasticsearch. For clustering, add the URLs separated by commas."
-msgstr ""
-
-msgid "The Unify Circuit webhook (for example, `https://circuit.com/rest/v2/webhooks/incoming/...`)."
 msgstr ""
 
 msgid "The XML file must be less than %{max_size} MB."
@@ -57753,6 +57741,12 @@ msgid "Todos|Marked 1 to-do as done"
 msgid_plural "Todos|Marked %d to-dos as done"
 msgstr[0] ""
 msgstr[1] ""
+
+msgid "Todos|Marked as done"
+msgstr ""
+
+msgid "Todos|Marked as undone"
+msgstr ""
 
 msgid "Todos|Member access request"
 msgstr ""

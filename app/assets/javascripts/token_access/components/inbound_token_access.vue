@@ -165,24 +165,40 @@ export default {
     },
     async removeItem(item) {
       try {
-        const mutation =
-          item.__typename === TYPENAME_GROUP // eslint-disable-line no-underscore-dangle
-            ? inboundRemoveGroupCIJobTokenScopeMutation
-            : inboundRemoveProjectCIJobTokenScopeMutation;
+        let errors;
 
-        const response = await this.$apollo.mutate({
-          mutation,
-          variables: { projectPath: this.fullPath, targetPath: item.fullPath },
-        });
-
-        const error = response.data.removeNamespace.errors[0];
-        if (error) {
-          createAlert({ message: error });
+        // eslint-disable-next-line no-underscore-dangle
+        if (item.__typename === TYPENAME_GROUP) {
+          const {
+            data: { ciJobTokenScopeRemoveGroup },
+          } = await this.$apollo.mutate({
+            mutation: inboundRemoveGroupCIJobTokenScopeMutation,
+            variables: {
+              projectPath: this.fullPath,
+              targetGroupPath: item.fullPath,
+            },
+          });
+          errors = ciJobTokenScopeRemoveGroup.errors;
         } else {
-          this.refetchGroupsAndProjects();
+          const {
+            data: { ciJobTokenScopeRemoveProject },
+          } = await this.$apollo.mutate({
+            mutation: inboundRemoveProjectCIJobTokenScopeMutation,
+            variables: {
+              projectPath: this.fullPath,
+              targetProjectPath: item.fullPath,
+            },
+          });
+          errors = ciJobTokenScopeRemoveProject.errors;
+        }
+
+        if (errors.length) {
+          throw new Error(errors[0]);
         }
       } catch (error) {
         createAlert({ message: error.message });
+      } finally {
+        this.refetchGroupsAndProjects();
       }
     },
     refetchGroupsAndProjects() {
@@ -194,7 +210,7 @@ export default {
 
 <template>
   <div class="gl-mt-5">
-    <gl-loading-icon v-if="$apollo.queries.inboundJobTokenScopeEnabled.loading" size="md" />
+    <gl-loading-icon v-if="$apollo.loading" size="md" />
     <template v-else>
       <div class="gl-font-bold">
         {{ $options.i18n.radioGroupTitle }}
@@ -268,11 +284,7 @@ export default {
           <namespace-form @saved="refetchGroupsAndProjects" @close="hideForm" />
         </template>
 
-        <token-access-table
-          :items="groupsAndProjectsWithAccess"
-          :loading="$apollo.queries.groupsAndProjectsWithAccess.loading"
-          @removeItem="removeItem"
-        />
+        <token-access-table :items="groupsAndProjectsWithAccess" @removeItem="removeItem" />
       </crud-component>
     </template>
   </div>
