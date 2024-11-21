@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
+require 'set' # -- Ruby 3.1 and earlier needs this. Drop this line after Ruby 3.2+ is only supported.
 require 'test_file_finder'
 
 # These tests run a sanity check on the mapping file `tests.yml`
@@ -129,8 +130,8 @@ tests = [
 
   {
     explanation: 'EE views should map to respective spec',
-    changed_file: 'ee/app/views/groups/hooks/edit.html.haml',
-    expected: ['ee/spec/views/groups/hooks/edit.html.haml_spec.rb']
+    changed_file: 'ee/app/views/subscriptions/new.html.haml',
+    expected: ['ee/spec/views/subscriptions/new.html.haml_spec.rb']
   },
 
   {

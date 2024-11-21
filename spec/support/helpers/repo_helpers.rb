@@ -162,14 +162,14 @@ EOS
     ).execute
   end
 
-  def create_and_delete_files(project, files, branch_name: project.default_branch_or_main, &block)
+  def create_and_delete_files(project, files, &block)
     files.each do |filename, content|
       project.repository.create_file(
         project.creator,
         filename,
         content,
         message: "Automatically created file #{filename}",
-        branch_name: branch_name
+        branch_name: project.default_branch_or_main
       )
     end
 
@@ -181,7 +181,7 @@ EOS
         project.creator,
         filename,
         message: "Automatically deleted file #{filename}",
-        branch_name: branch_name
+        branch_name: project.default_branch_or_main
       )
     end
   end

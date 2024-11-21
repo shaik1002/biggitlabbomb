@@ -392,7 +392,6 @@ class GfmAutoComplete {
       UNASSIGN_REVIEWER: '/unassign_reviewer',
       REASSIGN: '/reassign',
       CC: '/cc',
-      REQUEST_REVIEW: '/request_review',
     };
     let assignees = [];
     let reviewers = [];

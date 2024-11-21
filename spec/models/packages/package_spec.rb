@@ -18,8 +18,6 @@ RSpec.describe Packages::Package, type: :model, feature_category: :package_regis
     it { is_expected.to have_many(:tags).inverse_of(:package) }
     it { is_expected.to have_many(:build_infos).inverse_of(:package) }
     it { is_expected.to have_one(:maven_metadatum).inverse_of(:package) }
-    # TODO: Remove with the rollout of the FF npm_extract_npm_package_model
-    # https://gitlab.com/gitlab-org/gitlab/-/issues/501469
     it { is_expected.to have_one(:npm_metadatum).inverse_of(:package) }
   end
 
@@ -109,10 +107,8 @@ RSpec.describe Packages::Package, type: :model, feature_category: :package_regis
       it { is_expected.to allow_value("my.app-11.07.2018").for(:name) }
       it { is_expected.not_to allow_value("my(dom$$$ain)com.my-app").for(:name) }
 
-      # TODO: Remove with the rollout of the FF npm_extract_npm_package_model
-      # https://gitlab.com/gitlab-org/gitlab/-/issues/501469
       context 'npm package' do
-        subject { build_stubbed(:npm_package_legacy) }
+        subject { build_stubbed(:npm_package) }
 
         it { is_expected.to allow_value("@group-1/package").for(:name) }
         it { is_expected.to allow_value("@any-scope/package").for(:name) }
@@ -153,13 +149,9 @@ RSpec.describe Packages::Package, type: :model, feature_category: :package_regis
         it { is_expected.not_to allow_value('%2e%2e%2f1.2.3').for(:version) }
       end
 
-      # TODO: Remove with the rollout of the FF npm_extract_npm_package_model
-      # https://gitlab.com/gitlab-org/gitlab/-/issues/501469
-      it_behaves_like 'validating version to be SemVer compliant for', :npm_package_legacy
+      it_behaves_like 'validating version to be SemVer compliant for', :npm_package
     end
 
-    # TODO: Remove with the rollout of the FF npm_extract_npm_package_model
-    # https://gitlab.com/gitlab-org/gitlab/-/issues/501469
     describe '#npm_package_already_taken' do
       context 'maven package' do
         let!(:package) { create(:maven_package) }
@@ -176,7 +168,7 @@ RSpec.describe Packages::Package, type: :model, feature_category: :package_regis
         let_it_be(:project) { create(:project, namespace: group) }
         let_it_be(:second_project) { create(:project, namespace: group) }
 
-        let(:package) { build(:npm_package_legacy, project: project, name: name) }
+        let(:package) { build(:npm_package, project: project, name: name) }
 
         shared_examples 'validating the first package' do
           it 'validates the first package' do
@@ -221,7 +213,7 @@ RSpec.describe Packages::Package, type: :model, feature_category: :package_regis
           let(:name) { "@#{group.path}/test" }
 
           context 'with the second package in the project of the first package' do
-            let(:second_package) { build(:npm_package_legacy, project: project, name: second_package_name, version: second_package_version) }
+            let(:second_package) { build(:npm_package, project: project, name: second_package_name, version: second_package_version) }
 
             context 'with no duplicated name' do
               let(:second_package_name) { "@#{group.path}/test2" }
@@ -250,7 +242,7 @@ RSpec.describe Packages::Package, type: :model, feature_category: :package_regis
           end
 
           context 'with the second package in a different project than the first package' do
-            let(:second_package) { build(:npm_package_legacy, project: second_project, name: second_package_name, version: second_package_version) }
+            let(:second_package) { build(:npm_package, project: second_project, name: second_package_name, version: second_package_version) }
 
             context 'with no duplicated name' do
               let(:second_package_name) { "@#{group.path}/test2" }
@@ -283,7 +275,7 @@ RSpec.describe Packages::Package, type: :model, feature_category: :package_regis
           let(:name) { '@foobar/test' }
 
           context 'with the second package in the project of the first package' do
-            let(:second_package) { build(:npm_package_legacy, project: project, name: second_package_name, version: second_package_version) }
+            let(:second_package) { build(:npm_package, project: project, name: second_package_name, version: second_package_version) }
 
             context 'with no duplicated name' do
               let(:second_package_name) { "@foobar/test2" }
@@ -312,7 +304,7 @@ RSpec.describe Packages::Package, type: :model, feature_category: :package_regis
           end
 
           context 'with the second package in a different project than the first package' do
-            let(:second_package) { build(:npm_package_legacy, project: second_project, name: second_package_name, version: second_package_version) }
+            let(:second_package) { build(:npm_package, project: second_project, name: second_package_name, version: second_package_version) }
 
             context 'with no duplicated name' do
               let(:second_package_name) { "@foobar/test2" }
@@ -450,8 +442,6 @@ RSpec.describe Packages::Package, type: :model, feature_category: :package_regis
     end
   end
 
-  # TODO: Remove with the rollout of the FF npm_extract_npm_package_model
-  # https://gitlab.com/gitlab-org/gitlab/-/issues/501469
   describe '.with_npm_scope' do
     let_it_be(:package1) { create(:npm_package, name: '@test/foobar') }
     let_it_be(:package2) { create(:npm_package, name: '@test2/foobar') }
@@ -813,8 +803,6 @@ RSpec.describe Packages::Package, type: :model, feature_category: :package_regis
     end
   end
 
-  # TODO: Remove with the rollout of the FF npm_extract_npm_package_model
-  # https://gitlab.com/gitlab-org/gitlab/-/issues/501469
   describe '#sync_npm_metadata_cache' do
     let_it_be(:package) { create(:npm_package) }
 
@@ -965,20 +953,6 @@ RSpec.describe Packages::Package, type: :model, feature_category: :package_regis
           it 'maps to the correct class' do
             is_expected.to eq(described_class.inheritance_column_to_class_map[package_format].constantize)
           end
-        end
-      end
-    end
-
-    context 'when npm_extract_npm_package_model is disabled' do
-      before do
-        stub_feature_flags(npm_extract_npm_package_model: false)
-      end
-
-      context 'for package format npm' do
-        let(:format) { :npm }
-
-        it 'maps to Packages::Package' do
-          is_expected.to eq(described_class)
         end
       end
     end

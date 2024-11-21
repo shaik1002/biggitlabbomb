@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe '5-Minute-Production-App.gitlab-ci.yml', feature_category: :not_owned do # rubocop:disable RSpec/FeatureCategory -- removing code in https://gitlab.com/gitlab-org/gitlab/-/issues/478491
+RSpec.describe '5-Minute-Production-App.gitlab-ci.yml', feature_category: :five_minute_production_app do
   subject(:template) { Gitlab::Template::GitlabCiYmlTemplate.find('5-Minute-Production-App') }
 
   describe 'the created pipeline' do

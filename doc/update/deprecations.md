@@ -78,31 +78,6 @@ The [GitLab Runner Docker Machine executor](https://docs.gitlab.com/runner/execu
 
 <div class="deprecation breaking-change" data-milestone="19.0">
 
-### Behavior change for protected variables and multi-project pipelines
-
-<div class="deprecation-notes">
-
-- Announced in GitLab <span class="milestone">16.10</span>
-- Removal in GitLab <span class="milestone">19.0</span> ([breaking change](https://docs.gitlab.com/ee/update/terminology.html#breaking-change))
-- To discuss this change or learn more, see the [deprecation issue](https://gitlab.com/gitlab-org/gitlab/-/issues/432328).
-
-</div>
-
-In some cases, users with sufficient permissions in a project could forward protected variables to an unsecure project, so this change is a security enhancement that minimizes the risk of protected variable values being exposed.
-
-While [forwarding CI/CD variables](https://docs.gitlab.com/ee/ci/pipelines/downstream_pipelines.html#pass-cicd-variables-to-a-downstream-pipeline) through downstream pipelines is useful for some workflows, [protected variables](https://docs.gitlab.com/ee/ci/variables/#protect-a-cicd-variable) require additional care. They are intended for use only with specific protected branches or tags.
-
-In GitLab 19.0, variable forwarding will be updated to ensure protected variables are only passed in specific situations:
-
-- Project-level protected variables can only be forwarded to downstream pipelines in the same project (child pipelines).
-- Group-level protected variables can only be forwarded to downstream pipelines of projects that belong to the same group as the source project.
-
-If your pipeline relies on forwarding protected variables, update your configuration to either conform to the two options above, or avoid forwarding protected variables.
-
-</div>
-
-<div class="deprecation breaking-change" data-milestone="19.0">
-
 ### Running a single database is deprecated
 
 <div class="deprecation-notes">
@@ -195,6 +170,31 @@ This is one small step towards moving away from CI/CD templates in preference of
 <div class="milestone-wrapper" data-milestone="18.0">
 
 ## GitLab 18.0
+
+<div class="deprecation breaking-change" data-milestone="18.0">
+
+### Behavior change for protected variables and multi-project pipelines
+
+<div class="deprecation-notes">
+
+- Announced in GitLab <span class="milestone">16.10</span>
+- Removal in GitLab <span class="milestone">18.0</span> ([breaking change](https://docs.gitlab.com/ee/update/terminology.html#breaking-change))
+- To discuss this change or learn more, see the [deprecation issue](https://gitlab.com/gitlab-org/gitlab/-/issues/432328).
+
+</div>
+
+In some cases, users with sufficient permissions in a project could forward protected variables to an unsecure project, so this change is a security enhancement that minimizes the risk of protected variable values being exposed.
+
+While [forwarding CI/CD variables](https://docs.gitlab.com/ee/ci/pipelines/downstream_pipelines.html#pass-cicd-variables-to-a-downstream-pipeline) through downstream pipelines is useful for some workflows, [protected variables](https://docs.gitlab.com/ee/ci/variables/#protect-a-cicd-variable) require additional care. They are intended for use only with specific protected branches or tags.
+
+In GitLab 18.0, variable forwarding will be updated to ensure protected variables are only passed in specific situations:
+
+- Project-level protected variables can only be forwarded to downstream pipelines in the same project (child pipelines).
+- Group-level protected variables can only be forwarded to downstream pipelines of projects that belong to the same group as the source project.
+
+If your pipeline relies on forwarding protected variables, update your configuration to either conform to the two options above, or avoid forwarding protected variables.
+
+</div>
 
 <div class="deprecation breaking-change" data-milestone="18.0">
 
@@ -486,24 +486,6 @@ Starting in 18.0, Guest users on GitLab.com will be able to pull packages from p
 This change streamlines package sharing capabilities within organizations and simplifies access management for package consumers by providing consistent behavior across all GitLab deployments.
 
 Project Owners and Maintainers should review their private projects' lists of members. Users with the Guest role who should not have package pulling capabilities should be removed. If more restrictive package access is required, consider using project access tokens instead of guest access.
-
-</div>
-
-<div class="deprecation " data-milestone="18.0">
-
-### Increased default security for use of pipeline variables
-
-<div class="deprecation-notes">
-
-- Announced in GitLab <span class="milestone">17.7</span>
-- Removal in GitLab <span class="milestone">18.0</span>
-- To discuss this change or learn more, see the [deprecation issue](https://gitlab.com/gitlab-org/gitlab/-/issues/502382).
-
-</div>
-
-GitLab believes in secure-by-default practices. To honor this, we are making some changes to support least privilege principles relating to the use of CI/CD variables. Today, users with the Developer role or higher are able to use [pipeline variables](https://docs.gitlab.com/ee/ci/variables/#use-pipeline-variables) by default, without any verification or opt-in. In 18.0, GitLab is updating the [pipeline variable restrictions](https://docs.gitlab.com/ee/ci/variables/#restrict-pipeline-variables) to default enabled. As a result of this change, your project's use of pipeline CI/CD variables will be stricter by default, increased to only users with the Owner role. If necessary, you can manually set this setting to a lower role if still needed for your workflows, though it's not recommended.
-
-You can already start using a more secure-by-default experience for pipeline variables by enabling the current setting with the Project settings API, to increase the allowed role to Maintainers and above. You can also raise the minimum role to the recommended [Owner only, or no one](https://docs.gitlab.com/ee/ci/variables/#set-a-minimum-role-for-pipeline-variables). Starting in 17.7, this will be the default for all new projects for self-managed instances, and the default for all new projects in new namespaces on GitLab.com. We also plan to make this easier to manage by adding an option to control this from the project settings UI.
 
 </div>
 

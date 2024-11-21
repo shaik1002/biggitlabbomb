@@ -71,7 +71,7 @@
 
 /** COLORS **/
 .text-secondary {
-  @apply gl-text-subtle;
+  color: $gl-text-color-secondary;
 }
 
 .text-warning,
@@ -414,7 +414,7 @@ li.note {
 .gl-pseudo-placeholder:empty::before {
   content: attr(data-placeholder);
   font-weight: $gl-font-weight-normal;
-  color: var(--gl-control-placeholder-color);
+  color: $gl-text-color-secondary;
   cursor: text;
 }
 

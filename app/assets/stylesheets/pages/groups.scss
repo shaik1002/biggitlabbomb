@@ -18,7 +18,7 @@
 .group-row {
   .description p {
     margin-bottom: 0;
-    @apply gl-text-subtle;
+    color: $gl-text-color-secondary;
   }
 }
 
@@ -155,7 +155,7 @@
       position: relative;
       min-width: 250px;
       text-align: right;
-      @apply gl-text-subtle;
+      color: $gl-text-color-secondary;
     }
   }
 }

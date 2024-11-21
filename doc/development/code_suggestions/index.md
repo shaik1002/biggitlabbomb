@@ -24,7 +24,7 @@ This should enable everyone to see locally any change in an IDE being sent to th
       1. In VS Code, go to the Extensions page and find "GitLab Workflow" in the list.
       1. Open the extension settings by clicking a small cog icon and select "Extension Settings" option.
       1. Check a "GitLab: Debug" checkbox.
-   1. If you'd like to test that Code Suggestions is working from inside the GitLab Workflow extension for VS Code, then follow the [steps to set up a personal access token](../../editor_extensions/visual_studio_code/index.md#set-up-the-gitlab-workflow-extension) with your GDK inside the new window of VS Code that pops up when you run the "Run and Debug" command.
+   1. If you'd like to test that Code Suggestions is working from inside the GitLab Workflow extension for VS Code, then follow the [steps to set up a personal access token](https://gitlab.com/gitlab-org/gitlab-vscode-extension/#setup) with your GDK inside the new window of VS Code that pops up when you run the "Run and Debug" command.
       - Once you complete the steps below, to test you are hitting your local `/code_suggestions/completions` endpoint and not production, follow these steps:
         1. Inside the new window, in the built in terminal select the "Output" tab then "GitLab Language Server" from the drop down menu on the right.
         1. Open a new file inside of this VS Code window and begin typing to see Code Suggestions in action.
@@ -98,16 +98,6 @@ with the deployed staging AI Gateway. To do this:
 
 1. Inside your GDK, navigate to **Admin area** > **GitLab Duo Pro**, go to `/admin/code_suggestions`
 1. Filter users to find `root` and click the toggle to assign a GitLab Duo Pro add-on seat to the root user.
-
-### Bulk assign users to Duo Pro/Duo Enterprise add-on
-
-After purchasing the Duo add-on, existing eligible users can be assigned/un-assigned to the Duo `add_on_purchase` in bulk. There are a few ways to perform this action, that apply for both SaaS and Self-managed instances,
-
-1. [Duo users management UI](../../subscriptions/subscription-add-ons.md#assign-gitlab-duo-seats)
-1. [GraphQL endpoint](../../api/graphql/assign_gitlab_duo_seats.md#assign-gitlab-duo-seats-by-using-graphql)
-1. [Rake task](../../raketasks/user_management.md#bulk-assign-users-to-gitlab-duo-pro)
-
-The above methods make use of the [BulkAssignService](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/app/services/gitlab_subscriptions/duo/bulk_assign_service.rb)/[BulkUnassignService](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/app/services/gitlab_subscriptions/duo/bulk_unassign_service.rb), which evaluates eligibility criteria preliminarily before assigning/un-assigning the passed users in a single SQL operation.
 
 ### Setup instructions to use the Duo Pro add-on with a **staging** GitLab.com account
 

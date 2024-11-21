@@ -24,6 +24,7 @@
 # and executes the selected migrations for both the main and CI databases.
 
 require 'optparse'
+require 'set'
 
 SCRIPT_NAME = File.basename($PROGRAM_NAME)
 MIGRATIONS_DIR = 'db/migrate'

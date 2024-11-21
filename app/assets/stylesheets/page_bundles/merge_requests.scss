@@ -125,13 +125,6 @@
   .vue-recycle-scroller__item-wrapper {
     overflow: visible;
   }
-
-  .diff-file {
-    &.diff-file-is-active,
-    &:has(*:not(textarea):focus-visible) {
-      box-shadow: 0 0 0 2px var(--gl-border-color-strong);
-    }
-  }
 }
 
 .diff-grid {
@@ -645,7 +638,8 @@
 }
 
 .mr-widget-extension {
-  @apply gl-bg-subtle gl-border-t gl-border-t-section;
+  border-top: 1px solid var(--gl-border-color-default);
+  background-color: var(--gray-10, $gray-10);
   container-name: mr-widget-extension;
   container-type: inline-size;
   // Adds a fix for the view app dropdown not showing up
@@ -654,7 +648,7 @@
   z-index: 1;
 
   &.clickable:hover {
-    @apply gl-bg-strong;
+    background-color: var(--gray-50, $gray-50);
     cursor: pointer;
   }
 }

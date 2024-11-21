@@ -38,12 +38,23 @@ export const projectsWithScope = {
               id: 2,
               fullPath: 'root/332268-test',
               name: 'root/332268-test',
-              webUrl: 'http://localhost/root/332268-test',
-              avatarUrl: 'http://localhost/avatar.png',
+              namespace: {
+                id: '1234',
+                fullPath: 'root',
+              },
             },
           ],
         },
       },
+    },
+  },
+};
+
+export const addProjectSuccess = {
+  data: {
+    ciJobTokenScopeAddProject: {
+      errors: [],
+      __typename: 'CiJobTokenScopeAddProjectPayload',
     },
   },
 };
@@ -118,6 +129,17 @@ export const mockProjects = [
     webUrl: 'http://localhost/root/ci-project',
     isLocked: true,
     __typename: 'Project',
+  },
+];
+
+export const mockFields = [
+  {
+    key: 'fullPath',
+    label: '',
+  },
+  {
+    key: 'actions',
+    label: '',
   },
 ];
 
@@ -225,13 +247,48 @@ export const inboundGroupsAndProjectsWithScopeResponseWithAddedItem = {
   },
 };
 
-export const getAddNamespaceHandler = (error) =>
-  jest.fn().mockResolvedValue({
-    data: { ciJobTokenScopeAddGroupOrProject: { errors: error ? [error] : [] } },
-  });
+export const getGroupsAndProjectsResponse = {
+  data: {
+    groups: {
+      nodes: [
+        { id: 1, name: 'gitlab-org', avatarUrl: '', fullPath: 'gitlab-org' },
+        { id: 2, name: 'ci-group', avatarUrl: '', fullPath: 'root/ci-group' },
+      ],
+    },
+    projects: {
+      nodes: [
+        { id: 1, name: 'gitlab', avatarUrl: '', fullPath: 'gitlab-org/gitlab' },
+        { id: 2, name: 'ci-project', avatarUrl: '', fullPath: 'root/ci-project' },
+      ],
+    },
+  },
+};
 
-export const inboundRemoveNamespaceSuccess = {
-  data: { removeNamespace: { errors: [] } },
+export const inboundAddGroupOrProjectSuccessResponse = {
+  data: {
+    ciJobTokenScopeAddGroupOrProject: {
+      errors: [],
+      __typename: 'CiJobTokenScopeAddGroupOrProjectPayload',
+    },
+  },
+};
+
+export const inboundRemoveGroupSuccess = {
+  data: {
+    ciJobTokenScopeRemoveProject: {
+      errors: [],
+      __typename: 'CiJobTokenScopeRemoveGroupPayload',
+    },
+  },
+};
+
+export const inboundRemoveProjectSuccess = {
+  data: {
+    ciJobTokenScopeRemoveProject: {
+      errors: [],
+      __typename: 'CiJobTokenScopeRemoveProjectPayload',
+    },
+  },
 };
 
 export const inboundUpdateScopeSuccessResponse = {

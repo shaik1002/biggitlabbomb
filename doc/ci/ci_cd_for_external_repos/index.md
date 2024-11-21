@@ -53,15 +53,13 @@ always-run:
 
 on-pull-requests:
   script: echo 'this should run on pull requests'
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "external_pull_request_event"
+  only:
+    - external_pull_requests
 
 except-pull-requests:
-  script: echo 'This should not run for pull requests, but runs in other cases.'
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "external_pull_request_event"
-      when: never
-    - when: on_success
+  script: echo 'this should not run on pull requests'
+  except:
+    - external_pull_requests
 ```
 
 ### How it works

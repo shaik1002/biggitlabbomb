@@ -30,6 +30,7 @@ if ! scripts/lint-docs-metadata.sh
 then
   # shellcheck disable=2059
   printf "${COLOR_RED}ERROR: These documentation pages need front matter!${COLOR_RESET}"
+  printf " See https://docs.gitlab.com/ee/development/documentation/index.html#stage-and-group-metadata for how to add it.\n" >&2
   ((ERRORCODE++))
 fi
 

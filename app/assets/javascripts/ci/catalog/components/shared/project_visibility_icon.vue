@@ -17,5 +17,10 @@ export default {
 };
 </script>
 <template>
-  <gl-icon v-gl-tooltip name="lock" :title="$options.i18n.privateProjectTooltip" variant="subtle" />
+  <gl-icon
+    v-gl-tooltip
+    name="lock"
+    class="gl-text-gray-500"
+    :title="$options.i18n.privateProjectTooltip"
+  />
 </template>

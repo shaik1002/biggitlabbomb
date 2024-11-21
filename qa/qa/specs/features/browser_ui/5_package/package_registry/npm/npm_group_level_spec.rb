@@ -8,23 +8,27 @@ module QA
       include Runtime::Fixtures
       include Support::Helpers::MaskToken
 
-      let!(:personal_access_token) { Runtime::UserStore.test_user.current_personal_access_token }
-      let!(:project) { create(:project, name: 'npm-group-publish') }
+      let!(:api_client) { Runtime::API::Client.new(:gitlab) }
+      let!(:personal_access_token) { api_client.personal_access_token }
+
+      let!(:project) { create(:project, name: 'npm-group-publish', api_client: api_client) }
       let!(:group) { project.group }
       let!(:registry_scope) { group.sandbox.name }
-      let!(:another_project) { create(:project, name: 'npm-group-install', group: group) }
+      let!(:another_project) { create(:project, name: 'npm-group-install', group: group, api_client: api_client) }
       let!(:runner) do
         create(:group_runner,
           name: "qa-runner-#{SecureRandom.hex(6)}",
           tags: ["runner-for-#{group.name}"],
           executor: :docker,
-          group: group)
+          group: group,
+          api_client: api_client)
       end
 
       let(:project_deploy_token) do
         create(:project_deploy_token,
           name: 'npm-deploy-token',
           project: project,
+          api_client: api_client,
           scopes: %w[
             read_repository
             read_package_registry

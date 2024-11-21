@@ -529,7 +529,7 @@ module Types
       experiment: { milestone: '16.10' },
       resolver: Resolvers::ProjectContainerRegistryProtectionRulesResolver
 
-    field :container_repositories, Types::ContainerRegistry::ContainerRepositoryType.connection_type,
+    field :container_repositories, Types::ContainerRepositoryType.connection_type,
       null: true,
       description: 'Container repositories of the project.',
       resolver: Resolvers::ContainerRepositoriesResolver
@@ -570,12 +570,6 @@ module Types
       null: true,
       description: 'The CI Job Tokens scope of access.',
       resolver: Resolvers::Ci::JobTokenScopeResolver
-
-    field :ci_job_token_scope_allowlist, Types::Ci::JobTokenScope::AllowlistType,
-      null: true,
-      experiment: { milestone: '17.6' },
-      description: 'List of CI job token scopes where the project is the source.',
-      resolver: Resolvers::Ci::JobTokenScopeAllowlistResolver
 
     field :ci_job_token_auth_logs, Types::Ci::JobTokenAuthLogType.connection_type,
       null: true,

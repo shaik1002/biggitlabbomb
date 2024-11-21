@@ -149,7 +149,7 @@ four standard [pagination arguments](#pagination-arguments):
 
 ### `Query.aiSelfHostedModels`
 
-Returns the self-hosted model if an ID is provided, otherwise returns all models.
+List of self-hosted LLM servers.
 
 DETAILS:
 **Introduced** in GitLab 17.1.
@@ -160,12 +160,6 @@ Returns [`AiSelfHostedModelConnection`](#aiselfhostedmodelconnection).
 This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#pagination-arguments):
 `before: String`, `after: String`, `first: Int`, and `last: Int`.
-
-#### Arguments
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="queryaiselfhostedmodelsid"></a>`id` | [`AiSelfHostedModelID`](#aiselfhostedmodelid) | Global ID of a self-hosted model. |
 
 ### `Query.aiSlashCommands`
 
@@ -384,12 +378,6 @@ DETAILS:
 
 Returns [`CloudConnectorStatus`](#cloudconnectorstatus).
 
-### `Query.complianceRequirementControls`
-
-Get the list of all the compliance requirement controls.
-
-Returns [`ComplianceRequirementControl`](#compliancerequirementcontrol).
-
 ### `Query.containerRepository`
 
 Find a container repository.
@@ -595,7 +583,6 @@ four standard [pagination arguments](#pagination-arguments):
 | <a id="querygroupsmarkedfordeletionon"></a>`markedForDeletionOn` | [`Date`](#date) | Date when the group was marked for deletion. |
 | <a id="querygroupssearch"></a>`search` | [`String`](#string) | Search query for group name or group full path. |
 | <a id="querygroupssort"></a>`sort` | [`String`](#string) | Sort order of results. Format: `<field_name>_<sort_direction>`, for example: `id_desc` or `name_asc`. |
-| <a id="querygroupstoplevelonly"></a>`topLevelOnly` | [`Boolean`](#boolean) | Only include top level groups. |
 
 ### `Query.instanceExternalAuditEventDestinations`
 
@@ -3699,7 +3686,6 @@ Input type: `CreateDiffNoteInput`
 | <a id="mutationcreatediffnoteclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | <a id="mutationcreatediffnoteerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | <a id="mutationcreatediffnotenote"></a>`note` | [`Note`](#note) | Note after mutation. |
-| <a id="mutationcreatediffnotequickactionsstatus"></a>`quickActionsStatus` | [`QuickActionsStatus`](#quickactionsstatus) | Status of quick actions after mutation. |
 
 ### `Mutation.createDiscussion`
 
@@ -3721,7 +3707,6 @@ Input type: `CreateDiscussionInput`
 | <a id="mutationcreatediscussionclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | <a id="mutationcreatediscussionerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | <a id="mutationcreatediscussionnote"></a>`note` | [`Note`](#note) | Note after mutation. |
-| <a id="mutationcreatediscussionquickactionsstatus"></a>`quickActionsStatus` | [`QuickActionsStatus`](#quickactionsstatus) | Status of quick actions after mutation. |
 
 ### `Mutation.createEpic`
 
@@ -3738,7 +3723,7 @@ Input type: `CreateEpicInput`
 | <a id="mutationcreateepicaddlabelids"></a>`addLabelIds` | [`[ID!]`](#id) | IDs of labels to be added to the epic. |
 | <a id="mutationcreateepicaddlabels"></a>`addLabels` | [`[String!]`](#string) | Array of labels to be added to the epic. |
 | <a id="mutationcreateepicclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
-| <a id="mutationcreateepiccolor"></a>`color` | [`Color`](#color) | Color of the epic. |
+| <a id="mutationcreateepiccolor"></a>`color` | [`Color`](#color) | Color of the epic. Available only when feature flag `epic_color_highlight` is enabled. This flag is disabled by default, because the feature is experimental and is subject to change without notice. |
 | <a id="mutationcreateepicconfidential"></a>`confidential` | [`Boolean`](#boolean) | Indicates if the epic is confidential. |
 | <a id="mutationcreateepicdescription"></a>`description` | [`String`](#string) | Description of the epic. |
 | <a id="mutationcreateepicduedatefixed"></a>`dueDateFixed` | [`String`](#string) | End date of the epic. |
@@ -3778,7 +3763,6 @@ Input type: `CreateImageDiffNoteInput`
 | <a id="mutationcreateimagediffnoteclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | <a id="mutationcreateimagediffnoteerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | <a id="mutationcreateimagediffnotenote"></a>`note` | [`Note`](#note) | Note after mutation. |
-| <a id="mutationcreateimagediffnotequickactionsstatus"></a>`quickActionsStatus` | [`QuickActionsStatus`](#quickactionsstatus) | Status of quick actions after mutation. |
 
 ### `Mutation.createIssue`
 
@@ -3877,7 +3861,6 @@ Input type: `CreateNoteInput`
 | <a id="mutationcreatenoteclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | <a id="mutationcreatenoteerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | <a id="mutationcreatenotenote"></a>`note` | [`Note`](#note) | Note after mutation. |
-| <a id="mutationcreatenotequickactionsstatus"></a>`quickActionsStatus` | [`QuickActionsStatus`](#quickactionsstatus) | Status of quick actions after mutation. |
 
 ### `Mutation.createPackagesProtectionRule`
 
@@ -4788,7 +4771,6 @@ Input type: `DestroyNoteInput`
 | <a id="mutationdestroynoteclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | <a id="mutationdestroynoteerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | <a id="mutationdestroynotenote"></a>`note` | [`Note`](#note) | Note after mutation. |
-| <a id="mutationdestroynotequickactionsstatus"></a>`quickActionsStatus` | [`QuickActionsStatus`](#quickactionsstatus) | Status of quick actions after mutation. |
 
 ### `Mutation.destroyPackage`
 
@@ -5153,7 +5135,7 @@ Input type: `EpicBoardCreateInput`
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | <a id="mutationepicboardcreateclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
-| <a id="mutationepicboardcreatedisplaycolors"></a>`displayColors` | [`Boolean`](#boolean) | Whether or not display epic colors. |
+| <a id="mutationepicboardcreatedisplaycolors"></a>`displayColors` | [`Boolean`](#boolean) | Whether or not display epic colors. Ignored unless `epic_color_highlight` flag is enabled. |
 | <a id="mutationepicboardcreategrouppath"></a>`groupPath` | [`ID`](#id) | Full path of the group with which the resource is associated. |
 | <a id="mutationepicboardcreatehidebackloglist"></a>`hideBacklogList` | [`Boolean`](#boolean) | Whether or not backlog list is hidden. |
 | <a id="mutationepicboardcreatehideclosedlist"></a>`hideClosedList` | [`Boolean`](#boolean) | Whether or not closed list is hidden. |
@@ -5232,7 +5214,7 @@ Input type: `EpicBoardUpdateInput`
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | <a id="mutationepicboardupdateclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
-| <a id="mutationepicboardupdatedisplaycolors"></a>`displayColors` | [`Boolean`](#boolean) | Whether or not display epic colors. |
+| <a id="mutationepicboardupdatedisplaycolors"></a>`displayColors` | [`Boolean`](#boolean) | Whether or not display epic colors. Ignored unless `epic_color_highlight` flag is enabled. |
 | <a id="mutationepicboardupdatehidebackloglist"></a>`hideBacklogList` | [`Boolean`](#boolean) | Whether or not backlog list is hidden. |
 | <a id="mutationepicboardupdatehideclosedlist"></a>`hideClosedList` | [`Boolean`](#boolean) | Whether or not closed list is hidden. |
 | <a id="mutationepicboardupdateid"></a>`id` | [`BoardsEpicBoardID!`](#boardsepicboardid) | Epic board global ID. |
@@ -7653,7 +7635,6 @@ Input type: `NoteConvertToThreadInput`
 | <a id="mutationnoteconverttothreadclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | <a id="mutationnoteconverttothreaderrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | <a id="mutationnoteconverttothreadnote"></a>`note` | [`Note`](#note) | Note after mutation. |
-| <a id="mutationnoteconverttothreadquickactionsstatus"></a>`quickActionsStatus` | [`QuickActionsStatus`](#quickactionsstatus) | Status of quick actions after mutation. |
 
 ### `Mutation.oncallRotationCreate`
 
@@ -8963,7 +8944,6 @@ Input type: `RepositionImageDiffNoteInput`
 | <a id="mutationrepositionimagediffnoteclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | <a id="mutationrepositionimagediffnoteerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | <a id="mutationrepositionimagediffnotenote"></a>`note` | [`Note`](#note) | Note after mutation. |
-| <a id="mutationrepositionimagediffnotequickactionsstatus"></a>`quickActionsStatus` | [`QuickActionsStatus`](#quickactionsstatus) | Status of quick actions after mutation. |
 
 ### `Mutation.restorePagesDeployment`
 
@@ -10134,7 +10114,7 @@ Input type: `UpdateEpicInput`
 | <a id="mutationupdateepicaddlabelids"></a>`addLabelIds` | [`[ID!]`](#id) | IDs of labels to be added to the epic. |
 | <a id="mutationupdateepicaddlabels"></a>`addLabels` | [`[String!]`](#string) | Array of labels to be added to the epic. |
 | <a id="mutationupdateepicclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
-| <a id="mutationupdateepiccolor"></a>`color` | [`Color`](#color) | Color of the epic. |
+| <a id="mutationupdateepiccolor"></a>`color` | [`Color`](#color) | Color of the epic. Available only when feature flag `epic_color_highlight` is enabled. This flag is disabled by default, because the feature is experimental and is subject to change without notice. |
 | <a id="mutationupdateepicconfidential"></a>`confidential` | [`Boolean`](#boolean) | Indicates if the epic is confidential. |
 | <a id="mutationupdateepicdescription"></a>`description` | [`String`](#string) | Description of the epic. |
 | <a id="mutationupdateepicduedatefixed"></a>`dueDateFixed` | [`String`](#string) | End date of the epic. |
@@ -10206,7 +10186,6 @@ Input type: `UpdateImageDiffNoteInput`
 | <a id="mutationupdateimagediffnoteclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | <a id="mutationupdateimagediffnoteerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | <a id="mutationupdateimagediffnotenote"></a>`note` | [`Note`](#note) | Note after mutation. |
-| <a id="mutationupdateimagediffnotequickactionsstatus"></a>`quickActionsStatus` | [`QuickActionsStatus`](#quickactionsstatus) | Status of quick actions after mutation. |
 
 ### `Mutation.updateIssue`
 
@@ -10328,7 +10307,6 @@ Input type: `UpdateNoteInput`
 | <a id="mutationupdatenoteclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | <a id="mutationupdatenoteerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | <a id="mutationupdatenotenote"></a>`note` | [`Note`](#note) | Note after mutation. |
-| <a id="mutationupdatenotequickactionsstatus"></a>`quickActionsStatus` | [`QuickActionsStatus`](#quickactionsstatus) | Status of quick actions after mutation. |
 
 ### `Mutation.updatePackagesCleanupPolicy`
 
@@ -12402,30 +12380,6 @@ The edge type for [`CiJobTokenAuthLog`](#cijobtokenauthlog).
 | ---- | ---- | ----------- |
 | <a id="cijobtokenauthlogedgecursor"></a>`cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | <a id="cijobtokenauthlogedgenode"></a>`node` | [`CiJobTokenAuthLog`](#cijobtokenauthlog) | The item at the end of the edge. |
-
-#### `CiJobTokenScopeAllowlistEntryConnection`
-
-The connection type for [`CiJobTokenScopeAllowlistEntry`](#cijobtokenscopeallowlistentry).
-
-##### Fields
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="cijobtokenscopeallowlistentryconnectioncount"></a>`count` | [`Int!`](#int) | Total count of collection. |
-| <a id="cijobtokenscopeallowlistentryconnectionedges"></a>`edges` | [`[CiJobTokenScopeAllowlistEntryEdge]`](#cijobtokenscopeallowlistentryedge) | A list of edges. |
-| <a id="cijobtokenscopeallowlistentryconnectionnodes"></a>`nodes` | [`[CiJobTokenScopeAllowlistEntry]`](#cijobtokenscopeallowlistentry) | A list of nodes. |
-| <a id="cijobtokenscopeallowlistentryconnectionpageinfo"></a>`pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
-
-#### `CiJobTokenScopeAllowlistEntryEdge`
-
-The edge type for [`CiJobTokenScopeAllowlistEntry`](#cijobtokenscopeallowlistentry).
-
-##### Fields
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="cijobtokenscopeallowlistentryedgecursor"></a>`cursor` | [`String!`](#string) | A cursor for use in pagination. |
-| <a id="cijobtokenscopeallowlistentryedgenode"></a>`node` | [`CiJobTokenScopeAllowlistEntry`](#cijobtokenscopeallowlistentry) | The item at the end of the edge. |
 
 #### `CiManualVariableConnection`
 
@@ -19411,7 +19365,7 @@ Represents an epic on an issue board.
 | <a id="boardepicblockedbyepics"></a>`blockedByEpics` | [`EpicConnection`](#epicconnection) | Epics blocking this epic. (see [Connections](#connections)) |
 | <a id="boardepicblockingcount"></a>`blockingCount` | [`Int`](#int) | Count of epics that this epic is blocking. |
 | <a id="boardepicclosedat"></a>`closedAt` | [`Time`](#time) | Timestamp of when the epic was closed. |
-| <a id="boardepiccolor"></a>`color` | [`String`](#string) | Color of the epic. |
+| <a id="boardepiccolor"></a>`color` | [`String`](#string) | Color of the epic. Returns `null` if `epic_color_highlight` feature flag is disabled. |
 | <a id="boardepiccommenters"></a>`commenters` | [`UserCoreConnection!`](#usercoreconnection) | All commenters on this noteable. (see [Connections](#connections)) |
 | <a id="boardepicconfidential"></a>`confidential` | [`Boolean`](#boolean) | Indicates if the epic is confidential. |
 | <a id="boardepiccreatedat"></a>`createdAt` | [`Time`](#time) | Timestamp of when the epic was created. |
@@ -19450,7 +19404,7 @@ Represents an epic on an issue board.
 | <a id="boardepicstartdateisfixed"></a>`startDateIsFixed` | [`Boolean`](#boolean) | Indicates if the start date has been manually set. |
 | <a id="boardepicstate"></a>`state` | [`EpicState!`](#epicstate) | State of the epic. |
 | <a id="boardepicsubscribed"></a>`subscribed` | [`Boolean!`](#boolean) | Indicates the currently logged in user is subscribed to the epic. |
-| <a id="boardepictextcolor"></a>`textColor` | [`String`](#string) | Text color generated for the epic. |
+| <a id="boardepictextcolor"></a>`textColor` | [`String`](#string) | Text color generated for the epic. Returns `null` if `epic_color_highlight` feature flag is disabled. |
 | <a id="boardepictitle"></a>`title` | [`String`](#string) | Title of the epic. |
 | <a id="boardepictitlehtml"></a>`titleHtml` | [`String`](#string) | GitLab Flavored Markdown rendering of `title`. |
 | <a id="boardepicupdatedat"></a>`updatedAt` | [`Time`](#time) | Timestamp of when the epic was updated. |
@@ -19634,18 +19588,6 @@ four standard [pagination arguments](#pagination-arguments):
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | <a id="boardlistissuesfilters"></a>`filters` | [`BoardIssueInput`](#boardissueinput) | Filters applied when selecting issues in the board list. |
-
-### `BooleanExpression`
-
-an expression with a boolean value.
-
-#### Fields
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="booleanexpressionfield"></a>`field` | [`String!`](#string) | Field the expression applies to. |
-| <a id="booleanexpressionoperator"></a>`operator` | [`String!`](#string) | Operator of the expression. |
-| <a id="booleanexpressionvalue"></a>`value` | [`Boolean!`](#boolean) | Boolean value of the expression. |
 
 ### `Branch`
 
@@ -20069,15 +20011,6 @@ CI/CD variables for a GitLab instance.
 | ---- | ---- | ----------- |
 | <a id="cijobtokenauthloglastauthorizedat"></a>`lastAuthorizedAt` **{warning-solid}** | [`Time!`](#time) | **Introduced** in GitLab 17.6. **Status**: Experiment. Last authorization date time. |
 | <a id="cijobtokenauthlogoriginproject"></a>`originProject` **{warning-solid}** | [`Project!`](#project) | **Introduced** in GitLab 17.6. **Status**: Experiment. Origin project. |
-
-### `CiJobTokenScopeAllowlist`
-
-#### Fields
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="cijobtokenscopeallowlistgroupsallowlist"></a>`groupsAllowlist` | [`CiJobTokenScopeAllowlistEntryConnection`](#cijobtokenscopeallowlistentryconnection) | Allowlist of groups that can access the current project by authenticating with a CI/CD job token. (see [Connections](#connections)) |
-| <a id="cijobtokenscopeallowlistprojectsallowlist"></a>`projectsAllowlist` | [`CiJobTokenScopeAllowlistEntryConnection`](#cijobtokenscopeallowlistentryconnection) | Allowlist of projects that can access the current project by authenticating with a CI/CD job token. (see [Connections](#connections)) |
 
 ### `CiJobTokenScopeAllowlistEntry`
 
@@ -20959,7 +20892,6 @@ Represents a ComplianceFramework associated with a Project.
 | <a id="complianceframeworkprojects"></a>`projects` | [`ProjectConnection`](#projectconnection) | Projects associated with the compliance framework. (see [Connections](#connections)) |
 | <a id="complianceframeworkscanexecutionpolicies"></a>`scanExecutionPolicies` | [`ScanExecutionPolicyConnection`](#scanexecutionpolicyconnection) | Scan Execution Policies of the compliance framework. (see [Connections](#connections)) |
 | <a id="complianceframeworkscanresultpolicies"></a>`scanResultPolicies` | [`ScanResultPolicyConnection`](#scanresultpolicyconnection) | Scan Result Policies of the compliance framework. (see [Connections](#connections)) |
-| <a id="complianceframeworkvulnerabilitymanagementpolicies"></a>`vulnerabilityManagementPolicies` | [`VulnerabilityManagementPolicyConnection`](#vulnerabilitymanagementpolicyconnection) | Vulnerability Management Policies of the compliance framework. (see [Connections](#connections)) |
 
 ### `ComplianceRequirement`
 
@@ -20969,21 +20901,9 @@ Represents a ComplianceRequirement associated with a ComplianceFramework.
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
-| <a id="compliancerequirementcontrolexpression"></a>`controlExpression` | [`String!`](#string) | Control expression of the compliance requirement. |
 | <a id="compliancerequirementdescription"></a>`description` | [`String!`](#string) | Description of the compliance requirement. |
 | <a id="compliancerequirementid"></a>`id` | [`ID!`](#id) | Compliance requirement ID. |
 | <a id="compliancerequirementname"></a>`name` | [`String!`](#string) | Name of the compliance requirement. |
-| <a id="compliancerequirementrequirementtype"></a>`requirementType` | [`String!`](#string) | Type of the compliance requirement. |
-
-### `ComplianceRequirementControl`
-
-Lists down all the possible types of requirement controls.
-
-#### Fields
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="compliancerequirementcontrolcontrolexpressions"></a>`controlExpressions` | [`[ControlExpression!]!`](#controlexpression) | List of requirement controls. |
 
 ### `ComplianceStandardsAdherence`
 
@@ -21141,9 +21061,9 @@ A container repository.
 | <a id="containerrepositoryname"></a>`name` | [`String!`](#string) | Name of the container repository. |
 | <a id="containerrepositorypath"></a>`path` | [`String!`](#string) | Path of the container repository. |
 | <a id="containerrepositoryproject"></a>`project` | [`Project!`](#project) | Project of the container registry. |
-| <a id="containerrepositoryprotectionruleexists"></a>`protectionRuleExists` **{warning-solid}** | [`Boolean!`](#boolean) | **Introduced** in GitLab 17.2. **Status**: Experiment. Whether any matching container protection rule exists for the container. Available only when feature flag `container_registry_protected_containers` is enabled. |
+| <a id="containerrepositoryprotectionruleexists"></a>`protectionRuleExists` **{warning-solid}** | [`Boolean!`](#boolean) | **Introduced** in GitLab 17.2. **Status**: Experiment. Whether any matching container protection rule exists for this container. Available only when feature flag `container_registry_protected_containers` is enabled. |
 | <a id="containerrepositorystatus"></a>`status` | [`ContainerRepositoryStatus`](#containerrepositorystatus) | Status of the container repository. |
-| <a id="containerrepositorytagscount"></a>`tagsCount` | [`Int!`](#int) | Number of tags associated with the image. |
+| <a id="containerrepositorytagscount"></a>`tagsCount` | [`Int!`](#int) | Number of tags associated with this image. |
 | <a id="containerrepositoryupdatedat"></a>`updatedAt` | [`Time!`](#time) | Timestamp when the container repository was updated. |
 | <a id="containerrepositoryuserpermissions"></a>`userPermissions` | [`ContainerRepositoryPermissions!`](#containerrepositorypermissions) | Permissions for the current user on the resource. |
 
@@ -21166,10 +21086,10 @@ Details of a container repository.
 | <a id="containerrepositorydetailsname"></a>`name` | [`String!`](#string) | Name of the container repository. |
 | <a id="containerrepositorydetailspath"></a>`path` | [`String!`](#string) | Path of the container repository. |
 | <a id="containerrepositorydetailsproject"></a>`project` | [`Project!`](#project) | Project of the container registry. |
-| <a id="containerrepositorydetailsprotectionruleexists"></a>`protectionRuleExists` **{warning-solid}** | [`Boolean!`](#boolean) | **Introduced** in GitLab 17.2. **Status**: Experiment. Whether any matching container protection rule exists for the container. Available only when feature flag `container_registry_protected_containers` is enabled. |
+| <a id="containerrepositorydetailsprotectionruleexists"></a>`protectionRuleExists` **{warning-solid}** | [`Boolean!`](#boolean) | **Introduced** in GitLab 17.2. **Status**: Experiment. Whether any matching container protection rule exists for this container. Available only when feature flag `container_registry_protected_containers` is enabled. |
 | <a id="containerrepositorydetailssize"></a>`size` | [`Float`](#float) | Deduplicated size of the image repository in bytes. This is only available on GitLab.com for repositories created after `2021-11-04`. |
 | <a id="containerrepositorydetailsstatus"></a>`status` | [`ContainerRepositoryStatus`](#containerrepositorystatus) | Status of the container repository. |
-| <a id="containerrepositorydetailstagscount"></a>`tagsCount` | [`Int!`](#int) | Number of tags associated with the image. |
+| <a id="containerrepositorydetailstagscount"></a>`tagsCount` | [`Int!`](#int) | Number of tags associated with this image. |
 | <a id="containerrepositorydetailsupdatedat"></a>`updatedAt` | [`Time!`](#time) | Timestamp when the container repository was updated. |
 | <a id="containerrepositorydetailsuserpermissions"></a>`userPermissions` | [`ContainerRepositoryPermissions!`](#containerrepositorypermissions) | Permissions for the current user on the resource. |
 
@@ -21314,18 +21234,6 @@ Represents the contributions of a user.
 | <a id="contributionanalyticscontributionrepopushed"></a>`repoPushed` | [`Int`](#int) | Number of repository pushes the user made. |
 | <a id="contributionanalyticscontributiontotalevents"></a>`totalEvents` | [`Int`](#int) | Total number of events contributed by the user. |
 | <a id="contributionanalyticscontributionuser"></a>`user` | [`UserCore`](#usercore) | Contributor User object. |
-
-### `ControlExpression`
-
-Represents a control expression.
-
-#### Fields
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="controlexpressionexpression"></a>`expression` | [`ExpressionValue!`](#expressionvalue) | Expression details for the control. |
-| <a id="controlexpressionid"></a>`id` | [`ID!`](#id) | ID for the control. |
-| <a id="controlexpressionname"></a>`name` | [`String!`](#string) | Name of the control. |
 
 ### `CoverageFuzzingCorpus`
 
@@ -23068,7 +22976,7 @@ Represents an epic.
 | <a id="epicblockedbyepics"></a>`blockedByEpics` | [`EpicConnection`](#epicconnection) | Epics blocking this epic. (see [Connections](#connections)) |
 | <a id="epicblockingcount"></a>`blockingCount` | [`Int`](#int) | Count of epics that this epic is blocking. |
 | <a id="epicclosedat"></a>`closedAt` | [`Time`](#time) | Timestamp of when the epic was closed. |
-| <a id="epiccolor"></a>`color` | [`String`](#string) | Color of the epic. |
+| <a id="epiccolor"></a>`color` | [`String`](#string) | Color of the epic. Returns `null` if `epic_color_highlight` feature flag is disabled. |
 | <a id="epiccommenters"></a>`commenters` | [`UserCoreConnection!`](#usercoreconnection) | All commenters on this noteable. (see [Connections](#connections)) |
 | <a id="epicconfidential"></a>`confidential` | [`Boolean`](#boolean) | Indicates if the epic is confidential. |
 | <a id="epiccreatedat"></a>`createdAt` | [`Time`](#time) | Timestamp of when the epic was created. |
@@ -23107,7 +23015,7 @@ Represents an epic.
 | <a id="epicstartdateisfixed"></a>`startDateIsFixed` | [`Boolean`](#boolean) | Indicates if the start date has been manually set. |
 | <a id="epicstate"></a>`state` | [`EpicState!`](#epicstate) | State of the epic. |
 | <a id="epicsubscribed"></a>`subscribed` | [`Boolean!`](#boolean) | Indicates the currently logged in user is subscribed to the epic. |
-| <a id="epictextcolor"></a>`textColor` | [`String`](#string) | Text color generated for the epic. |
+| <a id="epictextcolor"></a>`textColor` | [`String`](#string) | Text color generated for the epic. Returns `null` if `epic_color_highlight` feature flag is disabled. |
 | <a id="epictitle"></a>`title` | [`String`](#string) | Title of the epic. |
 | <a id="epictitlehtml"></a>`titleHtml` | [`String`](#string) | GitLab Flavored Markdown rendering of `title`. |
 | <a id="epicupdatedat"></a>`updatedAt` | [`Time`](#time) | Timestamp of when the epic was updated. |
@@ -25650,27 +25558,6 @@ Returns [`[VulnerableProjectsByGrade!]`](#vulnerableprojectsbygrade).
 | <a id="groupvulnerabilitygradesincludesubgroups"></a>`includeSubgroups` | [`Boolean`](#boolean) | Include grades belonging to subgroups. |
 | <a id="groupvulnerabilitygradeslettergrade"></a>`letterGrade` | [`VulnerabilityGrade`](#vulnerabilitygrade) | Filter the response by given letter grade. |
 
-##### `Group.vulnerabilityManagementPolicies`
-
-Vulnerability Management Policies of the project.
-
-DETAILS:
-**Introduced** in GitLab 17.7.
-**Status**: Experiment.
-
-Returns [`VulnerabilityManagementPolicyConnection`](#vulnerabilitymanagementpolicyconnection).
-
-This field returns a [connection](#connections). It accepts the
-four standard [pagination arguments](#pagination-arguments):
-`before: String`, `after: String`, `first: Int`, and `last: Int`.
-
-###### Arguments
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="groupvulnerabilitymanagementpoliciesincludeunscoped"></a>`includeUnscoped` | [`Boolean`](#boolean) | Filter policies that are scoped to the project. |
-| <a id="groupvulnerabilitymanagementpoliciesrelationship"></a>`relationship` | [`SecurityPolicyRelationType`](#securitypolicyrelationtype) | Filter policies by the given policy relationship. |
-
 ##### `Group.vulnerabilitySeveritiesCount`
 
 Counts for each vulnerability severity in the group and its subgroups.
@@ -26413,18 +26300,6 @@ Returns [`VulnerabilitySeveritiesCount`](#vulnerabilityseveritiescount).
 | <a id="instancesecuritydashboardvulnerabilityseveritiescountscannerid"></a>`scannerId` | [`[VulnerabilitiesScannerID!]`](#vulnerabilitiesscannerid) | Filter vulnerabilities by scanner ID. |
 | <a id="instancesecuritydashboardvulnerabilityseveritiescountseverity"></a>`severity` | [`[VulnerabilitySeverity!]`](#vulnerabilityseverity) | Filter vulnerabilities by severity. |
 | <a id="instancesecuritydashboardvulnerabilityseveritiescountstate"></a>`state` | [`[VulnerabilityState!]`](#vulnerabilitystate) | Filter vulnerabilities by state. |
-
-### `IntegerExpression`
-
-An expression with an integer value.
-
-#### Fields
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="integerexpressionfield"></a>`field` | [`String!`](#string) | Field the expression applies to. |
-| <a id="integerexpressionoperator"></a>`operator` | [`String!`](#string) | Operator of the expression. |
-| <a id="integerexpressionvalue"></a>`value` | [`Int!`](#int) | Integer value of the expression. |
 
 ### `IntegrationExclusion`
 
@@ -29499,27 +29374,6 @@ four standard [pagination arguments](#pagination-arguments):
 | <a id="namespacescanresultpoliciesincludeunscoped"></a>`includeUnscoped` **{warning-solid}** | [`Boolean`](#boolean) | **Introduced** in GitLab 17.3. **Status**: Experiment. Filter policies that are scoped to the project. |
 | <a id="namespacescanresultpoliciesrelationship"></a>`relationship` | [`SecurityPolicyRelationType`](#securitypolicyrelationtype) | Filter policies by the given policy relationship. |
 
-##### `Namespace.vulnerabilityManagementPolicies`
-
-Vulnerability Management Policies of the project.
-
-DETAILS:
-**Introduced** in GitLab 17.7.
-**Status**: Experiment.
-
-Returns [`VulnerabilityManagementPolicyConnection`](#vulnerabilitymanagementpolicyconnection).
-
-This field returns a [connection](#connections). It accepts the
-four standard [pagination arguments](#pagination-arguments):
-`before: String`, `after: String`, `first: Int`, and `last: Int`.
-
-###### Arguments
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="namespacevulnerabilitymanagementpoliciesincludeunscoped"></a>`includeUnscoped` | [`Boolean`](#boolean) | Filter policies that are scoped to the project. |
-| <a id="namespacevulnerabilitymanagementpoliciesrelationship"></a>`relationship` | [`SecurityPolicyRelationType`](#securitypolicyrelationtype) | Filter policies by the given policy relationship. |
-
 ##### `Namespace.workItem`
 
 Find a work item by IID directly associated with the namespace(project or group).  Returns `null` for group level work items if the `namespace_level_work_items` feature flag is disabled.
@@ -29802,7 +29656,6 @@ four standard [pagination arguments](#pagination-arguments):
 | <a id="organizationgroupsmarkedfordeletionon"></a>`markedForDeletionOn` | [`Date`](#date) | Date when the group was marked for deletion. |
 | <a id="organizationgroupssearch"></a>`search` | [`String`](#string) | Search query for group name or group full path. |
 | <a id="organizationgroupssort"></a>`sort` | [`String`](#string) | Sort order of results. Format: `<field_name>_<sort_direction>`, for example: `id_desc` or `name_asc`. |
-| <a id="organizationgroupstoplevelonly"></a>`topLevelOnly` | [`Boolean`](#boolean) | Only include top level groups. |
 
 ##### `Organization.projects`
 
@@ -30930,7 +30783,6 @@ Project-level settings for product analytics provider.
 | <a id="projectcidownstreamprojectsubscriptions"></a>`ciDownstreamProjectSubscriptions` **{warning-solid}** | [`CiProjectSubscriptionConnection`](#ciprojectsubscriptionconnection) | **Introduced** in GitLab 17.6. **Status**: Experiment. Pipeline subscriptions where this project is the upstream project.When this project's pipeline completes, a pipeline is triggered in the downstream project. |
 | <a id="projectcijobtokenauthlogs"></a>`ciJobTokenAuthLogs` **{warning-solid}** | [`CiJobTokenAuthLogConnection`](#cijobtokenauthlogconnection) | **Introduced** in GitLab 17.6. **Status**: Experiment. The CI Job Tokens authorization logs. |
 | <a id="projectcijobtokenscope"></a>`ciJobTokenScope` | [`CiJobTokenScopeType`](#cijobtokenscopetype) | The CI Job Tokens scope of access. |
-| <a id="projectcijobtokenscopeallowlist"></a>`ciJobTokenScopeAllowlist` **{warning-solid}** | [`CiJobTokenScopeAllowlist`](#cijobtokenscopeallowlist) | **Introduced** in GitLab 17.6. **Status**: Experiment. List of CI job token scopes where the project is the source. |
 | <a id="projectcisubscribedprojects"></a>`ciSubscribedProjects` **{warning-solid}** | [`CiSubscriptionsProjectConnection`](#cisubscriptionsprojectconnection) | **Deprecated** in GitLab 17.6. Use `ciDownstreamProjectSubscriptions`. |
 | <a id="projectcisubscriptionsprojects"></a>`ciSubscriptionsProjects` **{warning-solid}** | [`CiSubscriptionsProjectConnection`](#cisubscriptionsprojectconnection) | **Deprecated** in GitLab 17.6. Use `ciUpstreamProjectSubscriptions`. |
 | <a id="projectciupstreamprojectsubscriptions"></a>`ciUpstreamProjectSubscriptions` **{warning-solid}** | [`CiProjectSubscriptionConnection`](#ciprojectsubscriptionconnection) | **Introduced** in GitLab 17.6. **Status**: Experiment. Pipeline subscriptions where this project is the downstream project.When an upstream project's pipeline completes, a pipeline is triggered in the downstream project (this project). |
@@ -33591,17 +33443,6 @@ The amount of time for a job to be picked up by a runner, in percentiles.
 | <a id="queueinghistorytimeseriesp99"></a>`p99` | [`Duration`](#duration) | 99th percentile. 99% of the durations are lower than this value. |
 | <a id="queueinghistorytimeseriestime"></a>`time` | [`Time!`](#time) | Start of the time interval. |
 
-### `QuickActionsStatus`
-
-#### Fields
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="quickactionsstatuscommandnames"></a>`commandNames` | [`[String!]`](#string) | Quick action command names. |
-| <a id="quickactionsstatuscommandsonly"></a>`commandsOnly` | [`Boolean`](#boolean) | Returns true if only quick action commands were in the note. |
-| <a id="quickactionsstatuserrormessages"></a>`errorMessages` | [`[String!]`](#string) | Error messages from quick actions that failed to apply. |
-| <a id="quickactionsstatusmessages"></a>`messages` | [`[String!]`](#string) | Response messages from quick actions. |
-
 ### `RecentFailures`
 
 Recent failure history of a test case.
@@ -34670,18 +34511,6 @@ Progress of standards adherence checks.
 | <a id="statusactionmethod"></a>`method` | [`String`](#string) | Method for the action, for example: :post. |
 | <a id="statusactionpath"></a>`path` | [`String`](#string) | Path for the action. |
 | <a id="statusactiontitle"></a>`title` | [`String`](#string) | Title for the action, for example: Retry. |
-
-### `StringExpression`
-
-an expression with a string value.
-
-#### Fields
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="stringexpressionfield"></a>`field` | [`String!`](#string) | Field the expression applies to. |
-| <a id="stringexpressionoperator"></a>`operator` | [`String!`](#string) | Operator of the expression. |
-| <a id="stringexpressionvalue"></a>`value` | [`String!`](#string) | String value of the expression. |
 
 ### `Submodule`
 
@@ -42051,16 +41880,6 @@ One of:
 
 - [`NugetDependencyLinkMetadata`](#nugetdependencylinkmetadata)
 
-#### `ExpressionValue`
-
-Represents possible value types for an expression.
-
-One of:
-
-- [`BooleanExpression`](#booleanexpression)
-- [`IntegerExpression`](#integerexpression)
-- [`StringExpression`](#stringexpression)
-
 #### `GoogleCloudArtifactRegistryArtifact`
 
 A base type of Google Artifact Registry artifacts.
@@ -42423,23 +42242,6 @@ Implementations:
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | <a id="eventableevents"></a>`events` | [`EventConnection`](#eventconnection) | List of events associated with the object. (see [Connections](#connections)) |
-
-#### `ExpressionInterface`
-
-Defines the common fields for all expressions.
-
-Implementations:
-
-- [`BooleanExpression`](#booleanexpression)
-- [`IntegerExpression`](#integerexpression)
-- [`StringExpression`](#stringexpression)
-
-##### Fields
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="expressioninterfacefield"></a>`field` | [`String!`](#string) | Field the expression applies to. |
-| <a id="expressioninterfaceoperator"></a>`operator` | [`String!`](#string) | Operator of the expression. |
 
 #### `ExternalAuditEventDestinationInterface`
 
@@ -43308,7 +43110,7 @@ see the associated mutation type above.
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | <a id="airesolvevulnerabilityinputresourceid"></a>`resourceId` | [`AiModelID!`](#aimodelid) | Global ID of the resource to mutate. |
-| <a id="airesolvevulnerabilityinputvulnerablemergerequestid"></a>`vulnerableMergeRequestId` | [`MergeRequestID`](#mergerequestid) | Global ID of the merge request which the merge request containing the vulnerability resolution will target. |
+| <a id="airesolvevulnerabilityinputsuggestionmergerequestid"></a>`suggestionMergeRequestId` | [`MergeRequestID`](#mergerequestid) | Global ID of the merge request where resolution will be provided as a suggestion. |
 
 ### `AiSummarizeCommentsInput`
 
@@ -43447,7 +43249,6 @@ Attributes for defining a CI/CD variable.
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
-| <a id="compliancerequirementinputcontrolexpression"></a>`controlExpression` | [`String`](#string) | Control expression for the compliance requirement. |
 | <a id="compliancerequirementinputdescription"></a>`description` | [`String`](#string) | New description for the compliance requirement. |
 | <a id="compliancerequirementinputname"></a>`name` | [`String`](#string) | New name for the compliance requirement. |
 
