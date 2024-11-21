@@ -18,12 +18,8 @@ RSpec.describe Gitlab::GrapeLogging::Loggers::TokenLogger do
     end
 
     describe 'when token information is available' do
-      let(:mock_request) do
-        instance_double(ActionDispatch::Request, 'env',
-          env: {
-            'gitlab.api.token' => { token_id: token_id, token_type: token_type }
-          }
-        )
+      before do
+        ::Current.token_info = { token_id: token_id, token_type: token_type }
       end
 
       it 'adds the token information to log parameters' do

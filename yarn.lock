@@ -1429,10 +1429,10 @@
   resolved "https://registry.yarnpkg.com/@gitlab/svgs/-/svgs-3.121.0.tgz#57cacc895929aef4320632396373797a64b230ff"
   integrity sha512-ZekVjdMZrjrNEjdrOHsJYCu7A+ea3AkuNUxWIZ3FaNgJj4Oh21RlTP7bQKnRSXVhBbV1jg1PgzQ1ANEoCW8t4g==
 
-"@gitlab/ui@103.1.0":
-  version "103.1.0"
-  resolved "https://registry.yarnpkg.com/@gitlab/ui/-/ui-103.1.0.tgz#7b446e72873ed9608211482b1f80419a0def3d4c"
-  integrity sha512-KpmJHY1+armClHecG1FoLrERpYgDK4GesbB82HsYEF1EydSZeyQPrrQEYdY83rqF1POYXBHOEzugmteOA5nUvg==
+"@gitlab/ui@102.1.0":
+  version "102.1.0"
+  resolved "https://registry.yarnpkg.com/@gitlab/ui/-/ui-102.1.0.tgz#ea52d414b56e28cdd7e1bd572d7e5c057238384a"
+  integrity sha512-8A2qNm2JYf9/xEF0Sh0XVVrZlp7YzFws+sPOQ4CVdwyoyBtXU4cACxBfb+/t1OvTrzX42gKnHjIbolN80E51NA==
   dependencies:
     "@floating-ui/dom" "1.4.3"
     echarts "^5.3.2"
@@ -6740,10 +6740,10 @@ domexception@^4.0.0:
   dependencies:
     webidl-conversions "^7.0.0"
 
-dompurify@^3.0.5, dompurify@^3.2.0:
-  version "3.2.0"
-  resolved "https://registry.yarnpkg.com/dompurify/-/dompurify-3.2.0.tgz#53c414317c51503183696fcdef6dd3f916c607ed"
-  integrity sha512-AMdOzK44oFWqHEi0wpOqix/fUNY707OmoeFDnbi3Q5I8uOpy21ufUA5cDJPr0bosxrflOVD/H2DMSvuGKJGfmQ==
+dompurify@^3.0.5, dompurify@^3.1.6:
+  version "3.1.6"
+  resolved "https://registry.yarnpkg.com/dompurify/-/dompurify-3.1.6.tgz#43c714a94c6a7b8801850f82e756685300a027e2"
+  integrity sha512-cTOAhc36AalkjtBpfG6O8JimdTMWNXjiePT2xQH/ppBGi/4uIpmj8eKyIkMJErXWARyINV/sB38yf8JCLF5pbQ==
 
 dropzone@^4.2.0:
   version "4.2.0"
@@ -6821,10 +6821,10 @@ emittery@^0.13.1:
   resolved "https://registry.yarnpkg.com/emittery/-/emittery-0.13.1.tgz#c04b8c3457490e0847ae51fced3af52d338e3dad"
   integrity sha512-DeWwawk6r5yR9jFgnDKYt4sLS0LmHJJi3ZOnb5/JdbYwj3nW+FxQnHIjhBKz8YLC7oRNPVM9NQ47I3CVx34eqQ==
 
-emoji-regex@^10.3.0:
-  version "10.4.0"
-  resolved "https://registry.yarnpkg.com/emoji-regex/-/emoji-regex-10.4.0.tgz#03553afea80b3975749cfcb36f776ca268e413d4"
-  integrity sha512-EC+0oUMY1Rqm4O6LLrgjtYDvcVYTy7chDnM4Q7030tP4Kwj3u/pR6gP9ygnp2CJMK5Gq+9Q2oqmrFJAz01DXjw==
+emoji-regex@^10.0.0:
+  version "10.0.0"
+  resolved "https://registry.yarnpkg.com/emoji-regex/-/emoji-regex-10.0.0.tgz#96559e19f82231b436403e059571241d627c42b8"
+  integrity sha512-KmJa8l6uHi1HrBI34udwlzZY1jOEuID/ft4d8BSSEdRyap7PwBEt910453PJa5MuGvxkLqlt4Uvhu7tttFHViw==
 
 emoji-regex@^8.0.0:
   version "8.0.0"
@@ -7215,14 +7215,6 @@ eslint-config-prettier@^9.1.0:
   version "9.1.0"
   resolved "https://registry.yarnpkg.com/eslint-config-prettier/-/eslint-config-prettier-9.1.0.tgz#31af3d94578645966c082fcb71a5846d3c94867f"
   integrity sha512-NSWl5BFQWEPi1j4TjVNItzYV7dZXZ+wP6I6ZhrBGpChQhZRUaElihE9uRRkcbRnNb76UMKDF3r+WTmNcGPKsqw==
-
-eslint-formatter-gitlab@^5.1.0:
-  version "5.1.0"
-  resolved "https://registry.yarnpkg.com/eslint-formatter-gitlab/-/eslint-formatter-gitlab-5.1.0.tgz#33162a17eefba5a44a257af568511d360212e866"
-  integrity sha512-IxhrjLYzDlbFgPWEnvZlWLwPjMeyymbyo0hDHWntZ3DSAP9AP9huj15KbU+BK3OqeO3OHhbFEh2TA6sR0KZhkA==
-  dependencies:
-    chalk "^4.0.0"
-    yaml "^2.0.0"
 
 eslint-import-resolver-jest@3.0.2:
   version "3.0.2"
@@ -14895,10 +14887,10 @@ vite-plugin-ruby@^5.1.1:
     debug "^4.3.4"
     fast-glob "^3.3.2"
 
-vite@^5.4.11:
-  version "5.4.11"
-  resolved "https://registry.yarnpkg.com/vite/-/vite-5.4.11.tgz#3b415cd4aed781a356c1de5a9ebafb837715f6e5"
-  integrity sha512-c7jFQRklXua0mTzneGW9QVyxFjUgwcihC4bXEtujIo2ouWCe1Ajt/amn2PCxYnhYfd5k09JX3SB7OYWFKYqj8Q==
+vite@^5.4.10:
+  version "5.4.10"
+  resolved "https://registry.yarnpkg.com/vite/-/vite-5.4.10.tgz#d358a7bd8beda6cf0f3b7a450a8c7693a4f80c18"
+  integrity sha512-1hvaPshuPUtxeQ0hsVH3Mud0ZanOLwVTneA1EgbAM5LhaZEqyPWGRQ7BtaMvUrTDeEaC8pxtj6a6jku3x4z6SQ==
   dependencies:
     esbuild "^0.21.3"
     postcss "^8.4.43"

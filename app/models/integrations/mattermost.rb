@@ -1,8 +1,7 @@
 # frozen_string_literal: true
 
 module Integrations
-  class Mattermost < Integration
-    include Base::ChatNotification
+  class Mattermost < BaseChatNotification
     include SlackMattermostNotifier
     include SlackMattermostFields
     include HasAvatar

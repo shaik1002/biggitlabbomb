@@ -10,7 +10,7 @@ ee/spec/frontend/admin/subscriptions/show/components/subscription_details_histor
 ee/spec/frontend/ai/settings/components/duo_experiment_beta_features_form_spec.js
 ee/spec/frontend/analytics/analytics_dashboards/components/analytics_dashboard_panel_spec.js
 ee/spec/frontend/analytics/analytics_dashboards/components/analytics_dashboards_breadcrumbs_spec.js
-ee/spec/frontend/analytics/analytics_dashboards/components/analytics_data_explorer_spec.js
+ee/spec/frontend/analytics/analytics_dashboards/components/analytics_visualization_designer_spec.js
 ee/spec/frontend/analytics/analytics_dashboards/components/list/feature_list_item_spec.js
 ee/spec/frontend/analytics/cycle_analytics/components/value_stream_aggregation_status_spec.js
 ee/spec/frontend/analytics/cycle_analytics/components/value_stream_form_content_spec.js
@@ -114,6 +114,7 @@ ee/spec/frontend/security_dashboard/components/shared/vulnerability_report/conta
 ee/spec/frontend/security_dashboard/components/shared/vulnerability_report/vulnerability_list_graphql_spec.js
 ee/spec/frontend/security_dashboard/components/shared/vulnerability_report/vulnerability_report_spec.js
 ee/spec/frontend/security_dashboard/components/shared/vulnerability_report/vulnerability_report_tabs_spec.js
+ee/spec/frontend/security_orchestration/components/policy_drawer/scan_execution/details_drawer_spec.js
 ee/spec/frontend/security_orchestration/components/policy_editor/pipeline_execution/action/action_section_spec.js
 ee/spec/frontend/security_orchestration/components/policy_editor/pipeline_execution/action/code_block_file_path_spec.js
 ee/spec/frontend/security_orchestration/components/policy_editor/pipeline_execution/rule/rule_section_spec.js
@@ -133,7 +134,9 @@ ee/spec/frontend/usage_quotas/code_suggestions/components/add_on_eligible_user_l
 ee/spec/frontend/usage_quotas/code_suggestions/components/health_check_list_spec.js
 ee/spec/frontend/usage_quotas/pipelines/components/app_spec.js
 ee/spec/frontend/usage_quotas/seats/components/subscription_user_list_spec.js
+ee/spec/frontend/users/identity_verification/components/credit_card_verification_spec.js
 ee/spec/frontend/users/identity_verification/components/international_phone_input_spec.js
+ee/spec/frontend/users/identity_verification/components/phone_verification_spec.js
 ee/spec/frontend/users/identity_verification/components/verify_phone_verification_code_spec.js
 ee/spec/frontend/vue_merge_request_widget/components/mr_widget_pipeline_container_spec.js
 ee/spec/frontend/vue_merge_request_widget/components/states/mr_widget_ready_to_merge_spec.js
@@ -247,6 +250,8 @@ spec/frontend/ide/ide_router_extension_spec.js
 spec/frontend/ide/ide_router_spec.js
 spec/frontend/ide/sync_router_and_store_spec.js
 spec/frontend/import_entities/import_projects/components/import_projects_table_spec.js
+spec/frontend/integrations/beyond_identity/components/exclusions_list_spec.js
+spec/frontend/integrations/edit/components/integration_form_spec.js
 spec/frontend/integrations/edit/components/sections/connection_spec.js
 spec/frontend/invite_members/components/members_token_select_spec.js
 spec/frontend/issuable/components/issuable_by_email_spec.js
@@ -283,6 +288,7 @@ spec/frontend/notes/components/discussion_notes_spec.js
 spec/frontend/notes/components/note_preview_spec.js
 spec/frontend/notes/components/notes_app_spec.js
 spec/frontend/notes/components/timeline_toggle_spec.js
+spec/frontend/notes/components/toggle_replies_widget_spec.js
 spec/frontend/organizations/groups_and_projects/components/app_spec.js
 spec/frontend/organizations/shared/components/new_edit_form_spec.js
 spec/frontend/packages_and_registries/container_registry/explorer/components/list_page/image_list_row_spec.js
@@ -317,6 +323,7 @@ spec/frontend/projects/compare/components/revision_dropdown_spec.js
 spec/frontend/projects/components/new_edit_form_spec.js
 spec/frontend/projects/new/components/new_project_url_select_spec.js
 spec/frontend/projects/report_abuse/components/report_abuse_dropdown_item_spec.js
+spec/frontend/projects/settings/branch_rules/components/view/rule_drawer_spec.js
 spec/frontend/projects/settings/components/branch_rule_modal_spec.js
 spec/frontend/projects/settings/repository/branch_rules/app_spec.js
 spec/frontend/projects/settings/topics/components/topics_token_selector_spec.js
@@ -324,6 +331,7 @@ spec/frontend/projects/settings_service_desk/components/custom_email_form_spec.j
 spec/frontend/projects/settings_service_desk/components/service_desk_root_spec.js
 spec/frontend/projects/settings_service_desk/components/service_desk_setting_spec.js
 spec/frontend/projects/your_work/components/app_spec.js
+spec/frontend/ref/components/ambiguous_ref_modal_spec.js
 spec/frontend/ref/init_ambiguous_ref_modal_spec.js
 spec/frontend/releases/components/app_edit_new_spec.js
 spec/frontend/releases/components/asset_links_form_spec.js
@@ -374,6 +382,7 @@ spec/frontend/vue_alerts_spec.js
 spec/frontend/vue_merge_request_widget/components/mr_widget_pipeline_spec.js
 spec/frontend/vue_merge_request_widget/components/states/merge_failed_pipeline_confirmation_dialog_spec.js
 spec/frontend/vue_merge_request_widget/components/states/mr_widget_ready_to_merge_spec.js
+spec/frontend/vue_merge_request_widget/components/widget/widget_spec.js
 spec/frontend/vue_popovers_spec.js
 spec/frontend/vue_shared/components/alert_details_table_spec.js
 spec/frontend/vue_shared/components/color_picker/color_picker_spec.js
@@ -395,8 +404,10 @@ spec/frontend/vue_shared/components/markdown_drawer/markdown_drawer_spec.js
 spec/frontend/vue_shared/components/metric_images/metric_image_details_modal_spec.js
 spec/frontend/vue_shared/components/page_heading_spec.js
 spec/frontend/vue_shared/components/project_selector/project_selector_spec.js
+spec/frontend/vue_shared/components/runner_instructions/instructions/runner_aws_instructions_spec.js
 spec/frontend/vue_shared/components/runner_instructions/runner_instructions_modal_spec.js
 spec/frontend/vue_shared/components/smart_virtual_list_spec.js
+spec/frontend/vue_shared/components/source_viewer/components/chunk_spec.js
 spec/frontend/vue_shared/components/tooltip_on_truncate_spec.js
 spec/frontend/vue_shared/components/upload_dropzone/upload_dropzone_spec.js
 spec/frontend/vue_shared/directives/tooltip_on_truncate_spec.js

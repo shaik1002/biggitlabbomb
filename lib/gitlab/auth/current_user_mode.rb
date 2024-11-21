@@ -91,7 +91,9 @@ module Gitlab
         def optionally_run_in_admin_mode(user)
           raise NonSidekiqEnvironmentError unless Gitlab::Runtime.sidekiq?
 
-          return yield unless Gitlab::CurrentSettings.admin_mode && user.admin?
+          unless Gitlab::CurrentSettings.admin_mode && user.admin? # rubocop:disable Cop/UserAdmin -- policy checks should be enforced further down the stack
+            return yield
+          end
 
           bypass_session!(user.id) do
             with_current_admin(user) do

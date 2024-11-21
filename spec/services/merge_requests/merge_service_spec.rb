@@ -743,9 +743,7 @@ RSpec.describe MergeRequests::MergeService, feature_category: :code_review_workf
         context 'with failing CI' do
           before do
             allow(merge_request.project).to receive(:only_allow_merge_if_pipeline_succeeds) { true }
-            allow_next_instance_of(MergeRequests::Mergeability::CheckCiStatusService) do |check|
-              allow(check).to receive(:mergeable_ci_state?).and_return(false)
-            end
+            allow(merge_request).to receive(:mergeable_ci_state?) { false }
           end
 
           it 'logs and saves error' do

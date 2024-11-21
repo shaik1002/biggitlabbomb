@@ -68,7 +68,6 @@ import {
   PARAM_PAGE_BEFORE,
   PARAM_STATE,
   urlSortParams,
-  PARAM_SORT,
 } from '~/issues/list/constants';
 import CiIcon from '~/vue_shared/components/ci_icon/ci_icon.vue';
 import MergeRequestReviewers from '~/issuable/components/merge_request_reviewers.vue';
@@ -461,11 +460,6 @@ export default {
     },
   },
   watch: {
-    $route(newValue, oldValue) {
-      if (newValue.fullPath !== oldValue.fullPath) {
-        this.updateData(getParameterByName(PARAM_SORT));
-      }
-    },
     state: {
       handler(val) {
         document
@@ -709,7 +703,6 @@ export default {
       :sort-options="sortOptions"
       :initial-sort-by="sortKey"
       :issuables="mergeRequests"
-      issuable-symbol="!"
       :error="mergeRequestsError"
       :tabs="$options.mergeRequestListTabs"
       :current-tab="state"

@@ -15,6 +15,7 @@ import {
   storageTypeHelpPaths,
   PROJECT_STORAGE_TYPES,
   NAMESPACE_STORAGE_TYPES,
+  TOTAL_USAGE_DEFAULT_TEXT,
 } from '~/usage_quotas/storage/constants';
 import getCostFactoredProjectStorageStatistics from 'ee_else_ce/usage_quotas/storage/project/queries/cost_factored_project_storage.query.graphql';
 import getProjectStorageStatistics from 'ee_else_ce/usage_quotas/storage/project/queries/project_storage.query.graphql';
@@ -163,7 +164,7 @@ describe('ProjectStorageApp', () => {
     });
 
     it('shows default text for total usage', () => {
-      expect(findUsagePercentage().text()).toBe('Not applicable.');
+      expect(findUsagePercentage().text()).toBe(TOTAL_USAGE_DEFAULT_TEXT);
     });
 
     it('passes empty array to project details table', () => {

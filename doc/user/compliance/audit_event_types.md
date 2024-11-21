@@ -1,5 +1,5 @@
 ---
-stage: Software Supply Chain Security
+stage: Govern
 group: Compliance
 info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments"
 ---
@@ -256,6 +256,12 @@ Audit event types belong to the following product categories.
 | [`cluster_agent_deleted`](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/159593) | Triggered when a user deletes a cluster agent | **{check-circle}** Yes | **{check-circle}** Yes | GitLab [17.3](https://gitlab.com/gitlab-org/gitlab/-/issues/462749) | Project |
 | [`cluster_agent_token_created`](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/112036) | Triggered when a user creates a cluster agent token | **{check-circle}** Yes | **{check-circle}** Yes | GitLab [15.10](https://gitlab.com/gitlab-org/gitlab/-/issues/382133) | Project |
 | [`cluster_agent_token_revoked`](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/112036) | Triggered when a user revokes a cluster agent token | **{check-circle}** Yes | **{check-circle}** Yes | GitLab [15.10](https://gitlab.com/gitlab-org/gitlab/-/issues/382133) | Project |
+
+### Duo workflow
+
+| Name | Description | Saved to database | Streamed | Introduced in | Scope |
+|:------------|:------------|:------------------|:---------|:--------------|:--------------|
+| [`api_request_access_with_scope`](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/172548) | A susbset of API requests authenticated by a token with an audited scope | **{check-circle}** Yes | **{check-circle}** Yes | GitLab [17.7](https://gitlab.com/gitlab-org/gitlab/-/issues/499461) | User |
 
 ### Dynamic application security testing
 
