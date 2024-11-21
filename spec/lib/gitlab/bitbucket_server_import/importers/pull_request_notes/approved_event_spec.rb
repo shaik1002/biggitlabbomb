@@ -2,7 +2,9 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::BitbucketServerImport::Importers::PullRequestNotes::ApprovedEvent, feature_category: :importers do
+RSpec.describe Gitlab::BitbucketServerImport::Importers::PullRequestNotes::ApprovedEvent, :clean_gitlab_redis_shared_state, feature_category: :importers do
+  include Import::UserMappingHelper
+
   let_it_be(:project) do
     create(:project, :repository, :import_started,
       import_data_attributes: {
@@ -22,6 +24,7 @@ RSpec.describe Gitlab::BitbucketServerImport::Importers::PullRequestNotes::Appro
   let(:approved_event) do
     {
       id: 4,
+      approver_name: pull_request_author.name,
       approver_username: pull_request_author.username,
       approver_email: pull_request_author.email,
       created_at: now
@@ -37,6 +40,31 @@ RSpec.describe Gitlab::BitbucketServerImport::Importers::PullRequestNotes::Appro
   subject(:importer) { described_class.new(project, merge_request) }
 
   describe '#execute', :clean_gitlab_redis_shared_state do
+    context 'when user contribution mapping is enabled' do
+      let_it_be(:project) do
+        create(
+          :project,
+          :repository,
+          :import_started,
+          :import_user_mapping_enabled,
+          import_type: :bitbucket_server
+        )
+      end
+
+      let_it_be(:merge_request) { create(:merge_request, source_project: project) }
+
+      it 'creates placeholder reference', :aggregate_failures do
+        importer.execute(approved_event)
+
+        cached_references = placeholder_user_references(::Import::SOURCE_BITBUCKET_SERVER, project.import_state.id)
+        expect(cached_references).to contain_exactly(
+          ['Approval', instance_of(Integer), 'user_id', instance_of(Integer)],
+          ['MergeRequestReviewer', instance_of(Integer), 'user_id', instance_of(Integer)],
+          ['Note', instance_of(Integer), 'author_id', instance_of(Integer)]
+        )
+      end
+    end
+
     it 'creates the approval, reviewer and approval note' do
       expect { importer.execute(approved_event) }
         .to change { merge_request.approvals.count }.from(0).to(1)

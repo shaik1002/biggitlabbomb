@@ -2,7 +2,9 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::BitbucketServerImport::Importers::PullRequestNotes::StandaloneNotes, feature_category: :importers do
+RSpec.describe Gitlab::BitbucketServerImport::Importers::PullRequestNotes::StandaloneNotes, :clean_gitlab_redis_shared_state, feature_category: :importers do
+  include Import::UserMappingHelper
+
   let_it_be(:project) do
     create(:project, :repository, :import_started,
       import_data_attributes: {
@@ -21,6 +23,7 @@ RSpec.describe Gitlab::BitbucketServerImport::Importers::PullRequestNotes::Stand
     {
       id: 5,
       note: 'Hello world',
+      author_name: note_author.name,
       author_email: note_author.email,
       author_username: note_author.username,
       comments: [],
@@ -43,6 +46,29 @@ RSpec.describe Gitlab::BitbucketServerImport::Importers::PullRequestNotes::Stand
   subject(:importer) { described_class.new(project, merge_request) }
 
   describe '#execute' do
+    context 'when user contribution mapping is enabled' do
+      let_it_be(:project) do
+        create(
+          :project,
+          :repository,
+          :import_started,
+          :import_user_mapping_enabled,
+          import_type: :bitbucket_server
+        )
+      end
+
+      let_it_be(:merge_request) { create(:merge_request, source_project: project) }
+
+      it 'creates placeholder reference' do
+        importer.execute(pr_comment)
+
+        cached_references = placeholder_user_references(::Import::SOURCE_BITBUCKET_SERVER, project.import_state.id)
+        expect(cached_references).to contain_exactly(
+          ['Note', instance_of(Integer), 'author_id', instance_of(Integer)]
+        )
+      end
+    end
+
     it 'imports the stand alone comments' do
       expect(mentions_converter).to receive(:convert).and_call_original
 

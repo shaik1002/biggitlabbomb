@@ -662,7 +662,10 @@ FactoryBot.define do
 
   trait :import_user_mapping_enabled do
     import_data_attributes do
-      { data: { user_contribution_mapping_enabled: true } }
+      {
+        credentials: { 'base_uri' => 'https://gitlab.example.com' },
+        data: { user_contribution_mapping_enabled: true }
+      }
     end
   end
 end

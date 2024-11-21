@@ -2,7 +2,9 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::BitbucketServerImport::Importers::PullRequestNotes::Inline, feature_category: :importers do
+RSpec.describe Gitlab::BitbucketServerImport::Importers::PullRequestNotes::Inline, :clean_gitlab_redis_shared_state, feature_category: :importers do
+  include Import::UserMappingHelper
+
   let_it_be(:project) do
     create(:project, :repository, :import_started,
       import_data_attributes: {
@@ -63,6 +65,30 @@ RSpec.describe Gitlab::BitbucketServerImport::Importers::PullRequestNotes::Inlin
   subject(:importer) { described_class.new(project, merge_request) }
 
   describe '#execute' do
+    context 'when user contribution mapping is enabled' do
+      let_it_be(:project) do
+        create(
+          :project,
+          :repository,
+          :import_started,
+          :import_user_mapping_enabled,
+          import_type: :bitbucket_server
+        )
+      end
+
+      let_it_be(:merge_request) { create(:merge_request, source_project: project) }
+
+      it 'creates placeholder reference', :aggregate_failures do
+        importer.execute(pr_inline_comment)
+
+        cached_references = placeholder_user_references(::Import::SOURCE_BITBUCKET_SERVER, project.import_state.id)
+        expect(cached_references).to contain_exactly(
+          ['DiffNote', instance_of(Integer), 'author_id', instance_of(Integer)],
+          ['DiffNote', instance_of(Integer), 'author_id', instance_of(Integer)]
+        )
+      end
+    end
+
     it 'imports the threaded discussion' do
       expect(mentions_converter).to receive(:convert).and_call_original.twice
 

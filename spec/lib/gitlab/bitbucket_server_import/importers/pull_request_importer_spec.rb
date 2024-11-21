@@ -2,10 +2,19 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::BitbucketServerImport::Importers::PullRequestImporter, feature_category: :importers do
+RSpec.describe Gitlab::BitbucketServerImport::Importers::PullRequestImporter, :clean_gitlab_redis_shared_state, feature_category: :importers do
   include AfterNextHelpers
+  include Import::UserMappingHelper
 
-  let_it_be(:project) { create(:project, :repository) }
+  let_it_be(:project) do
+    create(
+      :project,
+      :repository,
+      :import_started,
+      import_data: ProjectImportData.new(credentials: { 'base_uri' => 'gitlab.example.com' })
+    )
+  end
+
   let_it_be(:reviewer_1) { create(:user, username: 'john_smith', email: 'john@smith.com') }
   let_it_be(:reviewer_2) { create(:user, username: 'jane_doe', email: 'jane@doe.com') }
 
@@ -68,9 +77,50 @@ RSpec.describe Gitlab::BitbucketServerImport::Importers::PullRequestImporter, fe
       end
     end
 
-    context 'when the `bitbucket_server_user_mapping_by_username` flag is disabled' do
+    context 'when placeholder user mapping enabled?' do
+      let_it_be(:project) do
+        create(
+          :project,
+          :repository,
+          :import_started,
+          :import_user_mapping_enabled,
+          import_type: ::Import::SOURCE_BITBUCKET_SERVER
+        )
+      end
+
+      it 'maps the contribution to the correct user' do
+        importer.execute
+
+        merge_request = project.merge_requests.last
+
+        expect(merge_request.author).to be_a(User)
+      end
+
+      it 'excludes the author tag line' do
+        importer.execute
+
+        merge_request = project.merge_requests.last
+        expect(merge_request.description).to eq('Test')
+      end
+
+      it 'pushes placeholder references', :aggregate_failures do
+        importer.execute
+
+        cached_references = placeholder_user_references(::Import::SOURCE_BITBUCKET_SERVER, project.import_state.id)
+        expect(cached_references).to contain_exactly(
+          ['MergeRequestReviewer', instance_of(Integer), 'user_id', instance_of(Integer)],
+          ['MergeRequestReviewer', instance_of(Integer), 'user_id', instance_of(Integer)],
+          ['MergeRequest', instance_of(Integer), 'author_id', instance_of(Integer)]
+        )
+      end
+    end
+
+    context 'when `bitbucket_server_user_mapping_by_username` & `bitbucket_server_user_mapping` flags are disabled' do
       before do
-        stub_feature_flags(bitbucket_server_user_mapping_by_username: false)
+        stub_feature_flags(
+          bitbucket_server_convert_mentions_to_users: false,
+          bitbucket_server_user_mapping: false
+        )
       end
 
       it 'imports reviewers correctly' do

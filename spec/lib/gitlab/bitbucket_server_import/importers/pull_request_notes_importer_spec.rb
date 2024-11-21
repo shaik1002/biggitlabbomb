@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe Gitlab::BitbucketServerImport::Importers::PullRequestNotesImporter, feature_category: :importers do
   include AfterNextHelpers
+  include Import::UserMappingHelper
 
   let_it_be_with_reload(:project) do
     create(:project, :repository, :import_started,
@@ -30,6 +31,8 @@ RSpec.describe Gitlab::BitbucketServerImport::Importers::PullRequestNotesImporte
       comment?: false,
       merge_event?: true,
       approved_event?: false,
+      committer_name: pull_request_author.name,
+      committer_username: pull_request_author.username,
       committer_email: pull_request_author.email,
       merge_timestamp: now,
       merge_commit: '12345678'
@@ -43,6 +46,7 @@ RSpec.describe Gitlab::BitbucketServerImport::Importers::PullRequestNotesImporte
       comment?: false,
       merge_event?: false,
       approved_event?: true,
+      approver_name: pull_request_author.name,
       approver_username: pull_request_author.username,
       approver_email: pull_request_author.email,
       created_at: now
@@ -53,6 +57,7 @@ RSpec.describe Gitlab::BitbucketServerImport::Importers::PullRequestNotesImporte
     instance_double(
       BitbucketServer::Representation::Comment,
       note: 'Hello world',
+      author_name: note_author.name,
       author_email: note_author.email,
       author_username: note_author.username,
       comments: [],
@@ -394,6 +399,128 @@ RSpec.describe Gitlab::BitbucketServerImport::Importers::PullRequestNotesImporte
 
           it 'does not create the reviewer record' do
             expect { importer.execute }.not_to change { merge_request.reviewers.count }
+          end
+        end
+      end
+
+      context 'when user contribution mapping is enabled' do
+        let_it_be_with_reload(:project) do
+          create(
+            :project,
+            :repository,
+            :import_started,
+            :import_user_mapping_enabled,
+            import_type: :bitbucket_server
+          )
+        end
+
+        let_it_be(:merge_request) { create(:merge_request, iid: pull_request.iid, source_project: project) }
+
+        context 'when importing standalone comments' do
+          before do
+            allow_next(BitbucketServer::Client).to receive(:activities).and_return([pr_comment])
+          end
+
+          it 'pushes placeholder references' do
+            importer.execute
+
+            cached_references = placeholder_user_references(::Import::SOURCE_BITBUCKET_SERVER, project.import_state.id)
+            expect(cached_references).to contain_exactly(
+              ['Note', instance_of(Integer), 'author_id', instance_of(Integer)]
+            )
+          end
+        end
+
+        context 'when PR has threaded discussion' do
+          let_it_be(:reply_author) { create(:user, username: 'reply_author', email: 'reply_author@example.org') }
+          let_it_be(:inline_note_author) do
+            create(:user, username: 'inline_note_author', email: 'inline_note_author@example.org')
+          end
+
+          let(:reply) do
+            instance_double(
+              BitbucketServer::Representation::PullRequestComment,
+              author_name: reply_author.name,
+              author_email: reply_author.email,
+              author_username: reply_author.username,
+              note: 'I agree',
+              created_at: now,
+              updated_at: now,
+              parent_comment: nil)
+          end
+
+          let(:pr_inline_note) do
+            instance_double(
+              BitbucketServer::Representation::PullRequestComment,
+              file_type: 'ADDED',
+              from_sha: pull_request.target_branch_sha,
+              to_sha: pull_request.source_branch_sha,
+              file_path: '.gitmodules',
+              old_pos: nil,
+              new_pos: 4,
+              note: 'Hello world',
+              author_name: inline_note_author.name,
+              author_email: inline_note_author.email,
+              author_username: inline_note_author.username,
+              comments: [reply],
+              created_at: now,
+              updated_at: now,
+              parent_comment: nil)
+          end
+
+          let(:pr_inline_comment) do
+            instance_double(
+              BitbucketServer::Representation::Activity,
+              comment?: true,
+              inline_comment?: true,
+              merge_event?: false,
+              comment: pr_inline_note)
+          end
+
+          before do
+            allow_next(BitbucketServer::Client).to receive(:activities).and_return([pr_inline_comment])
+          end
+
+          it 'pushes placeholder references' do
+            importer.execute
+
+            cached_references = placeholder_user_references(::Import::SOURCE_BITBUCKET_SERVER, project.import_state.id)
+            expect(cached_references).to contain_exactly(
+              ['DiffNote', instance_of(Integer), 'author_id', instance_of(Integer)],
+              ['DiffNote', instance_of(Integer), 'author_id', instance_of(Integer)]
+            )
+          end
+        end
+
+        context 'when PR has a merge event' do
+          before do
+            allow_next(BitbucketServer::Client).to receive(:activities).and_return([merge_event])
+          end
+
+          it 'pushes placeholder references' do
+            importer.execute
+
+            cached_references = placeholder_user_references(::Import::SOURCE_BITBUCKET_SERVER, project.import_state.id)
+            expect(cached_references).to contain_exactly(
+              ["MergeRequest::Metrics", instance_of(Integer), "merged_by_id", instance_of(Integer)]
+            )
+          end
+        end
+
+        context 'when PR has an approved event' do
+          before do
+            allow_next(BitbucketServer::Client).to receive(:activities).and_return([approved_event])
+          end
+
+          it 'pushes placeholder references' do
+            importer.execute
+
+            cached_references = placeholder_user_references(::Import::SOURCE_BITBUCKET_SERVER, project.import_state.id)
+            expect(cached_references).to contain_exactly(
+              ['Approval', instance_of(Integer), 'user_id', instance_of(Integer)],
+              ['MergeRequestReviewer', instance_of(Integer), 'user_id', instance_of(Integer)],
+              ['Note', instance_of(Integer), 'author_id', instance_of(Integer)]
+            )
           end
         end
       end

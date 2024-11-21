@@ -2,7 +2,9 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::BitbucketServerImport::Importers::PullRequestNotes::DeclinedEvent, feature_category: :importers do
+RSpec.describe Gitlab::BitbucketServerImport::Importers::PullRequestNotes::DeclinedEvent, :clean_gitlab_redis_shared_state, feature_category: :importers do
+  include Import::UserMappingHelper
+
   let_it_be(:project) do
     create(:project, :repository, :import_started,
       import_data_attributes: {
@@ -22,6 +24,7 @@ RSpec.describe Gitlab::BitbucketServerImport::Importers::PullRequestNotes::Decli
   let(:declined_event) do
     {
       id: 7,
+      decliner_name: decliner_author.name,
       decliner_username: decliner_author.username,
       decliner_email: decliner_author.email,
       created_at: now
@@ -37,6 +40,30 @@ RSpec.describe Gitlab::BitbucketServerImport::Importers::PullRequestNotes::Decli
   subject(:importer) { described_class.new(project, merge_request) }
 
   describe '#execute', :clean_gitlab_redis_shared_state do
+    context 'when user contribution mapping is enabled' do
+      let_it_be(:project) do
+        create(
+          :project,
+          :repository,
+          :import_started,
+          :import_user_mapping_enabled,
+          import_type: :bitbucket_server
+        )
+      end
+
+      let_it_be(:merge_request) { create(:merge_request, source_project: project) }
+
+      it 'creates placeholder reference', :aggregate_failures do
+        importer.execute(declined_event)
+
+        cached_references = placeholder_user_references(::Import::SOURCE_BITBUCKET_SERVER, project.import_state.id)
+        expect(cached_references).to contain_exactly(
+          ['Event', instance_of(Integer), 'author_id', instance_of(Integer)],
+          ['MergeRequest::Metrics', instance_of(Integer), 'latest_closed_by_id', instance_of(Integer)]
+        )
+      end
+    end
+
     it 'imports the declined event' do
       expect { importer.execute(declined_event) }
         .to change { merge_request.events.count }.from(0).to(1)

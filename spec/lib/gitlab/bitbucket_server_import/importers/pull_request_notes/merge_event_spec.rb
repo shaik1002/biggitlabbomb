@@ -2,7 +2,9 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::BitbucketServerImport::Importers::PullRequestNotes::MergeEvent, feature_category: :importers do
+RSpec.describe Gitlab::BitbucketServerImport::Importers::PullRequestNotes::MergeEvent, :clean_gitlab_redis_shared_state, feature_category: :importers do
+  include Import::UserMappingHelper
+
   let_it_be(:project) do
     create(:project, :repository, :import_started,
       import_data_attributes: {
@@ -22,6 +24,8 @@ RSpec.describe Gitlab::BitbucketServerImport::Importers::PullRequestNotes::Merge
   let_it_be(:merge_event) do
     {
       id: 3,
+      committer_user: pull_request_author.name,
+      committer_username: pull_request_author.username,
       committer_email: pull_request_author.email,
       merge_timestamp: now,
       merge_commit: '12345678'
@@ -37,6 +41,29 @@ RSpec.describe Gitlab::BitbucketServerImport::Importers::PullRequestNotes::Merge
   subject(:importer) { described_class.new(project, merge_request) }
 
   describe '#execute' do
+    context 'when user contribution mapping is enabled' do
+      let_it_be(:project) do
+        create(
+          :project,
+          :repository,
+          :import_started,
+          :import_user_mapping_enabled,
+          import_type: :bitbucket_server
+        )
+      end
+
+      let_it_be(:merge_request) { create(:merge_request, source_project: project) }
+
+      it 'creates placeholder references', :aggregate_failures do
+        importer.execute(merge_event)
+
+        cached_references = placeholder_user_references(::Import::SOURCE_BITBUCKET_SERVER, project.import_state.id)
+        expect(cached_references).to contain_exactly(
+          ['MergeRequest::Metrics', instance_of(Integer), 'merged_by_id', instance_of(Integer)]
+        )
+      end
+    end
+
     it 'imports the merge event' do
       importer.execute(merge_event)
 
