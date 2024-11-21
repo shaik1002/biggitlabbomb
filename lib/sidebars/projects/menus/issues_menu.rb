@@ -52,7 +52,9 @@ module Sidebars
           return if Feature.enabled?(:async_sidebar_counts, context.project.root_ancestor)
 
           strong_memoize(:pill_count) do
-            count = context.project.open_issues_count(context.current_user)
+            count = ::WorkItems::CountOpenIssuesForProject
+              .new(project: context.project)
+              .count(context.current_user)
             format_cached_count(1000, count)
           end
         end

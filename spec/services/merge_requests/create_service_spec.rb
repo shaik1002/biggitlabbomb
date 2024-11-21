@@ -49,7 +49,11 @@ RSpec.describe MergeRequests::CreateService, :clean_gitlab_redis_shared_state, f
           service.execute
 
           BatchLoader::Executor.clear_current
-        end.to change { project.open_merge_requests_count }.from(0).to(1)
+        end.to change {
+                 MergeRequests::CountOpenForProject
+                       .new(project: project)
+                       .call
+               }.from(0).to(1)
       end
 
       it 'creates exactly 1 create MR event', :sidekiq_inline do

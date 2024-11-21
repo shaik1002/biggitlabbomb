@@ -415,27 +415,45 @@ RSpec.describe ProtectedBranch, feature_category: :source_code_management do
       it 'returns true when the branch matches a protected branch via direct match' do
         create(:protected_branch, project: project, name: "foo")
 
-        expect(described_class.protected?(project, 'foo')).to eq(true)
+        protected_status = Projects::ProtectedBranchFacade
+                            .new(project: project)
+                            .protected?('foo')
+        expect(protected_status).to eq(true)
       end
 
       it 'returns true when the branch matches a protected branch via wildcard match' do
         create(:protected_branch, project: project, name: "production/*")
 
-        expect(described_class.protected?(project, 'production/some-branch')).to eq(true)
+        protected_status = Projects::ProtectedBranchFacade
+                            .new(project: project)
+                            .protected?('production/some-branch')
+
+        expect(protected_status).to eq(true)
       end
 
       it 'returns false when the branch does not match a protected branch via direct match' do
-        expect(described_class.protected?(project, 'foo')).to eq(false)
+        protected_status = Projects::ProtectedBranchFacade
+                            .new(project: project)
+                            .protected?('foo')
+
+        expect(protected_status).to eq(false)
       end
 
       it 'returns false when the branch does not match a protected branch via wildcard match' do
         create(:protected_branch, project: project, name: "production/*")
+        protected_status = Projects::ProtectedBranchFacade
+                            .new(project: project)
+                            .protected?('staging/some-branch')
 
-        expect(described_class.protected?(project, 'staging/some-branch')).to eq(false)
+        expect(protected_status).to eq(false)
       end
 
       it 'returns false when branch name is nil' do
-        expect(described_class.protected?(project, nil)).to eq(false)
+        protected_status = Projects::ProtectedBranchFacade
+                            .new(project: project)
+                            .protected?(nil)
+
+        expect(protected_status).to eq(false)
       end
 
       context 'with caching', :use_clean_rails_redis_caching do
@@ -446,7 +464,9 @@ RSpec.describe ProtectedBranch, feature_category: :source_code_management do
           allow(described_class).to receive(:matching).and_call_original
 
           # the original call works and warms the cache
-          described_class.protected?(project, protected_branch.name)
+          Projects::ProtectedBranchFacade
+            .new(project: project)
+            .protected?(protected_branch.name)
         end
 
         it 'correctly invalidates a cache' do
@@ -454,13 +474,15 @@ RSpec.describe ProtectedBranch, feature_category: :source_code_management do
 
           create_params = { name: 'bar', merge_access_levels_attributes: [{ access_level: Gitlab::Access::DEVELOPER }] }
           branch = ProtectedBranches::CreateService.new(project, project.owner, create_params).execute
-          expect(described_class.protected?(project, protected_branch.name)).to eq(true)
+          facade = Projects::ProtectedBranchFacade
+                    .new(project: project)
+          expect(facade.protected?(protected_branch.name)).to eq(true)
 
           ProtectedBranches::UpdateService.new(project, project.owner, name: 'ber').execute(branch)
-          expect(described_class.protected?(project, protected_branch.name)).to eq(true)
+          expect(facade.protected?(protected_branch.name)).to eq(true)
 
           ProtectedBranches::DestroyService.new(project, project.owner).execute(branch)
-          expect(described_class.protected?(project, protected_branch.name)).to eq(true)
+          expect(facade.protected?(protected_branch.name)).to eq(true)
         end
 
         context 'when project is updated' do
@@ -468,8 +490,9 @@ RSpec.describe ProtectedBranch, feature_category: :source_code_management do
             expect(described_class).not_to receive(:matching).with(protected_branch.name, protected_refs: anything)
 
             project.touch
-
-            described_class.protected?(project, protected_branch.name)
+            Projects::ProtectedBranchFacade
+              .new(project: project)
+              .protected?(protected_branch.name)
           end
         end
 
@@ -480,14 +503,19 @@ RSpec.describe ProtectedBranch, feature_category: :source_code_management do
             another_project = create(:project)
             ProtectedBranches::CreateService.new(another_project, another_project.owner, name: 'bar').execute
 
-            described_class.protected?(project, protected_branch.name)
+            Projects::ProtectedBranchFacade
+              .new(project: project)
+              .protected?(protected_branch.name)
           end
         end
 
         it 'correctly uses the cached version' do
           expect(described_class).not_to receive(:matching)
+          protected_status = Projects::ProtectedBranchFacade
+                              .new(project: project)
+                              .protected?(protected_branch.name)
 
-          expect(described_class.protected?(project, protected_branch.name)).to eq(true)
+          expect(protected_status).to eq(true)
         end
       end
     end
@@ -509,7 +537,9 @@ RSpec.describe ProtectedBranch, feature_category: :source_code_management do
           it 'protects the default branch based on the default branch protection setting of the group' do
             expect(project.namespace).to receive(:default_branch_protection_settings).and_return(default_branch_protection_level)
 
-            expect(described_class.protected?(project, 'master')).to eq(result)
+            expect(Projects::ProtectedBranchFacade
+                    .new(project: project)
+                    .protected?('master')).to eq(result)
           end
         end
       end
@@ -528,7 +558,11 @@ RSpec.describe ProtectedBranch, feature_category: :source_code_management do
           end
 
           it 'protects the default branch based on the instance level default branch protection setting' do
-            expect(described_class.protected?(project, 'master')).to eq(result)
+            protected_status = Projects::ProtectedBranchFacade
+                                .new(project: project)
+                                .protected?('master')
+
+            expect(protected_status).to eq(result)
           end
         end
       end

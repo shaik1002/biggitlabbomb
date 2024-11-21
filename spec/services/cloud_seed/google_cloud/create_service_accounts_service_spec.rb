@@ -26,9 +26,11 @@ RSpec.describe CloudSeed::GoogleCloud::CreateServiceAccountsService, feature_cat
     end
 
     it 'creates unprotected vars', :aggregate_failures do
-      allow(ProtectedBranch).to receive(:protected?).and_return(false)
-
       project = create(:project)
+
+      facade_instance = instance_double(Projects::ProtectedBranchFacade)
+      allow(Projects::ProtectedBranchFacade).to receive(:new).with(project: project).and_return(facade_instance)
+      allow(facade_instance).to receive(:protected?).with(any_args).and_return(false)
 
       service = described_class.new(
         project,
@@ -49,9 +51,10 @@ RSpec.describe CloudSeed::GoogleCloud::CreateServiceAccountsService, feature_cat
     end
 
     it 'creates protected vars', :aggregate_failures do
-      allow(ProtectedBranch).to receive(:protected?).and_return(true)
-
       project = create(:project)
+      facade_instance = instance_double(Projects::ProtectedBranchFacade)
+      allow(Projects::ProtectedBranchFacade).to receive(:new).with(project: project).and_return(facade_instance)
+      allow(facade_instance).to receive(:protected?).with(any_args).and_return(true)
 
       service = described_class.new(
         project,

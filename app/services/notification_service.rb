@@ -430,7 +430,9 @@ class NotificationService
     return true unless note.noteable_type.present?
 
     # ignore gitlab service messages
-    return true if note.system_note_with_references?
+    return true if Notes::SystemNoteFacade
+                    .new(note)
+                    .system_note_with_references?
 
     send_new_note_notifications(note)
     send_service_desk_notification(note)

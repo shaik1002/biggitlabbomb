@@ -1799,7 +1799,7 @@ RSpec.describe Project, factory_default: :keep, feature_category: :groups_and_pr
       end
 
       it 'returns count of open issues' do
-        expect(project.open_issues_count).to eq(1)
+        expect(WorkItems::CountOpenIssuesForProject.new(project: project).count).to eq(1)
       end
 
       it 'returns nil when no issue found' do
@@ -1864,16 +1864,16 @@ RSpec.describe Project, factory_default: :keep, feature_category: :groups_and_pr
     let(:project) { build(:project) }
 
     it 'provides the issue count' do
-      expect(project.open_issues_count).to eq 0
+      expect(WorkItems::CountOpenIssuesForProject.new(project: project).count).to eq 0
     end
 
     it 'invokes the count service with current_user' do
       user = build(:user)
-      count_service = instance_double(Projects::OpenIssuesCountService)
-      expect(Projects::OpenIssuesCountService).to receive(:new).with(project, user).and_return(count_service)
+      count_service = instance_double(WorkItems::ProjectCountOpenIssuesService)
+      expect(WorkItems::ProjectCountOpenIssuesService).to receive(:new).with(project, user).and_return(count_service)
       expect(count_service).to receive(:count)
 
-      project.open_issues_count(user)
+      WorkItems::CountOpenIssuesForProject.new(project: project).count(user)
     end
 
     it 'invokes the batch count service with no current_user' do
@@ -1881,7 +1881,7 @@ RSpec.describe Project, factory_default: :keep, feature_category: :groups_and_pr
       expect(Projects::BatchOpenIssuesCountService).to receive(:new).with([project]).and_return(count_service)
       expect(count_service).to receive(:refresh_cache_and_retrieve_data).and_return({})
 
-      project.open_issues_count.to_s
+      WorkItems::CountOpenIssuesForProject.new(project: project).count.to_s
     end
   end
 
@@ -1889,7 +1889,11 @@ RSpec.describe Project, factory_default: :keep, feature_category: :groups_and_pr
     it 'provides the merge request count' do
       project = build(:project)
 
-      expect(project.open_merge_requests_count).to eq 0
+      expect(
+        MergeRequests::CountOpenForProject
+          .new(project: project)
+          .call
+      ).to eq 0
     end
   end
 
@@ -6260,7 +6264,7 @@ RSpec.describe Project, factory_default: :keep, feature_category: :groups_and_pr
     let(:project) { create(:project) }
 
     it 'updates all project counter caches' do
-      expect_any_instance_of(Projects::OpenIssuesCountService)
+      expect_any_instance_of(WorkItems::ProjectCountOpenIssuesService)
         .to receive(:refresh_cache)
         .and_call_original
 

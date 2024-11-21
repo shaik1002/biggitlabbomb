@@ -663,15 +663,15 @@ class Issue < ApplicationRecord
     true
   end
 
-  # rubocop: disable CodeReuse/ServiceClass
   def update_project_counter_caches
     # TODO: Fix counter cache for issues in group
     # TODO: see https://gitlab.com/gitlab-org/gitlab/-/work_items/393125
     return unless project
 
-    Projects::OpenIssuesCountService.new(project).refresh_cache
+    WorkItems::CountOpenIssuesForProject
+      .new(project: project)
+      .refresh_cache
   end
-  # rubocop: enable CodeReuse/ServiceClass
 
   def merge_requests_count(user = nil)
     ::MergeRequestsClosingIssues.count_for_issue(self.id, user)

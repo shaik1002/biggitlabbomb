@@ -28,7 +28,9 @@ module API
           type: 'boolean',
           example: true
         } do |repo_branch, options|
-        ::ProtectedBranch.protected?(options[:project], repo_branch.name)
+        ::Projects::ProtectedBranchFacade
+          .new(project: options[:project])
+          .protected?(repo_branch.name)
       end
 
       expose :developers_can_push,

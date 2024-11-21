@@ -12,7 +12,7 @@ module Projects
     # rubocop: enable CodeReuse/ActiveRecord
 
     def count_service
-      ::Projects::OpenIssuesCountService
+      ::WorkItems::ProjectCountOpenIssuesService
     end
   end
 end

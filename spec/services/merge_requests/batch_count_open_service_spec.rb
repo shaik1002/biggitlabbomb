@@ -2,8 +2,8 @@
 
 require 'spec_helper'
 
-RSpec.describe Projects::BatchOpenMergeRequestsCountService, feature_category: :code_review_workflow do
-  subject { described_class.new([project_1, project_2]) }
+RSpec.describe MergeRequests::BatchCountOpenService, feature_category: :code_review_workflow do
+  subject(:service) { described_class.new([project_1, project_2]) }
 
   let_it_be(:project_1) { create(:project) }
   let_it_be(:project_2) { create(:project) }
@@ -15,12 +15,12 @@ RSpec.describe Projects::BatchOpenMergeRequestsCountService, feature_category: :
     end
 
     it 'refreshes cache keys correctly when cache is clean', :aggregate_failures do
-      subject.refresh_cache_and_retrieve_data
+      service.refresh_cache_and_retrieve_data
 
-      expect(Rails.cache.read(get_cache_key(subject, project_1))).to eq(1)
-      expect(Rails.cache.read(get_cache_key(subject, project_2))).to eq(1)
+      expect(Rails.cache.read(get_cache_key(service, project_1))).to eq(1)
+      expect(Rails.cache.read(get_cache_key(service, project_2))).to eq(1)
 
-      expect { subject.refresh_cache_and_retrieve_data }.not_to exceed_query_limit(0)
+      expect { service.refresh_cache_and_retrieve_data }.not_to exceed_query_limit(0)
     end
   end
 

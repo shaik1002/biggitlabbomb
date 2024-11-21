@@ -1858,16 +1858,6 @@ class Project < ApplicationRecord
     find_integration(integrations, name) || build_from_instance(name) || build_integration(name)
   end
 
-  # rubocop: disable CodeReuse/ServiceClass
-  def create_labels
-    Label.templates.each do |label|
-      # slice on column_names to ensure an added DB column will not break a mixed deployment
-      params = label.attributes.slice(*Label.column_names).except('id', 'template', 'created_at', 'updated_at', 'type')
-      Labels::FindOrCreateService.new(nil, self, params).execute(skip_authorization: true)
-    end
-  end
-  # rubocop: enable CodeReuse/ServiceClass
-
   def ci_integrations
     integrations.where(category: :ci)
   end
@@ -1905,15 +1895,15 @@ class Project < ApplicationRecord
     end
   end
 
-  # rubocop: disable CodeReuse/ServiceClass
   def send_move_instructions(old_path_with_namespace)
     # New project path needs to be committed to the DB or notification will
     # retrieve stale information
     run_after_commit do
-      NotificationService.new.project_was_moved(self, old_path_with_namespace)
+      Projects::ProjectNotificationFacade
+        .new(project: self)
+        .call(old_path_with_namespace)
     end
   end
-  # rubocop: enable CodeReuse/ServiceClass
 
   def owner
     # This will be phased out and replaced with `owners` relationship
@@ -1945,14 +1935,13 @@ class Project < ApplicationRecord
     end
   end
 
-  # rubocop: disable CodeReuse/ServiceClass
   def execute_hooks(data, hooks_scope = :push_hooks)
     run_after_commit_or_now do
-      triggered_hooks(hooks_scope, data).execute
-      SystemHooksService.new.execute_hooks(data, hooks_scope)
+      Projects::ProjectHooksFacade
+        .new(project: self)
+        .call(data, hooks_scope)
     end
   end
-  # rubocop: enable CodeReuse/ServiceClass
 
   def triggered_hooks(hooks_scope, data)
     triggered = ::Projects::TriggeredHooks.new(hooks_scope, data)
@@ -2279,30 +2268,6 @@ class Project < ApplicationRecord
     self.runners_token && ActiveSupport::SecurityUtils.secure_compare(token, self.runners_token)
   end
 
-  # rubocop: disable CodeReuse/ServiceClass
-  def open_issues_count(current_user = nil)
-    return Projects::OpenIssuesCountService.new(self, current_user).count unless current_user.nil?
-
-    BatchLoader.for(self).batch do |projects, loader|
-      issues_count_per_project = ::Projects::BatchOpenIssuesCountService.new(projects).refresh_cache_and_retrieve_data
-
-      issues_count_per_project.each do |project, count|
-        loader.call(project, count)
-      end
-    end
-  end
-  # rubocop: enable CodeReuse/ServiceClass
-
-  # rubocop: disable CodeReuse/ServiceClass
-  def open_merge_requests_count(_current_user = nil)
-    BatchLoader.for(self).batch do |projects, loader|
-      ::Projects::BatchOpenMergeRequestsCountService.new(projects)
-        .refresh_cache_and_retrieve_data
-        .each { |project, count| loader.call(project, count) }
-    end
-  end
-  # rubocop: enable CodeReuse/ServiceClass
-
   def visibility_level_allowed_as_fork?(level = self.visibility_level)
     return true unless forked?
 
@@ -2383,9 +2348,10 @@ class Project < ApplicationRecord
     update_project_counter_caches
   end
 
+  # Issue: https://gitlab.com/gitlab-org/gitlab/-/issues/504679
   def update_project_counter_caches
     classes = [
-      Projects::OpenIssuesCountService,
+      WorkItems::ProjectCountOpenIssuesService,
       Projects::OpenMergeRequestsCountService
     ]
 
@@ -2394,11 +2360,11 @@ class Project < ApplicationRecord
     end
   end
 
-  # rubocop: disable CodeReuse/ServiceClass
   def after_create_default_branch
-    Projects::ProtectDefaultBranchService.new(self).execute
+    Projects::ProtectDefaultBranchFacade
+      .new(project: self)
+      .call
   end
-  # rubocop: enable CodeReuse/ServiceClass
 
   # Lazy loading of the `pipeline_status` attribute
   def pipeline_status
@@ -2642,7 +2608,9 @@ class Project < ApplicationRecord
                end
 
     if Gitlab::Git.branch_ref?(resolved_ref)
-      ProtectedBranch.protected?(self, ref_name)
+      Projects::ProtectedBranchFacade
+        .new(project: self)
+        .protected?(ref_name)
     elsif Gitlab::Git.tag_ref?(resolved_ref)
       ProtectedTag.protected?(self, ref_name)
     end
@@ -2719,17 +2687,11 @@ class Project < ApplicationRecord
   # @deprecated cannot remove yet because it has an index with its name in elasticsearch
   alias_method :path_with_namespace, :full_path
 
-  # rubocop: disable CodeReuse/ServiceClass
   def forks_count
-    BatchLoader.for(self).batch do |projects, loader|
-      fork_count_per_project = ::Projects::BatchForksCountService.new(projects).refresh_cache_and_retrieve_data
-
-      fork_count_per_project.each do |project, count|
-        loader.call(project, count)
-      end
-    end
+    Projects::BatchForksCountFacade
+      .new(project: self)
+      .call
   end
-  # rubocop: enable CodeReuse/ServiceClass
 
   def legacy_storage?
     [nil, 0].include?(self.storage_version)

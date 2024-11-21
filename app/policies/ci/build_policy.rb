@@ -20,7 +20,9 @@ module Ci
       if @subject.tag?
         !ProtectedTag.protected?(@subject.project, @subject.ref)
       else
-        !ProtectedBranch.protected?(@subject.project, @subject.ref)
+        !Projects::ProtectedBranchFacade
+          .new(project: @subject.project)
+          .protected?(@subject.ref)
       end
     end
 

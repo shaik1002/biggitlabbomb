@@ -85,7 +85,10 @@ RSpec.describe Sidebars::Projects::Menus::IssuesMenu, feature_category: :navigat
 
     describe 'formatting' do
       it 'returns truncated digits for count value over 1000' do
-        allow(project).to receive(:open_issues_count).and_return 1001
+        facade_instance = instance_double(WorkItems::CountOpenIssuesForProject)
+        allow(WorkItems::CountOpenIssuesForProject).to receive(:new).with(project: project).and_return(facade_instance)
+        expect(facade_instance).to receive(:count).with(user).and_return(1001)
+
         expect(subject.pill_count).to eq('1k')
       end
     end

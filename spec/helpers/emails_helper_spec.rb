@@ -91,6 +91,29 @@ RSpec.describe EmailsHelper, feature_category: :shared do
     end
   end
 
+  describe 'member_source_count' do
+    let_it_be(:project) { create(:project) }
+    let(:group) { create(:group) }
+    let(:admin) { create(:admin) }
+    let(:user) { create(:user, created_by: admin) }
+
+    it "returns correct count for project" do
+      allow(MergeRequests::CountOpenForProject)
+        .to receive(:new)
+        .with(project: project)
+        .and_return(instance_double(MergeRequests::CountOpenForProject, call: 5))
+      expect(member_source_count(project, nil)).to eq(5)
+    end
+
+    it "returns correct count for group" do
+      allow(group)
+        .to receive(:open_merge_requests_count)
+        .with(admin)
+        .and_return(10)
+      expect(member_source_count(group, user)).to eq(10)
+    end
+  end
+
   describe 'notification_reason_text' do
     subject { helper.notification_reason_text(reason: reason_code) }
 

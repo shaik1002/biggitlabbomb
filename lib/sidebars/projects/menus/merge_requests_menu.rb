@@ -41,7 +41,9 @@ module Sidebars
         def pill_count
           return if Feature.enabled?(:async_sidebar_counts, context.project.root_ancestor)
 
-          count = @pill_count ||= context.project.open_merge_requests_count
+          count = @pill_count ||= MergeRequests::CountOpenForProject
+                                    .new(project: context.project)
+                                    .call
           format_cached_count(1000, count)
         end
 

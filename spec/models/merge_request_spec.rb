@@ -2139,7 +2139,7 @@ RSpec.describe MergeRequest, factory_default: :keep, feature_category: :code_rev
 
     context 'when source branch is not protected' do
       before do
-        allow(ProtectedBranch).to receive(:protected?).and_return(false)
+        allow_any_instance_of(Projects::ProtectedBranchFacade).to receive(:protected?).and_return(false)
       end
 
       it { is_expected.to be_truthy }
@@ -2147,7 +2147,7 @@ RSpec.describe MergeRequest, factory_default: :keep, feature_category: :code_rev
 
     context 'when source branch is protected' do
       before do
-        allow(ProtectedBranch).to receive(:protected?).and_return(true)
+        allow_any_instance_of(Projects::ProtectedBranchFacade).to receive(:protected?).and_return(true)
       end
 
       context 'when force push is not allowed' do
@@ -2179,7 +2179,7 @@ RSpec.describe MergeRequest, factory_default: :keep, feature_category: :code_rev
     end
 
     it "can't be removed when its a protected branch" do
-      allow(ProtectedBranch).to receive(:protected?).and_return(true)
+      allow_any_instance_of(Projects::ProtectedBranchFacade).to receive(:protected?).and_return(true)
 
       expect(subject.can_remove_source_branch?(user)).to be_falsey
     end
@@ -4904,7 +4904,12 @@ RSpec.describe MergeRequest, factory_default: :keep, feature_category: :code_rev
     end
 
     context 'when the diff refs are for a comparison between merge request versions' do
-      let(:diff_refs) { merge_request_diff3.compare_with(merge_request_diff1.head_commit_sha).diff_refs }
+      let(:diff_refs) do
+        MergeRequests::MergeRequestDiffFacade
+          .new(merge_request_diff3)
+          .compare_with(merge_request_diff1.head_commit_sha)
+          .diff_refs
+      end
 
       it 'returns the diff ID and start sha of the versions to compare' do
         expect(subject.version_params_for(diff_refs)).to eq(diff_id: merge_request_diff3.id, start_sha: merge_request_diff1.head_commit_sha)
@@ -4945,7 +4950,11 @@ RSpec.describe MergeRequest, factory_default: :keep, feature_category: :code_rev
         subject.destroy!
 
         BatchLoader::Executor.clear_current
-      end.to change { project.open_merge_requests_count }.from(1).to(0)
+      end.to change {
+               MergeRequests::CountOpenForProject
+                   .new(project: project)
+                   .call
+             }.from(1).to(0)
     end
   end
 
@@ -5523,7 +5532,7 @@ RSpec.describe MergeRequest, factory_default: :keep, feature_category: :code_rev
     end
 
     before do
-      allow(ProtectedBranch).to receive(:protected?) { false }
+      allow_any_instance_of(Projects::ProtectedBranchFacade).to receive(:protected?) { false }
     end
 
     it 'does not allow maintainer to push if the source project is the same as the target' do
@@ -5543,9 +5552,9 @@ RSpec.describe MergeRequest, factory_default: :keep, feature_category: :code_rev
       merge_request.target_project = build(:project, :public)
       merge_request.source_project = build(:project, :public)
 
-      expect(ProtectedBranch).to receive(:protected?)
-                                   .with(merge_request.source_project, 'fixes')
-                                   .and_return(true)
+      facade_instance = instance_double(Projects::ProtectedBranchFacade)
+      allow(Projects::ProtectedBranchFacade).to receive(:new).with(project: merge_request.source_project).and_return(facade_instance)
+      expect(facade_instance).to receive(:protected?).with('fixes').and_return(true)
 
       expect(merge_request.collaborative_push_possible?).to be_falsy
     end

@@ -3,8 +3,10 @@
 # Concern handling functionality around deciding whether to send notification
 # for activities on a specified branch or not. Will be included in
 # Integrations::Base::ChatNotification and PipelinesEmailService classes.
+
 module NotificationBranchSelection
   extend ActiveSupport::Concern
+  include ::Integrations::BranchProtectionLogic
 
   class_methods do
     def branch_choices
@@ -18,26 +20,32 @@ module NotificationBranchSelection
   end
 
   def notify_for_branch?(data)
-    ref = if data[:ref]
-            Gitlab::Git.ref_name(data[:ref])
-          else
-            data.dig(:object_attributes, :ref)
-          end
-
-    is_default_branch = ref == project.default_branch
-    is_protected_branch = ProtectedBranch.protected?(project, ref)
-
+    ref_name = extract_ref_from_data(data)
     case branches_to_be_notified
     when "all"
       true
-    when  "default"
-      is_default_branch
-    when  "protected"
-      is_protected_branch
-    when  "default_and_protected"
-      is_default_branch || is_protected_branch
+    when "default"
+      default_branch?(ref_name)
+    when "protected"
+      protected_branch?(ref_name)
+    when "default_and_protected"
+      default_branch?(ref_name) || protected_branch?(ref_name)
     else
       false
+    end
+  end
+
+  private
+
+  def default_branch?(ref_name)
+    ref_name == project.default_branch
+  end
+
+  def extract_ref_from_data(data)
+    if data[:ref]
+      Gitlab::Git.ref_name(data[:ref])
+    else
+      data.dig(:object_attributes, :ref)
     end
   end
 end

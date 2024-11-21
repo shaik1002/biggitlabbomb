@@ -222,7 +222,7 @@ RSpec.describe Issues::UpdateService, :mailer, feature_category: :team_planning 
           update_issue(confidential: true)
 
           BatchLoader::Executor.clear_current
-        end.to change { project.open_issues_count }.from(1).to(0)
+        end.to change { WorkItems::CountOpenIssuesForProject.new(project: project).count }.from(1).to(0)
       end
 
       it 'enqueues ConfidentialIssueWorker when an issue is made confidential' do

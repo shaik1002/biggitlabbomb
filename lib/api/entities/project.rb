@@ -104,7 +104,11 @@ module API
       expose :import_error, documentation: { type: 'string', example: 'Import error' }, if: ->(_project, options) { options[:user_can_admin_project] } do |project|
         project.import_state&.last_error
       end
-      expose :open_issues_count, documentation: { type: 'integer', example: 1 }, if: ->(project, options) { project.feature_available?(:issues, options[:current_user]) }
+      expose :open_issues_count, documentation: { type: 'integer', example: 1 }, if: ->(project, options) { project.feature_available?(:issues, options[:current_user]) } do |project, options|
+        ::WorkItems::CountOpenIssuesForProject
+          .new(project: project)
+          .count
+      end
       expose :description_html, documentation: { type: 'string' }
       expose :updated_at, documentation: { type: 'dateTime', example: '2020-05-07T04:27:17.016Z' }
 
@@ -190,7 +194,11 @@ module API
       def self.execute_batch_counting(projects_relation)
         # Call the count methods on every project, so the BatchLoader would load them all at
         # once when the entities are rendered
-        projects_relation.each(&:open_issues_count)
+        projects_relation.each do |project|
+          WorkItems::CountOpenIssuesForProject
+            .new(project: project)
+            .count
+        end
 
         super
       end

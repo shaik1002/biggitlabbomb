@@ -75,7 +75,7 @@ RSpec.describe Issues::CloseService, feature_category: :team_planning do
         service.execute(issue)
 
         BatchLoader::Executor.clear_current
-      end.to change { project.open_issues_count }.from(1).to(0)
+      end.to change { WorkItems::CountOpenIssuesForProject.new(project: project).count }.from(1).to(0)
     end
 
     it 'invalidates counter cache for assignees' do

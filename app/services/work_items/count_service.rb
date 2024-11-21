@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Projects
+module WorkItems
   # Base class for the various service classes that count project data (e.g.
   # issues or forks).
   class CountService < BaseCountService
@@ -10,6 +10,13 @@ module Projects
     VERSION = 1
 
     attr_reader :project
+
+    def self.query(project_ids)
+      raise(
+        NotImplementedError,
+        '"query" must be implemented and return an ActiveRecord::Relation'
+      )
+    end
 
     def initialize(project)
       @project = project
@@ -30,13 +37,6 @@ module Projects
       cache_key = key || cache_key_name
 
       ['projects', 'count_service', VERSION, @project.id, cache_key]
-    end
-
-    def self.query(project_ids)
-      raise(
-        NotImplementedError,
-        '"query" must be implemented and return an ActiveRecord::Relation'
-      )
     end
   end
 end

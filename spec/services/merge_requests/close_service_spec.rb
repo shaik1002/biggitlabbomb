@@ -93,7 +93,11 @@ RSpec.describe MergeRequests::CloseService, feature_category: :code_review_workf
 
         BatchLoader::Executor.clear_current
       end
-        .to change { project.open_merge_requests_count }.from(1).to(0)
+        .to change {
+              MergeRequests::CountOpenForProject
+                    .new(project: project)
+                    .call
+            }.from(1).to(0)
     end
 
     it 'clean up environments for the merge request' do

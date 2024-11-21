@@ -54,7 +54,7 @@
         %div
           %img.mailer-icon{ alt: '', src: image_url("mailers/members/merge-request-open.png") }
           %span
-            - mr_count = member_source.open_merge_requests_count(member.created_by)
+            - mr_count = member_source_count(member_source, member)
             = n_('%{bold_start}%{count}%{bold_end} opened merge request', '%{bold_start}%{count}%{bold_end} opened merge requests',
               mr_count).html_safe % { count: number_with_delimiter(mr_count),
               bold_start: '<b>'.html_safe,

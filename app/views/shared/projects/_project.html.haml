@@ -108,11 +108,11 @@
       - if show_count?(disabled: !merge_requests, compact_mode: compact_mode)
         = link_to project_merge_requests_path(project), class: "#{css_metadata_classes} merge-requests", title: _('Merge requests'), data: { container: 'body', placement: 'top' } do
           = sprite_icon('merge-request', size: 14, css_class: 'gl-mr-2')
-          = badge_count(project.open_merge_requests_count)
+          = badge_count(MergeRequests::CountOpenForProject.new(project: project).call)
       - if show_count?(disabled: !issues, compact_mode: compact_mode)
         = link_to project_issues_path(project), class: "#{css_metadata_classes} issues", title: _('Issues'), data: { container: 'body', placement: 'top' } do
           = sprite_icon('issues', size: 14, css_class: 'gl-mr-2')
-          = badge_count(project.open_issues_count)
+          = badge_count(WorkItems::CountOpenIssuesForProject.new(project: project).count)
       = render_if_exists 'shared/projects/actions', project: project
     .updated-note.gl-text-sm.gl-whitespace-nowrap.gl-justify-end
       %span

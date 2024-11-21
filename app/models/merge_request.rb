@@ -591,7 +591,9 @@ class MergeRequest < ApplicationRecord
   end
 
   def permits_force_push?
-    return true unless ProtectedBranch.protected?(source_project, source_branch)
+    return true unless Projects::ProtectedBranchFacade
+                        .new(project: source_project)
+                        .protected?(source_branch)
 
     ProtectedBranch.allow_force_push?(source_project, source_branch)
   end
@@ -1393,7 +1395,7 @@ class MergeRequest < ApplicationRecord
 
   def can_remove_source_branch?(current_user)
     source_project &&
-      !ProtectedBranch.protected?(source_project, source_branch) &&
+      !Projects::ProtectedBranchFacade.new(project: source_project).protected?(source_branch) &&
       !source_project.root_ref?(source_branch) &&
       Ability.allowed?(current_user, :push_code, source_project) &&
       diff_head_sha == source_branch_head.try(:sha)
@@ -1844,7 +1846,9 @@ class MergeRequest < ApplicationRecord
       variables.append(key: 'CI_MERGE_REQUEST_PROJECT_PATH', value: project.full_path)
       variables.append(key: 'CI_MERGE_REQUEST_PROJECT_URL', value: project.web_url)
       variables.append(key: 'CI_MERGE_REQUEST_TARGET_BRANCH_NAME', value: target_branch.to_s)
-      variables.append(key: 'CI_MERGE_REQUEST_TARGET_BRANCH_PROTECTED', value: ProtectedBranch.protected?(target_project, target_branch).to_s)
+      variables.append(key: 'CI_MERGE_REQUEST_TARGET_BRANCH_PROTECTED', value: Projects::ProtectedBranchFacade
+                                                                                .new(project: target_project)
+                                                                                .protected?(target_branch).to_s)
       variables.append(key: 'CI_MERGE_REQUEST_TITLE', value: title)
 
       mr_description, mr_description_truncated = truncate_mr_description
@@ -2207,7 +2211,7 @@ class MergeRequest < ApplicationRecord
     source_project.present? && for_fork? &&
       target_project.visibility_level > Gitlab::VisibilityLevel::PRIVATE &&
       source_project.visibility_level > Gitlab::VisibilityLevel::PRIVATE &&
-      !ProtectedBranch.protected?(source_project, source_branch)
+      !Projects::ProtectedBranchFacade.new(project: source_project).protected?(source_branch)
   end
 
   def can_allow_collaboration?(user)
@@ -2477,7 +2481,9 @@ class MergeRequest < ApplicationRecord
       variables.append(key: 'CI_MERGE_REQUEST_SOURCE_PROJECT_PATH', value: source_project.full_path)
       variables.append(key: 'CI_MERGE_REQUEST_SOURCE_PROJECT_URL', value: source_project.web_url)
       variables.append(key: 'CI_MERGE_REQUEST_SOURCE_BRANCH_NAME', value: source_branch.to_s)
-      variables.append(key: 'CI_MERGE_REQUEST_SOURCE_BRANCH_PROTECTED', value: ProtectedBranch.protected?(source_project, source_branch).to_s)
+      variables.append(key: 'CI_MERGE_REQUEST_SOURCE_BRANCH_PROTECTED', value: Projects::ProtectedBranchFacade
+                                                                                .new(project: source_project)
+                                                                                .protected?(source_branch).to_s)
     end
   end
 

@@ -779,6 +779,7 @@ RSpec.describe Note, feature_category: :team_planning do
     let(:non_member) { create(:user) }
 
     let(:note) { create(:note, project: project) }
+    let(:facade) { Notes::SystemNoteFacade.new(note) }
 
     context 'when project is public' do
       it_behaves_like 'users with note access' do
@@ -794,12 +795,12 @@ RSpec.describe Note, feature_category: :team_planning do
       end
 
       it 'returns visible but not readable for non-member user' do
-        expect(note.system_note_visible_for?(non_member)).to be_truthy
+        expect(facade.system_note_visible_for?(non_member)).to be_truthy
         expect(note.readable_by?(non_member)).to be_falsy
       end
 
       it 'returns visible but not readable for a nil user' do
-        expect(note.system_note_visible_for?(nil)).to be_truthy
+        expect(facade.system_note_visible_for?(nil)).to be_truthy
         expect(note.readable_by?(nil)).to be_falsy
       end
     end
@@ -809,6 +810,7 @@ RSpec.describe Note, feature_category: :team_planning do
     let_it_be(:group) { create(:group, :private) }
     let_it_be(:project) { create(:project, group: group) }
     let_it_be(:note) { create(:note, project: project) }
+    let_it_be(:facade) { Notes::SystemNoteFacade.new(note) }
     let_it_be(:user) { create(:user) }
 
     let(:action) { "commit" }
@@ -818,13 +820,13 @@ RSpec.describe Note, feature_category: :team_planning do
       it "returns true" do
         expect(note).to receive(:system_note_metadata).and_return(nil)
 
-        expect(note.send(:system_note_viewable_by?, user)).to be_truthy
+        expect(facade.send(:system_note_viewable_by?, user)).to be_truthy
       end
     end
 
     context "system_note_metadata isn't of type 'branch' or 'contact'" do
       it "returns true" do
-        expect(note.send(:system_note_viewable_by?, user)).to be_truthy
+        expect(facade.send(:system_note_viewable_by?, user)).to be_truthy
       end
     end
 
@@ -833,7 +835,7 @@ RSpec.describe Note, feature_category: :team_planning do
 
       context "user doesn't have :download_code ability" do
         it "returns false" do
-          expect(note.send(:system_note_viewable_by?, user)).to be_falsey
+          expect(facade.send(:system_note_viewable_by?, user)).to be_falsey
         end
       end
 
@@ -841,7 +843,7 @@ RSpec.describe Note, feature_category: :team_planning do
         it "returns true" do
           expect(Ability).to receive(:allowed?).with(user, :download_code, note.project).and_return(true)
 
-          expect(note.send(:system_note_viewable_by?, user)).to be_truthy
+          expect(facade.send(:system_note_viewable_by?, user)).to be_truthy
         end
       end
     end
@@ -851,7 +853,7 @@ RSpec.describe Note, feature_category: :team_planning do
 
       context "user doesn't have :read_crm_contact ability" do
         it "returns false" do
-          expect(note.send(:system_note_viewable_by?, user)).to be_falsey
+          expect(facade.send(:system_note_viewable_by?, user)).to be_falsey
         end
       end
 
@@ -859,7 +861,7 @@ RSpec.describe Note, feature_category: :team_planning do
         it "returns true" do
           expect(Ability).to receive(:allowed?).with(user, :read_crm_contact, note.project.group).and_return(true)
 
-          expect(note.send(:system_note_viewable_by?, user)).to be_truthy
+          expect(facade.send(:system_note_viewable_by?, user)).to be_truthy
         end
       end
     end
@@ -875,11 +877,11 @@ RSpec.describe Note, feature_category: :team_planning do
 
     shared_examples "checks references" do
       it "returns false" do
-        expect(note.system_note_visible_for?(ext_issue.author)).to be_falsy
+        expect(facade.system_note_visible_for?(ext_issue.author)).to be_falsy
       end
 
       it "returns true" do
-        expect(note.system_note_visible_for?(private_user)).to be_truthy
+        expect(facade.system_note_visible_for?(private_user)).to be_truthy
       end
 
       it "returns true if user visible reference count set" do
@@ -887,7 +889,7 @@ RSpec.describe Note, feature_category: :team_planning do
         note.total_reference_count = 1
 
         expect(note).not_to receive(:reference_mentionables)
-        expect(note.system_note_visible_for?(ext_issue.author)).to be_truthy
+        expect(facade.system_note_visible_for?(ext_issue.author)).to be_truthy
       end
 
       it "returns false if user visible reference count set but does not match total reference count" do
@@ -895,14 +897,14 @@ RSpec.describe Note, feature_category: :team_planning do
         note.total_reference_count = 2
 
         expect(note).not_to receive(:reference_mentionables)
-        expect(note.system_note_visible_for?(ext_issue.author)).to be_falsy
+        expect(facade.system_note_visible_for?(ext_issue.author)).to be_falsy
       end
 
       it "returns false if ref count is 0" do
         note.user_visible_reference_count = 0
 
         expect(note).not_to receive(:reference_mentionables)
-        expect(note.system_note_visible_for?(ext_issue.author)).to be_falsy
+        expect(facade.system_note_visible_for?(ext_issue.author)).to be_falsy
       end
     end
 
@@ -913,6 +915,8 @@ RSpec.describe Note, feature_category: :team_planning do
           note: "mentioned in issue #{private_issue.to_reference(ext_proj)}",
           system: true
       end
+
+      let(:facade) { Notes::SystemNoteFacade.new(note) }
 
       it_behaves_like "checks references"
     end
@@ -926,6 +930,8 @@ RSpec.describe Note, feature_category: :team_planning do
           note: "added label #{private_label.to_reference(ext_proj)}",
           system: true
       end
+
+      let(:facade) { Notes::SystemNoteFacade.new(note) }
 
       let!(:system_note_metadata) { create(:system_note_metadata, note: note, action: :label) }
 
@@ -943,6 +949,8 @@ RSpec.describe Note, feature_category: :team_planning do
           system: true
       end
 
+      let(:facade) { Notes::SystemNoteFacade.new(note) }
+
       it_behaves_like "checks references"
     end
 
@@ -956,6 +964,8 @@ RSpec.describe Note, feature_category: :team_planning do
           system: true
       end
 
+      let(:facade) { Notes::SystemNoteFacade.new(note) }
+
       it_behaves_like "checks references"
     end
 
@@ -967,12 +977,14 @@ RSpec.describe Note, feature_category: :team_planning do
           system: true
       end
 
+      let(:facade) { Notes::SystemNoteFacade.new(note) }
+
       it "returns true for other users" do
-        expect(note.system_note_visible_for?(ext_issue.author)).to be_truthy
+        expect(facade.system_note_visible_for?(ext_issue.author)).to be_truthy
       end
 
       it "returns true for anonymous users" do
-        expect(note.system_note_visible_for?(nil)).to be_truthy
+        expect(facade.system_note_visible_for?(nil)).to be_truthy
       end
     end
 
@@ -981,8 +993,10 @@ RSpec.describe Note, feature_category: :team_planning do
         create :note, noteable: ext_issue, project: ext_proj, note: "mentioned in merge request !1", system: true
       end
 
+      let(:facade) { Notes::SystemNoteFacade.new(note) }
+
       it "returns false" do
-        expect(note.system_note_visible_for?(private_user)).to be_falsey
+        expect(facade.system_note_visible_for?(private_user)).to be_falsey
       end
 
       it "returns false if user visible reference count set" do
@@ -990,7 +1004,7 @@ RSpec.describe Note, feature_category: :team_planning do
         note.total_reference_count = 0
 
         expect(note).not_to receive(:reference_mentionables)
-        expect(note.system_note_visible_for?(ext_issue.author)).to be_falsey
+        expect(facade.system_note_visible_for?(ext_issue.author)).to be_falsey
       end
     end
   end
@@ -999,7 +1013,7 @@ RSpec.describe Note, feature_category: :team_planning do
     it 'falsey for user-generated notes' do
       note = build_stubbed(:note, system: false)
 
-      expect(note.system_note_with_references?).to be_falsy
+      expect(Notes::SystemNoteFacade.new(note).system_note_with_references?).to be_falsy
     end
 
     context 'when the note might contain cross references' do
@@ -1011,7 +1025,9 @@ RSpec.describe Note, feature_category: :team_planning do
           it 'delegates to the cross-reference regex' do
             expect(note).to receive(:matches_cross_reference_regex?).and_return(false)
 
-            note.system_note_with_references?
+            Notes::SystemNoteFacade
+              .new(note)
+              .system_note_with_references?
           end
         end
       end
@@ -1022,8 +1038,12 @@ RSpec.describe Note, feature_category: :team_planning do
       let(:label_note) { build(:note, note: 'added ~2323232323', system: true) }
 
       it 'scan for a `mentioned in` prefix' do
-        expect(commit_note.system_note_with_references?).to be_truthy
-        expect(label_note.system_note_with_references?).to be_falsy
+        expect(Notes::SystemNoteFacade
+                .new(commit_note)
+                .system_note_with_references?).to be_truthy
+        expect(Notes::SystemNoteFacade
+                .new(label_note)
+                .system_note_with_references?).to be_falsy
       end
     end
 
@@ -1037,7 +1057,9 @@ RSpec.describe Note, feature_category: :team_planning do
       it 'delegates to the system note service' do
         expect(SystemNotes::IssuablesService).to receive(:cross_reference?).with(note.note)
 
-        note.system_note_with_references?
+        Notes::SystemNoteFacade
+          .new(note)
+          .system_note_with_references?
       end
     end
 
@@ -1049,7 +1071,9 @@ RSpec.describe Note, feature_category: :team_planning do
         it 'delegates to the cross-reference regex' do
           expect(note).to receive(:matches_cross_reference_regex?)
 
-          note.system_note_with_references?
+          Notes::SystemNoteFacade
+            .new(note)
+            .system_note_with_references?
         end
       end
 
@@ -1058,13 +1082,13 @@ RSpec.describe Note, feature_category: :team_planning do
 
         it_behaves_like 'system_note_metadata includes note action'
 
-        it { expect(note.system_note_with_references?).to be_falsy }
+        it { expect(Notes::SystemNoteFacade.new(note).system_note_with_references?).to be_falsy }
 
         context 'with cross reference label note' do
           let(:label) { create(:label, project: issue.project) }
           let(:note) { create(:system_note, note: "added #{label.to_reference} label", noteable: issue, project: issue.project) }
 
-          it { expect(note.system_note_with_references?).to be_truthy }
+          it { expect(Notes::SystemNoteFacade.new(note).system_note_with_references?).to be_truthy }
         end
       end
 
@@ -1073,13 +1097,13 @@ RSpec.describe Note, feature_category: :team_planning do
 
         it_behaves_like 'system_note_metadata includes note action'
 
-        it { expect(note.system_note_with_references?).to be_falsy }
+        it { expect(Notes::SystemNoteFacade.new(note).system_note_with_references?).to be_falsy }
 
         context 'with cross reference milestone note' do
           let(:milestone) { create(:milestone, project: issue.project) }
           let(:note) { create(:system_note, note: "added #{milestone.to_reference} milestone", noteable: issue, project: issue.project) }
 
-          it { expect(note.system_note_with_references?).to be_truthy }
+          it { expect(Notes::SystemNoteFacade.new(note).system_note_with_references?).to be_truthy }
         end
       end
     end

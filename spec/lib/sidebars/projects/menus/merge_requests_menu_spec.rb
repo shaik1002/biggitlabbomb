@@ -78,9 +78,14 @@ RSpec.describe Sidebars::Projects::Menus::MergeRequestsMenu, feature_category: :
     end
 
     describe 'formatting' do
+      let(:count_open_for_project) { instance_double(::MergeRequests::CountOpenForProject) }
+
       context 'when the count value is over 1000' do
         before do
-          allow(project).to receive(:open_merge_requests_count).and_return(1001)
+          allow(::MergeRequests::CountOpenForProject).to receive(:new).with(project: project)
+            .and_return(count_open_for_project)
+
+          allow(count_open_for_project).to receive(:call).and_return(1001)
         end
 
         it 'returns truncated digits' do

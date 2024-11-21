@@ -2,10 +2,10 @@
 
 require 'spec_helper'
 
-RSpec.describe Projects::OpenIssuesCountService, :use_clean_rails_memory_store_caching, feature_category: :team_planning do
+RSpec.describe WorkItems::ProjectCountOpenIssuesService, :use_clean_rails_memory_store_caching, feature_category: :team_planning do
   let(:project) { create(:project) }
 
-  subject { described_class.new(project) }
+  subject(:service) { described_class.new(project) }
 
   it_behaves_like 'a counter caching service'
 
@@ -77,26 +77,26 @@ RSpec.describe Projects::OpenIssuesCountService, :use_clean_rails_memory_store_c
 
       context 'when cache is empty' do
         it 'refreshes cache keys correctly' do
-          subject.refresh_cache
+          service.refresh_cache
 
-          expect(Rails.cache.read(subject.cache_key(described_class::PUBLIC_COUNT_KEY))).to eq(2)
-          expect(Rails.cache.read(subject.cache_key(described_class::TOTAL_COUNT_KEY))).to eq(3)
+          expect(Rails.cache.read(service.cache_key(described_class::PUBLIC_COUNT_KEY))).to eq(2)
+          expect(Rails.cache.read(service.cache_key(described_class::TOTAL_COUNT_KEY))).to eq(3)
         end
       end
 
       context 'when cache is outdated' do
         before do
-          subject.refresh_cache
+          service.refresh_cache
         end
 
         it 'refreshes cache keys correctly' do
           create(:issue, :opened, project: project)
           create(:issue, :opened, confidential: true, project: project)
 
-          subject.refresh_cache
+          service.refresh_cache
 
-          expect(Rails.cache.read(subject.cache_key(described_class::PUBLIC_COUNT_KEY))).to eq(3)
-          expect(Rails.cache.read(subject.cache_key(described_class::TOTAL_COUNT_KEY))).to eq(5)
+          expect(Rails.cache.read(service.cache_key(described_class::PUBLIC_COUNT_KEY))).to eq(3)
+          expect(Rails.cache.read(service.cache_key(described_class::TOTAL_COUNT_KEY))).to eq(5)
         end
       end
     end

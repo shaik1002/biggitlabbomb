@@ -13,7 +13,9 @@ module CloudSeed
           service_account.project_id,
           Gitlab::Json.dump(service_account),
           Gitlab::Json.dump(service_account_key),
-          ProtectedBranch.protected?(project, environment_name) || ProtectedTag.protected?(project, environment_name)
+          Projects::ProtectedBranchFacade
+            .new(project: project)
+            .protected?(environment_name) || ProtectedTag.protected?(project, environment_name)
         )
 
         ServiceResponse.success(message: _('Service account generated successfully'), payload: {

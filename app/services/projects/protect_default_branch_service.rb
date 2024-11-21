@@ -53,7 +53,9 @@ module Projects
 
     def protect_branch?
       default_branch_protection.any? &&
-        !ProtectedBranch.protected?(project, default_branch)
+        !Projects::ProtectedBranchFacade
+          .new(project: project)
+          .protected?(default_branch)
     end
 
     def protected_branch_exists?

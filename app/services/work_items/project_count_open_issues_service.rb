@@ -1,14 +1,30 @@
 # frozen_string_literal: true
 
-module Projects
+module WorkItems
   # Service class for counting and caching the number of open issues of a
   # project.
-  class OpenIssuesCountService < Projects::CountService
+  class ProjectCountOpenIssuesService < CountService
     include Gitlab::Utils::StrongMemoize
 
     # Cache keys used to store issues count
     PUBLIC_COUNT_KEY = 'public_open_issues_count'
     TOTAL_COUNT_KEY = 'total_open_issues_count'
+
+    # We only show issues count including confidential for reporters, who are allowed to view confidential issues.
+    # This will still show a discrepancy on issues number but should be less than before.
+    # Check https://gitlab.com/gitlab-org/gitlab-foss/issues/38418 description.
+
+    # rubocop: disable CodeReuse/ActiveRecord -- For now, we want to access group of query
+    def self.query(projects, public_only: true)
+      open_issues = Issue.opened.without_hidden
+
+      if public_only
+        open_issues.public_only.where(project: projects)
+      else
+        open_issues.where(project: projects)
+      end
+    end
+    # rubocop: enable CodeReuse/ActiveRecord
 
     def initialize(project, user = nil)
       @user = user
@@ -25,10 +41,9 @@ module Projects
     end
 
     def user_is_at_least_reporter?
-      strong_memoize(:user_is_at_least_reporter) do
-        @project.member?(@user, Gitlab::Access::REPORTER)
-      end
+      @project.member?(@user, Gitlab::Access::REPORTER)
     end
+    strong_memoize_attr :user_is_at_least_reporter?
 
     def relation_for_count
       self.class.query(@project, public_only: public_only?)
@@ -42,8 +57,8 @@ module Projects
       cache_key(TOTAL_COUNT_KEY)
     end
 
-    # rubocop: disable CodeReuse/ActiveRecord
-    def refresh_cache(&block)
+    # rubocop: disable CodeReuse/ActiveRecord -- For now, we want to access group of query
+    def refresh_cache
       count_grouped_by_confidential = self.class.query(@project, public_only: false).group(:confidential).count
       public_count = count_grouped_by_confidential[false] || 0
       total_count = public_count + (count_grouped_by_confidential[true] || 0)
@@ -54,20 +69,6 @@ module Projects
 
       update_cache_for_key(total_count_cache_key) do
         total_count
-      end
-    end
-
-    # We only show issues count including confidential for reporters, who are allowed to view confidential issues.
-    # This will still show a discrepancy on issues number but should be less than before.
-    # Check https://gitlab.com/gitlab-org/gitlab-foss/issues/38418 description.
-
-    def self.query(projects, public_only: true)
-      open_issues = Issue.opened.without_hidden
-
-      if public_only
-        open_issues.public_only.where(project: projects)
-      else
-        open_issues.where(project: projects)
       end
     end
     # rubocop: enable CodeReuse/ActiveRecord

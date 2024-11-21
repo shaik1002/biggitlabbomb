@@ -2,7 +2,7 @@
 
 module Projects
   # Service class for getting and caching the number of forks of a project.
-  class ForksCountService < Projects::CountService
+  class ForksCountService < ::WorkItems::CountService
     def cache_key_name
       'forks_count'
     end

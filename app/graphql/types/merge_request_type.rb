@@ -339,7 +339,9 @@ module Types
     end
 
     def source_branch_protected
-      object.source_project.present? && ProtectedBranch.protected?(object.source_project, object.source_branch)
+      object.source_project.present? && Projects::ProtectedBranchFacade
+                                          .new(project: object.source_project)
+                                          .protected?(object.source_branch)
     end
 
     def discussion_locked

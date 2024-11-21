@@ -8,7 +8,9 @@ class MergeRequestPollWidgetEntity < Grape::Entity
     AutoMergeService.new(merge_request.project, current_user).available_strategies(merge_request) # rubocop: disable CodeReuse/ServiceClass
   end
   expose :source_branch_protected do |merge_request|
-    merge_request.source_project.present? && ProtectedBranch.protected?(merge_request.source_project, merge_request.source_branch)
+    merge_request.source_project.present? && Projects::ProtectedBranchFacade
+                                              .new(project: merge_request.source_project)
+                                              .protected?(merge_request.source_branch)
   end
   expose :allow_collaboration
   expose :ff_only_enabled do |merge_request|

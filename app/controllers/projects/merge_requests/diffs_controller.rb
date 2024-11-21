@@ -174,11 +174,9 @@ class Projects::MergeRequests::DiffsController < Projects::MergeRequests::Applic
 
     return @merge_request.merge_head_diff if render_merge_ref_head_diff?
 
-    if @start_sha
-      @merge_request_diff.compare_with(@start_sha)
-    else
-      @merge_request_diff
-    end
+    MergeRequests::MergeRequestDiffFacade
+      .new(@merge_request_diff)
+      .compare_with(@start_sha)
   end
   # rubocop: enable CodeReuse/ActiveRecord
 

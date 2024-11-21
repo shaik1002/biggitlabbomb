@@ -17,7 +17,11 @@ class NotePolicy < BasePolicy
 
   condition(:for_design) { @subject.for_design? }
 
-  condition(:is_visible) { @subject.system_note_visible_for?(@user) }
+  condition(:is_visible) do
+    Notes::SystemNoteFacade
+      .new(@subject)
+      .system_note_visible_for?(@user)
+  end
 
   condition(:internal, scope: :subject) { @subject.confidential? }
 

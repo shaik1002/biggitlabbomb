@@ -175,7 +175,10 @@ RSpec.describe Git::BranchHooksService, :clean_gitlab_redis_shared_state, featur
       it 'correctly marks branch as protected' do
         execute_service
 
-        expect(ProtectedBranch.protected?(project, branch)).to eq(true)
+        protected_status = Projects::ProtectedBranchFacade
+                                .new(project: project)
+                                .protected?(branch)
+        expect(protected_status).to eq(true)
       end
     end
 

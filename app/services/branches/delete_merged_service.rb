@@ -13,7 +13,11 @@ module Branches
       # Prevent deletion of branches relevant to open merge requests
       branches -= merge_request_branch_names
       # Prevent deletion of protected branches
-      branches = branches.reject { |branch| ProtectedBranch.protected?(project, branch) }
+      branches = branches.reject do |branch|
+        Projects::ProtectedBranchFacade
+          .new(project: project)
+          .protected?(branch)
+      end
 
       branches.each do |branch|
         ::Branches::DeleteService.new(project, current_user).execute(branch)

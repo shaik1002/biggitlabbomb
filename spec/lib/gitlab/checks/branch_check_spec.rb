@@ -85,8 +85,10 @@ RSpec.describe Gitlab::Checks::BranchCheck, feature_category: :source_code_manag
 
     context 'protected branches check' do
       before do
-        allow(ProtectedBranch).to receive(:protected?).with(project, 'master').and_return(true)
-        allow(ProtectedBranch).to receive(:protected?).with(project, 'feature').and_return(true)
+        facade_instance = instance_double(Projects::ProtectedBranchFacade)
+        allow(Projects::ProtectedBranchFacade).to receive(:new).with(project: project).and_return(facade_instance)
+        allow(facade_instance).to receive(:protected?).with('master').and_return(true)
+        allow(facade_instance).to receive(:protected?).with('feature').and_return(true)
       end
 
       it 'raises an error if the user is not allowed to do forced pushes to protected branches' do

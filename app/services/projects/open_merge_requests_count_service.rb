@@ -3,7 +3,7 @@
 module Projects
   # Service class for counting and caching the number of open merge requests of
   # a project.
-  class OpenMergeRequestsCountService < Projects::CountService
+  class OpenMergeRequestsCountService < ::WorkItems::CountService
     def cache_key_name
       'open_merge_requests_count'
     end

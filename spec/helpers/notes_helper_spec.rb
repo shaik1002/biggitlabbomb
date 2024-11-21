@@ -92,11 +92,14 @@ RSpec.describe NotesHelper, feature_category: :team_planning do
 
         context 'when the discussion is on a comparison between merge request versions' do
           let(:position) do
+            comparison_facade = ::MergeRequests::MergeRequestDiffFacade
+                                  .new(merge_request_diff3)
+
             build(:text_diff_position,
               file: ".gitmodules",
               old_line: 4,
               new_line: 4,
-              diff_refs: merge_request_diff3.compare_with(merge_request_diff1.head_commit_sha).diff_refs
+              diff_refs: comparison_facade.compare_with(merge_request_diff1.head_commit_sha).diff_refs
             )
           end
 

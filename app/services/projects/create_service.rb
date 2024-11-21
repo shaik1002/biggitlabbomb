@@ -257,7 +257,7 @@ module Projects
             Integration.create_from_default_integrations(@project, :project_id)
 
             @import_export_upload.save if @import_export_upload
-            @project.create_labels unless @project.gitlab_project_import?
+            create_labels unless @project.gitlab_project_import?
 
             next if @project.import?
 
@@ -311,6 +311,12 @@ module Projects
     end
 
     private
+
+    def create_labels
+      Projects::LabelCreationFacade
+        .new(project: @project)
+        .call
+    end
 
     def default_branch
       @default_branch.presence || @project.default_branch_or_main

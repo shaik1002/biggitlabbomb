@@ -1837,9 +1837,10 @@ RSpec.describe Issue, feature_category: :team_planning do
 
       expect do
         subject.destroy!
-
         BatchLoader::Executor.clear_current
-      end.to change { project.open_issues_count }.from(1).to(0)
+      end
+        .to change { WorkItems::CountOpenIssuesForProject.new(project: project).count }
+        .from(1).to(0)
     end
   end
 

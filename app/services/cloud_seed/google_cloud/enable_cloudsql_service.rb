@@ -20,7 +20,9 @@ module CloudSeed
       private
 
       def ci_var_protected?
-        ProtectedBranch.protected?(project, environment_name) || ProtectedTag.protected?(project, environment_name)
+        Projects::ProtectedBranchFacade
+          .new(project: project)
+          .protected?(environment_name) || ProtectedTag.protected?(project, environment_name)
       end
     end
   end

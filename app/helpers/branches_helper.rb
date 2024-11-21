@@ -6,7 +6,9 @@ module BranchesHelper
   end
 
   def protected_branch?(project, branch)
-    ProtectedBranch.protected?(project, branch.name)
+    Projects::ProtectedBranchFacade
+      .new(project: project)
+      .protected?(branch.name)
   end
 
   def access_levels_data(access_levels)

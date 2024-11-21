@@ -137,7 +137,9 @@ module Gitlab
     request_cache def protected?(kind, refs)
       assert_project!
 
-      kind.protected?(project, refs)
+      Gitlab::Services::ProtectionCheckService
+        .new(project, kind, refs)
+        .protected?
     end
 
     def project

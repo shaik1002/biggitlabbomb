@@ -165,7 +165,9 @@ module Gitlab
         end
 
         def protected_on_gitlab?
-          ProtectedBranch.protected?(project, protected_branch.id)
+          Projects::ProtectedBranchFacade
+            .new(project: project)
+            .protected?(protected_branch.id)
         end
 
         def non_default_branch_access_level_for(action)

@@ -291,7 +291,7 @@ RSpec.describe Issues::CreateService, feature_category: :team_planning do
           issue
 
           BatchLoader::Executor.clear_current
-        end.to change { project.open_issues_count }.from(0).to(1)
+        end.to change { WorkItems::CountOpenIssuesForProject.new(project: project).count }.from(0).to(1)
       end
 
       context 'when current user cannot set issue metadata in the project' do

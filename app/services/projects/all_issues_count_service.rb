@@ -3,7 +3,7 @@
 module Projects
   # Service class for counting and caching the number of all issues of a
   # project.
-  class AllIssuesCountService < Projects::CountService
+  class AllIssuesCountService < ::WorkItems::CountService
     def relation_for_count
       @project.issues
     end

@@ -214,6 +214,8 @@ RSpec.describe Projects::ProtectDefaultBranchService, feature_category: :source_
   end
 
   describe '#protect_branch?' do
+    let(:facade_instance) { instance_double(Projects::ProtectedBranchFacade) }
+
     context 'when default branch protection is disabled' do
       it 'returns false' do
         allow(project.namespace)
@@ -233,24 +235,28 @@ RSpec.describe Projects::ProtectDefaultBranchService, feature_category: :source_
         allow(service)
           .to receive(:default_branch)
                 .and_return('master')
+
+        allow(Projects::ProtectedBranchFacade).to receive(:new).with(project: project).and_return(facade_instance)
       end
 
-      it 'returns false if the branch is already protected' do
-        allow(ProtectedBranch)
-          .to receive(:protected?)
-                .with(project, 'master')
-                .and_return(true)
+      context 'when the branch is already protected' do
+        before do
+          allow(facade_instance).to receive(:protected?).with('master').and_return(true)
+        end
 
-        expect(service.protect_branch?).to eq(false)
+        it 'returns false' do
+          expect(service.protect_branch?).to eq(false)
+        end
       end
 
-      it 'returns true if the branch is not yet protected' do
-        allow(ProtectedBranch)
-          .to receive(:protected?)
-                .with(project, 'master')
-                .and_return(false)
+      context 'when the branch is not yet protected' do
+        before do
+          allow(facade_instance).to receive(:protected?).with('master').and_return(false)
+        end
 
-        expect(service.protect_branch?).to eq(true)
+        it 'returns true' do
+          expect(service.protect_branch?).to eq(true)
+        end
       end
     end
   end

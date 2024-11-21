@@ -22,13 +22,19 @@ RSpec.describe MergeRequests::PostMergeService, feature_category: :code_review_w
 
     it 'refreshes the number of open merge requests for a valid MR', :use_clean_rails_memory_store_caching do
       # Cache the counter before the MR changed state.
-      project.open_merge_requests_count
+      MergeRequests::CountOpenForProject
+        .new(project: project)
+        .call
 
       expect do
         subject
 
         BatchLoader::Executor.clear_current
-      end.to change { project.open_merge_requests_count }.from(1).to(0)
+      end.to change {
+               MergeRequests::CountOpenForProject
+                   .new(project: project)
+                   .call
+             }.from(1).to(0)
     end
 
     it 'updates metrics' do

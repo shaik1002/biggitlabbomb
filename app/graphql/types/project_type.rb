@@ -822,13 +822,23 @@ module Types
     end
 
     def open_issues_count
-      BatchLoader::GraphQL.wrap(object.open_issues_count) if object.feature_available?(:issues, context[:current_user])
+      return unless object.feature_available?(:issues, context[:current_user])
+
+      BatchLoader::GraphQL.wrap(
+        WorkItems::CountOpenIssuesForProject
+        .new(project: object)
+        .count
+      )
     end
 
     def open_merge_requests_count
       return unless object.feature_available?(:merge_requests, context[:current_user])
 
-      BatchLoader::GraphQL.wrap(object.open_merge_requests_count)
+      BatchLoader::GraphQL.wrap(
+        ::MergeRequests::CountOpenForProject
+          .new(project: object)
+          .call
+      )
     end
 
     def forks_count

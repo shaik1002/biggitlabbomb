@@ -3,7 +3,7 @@
 module Projects
   # Service class for counting and caching the number of all merge requests of
   # a project.
-  class AllMergeRequestsCountService < Projects::CountService
+  class AllMergeRequestsCountService < ::WorkItems::CountService
     def relation_for_count
       @project.merge_requests
     end

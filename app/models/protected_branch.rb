@@ -42,16 +42,6 @@ class ProtectedBranch < ApplicationRecord
     super
   end
 
-  # Check if branch name is marked as protected in the system
-  def self.protected?(project, ref_name)
-    return true if project.empty_repo? && project.default_branch_protected?
-    return false if ref_name.blank?
-
-    ProtectedBranches::CacheService.new(project).fetch(ref_name) do # rubocop: disable CodeReuse/ServiceClass
-      self.matching(ref_name, protected_refs: protected_refs(project)).present?
-    end
-  end
-
   def self.allow_force_push?(project, ref_name)
     project.all_protected_branches.allowing_force_push.matching(ref_name).any?
   end

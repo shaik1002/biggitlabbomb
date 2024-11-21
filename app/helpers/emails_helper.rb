@@ -271,6 +271,15 @@ module EmailsHelper
     end
   end
 
+  def member_source_count(member_source, member)
+    case member_source
+    when Project
+      MergeRequests::CountOpenForProject.new(project: member_source).call
+    when Group
+      member_source.open_merge_requests_count(member.created_by)
+    end
+  end
+
   def member_about_to_expire_text(member_source, days_to_expire, format: nil)
     days_formatted = pluralize(days_to_expire, 'day')
 

@@ -3,11 +3,14 @@
 # Service class for getting and caching the number of merge requests of several projects
 # Warning: do not user this service with a really large set of projects
 # because the service use maps to retrieve the project ids
-module Projects
-  class BatchOpenMergeRequestsCountService < Projects::BatchCountService
-    # rubocop: disable CodeReuse/ActiveRecord
+module MergeRequests
+  class BatchCountOpenService < Projects::BatchCountService
+    # rubocop: disable CodeReuse/ActiveRecord -- For now, we just want to be able to call group on query.
     def global_count
-      @global_count ||= count_service.query(project_ids).group(:project_id).count
+      @global_count ||= count_service
+                          .query(project_ids)
+                          .group(:project_id)
+                          .count
     end
     # rubocop: enable CodeReuse/ActiveRecord
 

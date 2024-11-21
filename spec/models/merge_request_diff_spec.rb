@@ -1201,11 +1201,16 @@ RSpec.describe MergeRequestDiff, feature_category: :code_review_workflow do
     it 'delegates compare to the service' do
       expect(CompareService).to receive(:new).and_call_original
 
-      diff_with_commits.compare_with(nil)
+      MergeRequests::MergeRequestDiffFacade
+        .new(diff_with_commits)
+        .compare_with('0b4bc9a49b562e85de7cc9e834518ea6828729b9')
     end
 
     it 'uses git diff A..B approach by default' do
-      diffs = diff_with_commits.compare_with('0b4bc9a49b562e85de7cc9e834518ea6828729b9').diffs
+      diffs = MergeRequests::MergeRequestDiffFacade
+                .new(diff_with_commits)
+                .compare_with('0b4bc9a49b562e85de7cc9e834518ea6828729b9')
+                .diffs
 
       expect(diffs.size).to eq(21)
     end

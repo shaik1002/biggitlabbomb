@@ -146,11 +146,13 @@ RSpec.describe 'Merge request > User sees versions', :js, feature_category: :cod
       expect(additions_content).to eq '15'
       expect(deletions_content).to eq '6'
 
+      comparison_facade = ::MergeRequests::MergeRequestDiffFacade
+                            .new(merge_request_diff3)
       position = build(:text_diff_position,
         file: ".gitmodules",
         old_line: 4,
         new_line: 4,
-        diff_refs: merge_request_diff3.compare_with(merge_request_diff1.head_commit_sha).diff_refs
+        diff_refs: comparison_facade.compare_with(merge_request_diff1.head_commit_sha).diff_refs
       )
       outdated_diff_note = create(:diff_note_on_merge_request, project: project, noteable: merge_request, position: position)
       outdated_diff_note.position = outdated_diff_note.original_position

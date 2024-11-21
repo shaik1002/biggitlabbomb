@@ -9,10 +9,16 @@ module RendersProjectsList
 
     # Call the count methods on every project, so the BatchLoader would load them all at
     # once when the entities are rendered
-    projects.each(&:forks_count)
-    projects.each(&:open_issues_count)
-    projects.each(&:open_merge_requests_count)
+    projects.each do |project|
+      project.forks_count
+      WorkItems::CountOpenIssuesForProject
+        .new(project: project)
+        .count
 
+      MergeRequests::CountOpenForProject
+        .new(project: project)
+        .call
+    end
     projects
   end
 

@@ -27,9 +27,9 @@ class Discussion
     :to_ability_name,
     :editable?,
     :resolved_by_id,
-    :system_note_visible_for?,
     :resource_parent,
     :save,
+    :system?,
     to: :first_note
 
   def declarative_policy_delegate

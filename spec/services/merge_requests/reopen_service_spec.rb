@@ -101,7 +101,11 @@ RSpec.describe MergeRequests::ReopenService, feature_category: :code_review_work
 
         BatchLoader::Executor.clear_current
       end
-        .to change { project.open_merge_requests_count }.from(0).to(1)
+        .to change {
+              MergeRequests::CountOpenForProject
+                    .new(project: project)
+                    .call
+            }.from(0).to(1)
     end
 
     context 'current user is not authorized to reopen merge request' do
