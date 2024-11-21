@@ -8,6 +8,8 @@ class RemoveNamespaceSettingsThirdPartyAiFeaturesEnabled < Gitlab::Database::Mig
   end
 
   def down
+    # rubocop:disable Migration/PreventAddingColumns -- Legacy migration
     add_column :namespace_settings, :third_party_ai_features_enabled, :boolean, default: true, null: false
+    # rubocop:enable Migration/PreventAddingColumns
   end
 end

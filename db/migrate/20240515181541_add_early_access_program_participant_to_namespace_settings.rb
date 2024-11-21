@@ -4,6 +4,8 @@ class AddEarlyAccessProgramParticipantToNamespaceSettings < Gitlab::Database::Mi
   milestone '17.1'
 
   def change
+    # rubocop:disable Migration/PreventAddingColumns -- Legacy migration
     add_column :namespace_settings, :early_access_program_participant, :boolean, null: false, default: false
+    # rubocop:enable Migration/PreventAddingColumns
   end
 end

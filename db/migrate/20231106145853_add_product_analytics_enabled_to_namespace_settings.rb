@@ -4,6 +4,8 @@ class AddProductAnalyticsEnabledToNamespaceSettings < Gitlab::Database::Migratio
   milestone '16.6'
 
   def change
+    # rubocop:disable Migration/PreventAddingColumns -- Legacy migration
     add_column :namespace_settings, :product_analytics_enabled, :boolean, default: false, null: false
+    # rubocop:enable Migration/PreventAddingColumns
   end
 end

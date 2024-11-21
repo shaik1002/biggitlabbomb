@@ -8,6 +8,8 @@ class RemoveImportedColumnOnMergeRequests < Gitlab::Database::Migration[2.2]
   end
 
   def down
+    # rubocop:disable Migration/PreventAddingColumns -- Legacy migration
     add_column :merge_requests, :imported, :integer, default: 0, null: false, limit: 2
+    # rubocop:enable Migration/PreventAddingColumns
   end
 end

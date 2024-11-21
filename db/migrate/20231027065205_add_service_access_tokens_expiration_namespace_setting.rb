@@ -6,6 +6,8 @@ class AddServiceAccessTokensExpirationNamespaceSetting < Gitlab::Database::Migra
   enable_lock_retries!
 
   def change
+    # rubocop:disable Migration/PreventAddingColumns -- Legacy migration
     add_column :namespace_settings, :service_access_tokens_expiration_enforced, :boolean, default: true, null: false
+    # rubocop:enable Migration/PreventAddingColumns
   end
 end

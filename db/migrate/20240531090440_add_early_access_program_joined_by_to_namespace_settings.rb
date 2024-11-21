@@ -6,7 +6,9 @@ class AddEarlyAccessProgramJoinedByToNamespaceSettings < Gitlab::Database::Migra
 
   def up
     with_lock_retries do
+      # rubocop:disable Migration/PreventAddingColumns -- Legacy migration
       add_column :namespace_settings, :early_access_program_joined_by_id, :bigint, if_not_exists: true
+      # rubocop:enable Migration/PreventAddingColumns
     end
   end
 

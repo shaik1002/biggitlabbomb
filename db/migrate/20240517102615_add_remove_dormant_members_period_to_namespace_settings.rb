@@ -4,6 +4,8 @@ class AddRemoveDormantMembersPeriodToNamespaceSettings < Gitlab::Database::Migra
   milestone '17.1'
 
   def change
+    # rubocop:disable Migration/PreventAddingColumns -- Legacy migration
     add_column :namespace_settings, :remove_dormant_members_period, :integer, default: 90, null: false
+    # rubocop:enable Migration/PreventAddingColumns
   end
 end

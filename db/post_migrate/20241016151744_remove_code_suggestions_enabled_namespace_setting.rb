@@ -8,6 +8,8 @@ class RemoveCodeSuggestionsEnabledNamespaceSetting < Gitlab::Database::Migration
   end
 
   def down
+    # rubocop:disable Migration/PreventAddingColumns -- Legacy migration
     add_column :namespace_settings, :code_suggestions, :boolean, default: true, null: false
+    # rubocop:enable Migration/PreventAddingColumns
   end
 end

@@ -12,7 +12,7 @@ class RemoveDeploymentsClusterId < Gitlab::Database::Migration[2.2]
 
   def down
     with_lock_retries do
-      add_column :deployments, :cluster_id, :integer, if_not_exists: true
+      add_column :deployments, :cluster_id, :integer, if_not_exists: true # rubocop:disable Migration/PreventAddingColumns -- Legacy migration
     end
 
     add_concurrent_index(:deployments, [:cluster_id, :status])

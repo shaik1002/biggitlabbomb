@@ -4,6 +4,8 @@ class AddSeatControlToNamespaceSettings < Gitlab::Database::Migration[2.2]
   milestone '17.2'
 
   def change
+    # rubocop:disable Migration/PreventAddingColumns -- Legacy migration
     add_column :namespace_settings, :seat_control, :smallint, null: false, default: 0
+    # rubocop:enable Migration/PreventAddingColumns
   end
 end

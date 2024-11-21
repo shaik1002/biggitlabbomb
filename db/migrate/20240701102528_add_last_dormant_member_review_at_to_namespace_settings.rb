@@ -7,7 +7,9 @@ class AddLastDormantMemberReviewAtToNamespaceSettings < Gitlab::Database::Migrat
 
   def up
     with_lock_retries do
+      # rubocop:disable Migration/PreventAddingColumns -- Legacy migration
       add_column :namespace_settings, :last_dormant_member_review_at, :datetime_with_timezone, if_not_exists: true
+      # rubocop:enable Migration/PreventAddingColumns
     end
 
     add_concurrent_index(

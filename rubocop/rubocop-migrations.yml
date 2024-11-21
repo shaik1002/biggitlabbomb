@@ -1,6 +1,40 @@
 # Make sure to update the docs if this file moves. Docs URL: https://docs.gitlab.com/ee/development/migration_style_guide.html#when-to-use-the-helper-method
 Migration/UpdateLargeTable:
   Enabled: true
+  OverLimitTables: # all tables classified as over_limit
+    - :ci_build_needs
+    - :ci_build_report_results
+    - :ci_builds
+    - :ci_builds_metadata
+    - :ci_job_artifacts
+    - :ci_job_variables
+    - :ci_pipeline_variables
+    - :ci_pipelines
+    - :ci_stages
+    - :deployments
+    - :description_versions
+    - :events
+    - :issues
+    - :merge_request_diff_commits
+    - :merge_request_diff_commits_b5377a7a34
+    - :merge_request_diff_files
+    - :merge_request_diff_files_99208b8fac
+    - :merge_request_diffs
+    - :merge_requests
+    - :note_diff_files
+    - :notes
+    - :oauth_access_tokens
+    - :project_authorizations
+    - :push_event_payloads
+    - :resource_label_events
+    - :security_findings
+    - :sent_notifications
+    - :system_note_metadata
+    - :taggings
+    - :vulnerability_finding_links
+    - :vulnerability_occurrences
+    - :vulnerability_reads
+    - :web_hook_logs
   LargeTables: # all tables classified as large, or over_limit
     - :approval_merge_request_rules_users
     - :audit_events

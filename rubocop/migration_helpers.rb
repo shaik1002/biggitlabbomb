@@ -9,7 +9,7 @@ module RuboCop
       plan_limits
     ].freeze
 
-    # Tables with large number of columns (> 50 on GitLab.com as of 01/2021)
+    # Tables with large number of columns (> 50 on GitLab.com as of 2024-11-20)
     WIDE_TABLES = %i[
       ci_builds
       p_ci_builds
@@ -30,6 +30,10 @@ module RuboCop
 
     def large_tables
       @large_tables ||= rubocop_migrations_config.dig('Migration/UpdateLargeTable', 'LargeTables')
+    end
+
+    def over_limit_tables
+      @over_limit_tables ||= rubocop_migrations_config.dig('Migration/UpdateLargeTable', 'OverLimitTables')
     end
 
     # Returns true if the given node originated from the db/migrate directory.
