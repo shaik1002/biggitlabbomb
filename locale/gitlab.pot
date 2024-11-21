@@ -2517,6 +2517,9 @@ msgstr ""
 msgid "AWS secret access key (Optional)"
 msgstr ""
 
+msgid "Aaaaaaa"
+msgstr ""
+
 msgid "Abort"
 msgstr ""
 
@@ -56595,6 +56598,9 @@ msgstr ""
 msgid "This is the only time the secret is accessible. Copy the secret and store it securely."
 msgstr ""
 
+msgid "This is the text content for the drawer. It provides more information about the GitLab provided devfile option."
+msgstr ""
+
 msgid "This is you."
 msgstr ""
 
@@ -63367,6 +63373,9 @@ msgstr ""
 msgid "Workspaces|Creating"
 msgstr ""
 
+msgid "Workspaces|Devfile"
+msgstr ""
+
 msgid "Workspaces|Devfile location"
 msgstr ""
 
@@ -63386,6 +63395,12 @@ msgid "Workspaces|Failed to update workspace"
 msgstr ""
 
 msgid "Workspaces|Git reference"
+msgstr ""
+
+msgid "Workspaces|GitLab devfile.yaml"
+msgstr ""
+
+msgid "Workspaces|Gitlab devfile"
 msgstr ""
 
 msgid "Workspaces|Group agents"
@@ -63413,6 +63428,9 @@ msgid "Workspaces|No active workspaces"
 msgstr ""
 
 msgid "Workspaces|No agents available to create workspaces. Please consult %{linkStart}Workspaces documentation%{linkEnd} for troubleshooting."
+msgstr ""
+
+msgid "Workspaces|No devfile detected. The GitLab devfile will be used."
 msgstr ""
 
 msgid "Workspaces|No terminated workspaces"
