@@ -15,8 +15,7 @@ import IS_JH from '../../../config/helpers/is_jh_env.js';
 import { postCssColorToHex } from './postcss_color_to_hex.js';
 /* eslint-enable import/extensions */
 
-// Note, in node > 21.2 we could replace the below with import.meta.dirname
-const ROOT_PATH = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../');
+const ROOT_PATH = path.resolve(import.meta.dirname, '../../../');
 const OUTPUT_PATH = path.join(ROOT_PATH, 'app/assets/builds/');
 
 const BASE_PATH = 'app/assets/stylesheets';
