@@ -6,8 +6,8 @@ RSpec.describe Gitlab::GithubImport::Importer::PullRequests::ReviewImporter, :cl
   include Import::UserMappingHelper
   using RSpec::Parameterized::TableSyntax
 
-  let_it_be_with_reload(:project) do
-    create(:project, :with_import_url, :import_user_mapping_enabled, import_type: Import::SOURCE_GITHUB)
+  let_it_be(:project) do
+    create(:project, :with_import_url, :import_user_mapping_enabled, import_type: ::Import::SOURCE_GITHUB)
   end
 
   let_it_be(:source_user) do
@@ -15,7 +15,7 @@ RSpec.describe Gitlab::GithubImport::Importer::PullRequests::ReviewImporter, :cl
       :import_source_user,
       source_user_identifier: 999,
       source_hostname: project.import_url,
-      import_type: Import::SOURCE_GITHUB,
+      import_type: ::Import::SOURCE_GITHUB,
       namespace: project.root_ancestor
     )
   end
@@ -29,8 +29,6 @@ RSpec.describe Gitlab::GithubImport::Importer::PullRequests::ReviewImporter, :cl
       user: { id: 999, login: 'author', email: 'author@email.com' }
     )
   end
-
-  let(:user_references) { placeholder_user_references(Import::SOURCE_GITHUB, project.import_state.id) }
 
   before do
     allow(client_double).to receive_message_chain(:octokit, :last_response, :headers).and_return({ etag: nil })
@@ -111,6 +109,8 @@ RSpec.describe Gitlab::GithubImport::Importer::PullRequests::ReviewImporter, :cl
         it 'pushes placeholder references for reviewer and system note' do
           subject.execute
 
+          user_references = placeholder_user_references(::Import::SOURCE_GITHUB, project.import_state.id)
+
           created_approval = merge_request.approvals.last
           created_reviewer = merge_request.merge_request_reviewers.last
           system_note = merge_request.notes.last
@@ -136,6 +136,8 @@ RSpec.describe Gitlab::GithubImport::Importer::PullRequests::ReviewImporter, :cl
           it 'only pushes placeholder references for reviewer' do
             subject.execute
 
+            user_references = placeholder_user_references(::Import::SOURCE_GITHUB, project.import_state.id)
+
             created_reviewer = merge_request.merge_request_reviewers.last
 
             expect(user_references).to match_array([
@@ -157,6 +159,8 @@ RSpec.describe Gitlab::GithubImport::Importer::PullRequests::ReviewImporter, :cl
         it 'only pushes placeholder references for reviewer' do
           subject.execute
 
+          user_references = placeholder_user_references(::Import::SOURCE_GITHUB, project.import_state.id)
+
           created_reviewer = merge_request.merge_request_reviewers.last
 
           expect(user_references).to match_array([
@@ -176,6 +180,8 @@ RSpec.describe Gitlab::GithubImport::Importer::PullRequests::ReviewImporter, :cl
 
         it 'only pushes placeholder references for reviewer' do
           subject.execute
+
+          user_references = placeholder_user_references(::Import::SOURCE_GITHUB, project.import_state.id)
 
           created_reviewer = merge_request.merge_request_reviewers.last
 
@@ -211,6 +217,8 @@ RSpec.describe Gitlab::GithubImport::Importer::PullRequests::ReviewImporter, :cl
         it 'pushes placeholder references for reviewer, system note, and reviewer note' do
           subject.execute
 
+          user_references = placeholder_user_references(::Import::SOURCE_GITHUB, project.import_state.id)
+
           created_approval = merge_request.approvals.last
           created_reviewer = merge_request.merge_request_reviewers.last
           system_note = merge_request.notes.where(system: true).last
@@ -243,6 +251,8 @@ RSpec.describe Gitlab::GithubImport::Importer::PullRequests::ReviewImporter, :cl
         it 'pushes placeholder references for reviewer and reviewer note' do
           subject.execute
 
+          user_references = placeholder_user_references(::Import::SOURCE_GITHUB, project.import_state.id)
+
           created_reviewer = merge_request.merge_request_reviewers.last
           note = merge_request.notes.last
 
@@ -271,6 +281,8 @@ RSpec.describe Gitlab::GithubImport::Importer::PullRequests::ReviewImporter, :cl
         it 'pushes placeholder references for reviewer and reviewer note' do
           subject.execute
 
+          user_references = placeholder_user_references(::Import::SOURCE_GITHUB, project.import_state.id)
+
           created_reviewer = merge_request.merge_request_reviewers.last
           note = merge_request.notes.last
 
@@ -285,7 +297,11 @@ RSpec.describe Gitlab::GithubImport::Importer::PullRequests::ReviewImporter, :cl
 
   context 'when user mapping is disabled' do
     before_all do
-      project.build_or_assign_import_data(data: { user_contribution_mapping_enabled: false }).save!
+      project.build_or_assign_import_data(data: { user_contribution_mapping_enabled: false })
+    end
+
+    after(:all) do
+      project.build_or_assign_import_data(data: { user_contribution_mapping_enabled: true })
     end
 
     context 'when the review author can be mapped to a gitlab user' do

@@ -121,7 +121,7 @@ export default {
         v-if="item.configured"
         v-gl-tooltip
         :name="item.active ? 'status-success' : 'status-paused'"
-        :variant="item.active ? 'success' : 'subtle'"
+        :class="item.active ? 'gl-text-green-500' : 'gl-text-gray-500'"
         :title="getStatusTooltipTitle(item)"
       />
     </template>

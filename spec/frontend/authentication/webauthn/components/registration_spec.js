@@ -9,6 +9,7 @@ import {
   I18N_BUTTON_TRY_AGAIN,
   I18N_ERROR_HTTP,
   I18N_ERROR_UNSUPPORTED_BROWSER,
+  I18N_INFO_TEXT,
   I18N_STATUS_SUCCESS,
   I18N_STATUS_WAITING,
   STATE_ERROR,
@@ -88,10 +89,11 @@ describe('Registration', () => {
     });
 
     describe(`when ${STATE_READY} state`, () => {
-      it('shows button', () => {
+      it('shows button and explanation text', () => {
         createComponent();
 
         expect(findButton().text()).toBe(I18N_BUTTON_SETUP);
+        expect(wrapper.text()).toContain(I18N_INFO_TEXT);
       });
     });
 

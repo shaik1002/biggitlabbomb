@@ -1,7 +1,17 @@
-import { getIdFromGraphQLId } from '~/graphql_shared/utils';
-import { ACTION_EDIT, ACTION_DELETE } from '~/vue_shared/components/list_actions/constants';
+import { s__ } from '~/locale';
+import {
+  ACTION_EDIT,
+  ACTION_DELETE,
+  BASE_ACTIONS,
+} from '~/vue_shared/components/list_actions/constants';
 
-const availableGraphQLProjectActions = (userPermissions) => {
+//
+export const restoreProject = () => {
+  // Overridden in EE
+  throw new Error(s__('Projects|Restoring a project is not available with your current license'));
+};
+
+export const availableGraphQLProjectActions = ({ userPermissions }) => {
   const baseActions = [];
 
   if (userPermissions.viewEditPage) {
@@ -12,33 +22,5 @@ const availableGraphQLProjectActions = (userPermissions) => {
     baseActions.push(ACTION_DELETE);
   }
 
-  return baseActions;
+  return baseActions.sort((a, b) => BASE_ACTIONS[a].order - BASE_ACTIONS[b].order);
 };
-
-export const formatGraphQLProjects = (projects) =>
-  projects.map(
-    ({
-      id,
-      nameWithNamespace,
-      mergeRequestsAccessLevel,
-      issuesAccessLevel,
-      forkingAccessLevel,
-      webUrl,
-      userPermissions,
-      maxAccessLevel: accessLevel,
-      organizationEditPath: editPath,
-      ...project
-    }) => ({
-      ...project,
-      id: getIdFromGraphQLId(id),
-      name: nameWithNamespace,
-      mergeRequestsAccessLevel: mergeRequestsAccessLevel.stringValue,
-      issuesAccessLevel: issuesAccessLevel.stringValue,
-      forkingAccessLevel: forkingAccessLevel.stringValue,
-      webUrl,
-      isForked: false,
-      accessLevel,
-      editPath,
-      availableActions: availableGraphQLProjectActions(userPermissions),
-    }),
-  );

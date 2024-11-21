@@ -71,11 +71,10 @@ to run scripts and deploy the site.
 
 This specific Ruby image is maintained on [DockerHub](https://hub.docker.com/_/ruby).
 
-Add a default image to your pipeline by adding this CI/CD configuration to the beginning of your `.gitlab-ci.yml` file:
+Edit your `.gitlab-ci.yml` file and add this text as the first line:
 
 ```yaml
-default:
-  image: ruby:3.2
+image: ruby:3.2
 ```
 
 If your SSG needs [NodeJS](https://nodejs.org/) to build, you must specify an
@@ -108,9 +107,9 @@ task.
 ```yaml
 job:
   script:
-    - gem install bundler
-    - bundle install
-    - bundle exec jekyll build
+  - gem install bundler
+  - bundle install
+  - bundle exec jekyll build
 ```
 
 For GitLab Pages, this `job` has to include a property, called `pages`.
@@ -166,8 +165,7 @@ deploy-pages:
 Your `.gitlab-ci.yml` file should now look like this:
 
 ```yaml
-default:
-  image: ruby:3.2
+image: ruby:3.2
 
 deploy-pages:
   script:
@@ -210,8 +208,7 @@ First, add a `workflow` section to force the pipeline to run only when changes a
 pushed to branches:
 
 ```yaml
-default:
-  image: ruby:3.2
+image: ruby:3.2
 
 workflow:
   rules:
@@ -232,8 +229,7 @@ Then configure the pipeline to run the job for the
 [default branch](../../repository/branches/default.md) (here, `main`) only.
 
 ```yaml
-default:
-  image: ruby:3.2
+image: ruby:3.2
 
 workflow:
   rules:
@@ -265,8 +261,7 @@ To specify a stage for your job to run in,
 add a `stage` line to your CI file:
 
 ```yaml
-default:
-  image: ruby:3.2
+image: ruby:3.2
 
 workflow:
   rules:
@@ -291,8 +286,7 @@ Now add another job to the CI file, telling it to
 test every push to every branch **except** the `main` branch:
 
 ```yaml
-default:
-  image: ruby:3.2
+image: ruby:3.2
 
 workflow:
   rules:
@@ -336,24 +330,24 @@ same time.
 
 ### Remove duplicate commands
 
-To avoid duplicating the same `before_script` commands in every job, you can add them
-to the default section.
+To avoid duplicating the same scripts in every job, you can add them
+to a `before_script` section.
 
 In the example, `gem install bundler` and `bundle install` were running
 for both jobs, `pages` and `test`.
 
-Move these commands to the `default` section:
+Move these commands to a `before_script` section:
 
 ```yaml
-default:
-  image: ruby:3.2
-  before_script:
-    - gem install bundler
-    - bundle install
+image: ruby:3.2
 
 workflow:
   rules:
     - if: $CI_COMMIT_BRANCH
+
+before_script:
+  - gem install bundler
+  - bundle install
 
 deploy-pages:
   stage: deploy
@@ -387,19 +381,19 @@ This example caches Jekyll dependencies in a `vendor` directory
 when you run `bundle install`:
 
 ```yaml
-default:
-  image: ruby:3.2
-  before_script:
-    - gem install bundler
-    - bundle install --path vendor
-  cache:
-    paths:
-      - vendor/
+image: ruby:3.2
 
 workflow:
   rules:
     - if: $CI_COMMIT_BRANCH
 
+cache:
+  paths:
+    - vendor/
+
+before_script:
+  - gem install bundler
+  - bundle install --path vendor
 
 deploy-pages:
   stage: deploy

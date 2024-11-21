@@ -45,8 +45,6 @@ FactoryBot already reflects the change.
 
 ### Without GDK
 
-Requires Git v2.26.0 or later. 
-
 1. Start a containerized GitLab instance
 
    ```shell
@@ -121,8 +119,6 @@ Where `:file` is the file path. (This path reflects relative `.rb`, `.yml`, or `
 
 WARNING:
 While it is possible to use the Data Seeder with an Linux package installation, **use caution** if you do this when the instance is being used in a production setting.
-
-Requires Git v2.26.0 or later. 
 
 1. Change the working directory to the GitLab installation:
 

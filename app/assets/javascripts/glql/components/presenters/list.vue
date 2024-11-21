@@ -38,7 +38,7 @@ export default {
       return this.config.fields;
     },
     docsPath() {
-      return helpPagePath('user/glql/index');
+      return helpPagePath('user/glql');
     },
   },
   i18n: {

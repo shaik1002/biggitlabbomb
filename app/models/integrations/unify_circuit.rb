@@ -6,22 +6,17 @@ module Integrations
 
     field :webhook,
       section: SECTION_TYPE_CONNECTION,
-      help: -> { _('The Unify Circuit webhook (for example, `https://circuit.com/rest/v2/webhooks/incoming/...`).') },
+      help: 'https://yourcircuit.com/rest/v2/webhooks/incoming/…',
       required: true
 
     field :notify_only_broken_pipelines,
       type: :checkbox,
-      description: -> { _('Send notifications for broken pipelines.') },
       section: SECTION_TYPE_CONFIGURATION
 
     field :branches_to_be_notified,
       type: :select,
       section: SECTION_TYPE_CONFIGURATION,
       title: -> { s_('Integrations|Branches for which notifications are to be sent') },
-      description: -> {
-                     _('Branches to send notifications for. Valid options are `all`, `default`, `protected`, ' \
-                       'and `default_and_protected`. The default value is `default`.')
-                   },
       choices: -> { branch_choices }
 
     def self.title

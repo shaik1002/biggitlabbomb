@@ -220,27 +220,30 @@ describe('IntegrationForm', () => {
     });
 
     describe.each`
-      formActive | method
-      ${true}    | ${'toBeUndefined'}
-      ${false}   | ${'toBeDefined'}
-    `('when `toggle-integration-active` is emitted with $formActive', ({ formActive, method }) => {
-      beforeEach(() => {
-        createComponent({
-          customStateProps: {
-            sections: [mockSectionConnection],
-            manualActivation: true,
-            initialActivated: false,
-          },
+      formActive | novalidate
+      ${true}    | ${undefined}
+      ${false}   | ${'true'}
+    `(
+      'when `toggle-integration-active` is emitted with $formActive',
+      ({ formActive, novalidate }) => {
+        beforeEach(() => {
+          createComponent({
+            customStateProps: {
+              sections: [mockSectionConnection],
+              manualActivation: true,
+              initialActivated: false,
+            },
+          });
+
+          const section = findAllSections().at(0);
+          section.vm.$emit('toggle-integration-active', formActive);
         });
 
-        const section = findAllSections().at(0);
-        section.vm.$emit('toggle-integration-active', formActive);
-      });
-
-      it(`checks noValidate ${method}`, () => {
-        expect(findGlForm().attributes('novalidate'))[method]();
-      });
-    });
+        it(`sets noValidate to ${novalidate}`, () => {
+          expect(findGlForm().attributes('novalidate')).toBe(novalidate);
+        });
+      },
+    );
 
     describe('when section emits `request-jira-issue-types` event', () => {
       beforeEach(() => {
@@ -282,25 +285,28 @@ describe('IntegrationForm', () => {
     });
 
     describe.each`
-      formActive | method
-      ${true}    | ${'toBeUndefined'}
-      ${false}   | ${'toBeDefined'}
-    `('when `toggle-integration-active` is emitted with $formActive', ({ formActive, method }) => {
-      beforeEach(() => {
-        createComponent({
-          customStateProps: {
-            manualActivation: true,
-            initialActivated: false,
-          },
+      formActive | novalidate
+      ${true}    | ${undefined}
+      ${false}   | ${'true'}
+    `(
+      'when `toggle-integration-active` is emitted with $formActive',
+      ({ formActive, novalidate }) => {
+        beforeEach(() => {
+          createComponent({
+            customStateProps: {
+              manualActivation: true,
+              initialActivated: false,
+            },
+          });
+
+          findActiveCheckbox().vm.$emit('toggle-integration-active', formActive);
         });
 
-        findActiveCheckbox().vm.$emit('toggle-integration-active', formActive);
-      });
-
-      it(`checks noValidate ${method}`, () => {
-        expect(findGlForm().attributes('novalidate'))[method]();
-      });
-    });
+        it(`sets noValidate to ${novalidate}`, () => {
+          expect(findGlForm().attributes('novalidate')).toBe(novalidate);
+        });
+      },
+    );
   });
 
   describe('Response to the "save" event (form submission)', () => {

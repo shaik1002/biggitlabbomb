@@ -132,8 +132,8 @@ export default {
     stateTimestampTypeText() {
       return this.isChildItemOpen ? this.$options.i18n.created : this.$options.i18n.closed;
     },
-    childItemTypeIconVariant() {
-      return this.isChildItemOpen ? 'default' : 'subtle';
+    childItemTypeColorClass() {
+      return this.isChildItemOpen ? 'gl-text-subtle' : 'gl-text-disabled';
     },
     displayLabels() {
       return this.showLabels && this.labels.length;
@@ -195,10 +195,7 @@ export default {
     data-testid="links-child"
   >
     <div ref="stateIcon" class="gl-cursor-help">
-      <work-item-type-icon
-        :icon-variant="childItemTypeIconVariant"
-        :work-item-type="childItemType"
-      />
+      <work-item-type-icon :color-class="childItemTypeColorClass" :work-item-type="childItemType" />
       <gl-tooltip :target="() => $refs.stateIcon">
         {{ childItemType }}
       </gl-tooltip>

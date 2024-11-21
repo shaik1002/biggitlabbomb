@@ -13,9 +13,7 @@ RSpec.describe Gitlab::Ci::Pipeline::Chain::CancelPendingPipelines, feature_cate
     subject(:perform) { step.perform! }
 
     it 'enqueues CancelRedundantPipelinesWorker' do
-      expect(Ci::CancelRedundantPipelinesWorker)
-        .to receive(:perform_async)
-        .with(pipeline.id, { 'partition_id' => pipeline.partition_id })
+      expect(Ci::CancelRedundantPipelinesWorker).to receive(:perform_async).with(pipeline.id)
 
       subject
     end
@@ -27,8 +25,7 @@ RSpec.describe Gitlab::Ci::Pipeline::Chain::CancelPendingPipelines, feature_cate
 
       it 'enqueues LowUrgencyCancelRedundantPipelinesWorker' do
         expect(Ci::LowUrgencyCancelRedundantPipelinesWorker)
-          .to receive(:perform_async)
-          .with(pipeline.id, { 'partition_id' => pipeline.partition_id })
+          .to receive(:perform_async).with(pipeline.id)
 
         subject
       end

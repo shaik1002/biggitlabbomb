@@ -1,12 +1,16 @@
 import { nextTick } from 'vue';
-import { GlAvatarLabeled, GlBadge, GlIcon, GlPopover } from '@gitlab/ui';
+import { GlAvatarLabeled, GlBadge, GlIcon, GlPopover, GlLoadingIcon } from '@gitlab/ui';
 import uniqueId from 'lodash/uniqueId';
 import projects from 'test_fixtures/api/users/projects/get.json';
 import { mountExtended } from 'helpers/vue_test_utils_helper';
 import ProjectListItemInactiveBadge from 'ee_else_ce/vue_shared/components/projects_list/project_list_item_inactive_badge.vue';
 import ProjectsListItem from '~/vue_shared/components/projects_list/projects_list_item.vue';
 import ListActions from '~/vue_shared/components/list_actions/list_actions.vue';
-import { ACTION_EDIT, ACTION_DELETE } from '~/vue_shared/components/list_actions/constants';
+import {
+  ACTION_EDIT,
+  ACTION_RESTORE,
+  ACTION_DELETE,
+} from '~/vue_shared/components/list_actions/constants';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 import waitForPromises from 'helpers/wait_for_promises';
@@ -24,9 +28,11 @@ import {
   TIMESTAMP_TYPE_UPDATED_AT,
 } from '~/vue_shared/components/resource_lists/constants';
 import {
+  renderRestoreSuccessToast,
   renderDeleteSuccessToast,
   deleteParams,
 } from 'ee_else_ce/vue_shared/components/resource_lists/utils';
+import { restoreProject } from 'ee_else_ce/vue_shared/components/projects_list/utils';
 import { deleteProject } from '~/api/projects_api';
 import { createAlert } from '~/alert';
 
@@ -37,11 +43,13 @@ const MOCK_DELETE_PARAMS = {
 jest.mock('lodash/uniqueId');
 jest.mock('ee_else_ce/vue_shared/components/resource_lists/utils', () => ({
   ...jest.requireActual('ee_else_ce/vue_shared/components/resource_lists/utils'),
+  renderRestoreSuccessToast: jest.fn(),
   renderDeleteSuccessToast: jest.fn(),
   deleteParams: jest.fn(() => MOCK_DELETE_PARAMS),
 }));
 jest.mock('~/alert');
 jest.mock('~/api/projects_api');
+jest.mock('ee_else_ce/vue_shared/components/projects_list/utils');
 
 describe('ProjectsListItem', () => {
   let wrapper;
@@ -76,11 +84,16 @@ describe('ProjectsListItem', () => {
   const findProjectDescription = () => wrapper.findByTestId('project-description');
   const findVisibilityIcon = () => findAvatarLabeled().findComponent(GlIcon);
   const findListActions = () => wrapper.findComponent(ListActions);
+  const findListActionsLoadingIcon = () => wrapper.findComponent(GlLoadingIcon);
   const findAccessLevelBadge = () => wrapper.findByTestId('access-level-badge');
   const findCiCatalogBadge = () => wrapper.findByTestId('ci-catalog-badge');
   const findInactiveBadge = () => wrapper.findComponent(ProjectListItemInactiveBadge);
   const findTimeAgoTooltip = () => wrapper.findComponent(TimeAgoTooltip);
   const findDeleteModal = () => wrapper.findComponent(DeleteModal);
+  const restoreProjectAction = async () => {
+    findListActions().props('actions')[ACTION_RESTORE].action();
+    await nextTick();
+  };
   const deleteModalFirePrimaryEvent = async () => {
     findDeleteModal().vm.$emit('primary');
     await nextTick();
@@ -433,7 +446,7 @@ describe('ProjectsListItem', () => {
 
     const projectWithActions = {
       ...project,
-      availableActions: [ACTION_EDIT, ACTION_DELETE],
+      availableActions: [ACTION_EDIT, ACTION_RESTORE, ACTION_DELETE],
       isForked: true,
       editPath,
     };
@@ -452,11 +465,65 @@ describe('ProjectsListItem', () => {
           [ACTION_EDIT]: {
             href: editPath,
           },
+          [ACTION_RESTORE]: {
+            action: expect.any(Function),
+          },
           [ACTION_DELETE]: {
             action: expect.any(Function),
           },
         },
-        availableActions: [ACTION_EDIT, ACTION_DELETE],
+        availableActions: [ACTION_EDIT, ACTION_RESTORE, ACTION_DELETE],
+      });
+    });
+
+    describe('when restore action is fired', () => {
+      describe('when API call is successful', () => {
+        it('calls restoreProject, properly sets loading state, and emits refetch event', async () => {
+          restoreProject.mockResolvedValueOnce();
+
+          await restoreProjectAction();
+          expect(restoreProject).toHaveBeenCalledWith(projectWithActions.id);
+
+          expect(findListActionsLoadingIcon().exists()).toBe(true);
+          expect(findListActions().exists()).toBe(false);
+
+          await waitForPromises();
+
+          expect(findListActionsLoadingIcon().exists()).toBe(false);
+          expect(findListActions().exists()).toBe(true);
+
+          expect(wrapper.emitted('refetch')).toEqual([[]]);
+          expect(renderRestoreSuccessToast).toHaveBeenCalledWith(projectWithActions, 'Project');
+          expect(createAlert).not.toHaveBeenCalled();
+        });
+      });
+
+      describe('when API call is not successful', () => {
+        const error = new Error();
+
+        it('calls restoreProject, properly sets loading state, and shows error alert', async () => {
+          restoreProject.mockRejectedValue(error);
+
+          await restoreProjectAction();
+          expect(restoreProject).toHaveBeenCalledWith(projectWithActions.id);
+
+          expect(findListActionsLoadingIcon().exists()).toBe(true);
+          expect(findListActions().exists()).toBe(false);
+
+          await waitForPromises();
+
+          expect(findListActionsLoadingIcon().exists()).toBe(false);
+          expect(findListActions().exists()).toBe(true);
+
+          expect(wrapper.emitted('refetch')).toBeUndefined();
+          expect(createAlert).toHaveBeenCalledWith({
+            message:
+              'An error occurred restoring the project. Please refresh the page to try again.',
+            error,
+            captureError: true,
+          });
+          expect(renderRestoreSuccessToast).not.toHaveBeenCalled();
+        });
       });
     });
 
@@ -479,7 +546,7 @@ describe('ProjectsListItem', () => {
 
       describe('when deletion is confirmed', () => {
         describe('when API call is successful', () => {
-          it('calls deleteProject, properly sets loading state, and emits delete-complete event', async () => {
+          it('calls deleteProject, properly sets loading state, and emits refetch event', async () => {
             deleteProject.mockResolvedValueOnce();
 
             await deleteModalFirePrimaryEvent();
@@ -490,7 +557,7 @@ describe('ProjectsListItem', () => {
             await waitForPromises();
 
             expect(findDeleteModal().props('confirmLoading')).toBe(false);
-            expect(wrapper.emitted('delete-complete')).toEqual([[]]);
+            expect(wrapper.emitted('refetch')).toEqual([[]]);
             expect(renderDeleteSuccessToast).toHaveBeenCalledWith(projectWithActions, 'Project');
             expect(createAlert).not.toHaveBeenCalled();
           });
@@ -511,7 +578,7 @@ describe('ProjectsListItem', () => {
 
             expect(findDeleteModal().props('confirmLoading')).toBe(false);
 
-            expect(wrapper.emitted('delete-complete')).toBeUndefined();
+            expect(wrapper.emitted('refetch')).toBeUndefined();
             expect(createAlert).toHaveBeenCalledWith({
               message:
                 'An error occurred deleting the project. Please refresh the page to try again.',

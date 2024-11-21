@@ -8,13 +8,16 @@ import {
   GlPopover,
   GlSprintf,
   GlTruncateText,
+  GlLoadingIcon,
 } from '@gitlab/ui';
 import uniqueId from 'lodash/uniqueId';
 
 import {
+  renderRestoreSuccessToast,
   renderDeleteSuccessToast,
   deleteParams,
 } from 'ee_else_ce/vue_shared/components/resource_lists/utils';
+import { restoreProject } from 'ee_else_ce/vue_shared/components/projects_list/utils';
 import ProjectListItemInactiveBadge from 'ee_else_ce/vue_shared/components/projects_list/project_list_item_inactive_badge.vue';
 import { VISIBILITY_TYPE_ICON, PROJECT_VISIBILITY_TYPE } from '~/visibility_level/constants';
 import { ACCESS_LEVEL_LABELS, ACCESS_LEVEL_NO_ACCESS_INTEGER } from '~/access_level/constants';
@@ -25,7 +28,11 @@ import { truncate } from '~/lib/utils/text_utility';
 import SafeHtml from '~/vue_shared/directives/safe_html';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 import ListActions from '~/vue_shared/components/list_actions/list_actions.vue';
-import { ACTION_EDIT, ACTION_DELETE } from '~/vue_shared/components/list_actions/constants';
+import {
+  ACTION_EDIT,
+  ACTION_RESTORE,
+  ACTION_DELETE,
+} from '~/vue_shared/components/list_actions/constants';
 import DeleteModal from '~/projects/components/shared/delete_modal.vue';
 import {
   TIMESTAMP_TYPE_CREATED_AT,
@@ -52,6 +59,9 @@ export default {
     showMore: __('Show more'),
     showLess: __('Show less'),
     project: __('Project'),
+    restoreErrorMessage: s__(
+      'Projects|An error occurred restoring the project. Please refresh the page to try again.',
+    ),
     deleteErrorMessage: s__(
       'Projects|An error occurred deleting the project. Please refresh the page to try again.',
     ),
@@ -66,6 +76,7 @@ export default {
     GlPopover,
     GlSprintf,
     GlTruncateText,
+    GlLoadingIcon,
     TimeAgoTooltip,
     DeleteModal,
     ListActions,
@@ -128,6 +139,7 @@ export default {
       topicsPopoverTarget: uniqueId('project-topics-popover-'),
       isDeleteModalVisible: false,
       isDeleteLoading: false,
+      actionsLoading: false,
     };
   },
   computed: {
@@ -217,6 +229,9 @@ export default {
         [ACTION_EDIT]: {
           href: this.project.editPath,
         },
+        [ACTION_RESTORE]: {
+          action: this.onActionRestore,
+        },
         [ACTION_DELETE]: {
           action: this.onActionDelete,
         },
@@ -253,12 +268,25 @@ export default {
     onActionDelete() {
       this.isDeleteModalVisible = true;
     },
+    async onActionRestore() {
+      this.actionsLoading = true;
+
+      try {
+        await restoreProject(this.project.id);
+        this.$emit('refetch');
+        renderRestoreSuccessToast(this.project, this.$options.i18n.project);
+      } catch (error) {
+        createAlert({ message: this.$options.i18n.restoreErrorMessage, error, captureError: true });
+      } finally {
+        this.actionsLoading = false;
+      }
+    },
     async onDeleteModalPrimary() {
       this.isDeleteLoading = true;
 
       try {
         await deleteProject(this.project.id, deleteParams(this.project));
-        this.$emit('delete-complete');
+        this.$emit('refetch');
         renderDeleteSuccessToast(this.project, this.$options.i18n.project);
       } catch (error) {
         createAlert({ message: this.$options.i18n.deleteErrorMessage, error, captureError: true });
@@ -426,9 +454,10 @@ export default {
         </div>
       </div>
     </div>
-    <div class="gl-ml-3 gl-flex gl-h-9 gl-items-center">
+    <div v-if="hasActions" class="gl-ml-3 gl-flex gl-h-9 gl-items-center">
+      <gl-loading-icon v-if="actionsLoading" size="sm" />
       <list-actions
-        v-if="hasActions"
+        v-if="!actionsLoading"
         :actions="actions"
         :available-actions="project.availableActions"
       />

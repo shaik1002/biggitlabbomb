@@ -18,7 +18,7 @@ import { getSelectedFragment } from '~/lib/utils/common_utils';
 import { truncateSha } from '~/lib/utils/text_utility';
 import { s__, __, sprintf } from '~/locale';
 import { CopyAsGFM } from '~/behaviors/markdown/copy_as_gfm';
-import { updateText, repeatCodeBackticks } from '~/lib/utils/text_markdown';
+import { updateText } from '~/lib/utils/text_markdown';
 import ToolbarButton from './toolbar_button.vue';
 import DrawioToolbarButton from './drawio_toolbar_button.vue';
 import CommentTemplatesModal from './comment_templates_modal.vue';
@@ -133,13 +133,9 @@ export default {
       ].join('\n');
     },
     mdSuggestion() {
-      const codeblockChars = repeatCodeBackticks(this.lineContent);
-
-      return [
-        `${codeblockChars}suggestion:-${this.suggestionStartIndex}+0`,
-        `{text}`,
-        codeblockChars,
-      ].join('\n');
+      return [['```', `suggestion:-${this.suggestionStartIndex}+0`].join(''), `{text}`, '```'].join(
+        '\n',
+      );
     },
     mdCollapsibleSection() {
       const expandText = s__('MarkdownEditor|Click to expand');

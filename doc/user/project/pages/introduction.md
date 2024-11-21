@@ -158,8 +158,9 @@ Below is a copy of `.gitlab-ci.yml` where the most significant line is the last
 one, specifying to execute everything in the `pages` branch:
 
 ```yaml
+image: ruby:2.6
+
 deploy-pages:
-  image: ruby:2.6
   script:
     - gem install jekyll
     - jekyll build -d public/
