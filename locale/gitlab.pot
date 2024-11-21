@@ -8115,6 +8115,9 @@ msgstr ""
 msgid "Author"
 msgstr ""
 
+msgid "Author / Assignee"
+msgstr ""
+
 msgid "Author: %{author_name}"
 msgstr ""
 
@@ -30429,6 +30432,9 @@ msgid "Item with ID: %{id} cannot be added. You don't have permission to perform
 msgstr ""
 
 msgid "Items are already linked"
+msgstr ""
+
+msgid "Items below are excluded from the active count"
 msgstr ""
 
 msgid "Iteration"

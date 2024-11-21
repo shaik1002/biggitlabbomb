@@ -15,6 +15,7 @@ export function initMergeRequestDashboard(el) {
     base: el.dataset.basePath,
     routes: [{ path: '/:filter' }],
   });
+  const newListsEnabled = el.dataset.newListsEnabled === 'true';
 
   const keyArgs = [
     'state',
@@ -64,7 +65,10 @@ export function initMergeRequestDashboard(el) {
         },
       ),
     }),
-    provide: { mergeRequestsSearchDashboardPath: el.dataset.mergeRequestsSearchDashboardPath },
+    provide: {
+      newListsEnabled,
+      mergeRequestsSearchDashboardPath: el.dataset.mergeRequestsSearchDashboardPath,
+    },
     render(createElement) {
       return createElement(App, {
         props: {
