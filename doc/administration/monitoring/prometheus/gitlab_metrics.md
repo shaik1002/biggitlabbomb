@@ -184,6 +184,7 @@ The following metrics are available:
 | `gitlab_security_policies_policy_sync_duration_seconds` | Histogram | 17.6 | The amount of time to sync policy changes for a policy configuration | |
 | `gitlab_security_policies_policy_deletion_duration_seconds` | Histogram | 17.6 | The amount of time to delete policy-related configuration | |
 | `gitlab_security_policies_policy_creation_duration_seconds` | Histogram | 17.6 | The amount of time to create policy-related configuration | |
+| `gitlab_security_policies_policy_updation_duration_seconds` | Histogram | 17.6 | The amount of time to update policy-related configuration | |
 | `gitlab_security_policies_sync_opened_merge_requests_duration_seconds` | Histogram | 17.6 | The amount of time to sync opened merge requests after policy changes | |
 | `gitlab_security_policies_scan_execution_configuration_rendering_seconds` | Histogram | 17.3 | The amount of time to render scan execution policy CI configurations | |
 | `gitlab_security_policies_update_configuration_duration_seconds` | Histogram | 17.6 | The amount of time to schedule sync for a policy configuration change | |
