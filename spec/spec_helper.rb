@@ -360,6 +360,13 @@ RSpec.configure do |config|
       # Our test suite is setup to test plain text editor by default with separate tests just
       # for the rich text editor. Switch the flag off to continue testing the same way as before
       stub_feature_flags(rich_text_editor_as_default: false)
+
+      # This feature flag toggles the UI for Secrets Manager and is disabled by default.
+      # It requires setting up openbao with gdk. Openbao integration and MVC development are still in progress.
+      # We are currently running a temporary experiment where the Secrets Manager UI located in the CI/CD settings for now
+      # (which affects tests within that page) but it will eventually be moved to its own page for the MVC.
+      # See https://gitlab.com/groups/gitlab-org/-/epics/14243.
+      stub_feature_flags(ci_tanukey_ui: false) if Gitlab.ee?
     else
       unstub_all_feature_flags
     end
