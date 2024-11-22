@@ -476,7 +476,19 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
     render
   end
 
+  def commit
+    commit_id = params[:commit_id].presence
+    return unless commit_id
+
+    merge_request = MergeRequest.from_project(@project).by_commit_sha(commit_id).sole
+    return unless merge_request&.id == @merge_request.id ||
+      @merge_request.recent_context_commits.map(&:id).include?(commit_id)
+
+    @commit ||= @project.commit(commit_id)
+  end
+
   def get_diffs_count
+    return @commit.raw_diffs.size if commit
     return @merge_request.context_commits_diff.raw_diffs.size if show_only_context_commits?
     return @merge_request.merge_request_diffs.find_by_id(params[:diff_id])&.size if params[:diff_id]
     return @merge_request.merge_head_diff.size if @merge_request.diffable_merge_ref? && params[:start_sha].blank?
