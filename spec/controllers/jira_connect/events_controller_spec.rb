@@ -144,85 +144,24 @@ RSpec.describe JiraConnect::EventsController, feature_category: :integrations do
       end
     end
 
-    context 'when additional_audience_url is not configured' do
+    context 'when enforce_jira_base_url_https' do
       before do
-        allow(Gitlab::CurrentSettings).to receive(:jira_connect_additional_audience_url)
-          .and_return(nil)
+        allow(Gitlab.config.jira_connect).to receive(:enforce_jira_base_url_https).and_return(true)
       end
 
-      context 'when enforce_jira_base_url_https is true' do
-        before do
-          allow(Gitlab.config.jira_connect).to receive(:enforce_jira_base_url_https).and_return(true)
-        end
+      let(:expected_claims) { { aud: "https://test.host/-/jira_connect", iss: anything, qsh: anything } }
 
-        let(:expected_claims) do
-          {
-            aud: ['https://test.host/-/jira_connect'],
-            iss: anything,
-            qsh: anything
-          }
-        end
-
-        it_behaves_like 'generates JWT validation claims'
-      end
-
-      context 'when enforce_jira_base_url_https is false' do
-        before do
-          allow(Gitlab.config.jira_connect).to receive(:enforce_jira_base_url_https).and_return(false)
-        end
-
-        let(:expected_claims) do
-          {
-            aud: ['http://test.host/-/jira_connect'],
-            iss: anything,
-            qsh: anything
-          }
-        end
-
-        it_behaves_like 'generates JWT validation claims'
-      end
+      it_behaves_like 'generates JWT validation claims'
     end
 
-    context 'when additional_audience_url is configured' do
-      context 'when enforce_jira_base_url_https is true' do
-        before do
-          allow(Gitlab::CurrentSettings).to receive(:jira_connect_additional_audience_url).and_return('https://proxy.host')
-          allow(Gitlab.config.jira_connect).to receive(:enforce_jira_base_url_https).and_return(true)
-        end
-
-        let(:expected_claims) do
-          {
-            aud: [
-              'https://test.host/-/jira_connect',
-              'https://proxy.host/-/jira_connect'
-            ],
-            iss: anything,
-            qsh: anything
-          }
-        end
-
-        it_behaves_like 'generates JWT validation claims'
+    context 'when not enforce_jira_base_url_https' do
+      before do
+        allow(Gitlab.config.jira_connect).to receive(:enforce_jira_base_url_https).and_return(false)
       end
 
-      context 'when enforce_jira_base_url_https is false' do
-        before do
-          allow(Gitlab::CurrentSettings).to receive(:jira_connect_additional_audience_url).and_return('https://proxy.host')
-          allow(Gitlab.config.jira_connect).to receive(:enforce_jira_base_url_https).and_return(false)
-        end
+      let(:expected_claims) { { aud: "http://test.host/-/jira_connect", iss: anything, qsh: anything } }
 
-        let(:expected_claims) do
-          {
-            aud: [
-              'http://test.host/-/jira_connect',
-              'https://proxy.host/-/jira_connect'
-            ],
-            iss: anything,
-            qsh: anything
-          }
-        end
-
-        it_behaves_like 'generates JWT validation claims'
-      end
+      it_behaves_like 'generates JWT validation claims'
     end
   end
 

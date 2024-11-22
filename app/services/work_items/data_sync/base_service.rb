@@ -8,7 +8,7 @@ module WorkItems
       attr_reader :work_item, :service_response, :target_namespace
 
       # work_item - original work item
-      # target_namespace - ProjectNamespace, Group or Project
+      # target_namespace - ProjectNamespace(not Project) or Group
       # current_user - user performing the move/clone action
       def initialize(work_item:, target_namespace:, current_user: nil, params: {})
         @work_item = work_item
@@ -22,7 +22,11 @@ module WorkItems
 
         return verification_response if verification_response.error?
 
-        data_sync_action
+        ::ApplicationRecord.transaction do
+          @service_response = data_sync_action
+        end
+
+        service_response
       end
 
       private

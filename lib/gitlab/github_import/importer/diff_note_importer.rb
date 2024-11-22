@@ -74,8 +74,7 @@ module Gitlab
             line_code: note.line_code,
             created_at: note.created_at,
             updated_at: note.updated_at,
-            st_diff: note.diff_hash.to_yaml,
-            imported_from: ::Import::HasImportSource::IMPORT_SOURCES[:github]
+            st_diff: note.diff_hash.to_yaml
           }
 
           diff_note = LegacyDiffNote.new(attributes.merge(importing: true))
@@ -103,9 +102,8 @@ module Gitlab
             commit_id: note.original_commit_id,
             created_at: note.created_at,
             updated_at: note.updated_at,
-            position: note.diff_position,
-            imported_from: ::Import::SOURCE_GITHUB
-          }).execute(importing: true)
+            position: note.diff_position
+          }).execute
 
           raise DiffNoteCreationError, record unless record.persisted?
 

@@ -111,11 +111,6 @@ export default {
       required: false,
       default: null,
     },
-    stickyFormSubmit: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
     relatedItem: {
       type: Object,
       required: false,
@@ -713,11 +708,7 @@ export default {
               @error="$emit('error', $event)"
             />
           </aside>
-          <div
-            v-if="!stickyFormSubmit"
-            class="gl-col-start-1 gl-flex gl-gap-3 gl-py-3"
-            data-testid="form-buttons"
-          >
+          <div class="gl-col-start-1 gl-flex gl-gap-3 gl-py-3">
             <gl-button
               variant="confirm"
               :loading="loading"
@@ -730,25 +721,6 @@ export default {
               {{ __('Cancel') }}
             </gl-button>
           </div>
-        </div>
-        <!-- stick to bottom and put the Confim button on the right -->
-        <!-- bg-overlap to match modal bg -->
-        <div
-          v-if="stickyFormSubmit"
-          class="gl-border-t gl-sticky gl-bottom-0 gl-z-1 -gl-mx-5 gl-flex gl-justify-end gl-gap-3 gl-bg-overlap gl-px-5 gl-py-3"
-          data-testid="form-buttons"
-        >
-          <gl-button type="button" data-testid="cancel-button" @click="handleCancelClick">
-            {{ __('Cancel') }}
-          </gl-button>
-          <gl-button
-            variant="confirm"
-            :loading="loading"
-            data-testid="create-button"
-            @click="createWorkItem"
-          >
-            {{ createWorkItemText }}
-          </gl-button>
         </div>
       </div>
     </template>

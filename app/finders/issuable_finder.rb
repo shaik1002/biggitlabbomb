@@ -239,8 +239,7 @@ class IssuableFinder
 
         # These are "helper" params that modify the results, like :in and :search. They usually come in at the top-level
         # params, but if they do come in inside the `:not` params, the inner ones should take precedence.
-        not_helpers = params.slice(*NEGATABLE_PARAMS_HELPER_KEYS)
-                            .merge(params[:not].to_h.slice(*NEGATABLE_PARAMS_HELPER_KEYS))
+        not_helpers = params.slice(*NEGATABLE_PARAMS_HELPER_KEYS).merge(params[:not].to_h.slice(*NEGATABLE_PARAMS_HELPER_KEYS))
         not_helpers.each do |key, value|
           not_params[key] = value unless not_params[key].present?
         end
@@ -373,14 +372,7 @@ class IssuableFinder
   def sort(items)
     # Ensure we always have an explicit sort order (instead of inheriting
     # multiple orders when combining ActiveRecord::Relation objects).
-    if params[:sort]
-      items.sort_by_attribute(
-        params[:sort],
-        excluded_labels: label_filter.label_names_excluded_from_priority_sort
-      )
-    else
-      items.reorder(id: :desc)
-    end
+    params[:sort] ? items.sort_by_attribute(params[:sort], excluded_labels: label_filter.label_names_excluded_from_priority_sort) : items.reorder(id: :desc)
   end
   # rubocop: enable CodeReuse/ActiveRecord
 

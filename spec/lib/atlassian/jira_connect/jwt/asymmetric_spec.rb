@@ -44,18 +44,8 @@ RSpec.describe Atlassian::JiraConnect::Jwt::Asymmetric, feature_category: :integ
       it { is_expected.not_to be_valid }
     end
 
-    context 'When public key ID is a string' do
-      let(:public_key_id) { 'generic-keypair/cs-migrations/installation-key-pair--r0d6u65570m0lc8n' }
-
-      specify do
-        expect(asymmetric_jwt).to be_valid
-
-        expect(WebMock).to have_requested(:get, install_keys_url)
-      end
-    end
-
-    context 'when public key ID contains invalid characters' do
-      let(:public_key_id) { '$#%' }
+    context 'JWT contains a key ID that is not a valid UUID4' do
+      let(:public_key_id) { '123' }
 
       it { is_expected.not_to be_valid }
     end

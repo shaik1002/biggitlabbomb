@@ -376,42 +376,6 @@ upgrade to GitLab 16.3 or above, and remove the feature flag configuration.
 
 <div class="deprecation breaking-change" data-milestone="18.0">
 
-### Deprecation of `STORAGE` enum in `NamespaceProjectSortEnum` GraphQL API
-
-<div class="deprecation-notes">
-
-- Announced in GitLab <span class="milestone">17.7</span>
-- Removal in GitLab <span class="milestone">18.0</span> ([breaking change](https://docs.gitlab.com/ee/update/terminology.html#breaking-change))
-- To discuss this change or learn more, see the [deprecation issue](https://gitlab.com/gitlab-org/gitlab/-/issues/396284).
-
-</div>
-
-The `STORAGE` enum in `NamespaceProjectSortEnum` of GitLab's GraphQL API will be removed in GitLab 18.0.
-
-To prepare for this change, we recommend reviewing and updating your GraphQL queries that interact with the `NamespaceProjectSortEnum`. Replace any references to the `STORAGE` field with `EXCESS_REPO_STORAGE_SIZE_DESC`.
-
-</div>
-
-<div class="deprecation breaking-change" data-milestone="18.0">
-
-### Deprecation of `name` field in `ProjectMonthlyUsageType` GraphQL API
-
-<div class="deprecation-notes">
-
-- Announced in GitLab <span class="milestone">17.7</span>
-- Removal in GitLab <span class="milestone">18.0</span> ([breaking change](https://docs.gitlab.com/ee/update/terminology.html#breaking-change))
-- To discuss this change or learn more, see the [deprecation issue](https://gitlab.com/gitlab-org/gitlab/-/issues/381894).
-
-</div>
-
-The `name` field in the `ProjectMonthlyUsageType` of GitLab's GraphQL API will be removed in GitLab 18.0.
-
-To prepare for this change, we recommend reviewing and updating your GraphQL queries that interact with the `ProjectMonthlyUsageType`. Replace any references to the `name` field with `project.name`.
-
-</div>
-
-<div class="deprecation breaking-change" data-milestone="18.0">
-
 ### GitLab Runner platforms and setup instructions in GraphQL API
 
 <div class="deprecation-notes">
@@ -525,24 +489,6 @@ Project Owners and Maintainers should review their private projects' lists of me
 
 </div>
 
-<div class="deprecation " data-milestone="18.0">
-
-### Increased default security for use of pipeline variables
-
-<div class="deprecation-notes">
-
-- Announced in GitLab <span class="milestone">17.7</span>
-- Removal in GitLab <span class="milestone">18.0</span>
-- To discuss this change or learn more, see the [deprecation issue](https://gitlab.com/gitlab-org/gitlab/-/issues/502382).
-
-</div>
-
-GitLab believes in secure-by-default practices. To honor this, we are making some changes to support least privilege principles relating to the use of CI/CD variables. Today, users with the Developer role or higher are able to use [pipeline variables](https://docs.gitlab.com/ee/ci/variables/#use-pipeline-variables) by default, without any verification or opt-in. In 18.0, GitLab is updating the [pipeline variable restrictions](https://docs.gitlab.com/ee/ci/variables/#restrict-pipeline-variables) to default enabled. As a result of this change, your project's use of pipeline CI/CD variables will be stricter by default, increased to only users with the Owner role. If necessary, you can manually set this setting to a lower role if still needed for your workflows, though it's not recommended.
-
-You can already start using a more secure-by-default experience for pipeline variables by enabling the current setting with the Project settings API, to increase the allowed role to Maintainers and above. You can also raise the minimum role to the recommended [Owner only, or no one](https://docs.gitlab.com/ee/ci/variables/#set-a-minimum-role-for-pipeline-variables). Starting in 17.7, this will be the default for all new projects for self-managed instances, and the default for all new projects in new namespaces on GitLab.com. We also plan to make this easier to manage by adding an option to control this from the project settings UI.
-
-</div>
-
 <div class="deprecation breaking-change" data-milestone="18.0">
 
 ### Limited `scan` actions in a scan execution policy
@@ -581,22 +527,6 @@ With the introduction of [GitLab CI/CD components for self-managed users](https:
 we are removing the redundant OpenTofu CI/CD templates in favor of the CI/CD components.
 
 For information about migrating from the CI/CD template to the component, see the [OpenTofu component documentation](https://gitlab.com/components/opentofu#usage-on-self-managed).
-
-</div>
-
-<div class="deprecation breaking-change" data-milestone="18.0">
-
-### Pipeline job limits extended to the Commits API
-
-<div class="deprecation-notes">
-
-- Announced in GitLab <span class="milestone">17.7</span>
-- Removal in GitLab <span class="milestone">18.0</span> ([breaking change](https://docs.gitlab.com/ee/update/terminology.html#breaking-change))
-- To discuss this change or learn more, see the [deprecation issue](https://gitlab.com/gitlab-org/gitlab/-/issues/436361).
-
-</div>
-
-Starting in GitLab 18.0, the maximum [number of jobs in active pipelines](https://docs.gitlab.com/ee/administration/instance_limits.html#number-of-jobs-in-active-pipelines) will also apply when creating jobs using the [Commits API](https://docs.gitlab.com/ee/api/commits.html#set-the-pipeline-status-of-a-commit). Review your integration to ensure it stays within the configured job limits.
 
 </div>
 
@@ -1220,111 +1150,6 @@ We encourage GitLab administrators to switch to the webhook delivery method for
 
 [Issue 393157](https://gitlab.com/gitlab-org/gitlab/-/issues/393157) tracks improving email ingestion in general.
 We hope this will simplify infrastructure setup and add several improvements to how you manage GitLab in the near future.
-
-</div>
-</div>
-
-<div class="milestone-wrapper" data-milestone="17.9">
-
-## GitLab 17.9
-
-<div class="deprecation " data-milestone="17.9">
-
-### Support for openSUSE Leap 15.5
-
-<div class="deprecation-notes">
-
-- Announced in GitLab <span class="milestone">17.6</span>
-- Removal in GitLab <span class="milestone">17.9</span>
-- To discuss this change or learn more, see the [deprecation issue](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/8778).
-
-</div>
-
-Long term service and support (LTSS) for [openSUSE Leap ends in December 2024](https://en.opensuse.org/Lifetime#openSUSE_Leap).
-
-Therefore, we will longer support the openSUSE Leap 15.5 distribution for Linux package installs. Users should upgrade to
-openSUSE Leap 15.6 for continued support.
-
-</div>
-</div>
-
-<div class="milestone-wrapper" data-milestone="17.8">
-
-## GitLab 17.8
-
-<div class="deprecation " data-milestone="17.8">
-
-### Support for CentOS 7
-
-<div class="deprecation-notes">
-
-- Announced in GitLab <span class="milestone">17.6</span>
-- Removal in GitLab <span class="milestone">17.8</span>
-- To discuss this change or learn more, see the [deprecation issue](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/8714).
-
-</div>
-
-Long term service and support (LTSS) for [CentOS 7 ended in June 2024](https://www.redhat.com/en/topics/linux/centos-linux-eol).
-
-Therefore, we will longer support the CentOS 7 distribution for Linux package installs. Users should upgrade to
-another operating system for continued support.
-
-</div>
-
-<div class="deprecation " data-milestone="17.8">
-
-### Support for Oracle Linux 7
-
-<div class="deprecation-notes">
-
-- Announced in GitLab <span class="milestone">17.6</span>
-- Removal in GitLab <span class="milestone">17.8</span>
-- To discuss this change or learn more, see the [deprecation issue](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/8746).
-
-</div>
-
-Long term service and support (LTSS) for [Oracle Linux 7 ends in December 2024](https://wiki.debian.org/LTS).
-
-Therefore, we will longer support the Oracle Linux 7 distribution for Linux package installs. Users should upgrade to
-Oracle Linux 8 for continued support.
-
-</div>
-
-<div class="deprecation " data-milestone="17.8">
-
-### Support for Raspberry Pi OS Buster
-
-<div class="deprecation-notes">
-
-- Announced in GitLab <span class="milestone">17.6</span>
-- Removal in GitLab <span class="milestone">17.8</span>
-- To discuss this change or learn more, see the [deprecation issue](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/8734).
-
-</div>
-
-Long term service and support (LTSS) for Raspberry Pi OS Buster (formerly known as Raspbian Buster) ended in June 2024.
-
-Therefore, we will longer support the PiOS Buster distribution for Linux package installs. Users should upgrade to
-PiOS Bullseye for continued support.
-
-</div>
-
-<div class="deprecation " data-milestone="17.8">
-
-### Support for Scientific Linux 7
-
-<div class="deprecation-notes">
-
-- Announced in GitLab <span class="milestone">17.6</span>
-- Removal in GitLab <span class="milestone">17.8</span>
-- To discuss this change or learn more, see the [deprecation issue](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/8745).
-
-</div>
-
-Long term service and support (LTSS) for [Scientific Linux 7 ended in June 2024](https://scientificlinux.org/downloads/sl-versions/sl7/).
-
-Therefore, we will longer support the Scientific Linux distribution for Linux package installs. Users should upgrade to
-another RHEL-compatible operating system.
 
 </div>
 </div>

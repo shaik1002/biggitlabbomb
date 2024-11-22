@@ -17,14 +17,13 @@ import Tracking from '~/tracking';
 import {
   INSTRUMENT_TAB_LABELS,
   INSTRUMENT_TODO_FILTER_CHANGE,
+  INSTRUMENT_TODO_ITEM_CLICK,
   STATUS_BY_TAB,
-  TAB_PENDING,
-  TODO_WAIT_BEFORE_RELOAD,
-  TAB_DONE,
-  TAB_ALL,
 } from '~/todos/constants';
 import getTodosQuery from './queries/get_todos.query.graphql';
 import getPendingTodosCount from './queries/get_pending_todos_count.query.graphql';
+import markAsDoneMutation from './mutations/mark_as_done.mutation.graphql';
+import markAsPendingMutation from './mutations/mark_as_pending.mutation.graphql';
 import TodoItem from './todo_item.vue';
 import TodosEmptyState from './todos_empty_state.vue';
 import TodosFilterBar, { SORT_OPTIONS } from './todos_filter_bar.vue';
@@ -57,8 +56,6 @@ export default {
   },
   data() {
     return {
-      updatePid: null,
-      needsRefresh: false,
       cursor: {
         first: ENTRIES_PER_PAGE,
         after: null,
@@ -68,7 +65,7 @@ export default {
       currentUserId: null,
       pageInfo: {},
       todos: [],
-      currentTab: TAB_PENDING,
+      currentTab: 0,
       pendingTodosCount: '-',
       queryFilterValues: {
         groupId: [],
@@ -102,10 +99,6 @@ export default {
         this.alert = createAlert({ message: s__('Todos|Something went wrong. Please try again.') });
         Sentry.captureException(error);
       },
-      watchLoading() {
-        // We reset the `needsRefresh` when paginating or changing tabs
-        this.needsRefresh = false;
-      },
     },
     pendingTodosCount: {
       query: getPendingTodosCount,
@@ -136,22 +129,8 @@ export default {
       return !this.isLoading && this.todos.length === 0;
     },
     showMarkAllAsDone() {
-      return this.currentTab === TAB_PENDING && !this.showEmptyState;
+      return this.currentTab === 0 && !this.showEmptyState;
     },
-  },
-  created() {
-    const searchParams = new URLSearchParams(window.location.search);
-    const stateFromUrl = searchParams.get('state');
-    switch (stateFromUrl) {
-      case 'done':
-        this.currentTab = TAB_DONE;
-        break;
-      case 'all':
-        this.currentTab = TAB_ALL;
-        break;
-      default:
-        break;
-    }
   },
   mounted() {
     document.addEventListener('visibilitychange', this.handleVisibilityChanged);
@@ -187,21 +166,6 @@ export default {
         last: null,
         before: null,
       };
-      this.syncActiveTabToUrl();
-    },
-    syncActiveTabToUrl() {
-      const tabIndexToUrlStateParam = {
-        [TAB_DONE]: 'done',
-        [TAB_ALL]: 'all',
-      };
-      const searchParams = new URLSearchParams(window.location.search);
-      if (this.currentTab === TAB_PENDING) {
-        searchParams.delete('state');
-      } else {
-        searchParams.set('state', tabIndexToUrlStateParam[this.currentTab]);
-      }
-
-      window.history.replaceState(null, '', `?${searchParams.toString()}`);
     },
     handleFiltersChanged(data) {
       this.alert?.dismiss();
@@ -212,10 +176,27 @@ export default {
         this.updateAllQueries(false);
       }
     },
-    async handleItemChanged() {
-      this.needsRefresh = true;
+    async handleItemChanged(id, markedAsDone) {
+      await this.updateAllQueries(false);
+      this.showUndoToast(id, markedAsDone);
+    },
+    showUndoToast(todoId, markedAsDone) {
+      const message = markedAsDone ? s__('Todos|Marked as done') : s__('Todos|Marked as undone');
+      const mutation = markedAsDone ? markAsPendingMutation : markAsDoneMutation;
 
-      await this.updateCounts();
+      const { hide } = this.$toast.show(message, {
+        action: {
+          text: s__('Todos|Undo'),
+          onClick: async () => {
+            hide();
+            await this.$apollo.mutate({ mutation, variables: { todoId } });
+            this.track(INSTRUMENT_TODO_ITEM_CLICK, {
+              label: markedAsDone ? 'undo_mark_done' : 'undo_mark_pending',
+            });
+            this.updateAllQueries(false);
+          },
+        },
+      });
     },
     updateCounts() {
       return this.$apollo.queries.pendingTodosCount.refetch();
@@ -228,29 +209,6 @@ export default {
 
       this.showSpinnerWhileLoading = true;
     },
-    markInteracting() {
-      clearTimeout(this.updatePid);
-    },
-    stoppedInteracting() {
-      if (!this.needsRefresh) {
-        return;
-      }
-
-      if (this.updatePid) {
-        clearTimeout(this.updatePid);
-      }
-
-      this.updatePid = setTimeout(() => {
-        /*
-         We double-check needsRefresh or
-         whether a query is already running
-         */
-        if (this.needsRefresh && !this.$apollo.queries.todos.loading) {
-          this.updateAllQueries(false);
-        }
-        this.updatePid = null;
-      }, TODO_WAIT_BEFORE_RELOAD);
-    },
   },
 };
 </script>
@@ -258,12 +216,7 @@ export default {
 <template>
   <div>
     <div class="gl-flex gl-justify-between gl-border-b-1 gl-border-gray-100 gl-border-b-solid">
-      <gl-tabs
-        :value="currentTab"
-        content-class="gl-p-0"
-        nav-class="gl-border-0"
-        @input="tabChanged"
-      >
+      <gl-tabs content-class="gl-p-0" nav-class="gl-border-0" @input="tabChanged">
         <gl-tab>
           <template #title>
             <span>{{ s__('Todos|To Do') }}</span>
@@ -309,13 +262,7 @@ export default {
     <div>
       <div class="gl-flex gl-flex-col">
         <gl-loading-icon v-if="isLoading && showSpinnerWhileLoading" size="lg" class="gl-mt-5" />
-        <ul
-          v-else
-          data-testid="todo-item-list-container"
-          class="gl-m-0 gl-border-collapse gl-list-none gl-p-0"
-          @mouseenter="markInteracting"
-          @mouseleave="stoppedInteracting"
-        >
+        <ul v-else class="gl-m-0 gl-border-collapse gl-list-none gl-p-0">
           <transition-group name="todos">
             <todo-item
               v-for="todo in todos"

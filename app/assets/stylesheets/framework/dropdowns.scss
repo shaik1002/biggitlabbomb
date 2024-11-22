@@ -137,6 +137,10 @@
   line-height: $gl-line-height;
   width: 160px;
 
+  &:hover {
+    @apply gl-shadow-inner-1-gray-400;
+  }
+
   &:hover,
   &:focus {
     background-color: $gray-50;
@@ -152,7 +156,7 @@
   .dropdown-menu-toggle-icon {
     position: absolute;
     right: $gl-padding-8;
-    @apply gl-fill-icon-subtle;
+    color: $gray-500;
   }
 }
 
@@ -584,7 +588,7 @@
     position: absolute;
     top: $gl-padding-8;
     right: 20px;
-    @apply gl-fill-icon-subtle;
+    color: $gray-500;
     font-size: 12px;
     pointer-events: none;
   }

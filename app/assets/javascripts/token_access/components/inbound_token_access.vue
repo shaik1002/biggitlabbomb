@@ -70,7 +70,9 @@ export default {
     inboundJobTokenScopeEnabled: {
       query: inboundGetCIJobTokenScopeQuery,
       variables() {
-        return { fullPath: this.fullPath };
+        return {
+          fullPath: this.fullPath,
+        };
       },
       update({ project }) {
         return project.ciCdSettings.inboundJobTokenScopeEnabled;
@@ -85,13 +87,18 @@ export default {
     groupsAndProjectsWithAccess: {
       query: inboundGetGroupsAndProjectsWithCIJobTokenScopeQuery,
       variables() {
-        return { fullPath: this.fullPath };
+        return {
+          fullPath: this.fullPath,
+        };
       },
       update({ project }) {
         const projects = project?.ciJobTokenScope?.inboundAllowlist?.nodes ?? [];
         const groups = project?.ciJobTokenScope?.groupsAllowlist?.nodes ?? [];
 
-        return { projects, groups };
+        this.projectCount = projects.length;
+        this.groupCount = groups.length;
+
+        return [...groups, ...projects];
       },
       error() {
         createAlert({ message: this.$options.i18n.projectsFetchError });
@@ -102,8 +109,10 @@ export default {
     return {
       inboundJobTokenScopeEnabled: null,
       isUpdating: false,
-      groupsAndProjectsWithAccess: { groups: [], projects: [] },
+      groupsAndProjectsWithAccess: [],
+      projectCount: 0,
       projectName: '',
+      groupCount: 0,
     };
   },
   computed: {
@@ -112,24 +121,11 @@ export default {
         anchor: 'control-job-token-access-to-your-project',
       });
     },
-    allowlist() {
-      const { groups, projects } = this.groupsAndProjectsWithAccess;
-      return [...groups, ...projects];
-    },
-    groupCount() {
-      return this.groupsAndProjectsWithAccess.groups.length;
-    },
-    projectCount() {
-      return this.groupsAndProjectsWithAccess.projects.length;
-    },
     groupCountTooltip() {
       return n__('%d group has access', '%d groups have access', this.groupCount);
     },
     projectCountTooltip() {
       return n__('%d project has access', '%d projects have access', this.projectCount);
-    },
-    isAllowlistLoading() {
-      return this.$apollo.queries.groupsAndProjectsWithAccess.loading;
     },
   },
   methods: {
@@ -169,24 +165,40 @@ export default {
     },
     async removeItem(item) {
       try {
-        const mutation =
-          item.__typename === TYPENAME_GROUP // eslint-disable-line no-underscore-dangle
-            ? inboundRemoveGroupCIJobTokenScopeMutation
-            : inboundRemoveProjectCIJobTokenScopeMutation;
+        let errors;
 
-        const response = await this.$apollo.mutate({
-          mutation,
-          variables: { projectPath: this.fullPath, targetPath: item.fullPath },
-        });
-
-        const error = response.data.removeNamespace.errors[0];
-        if (error) {
-          createAlert({ message: error });
+        // eslint-disable-next-line no-underscore-dangle
+        if (item.__typename === TYPENAME_GROUP) {
+          const {
+            data: { ciJobTokenScopeRemoveGroup },
+          } = await this.$apollo.mutate({
+            mutation: inboundRemoveGroupCIJobTokenScopeMutation,
+            variables: {
+              projectPath: this.fullPath,
+              targetGroupPath: item.fullPath,
+            },
+          });
+          errors = ciJobTokenScopeRemoveGroup.errors;
         } else {
-          this.refetchGroupsAndProjects();
+          const {
+            data: { ciJobTokenScopeRemoveProject },
+          } = await this.$apollo.mutate({
+            mutation: inboundRemoveProjectCIJobTokenScopeMutation,
+            variables: {
+              projectPath: this.fullPath,
+              targetProjectPath: item.fullPath,
+            },
+          });
+          errors = ciJobTokenScopeRemoveProject.errors;
+        }
+
+        if (errors.length) {
+          throw new Error(errors[0]);
         }
       } catch (error) {
         createAlert({ message: error.message });
+      } finally {
+        this.refetchGroupsAndProjects();
       }
     },
     refetchGroupsAndProjects() {
@@ -198,7 +210,7 @@ export default {
 
 <template>
   <div class="gl-mt-5">
-    <gl-loading-icon v-if="$apollo.queries.inboundJobTokenScopeEnabled.loading" size="md" />
+    <gl-loading-icon v-if="$apollo.loading" size="md" />
     <template v-else>
       <div class="gl-font-bold">
         {{ $options.i18n.radioGroupTitle }}
@@ -246,34 +258,33 @@ export default {
         class="gl-mt-5"
       >
         <template #count>
-          <gl-loading-icon v-if="isAllowlistLoading" data-testid="count-loading-icon" />
-          <template v-else>
+          <span class="gl-inline-flex gl-gap-3">
             <span
-              v-gl-tooltip.d0="groupCountTooltip"
-              class="gl-cursor-default"
+              v-gl-tooltip
+              :title="groupCountTooltip"
+              class="gl-inline-flex gl-items-center gl-gap-2 gl-text-sm gl-text-subtle"
               data-testid="group-count"
             >
-              <gl-icon name="group" /> {{ groupCount }}
+              <gl-icon name="group" />
+              {{ groupCount }}
             </span>
             <span
-              v-gl-tooltip.d0="projectCountTooltip"
-              class="gl-ml-2 gl-cursor-default"
+              v-gl-tooltip
+              :title="projectCountTooltip"
+              class="gl-inline-flex gl-items-center gl-gap-2 gl-text-sm gl-text-subtle"
               data-testid="project-count"
             >
-              <gl-icon name="project" /> {{ projectCount }}
+              <gl-icon name="project" />
+              {{ projectCount }}
             </span>
-          </template>
+          </span>
         </template>
 
         <template #form="{ hideForm }">
           <namespace-form @saved="refetchGroupsAndProjects" @close="hideForm" />
         </template>
 
-        <token-access-table
-          :items="allowlist"
-          :loading="isAllowlistLoading"
-          @removeItem="removeItem"
-        />
+        <token-access-table :items="groupsAndProjectsWithAccess" @removeItem="removeItem" />
       </crud-component>
     </template>
   </div>

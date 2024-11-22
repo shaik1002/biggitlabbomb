@@ -65,7 +65,6 @@ module API
             expires_in: 60.minutes,
             cache_context: ->(branch) {
               [
-                user_project.cache_key,
                 current_user&.cache_key,
                 merged_branch_names.include?(branch.name),
                 user_project.default_branch

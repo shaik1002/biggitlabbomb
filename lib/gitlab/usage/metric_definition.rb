@@ -37,16 +37,13 @@ module Gitlab
             name: event[:name],
             time_framed: time_framed?,
             filter: event[:filter],
-            unique_identifier_name: event[:unique]&.split('.')&.first&.to_sym,
-            operator: event[:operator]
+            unique_identifier_name: event[:unique]&.split('.')&.first&.to_sym
           )
         end
       end
 
       def instrumentation_class
         if internal_events?
-          return "TotalSumMetric" if event_selection_rules.first&.sum?
-
           events.each_value.first.nil? ? "TotalCountMetric" : "UniqueCountMetric"
         else
           @attributes[:instrumentation_class]
@@ -184,6 +181,9 @@ module Gitlab
           @metrics_yaml[include_paths.to_s] ||= begin
             metrics = definitions.values.map do |definition|
               result = definition.to_h
+
+              # TODO: remove during clean up of replacing tier with tiers in definition files
+              result[:tiers] = result[:tier] unless result.key?(:tiers)
 
               result[:file_path] = Pathname.new(definition.path).relative_path_from(Rails.root).to_s if include_paths
               result

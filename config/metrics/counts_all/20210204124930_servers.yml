@@ -2,9 +2,7 @@
 data_category: operational
 key_path: gitaly.servers
 description: Total Gitalty Servers
-product_group: gitaly
-product_categories:
-- gitaly
+product_group: gitaly_cluster
 value_type: number
 status: active
 time_frame: all

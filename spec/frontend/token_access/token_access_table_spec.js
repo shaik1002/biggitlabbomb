@@ -1,19 +1,23 @@
-import { GlButton, GlTable, GlLoadingIcon } from '@gitlab/ui';
+import { GlButton, GlTableLite } from '@gitlab/ui';
 import { mountExtended } from 'helpers/vue_test_utils_helper';
 import TokenAccessTable from '~/token_access/components/token_access_table.vue';
-import { mockGroups, mockProjects } from './mock_data';
+import { mockGroups, mockProjects, mockFields } from './mock_data';
 
 describe('Token access table', () => {
   let wrapper;
 
   const createComponent = (props) => {
     wrapper = mountExtended(TokenAccessTable, {
-      provide: { fullPath: 'root/ci-project' },
-      propsData: props,
+      provide: {
+        fullPath: 'root/ci-project',
+      },
+      propsData: {
+        ...props,
+      },
     });
   };
 
-  const findTable = () => wrapper.findComponent(GlTable);
+  const findTable = () => wrapper.findComponent(GlTableLite);
   const findDeleteButton = () => wrapper.findComponent(GlButton);
   const findAllTableRows = () => findTable().findAll('tbody tr');
   const findIcon = (type) => wrapper.findByTestId(`token-access-${type}-icon`);
@@ -26,7 +30,11 @@ describe('Token access table', () => {
     ${'project'} | ${false} | ${mockProjects}
   `('when provided with $type', ({ type, isGroup, items }) => {
     beforeEach(() => {
-      createComponent({ isGroup, items, loading: false });
+      createComponent({
+        isGroup,
+        items,
+        tableFields: mockFields,
+      });
     });
 
     it('displays a table', () => {
@@ -51,14 +59,6 @@ describe('Token access table', () => {
     it(`displays link to the ${type}`, () => {
       expect(findName(type).text()).toBe(items[0].fullPath);
       expect(findName(type).attributes('href')).toBe(items[0].webUrl);
-    });
-  });
-
-  describe('when table is loading', () => {
-    it('shows loading icon', () => {
-      createComponent({ isGroup: true, items: mockGroups, loading: true });
-
-      expect(findTable().findComponent(GlLoadingIcon).props('size')).toBe('md');
     });
   });
 });

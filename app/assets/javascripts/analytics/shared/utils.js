@@ -148,4 +148,6 @@ export const extractVSAFeaturesFromGON = () => ({
   cycleAnalyticsForGroups: Boolean(gon?.licensed_features?.cycleAnalyticsForGroups),
   cycleAnalyticsForProjects: Boolean(gon?.licensed_features?.cycleAnalyticsForProjects),
   groupLevelAnalyticsDashboard: Boolean(gon?.licensed_features?.groupLevelAnalyticsDashboard),
+  // feature flags
+  vsaStandaloneSettingsPage: Boolean(gon?.features?.vsaStandaloneSettingsPage),
 });

@@ -1,5 +1,6 @@
 <script>
 import { GlAlert, GlKeysetPagination } from '@gitlab/ui';
+import { toggleQueryPollingByVisibility, etagQueryHeaders } from '~/graphql_shared/utils';
 import { __ } from '~/locale';
 import { createAlert } from '~/alert';
 import { setUrlParams, updateHistory, queryToObject } from '~/lib/utils/url_utility';
@@ -13,7 +14,7 @@ import GetJobsCount from './graphql/queries/get_jobs_count.query.graphql';
 import JobsTable from './components/jobs_table.vue';
 import JobsTableEmptyState from './components/jobs_table_empty_state.vue';
 import JobsTableTabs from './components/jobs_table_tabs.vue';
-import { RAW_TEXT_WARNING, DEFAULT_PAGINATION, JOBS_PER_PAGE } from './constants';
+import { RAW_TEXT_WARNING, DEFAULT_PAGINATION, JOBS_PER_PAGE, POLL_INTERVAL } from './constants';
 
 export default {
   name: 'JobsPageApp',
@@ -34,10 +35,13 @@ export default {
     JobsSkeletonLoader,
   },
   mixins: [glFeatureFlagsMixin()],
-  inject: ['fullPath'],
+  inject: ['fullPath', 'graphqlResourceEtag'],
   apollo: {
     jobs: {
       query: GetJobs,
+      context() {
+        return etagQueryHeaders('jobs_table', this.graphqlResourceEtag);
+      },
       variables() {
         return {
           fullPath: this.fullPath,
@@ -56,9 +60,13 @@ export default {
         this.error = this.$options.i18n.jobsFetchErrorMsg;
         reportToSentry(this.$options.name, error);
       },
+      pollInterval: POLL_INTERVAL,
     },
     jobsCount: {
       query: GetJobsCount,
+      context() {
+        return etagQueryHeaders('jobs_table', this.graphqlResourceEtag);
+      },
       variables() {
         return {
           fullPath: this.fullPath,
@@ -72,6 +80,7 @@ export default {
         this.error = this.$options.i18n.jobsCountErrorMsg;
         reportToSentry(this.$options.name, error);
       },
+      pollInterval: POLL_INTERVAL,
     },
   },
   data() {
@@ -128,6 +137,10 @@ export default {
         this.count = newCount;
       }
     },
+  },
+  mounted() {
+    toggleQueryPollingByVisibility(this.$apollo.queries.jobs);
+    toggleQueryPollingByVisibility(this.$apollo.queries.jobsCount);
   },
   methods: {
     resetRequestData() {
