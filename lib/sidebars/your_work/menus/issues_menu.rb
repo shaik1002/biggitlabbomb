@@ -41,6 +41,11 @@ module Sidebars
           context.current_user.assigned_open_issues_count
         end
         strong_memoize_attr :pill_count
+
+        override :inertia_page?
+        def inertia_page?
+          true
+        end
       end
     end
   end

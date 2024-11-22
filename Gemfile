@@ -741,3 +741,5 @@ gem 'openbao_client', path: 'gems/openbao_client' # rubocop:todo Gemfile/Missing
 gem 'paper_trail', '~> 15.0' # rubocop:todo Gemfile/MissingFeatureCategory
 
 gem "i18n_data", "~> 0.13.1", feature_category: :system_access
+
+gem 'inertia_rails', '~> 3.2' # rubocop:todo Gemfile/MissingFeatureCategory

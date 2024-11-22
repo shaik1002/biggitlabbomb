@@ -8,11 +8,7 @@ module Sidebars
 
         override :link
         def link
-          if Feature.enabled?(:todos_vue_application, context.current_user)
-            vue_dashboard_todos_path
-          else
-            dashboard_todos_path
-          end
+          vue_dashboard_todos_path
         end
 
         override :title
@@ -32,7 +28,7 @@ module Sidebars
 
         override :active_routes
         def active_routes
-          { path: 'dashboard/todos#index' }
+          { path: 'dashboard/todos#vue' }
         end
 
         override :has_pill?
@@ -45,6 +41,11 @@ module Sidebars
           context.current_user.todos_pending_count
         end
         strong_memoize_attr :pill_count
+
+        override :inertia_page?
+        def inertia_page?
+          true
+        end
       end
     end
   end

@@ -4,6 +4,7 @@ class Dashboard::TodosController < Dashboard::ApplicationController
   include ActionView::Helpers::NumberHelper
   include PaginatedCollection
   include Gitlab::Utils::StrongMemoize
+  include Inertia::Share
 
   before_action :authorize_read_project!, only: :index
   before_action :authorize_read_group!, only: :index
@@ -24,6 +25,17 @@ class Dashboard::TodosController < Dashboard::ApplicationController
 
   def vue
     redirect_to(dashboard_todos_path, status: :found) unless Feature.enabled?(:todos_vue_application, current_user)
+
+    respond_to do |format|
+      format.html do
+        render inertia: 'Todos/Index', props: {
+          breadcrumbs: [
+            { text: _('Your work'), href: root_url },
+            { text: _('To-Do List'), href: dashboard_todos_path }
+          ]
+        }
+      end
+    end
   end
 
   def destroy

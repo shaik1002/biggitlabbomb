@@ -56,6 +56,11 @@ module Sidebars
           user_merge_requests_counts[:total]
         end
 
+        override :inertia_page?
+        def inertia_page?
+          true
+        end
+
         private
 
         def assigned_mrs_menu_item

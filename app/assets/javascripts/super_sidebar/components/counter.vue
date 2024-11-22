@@ -1,11 +1,13 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script>
 import { GlIcon } from '@gitlab/ui';
+import { Link } from '@inertiajs/vue2';
 import { highCountTrim } from '~/lib/utils/text_utility';
 
 export default {
   components: {
     GlIcon,
+    Link,
   },
   props: {
     count: {
@@ -31,7 +33,8 @@ export default {
       return `${this.label} ${this.count}`;
     },
     component() {
-      return this.href ? 'a' : 'button';
+      // eslint-disable-next-line no-nested-ternary
+      return this.href ? (this.$page ? Link : 'a') : 'button';
     },
     formattedCount() {
       if (Number.isFinite(this.count)) {

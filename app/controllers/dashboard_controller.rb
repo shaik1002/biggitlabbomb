@@ -3,6 +3,7 @@
 class DashboardController < Dashboard::ApplicationController
   include IssuableCollectionsAction
   include FiltersEvents
+  include Inertia::Share
 
   prepend_before_action(only: [:issues]) { authenticate_sessionless_user!(:rss) }
   prepend_before_action(only: [:issues_calendar]) { authenticate_sessionless_user!(:ics) }
@@ -10,7 +11,7 @@ class DashboardController < Dashboard::ApplicationController
   before_action :event_filter, only: :activity
   before_action :projects, only: [:issues, :merge_requests, :search_merge_requests]
   before_action :set_show_full_reference, only: [:issues, :merge_requests, :search_merge_requests]
-  before_action :check_filters_presence!, only: [:issues, :merge_requests, :search_merge_requests]
+  # before_action :check_filters_presence!, only: [:issues, :merge_requests, :search_merge_requests]
 
   before_action only: :issues do
     push_frontend_feature_flag(:frontend_caching)

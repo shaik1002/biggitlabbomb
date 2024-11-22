@@ -346,7 +346,8 @@ module MergeRequestsHelper
       show_new_mr_dashboard_banner?
   end
 
-  private
+  # private
+  # FIXME: Re-enable `private` but make `merge_request_dashboard_data` useable for Inertia controller
 
   def review_requested_merge_requests_count
     current_user.review_requested_open_merge_requests_count

@@ -1,0 +1,41 @@
+%html{ lang: I18n.locale }
+  %head
+    = Gon::Base.render_data(nonce: content_security_policy_nonce)
+
+    = webpack_bundle_tag('inertia')
+
+
+  -# TODO: Share this code with _head.html.haml
+  - if user_application_dark_mode?
+    %meta{ name: 'color-scheme', content: 'dark light' }
+    = universal_stylesheet_link_tag "application_dark"
+    = yield :page_specific_styles
+    = universal_stylesheet_link_tag "application_utilities_dark"
+  - elsif user_application_system_mode?
+    %meta{ name: 'color-scheme', content: 'light dark' }
+    = universal_stylesheet_link_tag "application", media: "(prefers-color-scheme: light)"
+    = universal_stylesheet_link_tag "application_dark", media: "(prefers-color-scheme: dark)"
+    = yield :page_specific_styles
+    = universal_stylesheet_link_tag "application_utilities", media: "(prefers-color-scheme: light)"
+    = universal_stylesheet_link_tag "application_utilities_dark", media: "(prefers-color-scheme: dark)"
+  - else
+    = universal_stylesheet_link_tag "application"
+    = yield :page_specific_styles
+    = universal_stylesheet_link_tag 'application_utilities'
+  = universal_stylesheet_link_tag 'tailwind'
+  = universal_stylesheet_link_tag "disable_animations", media: "all" if Rails.env.test? || Gitlab.config.gitlab['disable_animations']
+  = universal_stylesheet_link_tag "test_environment", media: "all" if Rails.env.test?
+
+  = universal_stylesheet_link_tag "fonts"
+
+  = universal_stylesheet_link_tag "highlight/themes/#{user_color_scheme}"
+
+
+
+
+  %meta{ name: "viewport", content: "width=device-width,initial-scale=1" }
+    = csrf_meta_tags
+    = csp_meta_tag
+
+  %body
+    = yield

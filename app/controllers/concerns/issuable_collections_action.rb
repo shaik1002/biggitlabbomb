@@ -20,14 +20,35 @@ module IssuableCollectionsAction
     @issuable_meta_data = Gitlab::IssuableMetadata.new(current_user, @issues).data
 
     respond_to do |format|
-      format.html
+      format.html do
+        # TODO: Check if this action is used for anything other than /dashboard/issues
+        # TODO: To feature flag this, just return and keep Rails magic working :/
+
+        render inertia: 'Issues/Index', props: {
+          breadcrumbs: [
+            { text: _('Your work'), href: root_url },
+            { text: _('Issues'), href: issues_dashboard_path }
+          ],
+          issues: helpers.dashboard_issues_list_data(current_user)
+        }
+      end
       format.atom { render layout: 'xml' }
     end
   end
   # rubocop:enable Gitlab/ModuleWithInstanceVariables
 
   def merge_requests
-    render_merge_requests
+    respond_to do |format|
+      format.html do
+        render inertia: 'MergeRequests/Index', props: {
+          initialData: helpers.merge_request_dashboard_data,
+          breadcrumbs: [
+            { text: _('Your work'), href: root_url },
+            { text: _('Merge requests'), href: merge_requests_dashboard_path }
+          ]
+        }
+      end
+    end
   end
 
   def issues_calendar
