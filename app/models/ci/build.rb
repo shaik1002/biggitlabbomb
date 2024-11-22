@@ -486,7 +486,9 @@ module Ci
     end
 
     # Overriden on EE
-    def pages; end
+    def pages
+      {}
+    end
 
     def runnable?
       true
@@ -573,6 +575,7 @@ module Ci
           .concat(dependency_proxy_variables)
           .concat(job_jwt_variables)
           .concat(scoped_variables)
+          .concat(pages_variables)
           .concat(job_variables)
           .concat(persisted_environment_variables)
       end
@@ -652,6 +655,16 @@ module Ci
       return [] unless diffblue_cover_integration.try(:activated?)
 
       Gitlab::Ci::Variables::Collection.new(diffblue_cover_integration.ci_variables)
+    end
+
+    def pages_variables
+      return [] unless pages_generator? && Feature.enabled?(:fix_pages_ci_variables, project)
+
+      pages_url_builder = project.pages_url_builder(pages)
+
+      ::Gitlab::Ci::Variables::Collection.new
+       .append(key: 'CI_PAGES_HOSTNAME', value: pages_url_builder.hostname)
+       .append(key: 'CI_PAGES_URL', value: pages_url_builder.pages_url)
     end
 
     def features

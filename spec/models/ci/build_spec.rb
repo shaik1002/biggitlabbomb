@@ -2578,7 +2578,6 @@ RSpec.describe Ci::Build, feature_category: :continuous_integration, factory_def
           { key: 'CI_DEFAULT_BRANCH', value: project.default_branch, public: true, masked: false },
           { key: 'CI_CONFIG_PATH', value: project.ci_config_path_or_default, public: true, masked: false },
           { key: 'CI_PAGES_DOMAIN', value: Gitlab.config.pages.host, public: true, masked: false },
-          { key: 'CI_PAGES_URL', value: Gitlab::Pages::UrlBuilder.new(project).pages_url, public: true, masked: false },
           { key: 'CI_DEPENDENCY_PROXY_SERVER', value: Gitlab.host_with_port, public: true, masked: false },
           { key: 'CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX',
             value: "#{Gitlab.host_with_port}/#{project.namespace.root_ancestor.path.downcase}#{DependencyProxy::URL_SUFFIX}",
@@ -2619,7 +2618,9 @@ RSpec.describe Ci::Build, feature_category: :continuous_integration, factory_def
 
       it { is_expected.to be_instance_of(Gitlab::Ci::Variables::Collection) }
 
-      it { expect(subject.to_runner_variables).to eq(predefined_variables) }
+      it do
+        expect(subject.to_runner_variables).to eq(predefined_variables)
+      end
 
       it 'excludes variables that require an environment or user' do
         environment_based_variables_collection = subject.filter do |variable|
@@ -4349,6 +4350,30 @@ RSpec.describe Ci::Build, feature_category: :continuous_integration, factory_def
       end
 
       context 'and job succeeds' do
+        context 'and fix_pages_ci_variables FF is enabled' do
+          let(:expected_hostname) { "#{project.namespace.path}.example.com" }
+          let(:expected_url) { "http://#{expected_hostname}/#{project.path}" }
+
+          it "includes the expected variables" do
+            expect(build.variables.to_runner_variables).to include(
+              { key: 'CI_PAGES_HOSTNAME', value: expected_hostname, public: true, masked: false },
+              { key: 'CI_PAGES_URL', value: expected_url, public: true, masked: false }
+            )
+          end
+        end
+
+        context 'and fix_pages_ci_variables FF is disabled' do
+          before do
+            stub_feature_flags(fix_pages_ci_variables: false)
+          end
+
+          it "includes the expected variables" do
+            expect(build.variables.to_runner_variables).to include(
+              { key: 'CI_PAGES_URL', value: Gitlab::Pages::UrlBuilder.new(project).pages_url, public: true, masked: false }
+            )
+          end
+        end
+
         it "calls pages worker" do
           expect(PagesWorker).to receive(:perform_async).with(:deploy, build.id)
 

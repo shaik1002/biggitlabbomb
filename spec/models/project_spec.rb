@@ -1215,7 +1215,7 @@ RSpec.describe Project, factory_default: :keep, feature_category: :groups_and_pr
   describe 'delegation' do
     let_it_be(:project) { create(:project) }
 
-    [:add_guest, :add_reporter, :add_developer, :add_maintainer, :add_member, :add_members].each do |method|
+    [:add_guest, :add_planner, :add_reporter, :add_developer, :add_maintainer, :add_member, :add_members].each do |method|
       it { is_expected.to delegate_method(method).to(:team) }
     end
 
@@ -6887,6 +6887,48 @@ RSpec.describe Project, factory_default: :keep, feature_category: :groups_and_pr
     end
   end
 
+  describe '#pages_hostname' do
+    let(:project) { create(:project) }
+    let(:url_builder) { ::Gitlab::Pages::UrlBuilder.new(project) }
+
+    subject { project.pages_hostname }
+
+    it "lets URL builder handle the domain resolution" do
+      expect(::Gitlab::Pages::UrlBuilder).to receive(:new).with(project).and_return(url_builder)
+      expect(url_builder).to receive(:hostname).and_return('namespace.example.com')
+      expect(subject).to eq('namespace.example.com')
+    end
+  end
+
+  describe '#pages_url' do
+    let(:project) { create(:project) }
+
+    context "when a config argument is passed" do
+      let(:url_builder) { ::Gitlab::Pages::UrlBuilder.new(project, pages_url_config) }
+      let(:pages_url_config) { { path_prefix: 'foo' } }
+
+      subject { project.pages_url(pages_url_config) }
+
+      it "lets URL builder handle the URL resolution" do
+        expect(::Gitlab::Pages::UrlBuilder).to receive(:new).with(project, pages_url_config).and_return(url_builder)
+        expect(url_builder).to receive(:pages_url).and_return('http://namespace1.example.com/project-1/foo')
+        expect(subject).to eq('http://namespace1.example.com/project-1/foo')
+      end
+    end
+
+    context "when no arguments are passed" do
+      let(:url_builder) { ::Gitlab::Pages::UrlBuilder.new(project) }
+
+      subject { project.pages_url }
+
+      it "calls URL builder handle the URL resolution" do
+        expect(::Gitlab::Pages::UrlBuilder).to receive(:new).with(project, nil).and_return(url_builder)
+        expect(url_builder).to receive(:pages_url).and_return('http://namespace1.example.com/project-1')
+        expect(subject).to eq('http://namespace1.example.com/project-1')
+      end
+    end
+  end
+
   describe '#toggle_ci_cd_settings!' do
     it 'toggles the value on #settings' do
       project = create(:project, group_runners_enabled: false)
@@ -7663,29 +7705,45 @@ RSpec.describe Project, factory_default: :keep, feature_category: :groups_and_pr
     end
   end
 
+  # this describe block tests the legacy behavior, it is to be removed with the
+  # fix_pages_ci_variables Feature flag.
   describe '#pages_variables' do
     let(:group) { build(:group, path: 'group') }
     let(:project) { build(:project, path: 'project', namespace: group) }
 
-    it 'returns the pages variables' do
-      expect(project.pages_variables.to_hash).to eq({
-        'CI_PAGES_DOMAIN' => 'example.com',
-        'CI_PAGES_URL' => 'http://group.example.com/project'
-      })
+    context 'with fix_pages_ci_variables enabled' do
+      it 'returns the pages variables' do
+        expect(project.pages_variables.to_hash).to eq({
+          'CI_PAGES_DOMAIN' => 'example.com'
+        })
+      end
     end
 
-    it 'returns the pages variables' do
-      build(
-        :project_setting,
-        project: project,
-        pages_unique_domain_enabled: true,
-        pages_unique_domain: 'unique-domain'
-      )
+    context 'with fix_pages_ci_variables disabled' do
+      before do
+        stub_feature_flags(fix_pages_ci_variables: false)
+      end
 
-      expect(project.pages_variables.to_hash).to eq({
-        'CI_PAGES_DOMAIN' => 'example.com',
-        'CI_PAGES_URL' => 'http://unique-domain.example.com'
-      })
+      it 'returns the pages variables' do
+        expect(project.pages_variables.to_hash).to eq({
+          'CI_PAGES_DOMAIN' => 'example.com',
+          'CI_PAGES_URL' => 'http://group.example.com/project'
+        })
+      end
+
+      it 'returns the pages variables' do
+        build(
+          :project_setting,
+          project: project,
+          pages_unique_domain_enabled: true,
+          pages_unique_domain: 'unique-domain'
+        )
+
+        expect(project.pages_variables.to_hash).to eq({
+          'CI_PAGES_DOMAIN' => 'example.com',
+          'CI_PAGES_URL' => 'http://unique-domain.example.com'
+        })
+      end
     end
   end
 

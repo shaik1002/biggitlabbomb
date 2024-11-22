@@ -538,7 +538,7 @@ class Project < ApplicationRecord
   with_options to: :team do
     delegate :members, prefix: true
     delegate :add_member, :add_members, :member?
-    delegate :add_guest, :add_reporter, :add_developer, :add_maintainer, :add_owner, :add_role
+    delegate :add_guest, :add_planner, :add_reporter, :add_developer, :add_maintainer, :add_owner, :add_role
     delegate :has_user?
   end
 
@@ -2573,7 +2573,10 @@ class Project < ApplicationRecord
       break unless pages_enabled?
 
       variables.append(key: 'CI_PAGES_DOMAIN', value: Gitlab.config.pages.host)
-      variables.append(key: 'CI_PAGES_URL', value: pages_url)
+
+      if Feature.disabled?(:fix_pages_ci_variables, self)
+        variables.append(key: 'CI_PAGES_URL', value: pages_url)
+      end
     end
   end
 
@@ -3424,8 +3427,16 @@ class Project < ApplicationRecord
     )
   end
 
+  def default_custom_pages_domain
+    pages_domains.order(id: :asc).limit(1).first&.domain
+  end
+
   def pages_url
-    Gitlab::Pages::UrlBuilder.new(self).pages_url
+    pages_url_builder.pages_url
+  end
+
+  def pages_url_builder(options = nil)
+    Gitlab::Pages::UrlBuilder.new(self, options)
   end
 
   private
