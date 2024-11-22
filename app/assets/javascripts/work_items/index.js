@@ -57,6 +57,10 @@ export const initWorkItemsRoot = ({ workItemType, workspaceType } = {}) => {
     groupIssuesPath,
     labelsFetchPath,
     hasLinkedItemsEpicsFeature,
+    workItemsCreateEntityDataCanCreatePath,
+    workItemsCreateEntityDataCreateBranchPath,
+    workItemsCreateEntityDataCreateMrPath,
+    workItemsCreateEntityDataRefsPath,
   } = el.dataset;
 
   const isGroup = workspaceType === WORKSPACE_GROUP;
@@ -127,6 +131,11 @@ export const initWorkItemsRoot = ({ workItemType, workspaceType } = {}) => {
       groupIssuesPath,
       labelsFetchPath,
       hasLinkedItemsEpicsFeature: parseBoolean(hasLinkedItemsEpicsFeature),
+      canCreatePath: workItemsCreateEntityDataCanCreatePath,
+      defaultBranch,
+      createBranchPath: workItemsCreateEntityDataCreateBranchPath,
+      createMrPath: workItemsCreateEntityDataCreateMrPath,
+      refsPath: workItemsCreateEntityDataRefsPath,
     },
     mounted() {
       performanceMarkAndMeasure({

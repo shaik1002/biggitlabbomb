@@ -1,5 +1,13 @@
 <script>
-import { GlLoadingIcon, GlIcon, GlButton, GlTooltipDirective, GlModalDirective } from '@gitlab/ui';
+import {
+  GlLoadingIcon,
+  GlIcon,
+  GlButton,
+  GlTooltipDirective,
+  GlSprintf,
+  GlDisclosureDropdown,
+  GlDisclosureDropdownGroup,
+} from '@gitlab/ui';
 import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
 import { s__, __ } from '~/locale';
@@ -9,17 +17,21 @@ import workItemByIidQuery from '~/work_items/graphql/work_item_by_iid.query.grap
 import { sprintfWorkItem, WIDGET_TYPE_DEVELOPMENT, STATE_OPEN } from '~/work_items/constants';
 
 import WorkItemDevelopmentRelationshipList from './work_item_development_relationship_list.vue';
+import WorkItemCreateBranchMergeRequestModal from './work_item_create_branch_merge_request_modal.vue';
 
 export default {
   components: {
     GlLoadingIcon,
     GlIcon,
     GlButton,
+    GlSprintf,
+    GlDisclosureDropdown,
+    GlDisclosureDropdownGroup,
     WorkItemDevelopmentRelationshipList,
+    WorkItemCreateBranchMergeRequestModal,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
-    GlModal: GlModalDirective,
   },
   mixins: [glFeatureFlagMixin()],
   props: {
@@ -61,6 +73,10 @@ export default {
   data() {
     return {
       error: '',
+      showCreateBranchAndMrModal: false,
+      branchFlow: true,
+      mergeRequestFlow: false,
+      isDropdownShown: false,
     };
   },
   computed: {
@@ -122,8 +138,52 @@ export default {
     showAddButton() {
       return this.workItemsAlphaEnabled && this.canUpdate;
     },
+    mergeRequestGroup() {
+      const items = [];
+
+      items.push({
+        text: this.$options.i18n.createMergeRequest,
+        action: this.openModal.bind(this, false, true),
+        extraAttrs: {
+          'data-testid': 'create-mr-dropdown-button',
+        },
+      });
+
+      return { items, name: __('Merge request') };
+    },
+    branchGroup() {
+      const items = [];
+
+      items.push({
+        text: this.$options.i18n.createBranch,
+        action: this.openModal.bind(this, true, false),
+        extraAttrs: {
+          'data-testid': 'create-branch-dropdown-button',
+        },
+      });
+
+      return { items, name: __('Branch') };
+    },
+    addButtonTitle() {
+      return this.isDropdownShown ? '' : __('Add branch or merge request');
+    },
   },
-  createMRModalId: 'create-merge-request-modal',
+  methods: {
+    openModal(createBranch = true, createMergeRequest = false) {
+      this.toggleCreateModal(true);
+      this.branchFlow = createBranch;
+      this.mergeRequestFlow = createMergeRequest;
+    },
+    toggleCreateModal(showOrhide) {
+      this.showCreateBranchAndMrModal = showOrhide;
+    },
+    onHideDropdown() {
+      this.isDropdownShown = false;
+    },
+    onShowDropdown() {
+      this.isDropdownShown = true;
+    },
+  },
   i18n: {
     development: s__('WorkItem|Development'),
     fetchError: s__('WorkItem|Something went wrong when fetching items. Please refresh this page.'),
@@ -138,6 +198,9 @@ export default {
     closedStateText: s__(
       'WorkItem|The %{workItemType} was closed automatically when a branch was merged.',
     ),
+    createMergeRequestOrBranch: __('Create a %{mergeRequest} or a %{branch}.'),
+    mergeRequest: __('merge request'),
+    branch: __('branch'),
   },
 };
 </script>
@@ -162,17 +225,28 @@ export default {
           <gl-icon name="information-o" variant="info" />
         </gl-button>
       </h3>
-      <gl-button
-        v-if="showAddButton"
-        v-gl-modal="$options.createMRModalId"
-        v-gl-tooltip.top
-        category="tertiary"
-        icon="plus"
-        size="small"
-        data-testid="add-item"
-        :title="__('Add branch or merge request')"
-        :aria-label="__('Add branch or merge request')"
-      />
+      <gl-disclosure-dropdown
+        data-testid="create-options-dropdown"
+        @hidden="onHideDropdown"
+        @shown="onShowDropdown"
+      >
+        <template #toggle>
+          <gl-button
+            v-if="showAddButton"
+            v-gl-tooltip.top
+            category="tertiary"
+            icon="plus"
+            size="small"
+            data-testid="add-item"
+            :title="addButtonTitle"
+            :aria-label="addButtonTitle"
+          />
+        </template>
+
+        <gl-disclosure-dropdown-group :group="mergeRequestGroup" />
+
+        <gl-disclosure-dropdown-group bordered :group="branchGroup" />
+      </gl-disclosure-dropdown>
     </div>
     <work-item-development-relationship-list
       v-if="!isRelatedDevelopmentListEmpty"
@@ -181,13 +255,40 @@ export default {
     <template v-else>
       <span v-if="!canUpdate" class="gl-text-secondary">{{ __('None') }}</span>
       <template v-else>
-        <gl-button category="secondary" size="small" data-testid="create-mr-button">{{
-          $options.i18n.createMergeRequest
-        }}</gl-button>
-        <gl-button category="tertiary" size="small" data-testid="create-branch-button">{{
-          $options.i18n.createBranch
-        }}</gl-button>
+        <span class="gl-text-sm gl-text-subtle">
+          <gl-sprintf :message="$options.i18n.createMergeRequestOrBranch">
+            <template #mergeRequest>
+              <gl-button
+                variant="link"
+                class="gl-align-baseline !gl-text-sm"
+                data-testid="create-mr-button"
+                @click="openModal(false, true)"
+              >
+                {{ $options.i18n.mergeRequest }}
+              </gl-button>
+            </template>
+            <template #branch>
+              <gl-button
+                variant="link"
+                class="gl-align-baseline !gl-text-sm"
+                data-testid="create-branch-button"
+                @click="openModal(true, false)"
+              >
+                {{ $options.i18n.branch }}
+              </gl-button>
+            </template>
+          </gl-sprintf>
+        </span>
       </template>
     </template>
+    <work-item-create-branch-merge-request-modal
+      :show-modal="showCreateBranchAndMrModal"
+      :branch-flow="branchFlow"
+      :merge-request-flow="mergeRequestFlow"
+      :work-item-iid="workItemIid"
+      :work-item-id="workItemId"
+      :work-item-type="workItemTypeName"
+      @hideModal="toggleCreateModal(false)"
+    />
   </div>
 </template>

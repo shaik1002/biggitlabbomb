@@ -9543,6 +9543,9 @@ msgstr ""
 msgid "Branch changed"
 msgstr ""
 
+msgid "Branch created."
+msgstr ""
+
 msgid "Branch defaults"
 msgstr ""
 
@@ -9553,6 +9556,12 @@ msgid "Branch is already taken"
 msgstr ""
 
 msgid "Branch name"
+msgstr ""
+
+msgid "Branch name is available"
+msgstr ""
+
+msgid "Branch name is required"
 msgstr ""
 
 msgid "Branch name pattern"
@@ -11315,10 +11324,22 @@ msgstr ""
 msgid "Checking branch availability…"
 msgstr ""
 
+msgid "Checking branch validity"
+msgstr ""
+
+msgid "Checking branch validity..."
+msgstr ""
+
 msgid "Checking group path availability..."
 msgstr ""
 
 msgid "Checking if merge request can be merged..."
+msgstr ""
+
+msgid "Checking source validity"
+msgstr ""
+
+msgid "Checking source validity..."
 msgstr ""
 
 msgid "Checking username availability..."
@@ -16306,6 +16327,9 @@ msgid "Create %{humanized_resource_name}"
 msgstr ""
 
 msgid "Create %{workspace} label"
+msgstr ""
+
+msgid "Create a %{mergeRequest} or a %{branch}."
 msgstr ""
 
 msgid "Create a Kubernetes cluster"
@@ -23108,6 +23132,9 @@ msgid "Failed to clone this issue because target project doesn't exist."
 msgstr ""
 
 msgid "Failed to clone this issue: wrong parameters."
+msgstr ""
+
+msgid "Failed to create a branch for this %{workItemType}. Please try again."
 msgstr ""
 
 msgid "Failed to create a branch for this issue. Please try again."
@@ -33787,6 +33814,9 @@ msgstr ""
 msgid "MemberRole|The Owner role is normally assigned to the individual or team responsible for managing and maintaining the group or creating the project. This role has the highest level of administrative control, and can manage all aspects of the group or project, including managing other Owners."
 msgstr ""
 
+msgid "MemberRole|The Planner role is suitable for team members who need to manage projects and track work items but do not need to contribute code, such as project managers and scrum masters."
+msgstr ""
+
 msgid "MemberRole|The Reporter role is suitable for team members who need to stay informed about a project or group but do not actively contribute code."
 msgstr ""
 
@@ -41324,6 +41354,9 @@ msgid "Plan"
 msgstr ""
 
 msgid "Plan:"
+msgstr ""
+
+msgid "Planner"
 msgstr ""
 
 msgid "PlantUML"
@@ -53294,7 +53327,13 @@ msgstr ""
 msgid "Source code (%{fileExtension})"
 msgstr ""
 
+msgid "Source is available"
+msgstr ""
+
 msgid "Source is not available"
+msgstr ""
+
+msgid "Source name is required"
 msgstr ""
 
 msgid "Source project"
@@ -55299,6 +55338,9 @@ msgid "The Matrix access token (for example, `syt-zyx57W2v1u123ew11`)."
 msgstr ""
 
 msgid "The Mattermost token."
+msgstr ""
+
+msgid "The Planner role is suitable for team members who need to manage projects and track work items but do not need to contribute code."
 msgstr ""
 
 msgid "The Slack notifications integration is deprecated and will be removed in a future release. To continue to receive notifications from Slack, use the GitLab for Slack app instead. %{learn_more_link_start}Learn more%{link_end}."
@@ -61072,6 +61114,9 @@ msgstr ""
 msgid "View blame prior to this change"
 msgstr ""
 
+msgid "View branch"
+msgstr ""
+
 msgid "View card matches"
 msgstr ""
 
@@ -62429,25 +62474,7 @@ msgstr ""
 msgid "WikiClone|Clone Wiki repository"
 msgstr ""
 
-msgid "WikiClone|Clone repository"
-msgstr ""
-
 msgid "WikiClone|Git Access"
-msgstr ""
-
-msgid "WikiClone|Go to directory"
-msgstr ""
-
-msgid "WikiClone|Install Gollum"
-msgstr ""
-
-msgid "WikiClone|Start Gollum and edit locally"
-msgstr ""
-
-msgid "WikiClone|Step 1: Clone repository"
-msgstr ""
-
-msgid "WikiClone|Step 2: Install and start Gollum"
 msgstr ""
 
 msgid "WikiEdit|There is already a page with the same title in that path."

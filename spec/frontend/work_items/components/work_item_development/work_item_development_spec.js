@@ -1,7 +1,7 @@
-import Vue from 'vue';
-import { GlLoadingIcon } from '@gitlab/ui';
+import Vue, { nextTick } from 'vue';
+import { GlLoadingIcon, GlDisclosureDropdownGroup, GlDisclosureDropdown } from '@gitlab/ui';
 import VueApollo from 'vue-apollo';
-import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
+import { mountExtended, shallowMountExtended } from 'helpers/vue_test_utils_helper';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import { createMockDirective } from 'helpers/vue_mock_directive';
 import workItemByIidQuery from '~/work_items/graphql/work_item_by_iid.query.graphql';
@@ -16,6 +16,7 @@ import {
 
 import WorkItemDevelopment from '~/work_items/components/work_item_development/work_item_development.vue';
 import WorkItemDevelopmentRelationshipList from '~/work_items/components/work_item_development/work_item_development_relationship_list.vue';
+import WorkItemCreateBranchMergeRequestModal from '~/work_items/components/work_item_development/work_item_create_branch_merge_request_modal.vue';
 
 describe('WorkItemDevelopment CE', () => {
   Vue.use(VueApollo);
@@ -136,6 +137,7 @@ describe('WorkItemDevelopment CE', () => {
     .mockResolvedValue(closedWorkItemWithAutoCloseFlagEnabled);
 
   const createComponent = ({
+    mountFn = shallowMountExtended,
     workItemId = 'gid://gitlab/WorkItem/1',
     workItemIid = '1',
     workItemFullPath = 'full-path',
@@ -144,7 +146,7 @@ describe('WorkItemDevelopment CE', () => {
   } = {}) => {
     mockApollo = createMockApollo([[workItemByIidQuery, workItemQueryHandler]]);
 
-    wrapper = shallowMountExtended(WorkItemDevelopment, {
+    wrapper = mountFn(WorkItemDevelopment, {
       apolloProvider: mockApollo,
       directives: {
         GlModal: createMockDirective('gl-modal'),
@@ -160,6 +162,11 @@ describe('WorkItemDevelopment CE', () => {
           workItemsAlpha: workItemsAlphaEnabled,
         },
       },
+      stubs: {
+        WorkItemCreateBranchMergeRequestModal: true,
+        GlDisclosureDropdown,
+        GlDisclosureDropdownGroup,
+      },
     });
   };
 
@@ -170,6 +177,14 @@ describe('WorkItemDevelopment CE', () => {
   const findCreateBranchButton = () => wrapper.findByTestId('create-branch-button');
   const findMoreInformation = () => wrapper.findByTestId('more-information');
   const findRelationshipList = () => wrapper.findComponent(WorkItemDevelopmentRelationshipList);
+  const findCreateOptionsDropdown = () => wrapper.findByTestId('create-options-dropdown');
+  const findCreateBranchMergeRequestModal = () =>
+    wrapper.findComponent(WorkItemCreateBranchMergeRequestModal);
+  const findDropdownGroups = () =>
+    findCreateOptionsDropdown().findAllComponents(GlDisclosureDropdownGroup);
+  const findCreateMrDropdownButton = () => wrapper.findByTestId('create-mr-dropdown-button');
+  const findCreateBranchDropdownButton = () =>
+    wrapper.findByTestId('create-branch-dropdown-button');
 
   describe('Default', () => {
     it('should show the widget label', async () => {
@@ -180,14 +195,14 @@ describe('WorkItemDevelopment CE', () => {
     });
 
     it('should render the add button when `canUpdate` is true and `workItemsAlpha` is on', async () => {
-      createComponent({ workItemsAlphaEnabled: true });
+      createComponent({ mountFn: mountExtended, workItemsAlphaEnabled: true });
       await waitForPromises();
 
       expect(findAddButton().exists()).toBe(true);
     });
 
     it('should not render the add button when `canUpdate` is true and `workItemsAlpha` is off', async () => {
-      createComponent({ workItemsAlphaEnabled: false });
+      createComponent({ mountFn: mountExtended, workItemsAlphaEnabled: false });
       await waitForPromises();
 
       expect(findAddButton().exists()).toBe(false);
@@ -197,7 +212,11 @@ describe('WorkItemDevelopment CE', () => {
       const handlerWithCanUpdateFalse = jest
         .fn()
         .mockResolvedValue(noUpdateProjectWorkItemResponseWithMRList);
-      createComponent({ workItemsAlphaEnabled: false, queryHandler: handlerWithCanUpdateFalse });
+      createComponent({
+        mountFn: mountExtended,
+        workItemsAlphaEnabled: false,
+        queryHandler: handlerWithCanUpdateFalse,
+      });
       await waitForPromises();
 
       expect(findAddButton().exists()).toBe(false);
@@ -221,6 +240,7 @@ describe('WorkItemDevelopment CE', () => {
       ({ workItemsAlphaFFEnabled, shouldShowActionCtaButtons }) => {
         beforeEach(async () => {
           createComponent({
+            mountFn: mountExtended,
             workItemQueryHandler: successQueryHandlerWithEmptyMRList,
             workItemsAlphaEnabled: workItemsAlphaFFEnabled,
           });
@@ -282,5 +302,70 @@ describe('WorkItemDevelopment CE', () => {
         expect(findMoreInformation().attributes('aria-label')).toBe(message);
       },
     );
+  });
+
+  describe('Create branch/merge request flow', () => {
+    beforeEach(() => {
+      createComponent({ mountFn: mountExtended });
+      return waitForPromises();
+    });
+
+    it('should not show the create branch or merge request flow by default', () => {
+      expect(findCreateBranchMergeRequestModal().props('showModal')).toBe(false);
+    });
+
+    describe('Add button', () => {
+      beforeEach(() => {
+        createComponent({ mountFn: mountExtended });
+        return waitForPromises();
+      });
+
+      it('should show the popover on hover', () => {
+        expect(findAddButton().attributes('title')).toBe('Add branch or merge request');
+      });
+
+      it('should hide the popover title on click', async () => {
+        await findCreateOptionsDropdown().vm.$emit('shown');
+
+        expect(findAddButton().attributes('title')).toBe('');
+      });
+
+      it('should show the options in dropdown on click', () => {
+        const groups = findDropdownGroups();
+        const mergeRequestGroup = groups.at(0);
+        const branchGroup = groups.at(1);
+
+        expect(groups).toHaveLength(2);
+
+        expect(mergeRequestGroup.props('group').name).toBe('Merge request');
+        expect(mergeRequestGroup.props('group').items).toEqual([
+          expect.objectContaining({ text: 'Create merge request' }),
+        ]);
+
+        expect(branchGroup.props('group').name).toBe('Branch');
+        expect(branchGroup.props('group').items).toEqual([
+          expect.objectContaining({ text: 'Create branch' }),
+        ]);
+      });
+
+      it('should show the modal when clicked on create merge request option', async () => {
+        findCreateOptionsDropdown().vm.$emit('shown');
+        await nextTick();
+
+        findCreateMrDropdownButton().trigger('click');
+        await nextTick();
+
+        expect(findCreateBranchMergeRequestModal().props('showModal')).toBe(true);
+      });
+
+      it('should show the modal when clicked on create branch option', async () => {
+        await findCreateOptionsDropdown().vm.$emit('shown');
+
+        findCreateBranchDropdownButton().trigger('click');
+        await nextTick();
+
+        expect(findCreateBranchMergeRequestModal().props('showModal')).toBe(true);
+      });
+    });
   });
 });

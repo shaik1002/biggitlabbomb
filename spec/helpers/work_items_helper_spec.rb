@@ -122,4 +122,24 @@ RSpec.describe WorkItemsHelper, feature_category: :team_planning do
       )
     end
   end
+
+  describe '#work_items_create_entity_data' do
+    let_it_be(:project) { build_stubbed(:project) }
+    let_it_be(:work_item) { build_stubbed(:work_item, namespace: project.namespace) }
+
+    let(:current_user) { double.as_null_object }
+
+    it 'returns expected data' do
+      expect(work_items_create_entity_data(project, work_item)).to include(
+        {
+          can_create_path: can_create_branch_project_issue_path(project, work_item),
+          create_branch_path: project_branches_path(project, branch_name: work_item.to_branch_name,
+            ref: project.default_branch, issue_iid: work_item.iid, format: :json),
+          create_mr_path: create_mr_path(from: work_item.to_branch_name, source_project: project,
+            to: project.default_branch, mr_params: { issue_iid: work_item.iid }),
+          refs_path: refs_project_path(project, search: '')
+        }
+      )
+    end
+  end
 end

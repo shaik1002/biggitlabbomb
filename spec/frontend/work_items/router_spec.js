@@ -79,6 +79,7 @@ describe('Work items router', () => {
         WorkItemAwardEmoji: true,
         WorkItemTimeTracking: true,
         WorkItemAncestors: true,
+        WorkItemCreateBranchMergeRequestModal: true,
       },
     });
   };
