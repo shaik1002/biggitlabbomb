@@ -404,7 +404,7 @@ export default {
         <span
           v-if="listType === 'assignee'"
           v-show="!list.collapsed"
-          class="gl-ml-2 gl-font-normal gl-text-secondary"
+          class="gl-ml-2 gl-font-normal gl-text-subtle"
         >
           @{{ listAssignee }}
         </span>
@@ -424,7 +424,7 @@ export default {
         v-if="isSwimlanesHeader && list.collapsed"
         ref="collapsedInfo"
         aria-hidden="true"
-        class="board-header-collapsed-info-icon gl-cursor-pointer gl-text-secondary hover:gl-text-gray-900"
+        class="board-header-collapsed-info-icon gl-cursor-pointer gl-text-subtle hover:gl-text-gray-900"
       >
         <gl-icon name="information" />
       </span>
@@ -448,7 +448,7 @@ export default {
       <!-- EE end -->
 
       <div
-        class="issue-count-badge no-drag gl-inline-flex gl-pr-2 gl-text-sm gl-text-secondary"
+        class="issue-count-badge no-drag gl-inline-flex gl-pr-2 gl-text-sm gl-text-subtle"
         data-testid="issue-count-badge"
         :class="{
           '!gl-hidden': list.collapsed && isSwimlanesHeader,
