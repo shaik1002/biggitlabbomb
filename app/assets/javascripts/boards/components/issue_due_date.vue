@@ -91,17 +91,13 @@ export default {
 
 <template>
   <span>
-    <span
-      ref="issueDueDate"
-      :class="cssClass"
-      class="board-card-info gl-mr-3 gl-cursor-help gl-text-secondary"
-    >
+    <span ref="issueDueDate" :class="cssClass" class="board-card-info gl-mr-3 gl-cursor-help">
       <gl-icon
-        :variant="isOverdue ? 'danger' : 'current'"
+        :variant="isOverdue ? 'danger' : 'subtle'"
         class="board-card-info-icon gl-mr-2"
         :name="iconName"
       />
-      <time datetime="date" class="board-card-info-text gl-text-sm">{{ body }}</time>
+      <time datetime="date" class="board-card-info-text gl-text-sm gl-text-subtle">{{ body }}</time>
     </span>
     <gl-tooltip :target="() => $refs.issueDueDate" :placement="tooltipPlacement">
       <span class="gl-font-bold">{{ __('Due date') }}</span>

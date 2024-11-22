@@ -98,8 +98,10 @@ export default {
 
         <template v-if="error.integrated" #default>
           <time-ago-tooltip :time="error.firstSeen" />
-          <span v-if="shortFirstReleaseVersion" class="gl-text-sm gl-text-secondary">
-            <gl-icon name="commit" class="gl-mr-1" :size="12" />{{ shortFirstReleaseVersion }}
+          <span v-if="shortFirstReleaseVersion" class="gl-text-sm">
+            <gl-icon name="commit" class="gl-mr-1" :size="12" variant="subtle" />{{
+              shortFirstReleaseVersion
+            }}
           </span>
         </template>
 
@@ -123,7 +125,7 @@ export default {
 
         <template v-if="error.integrated" #default>
           <time-ago-tooltip :time="error.lastSeen" />
-          <span v-if="shortLastReleaseVersion" class="gl-text-sm gl-text-secondary">
+          <span v-if="shortLastReleaseVersion" class="gl-text-sm gl-text-subtle">
             <gl-icon name="commit" class="gl-mr-1" :size="12" />{{ shortLastReleaseVersion }}
           </span>
         </template>
