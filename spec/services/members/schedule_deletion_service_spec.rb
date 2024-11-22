@@ -22,20 +22,7 @@ RSpec.describe Members::ScheduleDeletionService, feature_category: :seat_cost_ma
       end
     end
 
-    context 'when the user is not authorized' do
-      it 'returns an error' do
-        result = service.execute
-
-        expect(result[:status]).to eq :error
-        expect(result[:message]).to eq('User not authorized')
-      end
-    end
-
-    context 'when the user is authorized' do
-      before_all do
-        namespace.add_owner(scheduled_by)
-      end
-
+    shared_examples 'successful deletion schedule' do
       it 'creates a deletion schedule' do
         expect { service.execute }.to change { Members::DeletionSchedule.count }.by(1)
       end
@@ -86,6 +73,29 @@ RSpec.describe Members::ScheduleDeletionService, feature_category: :seat_cost_ma
           expect(result[:status]).to eq :error
           expect(result[:message]).to eq(['User must exist'])
         end
+      end
+    end
+
+    context 'when the user is an owner' do
+      before_all do
+        namespace.add_owner(scheduled_by)
+      end
+
+      it_behaves_like 'successful deletion schedule'
+    end
+
+    context 'when the user is an admin bot' do
+      let_it_be(:scheduled_by) { Users::Internal.admin_bot }
+
+      it_behaves_like 'successful deletion schedule'
+    end
+
+    context 'when the user is not authorized' do
+      it 'returns an error' do
+        result = service.execute
+
+        expect(result[:status]).to eq :error
+        expect(result[:message]).to eq('User not authorized')
       end
     end
   end
