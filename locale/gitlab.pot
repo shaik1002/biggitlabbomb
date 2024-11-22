@@ -18415,9 +18415,6 @@ msgstr ""
 msgid "Deleted group can not be restored!"
 msgstr ""
 
-msgid "Deleted projects cannot be restored!"
-msgstr ""
-
 msgid "Deleted the source branch."
 msgstr ""
 
@@ -18431,9 +18428,6 @@ msgid "Deleting a project places it into a read-only state until %{date}, at whi
 msgstr ""
 
 msgid "Deleting protected branches is blocked by security policies"
-msgstr ""
-
-msgid "Deleting the project will delete its repository and all related resources, including issues and merge requests."
 msgstr ""
 
 msgid "Deleting this group also deletes all child projects, including archived projects, and their resources."
@@ -21694,6 +21688,9 @@ msgid "Environments|Select Flux resource"
 msgstr ""
 
 msgid "Environments|Select Flux resource (optional)"
+msgstr ""
+
+msgid "Environments|Select a namespace to see available Flux resources."
 msgstr ""
 
 msgid "Environments|Select agent"
@@ -25823,7 +25820,7 @@ msgstr ""
 msgid "Go to wiki"
 msgstr ""
 
-msgid "Go to your To-Do list"
+msgid "Go to your To-Do List"
 msgstr ""
 
 msgid "Go to your fork"
@@ -56247,9 +56244,6 @@ msgstr ""
 msgid "This action deletes %{codeOpen}%{project_path_with_namespace}%{codeClose} on %{date} and everything this project contains."
 msgstr ""
 
-msgid "This action deletes %{codeOpen}%{project_path_with_namespace}%{codeClose} on %{date} and everything this project contains. %{strongOpen}There is no going back.%{strongClose}"
-msgstr ""
-
 msgid "This action will %{strongOpen}permanently remove%{strongClose} %{codeOpen}%{group}%{codeClose} %{strongOpen}immediately%{strongClose}."
 msgstr ""
 
@@ -57576,9 +57570,6 @@ msgid "To widen your search, change or remove filters above."
 msgstr ""
 
 msgid "To-Do List"
-msgstr ""
-
-msgid "To-Do list"
 msgstr ""
 
 msgid "To-do item successfully marked as done."
