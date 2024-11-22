@@ -338,6 +338,12 @@ RSpec.describe Gitlab::UserAccess, feature_category: :system_access do
 
         expect(access.can_push_for_ref?(ref)).to be_falsey
       end
+
+      it 'is false' do
+        project.add_member(user, :planner)
+
+        expect(access.can_push_for_ref?(ref)).to be_falsey
+      end
     end
 
     context 'when user can push_code to a project repository (eg. as a developer)' do

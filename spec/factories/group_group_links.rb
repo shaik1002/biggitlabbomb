@@ -7,6 +7,7 @@ FactoryBot.define do
     group_access { Gitlab::Access::DEVELOPER }
 
     trait(:guest) { group_access { Gitlab::Access::GUEST } }
+    trait(:planner) { group_access { Gitlab::Access::PLANNER } }
     trait(:reporter) { group_access { Gitlab::Access::REPORTER } }
     trait(:developer) { group_access { Gitlab::Access::DEVELOPER } }
     trait(:owner) { group_access { Gitlab::Access::OWNER } }

@@ -18,6 +18,7 @@ RSpec.describe ProjectTeam, feature_category: :groups_and_projects do
       project.add_maintainer(maintainer)
       project.add_planner(planner)
       project.add_reporter(reporter)
+      project.add_planner(planner)
       project.add_guest(guest)
     end
 
@@ -37,8 +38,9 @@ RSpec.describe ProjectTeam, feature_category: :groups_and_projects do
       it { expect(project.team.maintainer?(nonmember)).to be_falsey }
       it { expect(project.team.member?(nonmember)).to be_falsey }
       it { expect(project.team.member?(guest)).to be_truthy }
-      it { expect(project.team.member?(planner, Gitlab::Access::PLANNER)).to be_truthy }
+      it { expect(project.team.member?(planner, Gitlab::Access::REPORTER)).to be_falsey }
       it { expect(project.team.member?(reporter, Gitlab::Access::REPORTER)).to be_truthy }
+      it { expect(project.team.member?(planner, Gitlab::Access::PLANNER)).to be_truthy }
       it { expect(project.team.member?(guest, Gitlab::Access::REPORTER)).to be_falsey }
       it { expect(project.team.member?(nonmember, Gitlab::Access::GUEST)).to be_falsey }
     end
@@ -77,10 +79,12 @@ RSpec.describe ProjectTeam, feature_category: :groups_and_projects do
       it { expect(project.team.maintainer?(maintainer)).to be_truthy }
       it { expect(project.team.maintainer?(guest)).to be_truthy }
       it { expect(project.team.maintainer?(reporter)).to be_falsey }
+      it { expect(project.team.maintainer?(planner)).to be_falsey }
       it { expect(project.team.maintainer?(nonmember)).to be_falsey }
       it { expect(project.team.member?(nonmember)).to be_falsey }
       it { expect(project.team.member?(guest)).to be_truthy }
       it { expect(project.team.member?(guest, Gitlab::Access::MAINTAINER)).to be_truthy }
+      it { expect(project.team.member?(planner, Gitlab::Access::MAINTAINER)).to be_falsey }
       it { expect(project.team.member?(reporter, Gitlab::Access::MAINTAINER)).to be_falsey }
       it { expect(project.team.member?(nonmember, Gitlab::Access::GUEST)).to be_falsey }
     end

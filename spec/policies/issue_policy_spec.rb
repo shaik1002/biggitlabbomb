@@ -662,9 +662,9 @@ RSpec.describe IssuePolicy, feature_category: :team_planning do
       end
     end
 
-    context 'and policy allows reporter access' do
+    context 'and policy allows planner access' do
       where(:project_level, :feature_access_level, :membership, :admin_mode, :expected_count) do
-        permission_table_for_reporter_issue_access
+        permission_table_for_planner_issue_access
       end
 
       with_them do

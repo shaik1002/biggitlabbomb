@@ -38,6 +38,7 @@ RSpec.describe GroupGroupLink, feature_category: :groups_and_projects do
   describe 'scopes' do
     context 'for scopes fetching records based on access levels' do
       let_it_be(:group_group_link_guest) { create :group_group_link, :guest }
+      let_it_be(:group_group_link_planner) { create :group_group_link, :planner }
       let_it_be(:group_group_link_reporter) { create :group_group_link, :reporter }
       let_it_be(:group_group_link_developer) { create :group_group_link, :developer }
       let_it_be(:group_group_link_maintainer) { create :group_group_link, :maintainer }
@@ -46,7 +47,7 @@ RSpec.describe GroupGroupLink, feature_category: :groups_and_projects do
       describe '.non_guests' do
         it 'returns all records which are greater than Guests access' do
           expect(described_class.non_guests).to match_array([
-            group_group_link_reporter, group_group_link_developer,
+            group_group_link_reporter, group_group_link_planner, group_group_link_developer,
             group_group_link_maintainer, group_group_link_owner
           ])
         end

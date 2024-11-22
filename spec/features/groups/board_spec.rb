@@ -45,7 +45,7 @@ RSpec.describe 'Group Boards', feature_category: :portfolio_management do
     end
   end
 
-  context "when user is a Reporter in one of the group's projects", :js do
+  context "when user is a Planner in one of the group's projects", :js do
     let_it_be(:board) { create(:board, group: group) }
 
     let_it_be(:group_label1) { create(:group_label, title: "bug", group: group) }
@@ -60,7 +60,7 @@ RSpec.describe 'Group Boards', feature_category: :portfolio_management do
 
     before do
       project1.add_guest(user)
-      project2.add_reporter(user)
+      project2.add_planner(user)
       stub_feature_flags(issues_list_drawer: false)
       sign_in(user)
 
@@ -69,7 +69,7 @@ RSpec.describe 'Group Boards', feature_category: :portfolio_management do
       end
     end
 
-    it 'allows user to move issue of project where they are a Reporter' do
+    it 'allows user to move issue of project where they are a Planner' do
       expect(all('[data-testid="board-list"]')[0]).to have_content(issue2.title)
 
       drag(list_from_index: 0, from_index: 0, list_to_index: 1)
