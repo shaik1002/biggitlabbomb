@@ -87,6 +87,13 @@ module Gitlab
     require_dependency Rails.root.join('lib/gitlab/patch/old_redis_cache_store')
     require_dependency Rails.root.join('lib/gitlab/exceptions_app')
 
+    if Gitlab.ee?
+      # Cloud Connector code is shipped both through a gem (gitlab-cloud-connector) as well
+      # as this code base. Since both use the same namespace, if the library module is required
+      # first, then this file will never be evaluated. So we require it explicitly.
+      require_dependency Rails.root.join('ee/lib/gitlab/cloud_connector')
+    end
+
     unless ::Gitlab.next_rails?
       config.active_support.cache_format_version = nil
       config.active_support.disable_to_s_conversion = false # New default is true
