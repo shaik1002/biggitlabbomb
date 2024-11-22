@@ -9,6 +9,8 @@
 module Ci
   module JobToken
     class Authorization < Ci::ApplicationRecord
+      include EachBatch
+
       self.table_name = 'ci_job_token_authorizations'
 
       belongs_to :origin_project, class_name: 'Project' # where the job token came from
