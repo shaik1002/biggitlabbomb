@@ -203,7 +203,7 @@ gem 'fog-local', '~> 0.8' # rubocop:todo Gemfile/MissingFeatureCategory
 # We may want to update this dependency if this is ever addressed upstream, e.g. via
 # https://github.com/aliyun/aliyun-oss-ruby-sdk/pull/93
 gem 'fog-aliyun', '~> 0.4' # rubocop:todo Gemfile/MissingFeatureCategory
-gem 'gitlab-fog-azure-rm', '~> 2.2.0', require: 'fog/azurerm', feature_category: :shared
+gem 'gitlab-fog-azure-rm', '~> 2.1.0', require: 'fog/azurerm', feature_category: :shared
 
 # for Google storage
 
@@ -325,7 +325,7 @@ gem 'redis-clustering', '~> 5.3.0', feature_category: :redis
 gem 'connection_pool', '~> 2.4' # rubocop:todo Gemfile/MissingFeatureCategory
 
 # Redis session store
-gem 'redis-actionpack', '~> 5.5.0', feature_category: :redis
+gem 'redis-actionpack', '~> 5.4.0', feature_category: :redis
 
 # Discord integration
 gem 'discordrb-webhooks', '~> 3.5', require: false, feature_category: :integrations

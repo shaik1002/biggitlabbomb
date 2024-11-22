@@ -20,8 +20,6 @@ import {
   STATUS_BY_TAB,
   TAB_PENDING,
   TODO_WAIT_BEFORE_RELOAD,
-  TAB_DONE,
-  TAB_ALL,
 } from '~/todos/constants';
 import getTodosQuery from './queries/get_todos.query.graphql';
 import getPendingTodosCount from './queries/get_pending_todos_count.query.graphql';
@@ -68,7 +66,7 @@ export default {
       currentUserId: null,
       pageInfo: {},
       todos: [],
-      currentTab: TAB_PENDING,
+      currentTab: 0,
       pendingTodosCount: '-',
       queryFilterValues: {
         groupId: [],
@@ -139,20 +137,6 @@ export default {
       return this.currentTab === TAB_PENDING && !this.showEmptyState;
     },
   },
-  created() {
-    const searchParams = new URLSearchParams(window.location.search);
-    const stateFromUrl = searchParams.get('state');
-    switch (stateFromUrl) {
-      case 'done':
-        this.currentTab = TAB_DONE;
-        break;
-      case 'all':
-        this.currentTab = TAB_ALL;
-        break;
-      default:
-        break;
-    }
-  },
   mounted() {
     document.addEventListener('visibilitychange', this.handleVisibilityChanged);
   },
@@ -187,21 +171,6 @@ export default {
         last: null,
         before: null,
       };
-      this.syncActiveTabToUrl();
-    },
-    syncActiveTabToUrl() {
-      const tabIndexToUrlStateParam = {
-        [TAB_DONE]: 'done',
-        [TAB_ALL]: 'all',
-      };
-      const searchParams = new URLSearchParams(window.location.search);
-      if (this.currentTab === TAB_PENDING) {
-        searchParams.delete('state');
-      } else {
-        searchParams.set('state', tabIndexToUrlStateParam[this.currentTab]);
-      }
-
-      window.history.replaceState(null, '', `?${searchParams.toString()}`);
     },
     handleFiltersChanged(data) {
       this.alert?.dismiss();
@@ -258,12 +227,7 @@ export default {
 <template>
   <div>
     <div class="gl-flex gl-justify-between gl-border-b-1 gl-border-gray-100 gl-border-b-solid">
-      <gl-tabs
-        :value="currentTab"
-        content-class="gl-p-0"
-        nav-class="gl-border-0"
-        @input="tabChanged"
-      >
+      <gl-tabs content-class="gl-p-0" nav-class="gl-border-0" @input="tabChanged">
         <gl-tab>
           <template #title>
             <span>{{ s__('Todos|To Do') }}</span>

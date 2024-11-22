@@ -126,9 +126,11 @@
     overflow: visible;
   }
 
-  .diff-file-is-active {
-    outline: 1px solid var(--gl-focus-ring-outer-color);
-    outline-offset: 2px;
+  .diff-file {
+    &.diff-file-is-active,
+    &:has(*:not(textarea):focus-visible) {
+      box-shadow: 0 0 0 2px var(--gl-border-color-strong);
+    }
   }
 }
 
@@ -314,7 +316,7 @@
 
   .coverage {
     font-size: 12px;
-    @apply gl-text-subtle;
+    color: var(--gray-500, $gray-500);
     line-height: initial;
   }
 }

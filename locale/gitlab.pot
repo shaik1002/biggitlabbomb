@@ -1447,9 +1447,6 @@ msgstr ""
 msgid "%{time_ago}"
 msgstr ""
 
-msgid "%{timeago} in pipeline %{pipeline}"
-msgstr ""
-
 msgid "%{timebox_type} does not support burnup charts"
 msgstr ""
 
@@ -3501,12 +3498,6 @@ msgstr ""
 msgid "Added %{label_references} %{label_text}."
 msgstr ""
 
-msgid "Added %{target} as a linked item blocked by this %{work_item_type}."
-msgstr ""
-
-msgid "Added %{target} as a linked item blocking this %{work_item_type}."
-msgstr ""
-
 msgid "Added %{timeAgo} by"
 msgstr ""
 
@@ -3936,9 +3927,6 @@ msgid "AdminSelfHostedModels|Model"
 msgstr ""
 
 msgid "AdminSelfHostedModels|Model family"
-msgstr ""
-
-msgid "AdminSelfHostedModels|Model identifier"
 msgstr ""
 
 msgid "AdminSelfHostedModels|Model identifier (optional)"
@@ -11330,6 +11318,9 @@ msgstr ""
 msgid "Checking username availability..."
 msgstr ""
 
+msgid "Checkout|$%{pricePerUserPerYear} per user per year"
+msgstr ""
+
 msgid "Checkout|$%{selectedPlanPrice} per 10 GB storage pack per year"
 msgstr ""
 
@@ -11342,6 +11333,9 @@ msgstr[0] ""
 msgstr[1] ""
 
 msgid "Checkout|%{cardType} ending in %{lastFourDigits}"
+msgstr ""
+
+msgid "Checkout|%{name}'s GitLab subscription"
 msgstr ""
 
 msgid "Checkout|%{name}'s compute minutes"
@@ -11361,13 +11355,22 @@ msgid_plural "Checkout|%{quantity} storage packs"
 msgstr[0] ""
 msgstr[1] ""
 
+msgid "Checkout|%{selectedPlanText}"
+msgstr ""
+
 msgid "Checkout|%{startDate} - %{endDate}"
 msgstr ""
 
 msgid "Checkout|(may be %{linkStart}charged upon purchase%{linkEnd})"
 msgstr ""
 
+msgid "Checkout|(x%{numberOfUsers})"
+msgstr ""
+
 msgid "Checkout|(x%{quantity})"
+msgstr ""
+
+msgid "Checkout|Add active users before adding a coupon."
 msgstr ""
 
 msgid "Checkout|An unknown error has occurred. Please try again by refreshing this page."
@@ -11377,6 +11380,9 @@ msgid "Checkout|Billing address"
 msgstr ""
 
 msgid "Checkout|Billing contact"
+msgstr ""
+
+msgid "Checkout|Calculating your subscription..."
 msgstr ""
 
 msgid "Checkout|Checkout"
@@ -11412,6 +11418,24 @@ msgstr ""
 msgid "Checkout|Country"
 msgstr ""
 
+msgid "Checkout|Coupon code (optional)"
+msgstr ""
+
+msgid "Checkout|Coupon has been applied and by continuing with your purchase, you accept and agree to the %{linkStart}Coupon Terms%{linkEnd}."
+msgstr ""
+
+msgid "Checkout|Create a new group"
+msgstr ""
+
+msgid "Checkout|Credit card form failed to load. Please try again."
+msgstr ""
+
+msgid "Checkout|Credit card form failed to load: %{message}"
+msgstr ""
+
+msgid "Checkout|Discount"
+msgstr ""
+
 msgid "Checkout|Edit"
 msgstr ""
 
@@ -11430,25 +11454,70 @@ msgstr ""
 msgid "Checkout|Failed to load the payment form. Refresh the page and try again."
 msgstr ""
 
+msgid "Checkout|Failed to register credit card. Please try again."
+msgstr ""
+
 msgid "Checkout|GB"
+msgstr ""
+
+msgid "Checkout|GitLab group"
+msgstr ""
+
+msgid "Checkout|GitLab plan"
+msgstr ""
+
+msgid "Checkout|Group"
+msgstr ""
+
+msgid "Checkout|Invalid coupon code. Enter a valid coupon code."
 msgstr ""
 
 msgid "Checkout|Manage the subscription and billing contacts for your billing account in the %{customersPortalLinkStart}Customers Portal%{customersPortalLinkEnd}. Learn more about %{manageContactsLinkStart}how to manage your contacts%{manageContactsLinkEnd}."
 msgstr ""
 
+msgid "Checkout|Must be %{minimumNumberOfUsers} (your seats in use) or more."
+msgstr ""
+
+msgid "Checkout|Must be %{minimumNumberOfUsers} (your seats in use, plus all over limit members) or more. To buy fewer seats, remove members from the group."
+msgstr ""
+
 msgid "Checkout|Must be 1 or more. Cannot be a decimal."
+msgstr ""
+
+msgid "Checkout|Name of company or organization using GitLab"
+msgstr ""
+
+msgid "Checkout|Name: %{errorMessage}"
+msgstr ""
+
+msgid "Checkout|Need more users? Purchase GitLab for your %{company}."
+msgstr ""
+
+msgid "Checkout|Network Error: %{message}"
+msgstr ""
+
+msgid "Checkout|Number of users"
 msgstr ""
 
 msgid "Checkout|Payment method"
 msgstr ""
 
+msgid "Checkout|Pricing reflective of %{linkStart}limited-time offer%{linkEnd}."
+msgstr ""
+
 msgid "Checkout|Purchase details"
+msgstr ""
+
+msgid "Checkout|Select"
 msgstr ""
 
 msgid "Checkout|Select a country"
 msgstr ""
 
 msgid "Checkout|Select a state"
+msgstr ""
+
+msgid "Checkout|Something went wrong while loading price details."
 msgstr ""
 
 msgid "Checkout|State"
@@ -11463,13 +11532,22 @@ msgstr ""
 msgid "Checkout|Subscription contact"
 msgstr ""
 
+msgid "Checkout|Subscription details"
+msgstr ""
+
 msgid "Checkout|Subtotal"
+msgstr ""
+
+msgid "Checkout|Success: subscription"
 msgstr ""
 
 msgid "Checkout|Tax"
 msgstr ""
 
 msgid "Checkout|Tax ID"
+msgstr ""
+
+msgid "Checkout|The maximum amount of seats available to buy is %{maximumSeatLimit}. %{maxSeatLinkStart}Learn more.%{maxSeatLinkEnd}"
 msgstr ""
 
 msgid "Checkout|Total"
@@ -11481,6 +11559,21 @@ msgstr ""
 msgid "Checkout|Total storage: %{quantity} GB"
 msgstr ""
 
+msgid "Checkout|Users"
+msgstr ""
+
+msgid "Checkout|You can only buy a maximum of %{seatLimit} seats."
+msgstr ""
+
+msgid "Checkout|You must buy a minimum of %{seatLimit} seat."
+msgstr ""
+
+msgid "Checkout|You'll create your new group after checkout"
+msgstr ""
+
+msgid "Checkout|Your organization"
+msgstr ""
+
 msgid "Checkout|Your storage subscription has the same term as your main subscription, and the price is prorated accordingly."
 msgstr ""
 
@@ -11488,6 +11581,9 @@ msgid "Checkout|Your subscription will be applied to this group"
 msgstr ""
 
 msgid "Checkout|Zip code"
+msgstr ""
+
+msgid "Checkout|company or team"
 msgstr ""
 
 msgid "Checkout|compute minutes"
@@ -15025,6 +15121,9 @@ msgstr ""
 msgid "ContainerRegistry|Add rule"
 msgstr ""
 
+msgid "ContainerRegistry|Both keep and remove regex patterns are automatically surrounded with %{codeStart}\\A%{codeEnd} and %{codeStart}\\Z%{codeEnd} anchors, so you do not need to include them. However, make sure to take this into account when choosing and testing your regex patterns."
+msgstr ""
+
 msgid "ContainerRegistry|Build an image"
 msgstr ""
 
@@ -15242,9 +15341,6 @@ msgid "ContainerRegistry|Published to the %{repositoryPath} image repository on 
 msgstr ""
 
 msgid "ContainerRegistry|Push an image"
-msgstr ""
-
-msgid "ContainerRegistry|Regular expression without the \\A and \\z anchors."
 msgstr ""
 
 msgid "ContainerRegistry|Remember to run %{docLinkStart}garbage collection%{docLinkEnd} to remove the stale data from storage."
@@ -17355,9 +17451,6 @@ msgid "DORA4Metrics|Metrics comparison for %{name}"
 msgstr ""
 
 msgid "DORA4Metrics|Month to date"
-msgstr ""
-
-msgid "DORA4Metrics|New issues"
 msgstr ""
 
 msgid "DORA4Metrics|No data available for Group: %{fullPath}"
@@ -20619,9 +20712,6 @@ msgstr ""
 msgid "DuoProTrial|Start your free GitLab Duo Pro trial"
 msgstr ""
 
-msgid "DuoProTrial|Start your free GitLab Duo Pro trial on %{group_name}"
-msgstr ""
-
 msgid "DuoProTrial|Test Generation"
 msgstr ""
 
@@ -21963,7 +22053,7 @@ msgstr ""
 msgid "Epics|The color for the epic when it's visualized, such as on roadmap timeline bars."
 msgstr ""
 
-msgid "Epics|This epic and any containing child epics are confidential and should only be visible to team members with at least the Planner role."
+msgid "Epics|This epic and any containing child epics are confidential and should only be visible to team members with at least Reporter access."
 msgstr ""
 
 msgid "Epics|This will also remove any descendents of %{bStart}%{targetEpicTitle}%{bEnd} from %{bStart}%{parentEpicTitle}%{bEnd}. Are you sure?"
@@ -29815,7 +29905,7 @@ msgstr ""
 msgid "InviteMembersModal|Manage members"
 msgstr ""
 
-msgid "InviteMembersModal|Members were successfully added."
+msgid "InviteMembersModal|Members were successfully added"
 msgstr ""
 
 msgid "InviteMembersModal|Please add members to invite"
@@ -29845,7 +29935,7 @@ msgstr ""
 msgid "InviteMembersModal|Show more (%{count})"
 msgstr ""
 
-msgid "InviteMembersModal|Some invitations have been queued for administrator approval."
+msgid "InviteMembersModal|Some requests have been sent for administrator approval"
 msgstr ""
 
 msgid "InviteMembersModal|Something went wrong"
@@ -32512,12 +32602,6 @@ msgstr ""
 msgid "Link does not exist"
 msgstr ""
 
-msgid "Link items blocked by this item"
-msgstr ""
-
-msgid "Link items blocking this item"
-msgstr ""
-
 msgid "Link text"
 msgstr ""
 
@@ -32977,6 +33061,9 @@ msgstr ""
 msgid "Mark this issue as a duplicate of another issue"
 msgstr ""
 
+msgid "Mark this issue as blocked by other issues"
+msgstr ""
+
 msgid "Mark this issue as related to another issue"
 msgstr ""
 
@@ -33046,6 +33133,9 @@ msgstr ""
 msgid "Marked"
 msgstr ""
 
+msgid "Marked %{target} as blocked by this issue."
+msgstr ""
+
 msgid "Marked For Deletion At - %{deletion_time}"
 msgstr ""
 
@@ -33056,6 +33146,9 @@ msgid "Marked as ready. Merging is now allowed."
 msgstr ""
 
 msgid "Marked this %{noun} as ready."
+msgstr ""
+
+msgid "Marked this issue as blocked by %{target}."
 msgstr ""
 
 msgid "Marked this issue as related to %{issue_ref}."
@@ -33680,9 +33773,6 @@ msgid "MemberRole|The None role is assigned to the invited group users of a shar
 msgstr ""
 
 msgid "MemberRole|The Owner role is normally assigned to the individual or team responsible for managing and maintaining the group or creating the project. This role has the highest level of administrative control, and can manage all aspects of the group or project, including managing other Owners."
-msgstr ""
-
-msgid "MemberRole|The Planner role is suitable for team members who need to manage projects and track work items but do not need to contribute code, such as project managers and scrum masters."
 msgstr ""
 
 msgid "MemberRole|The Reporter role is suitable for team members who need to stay informed about a project or group but do not actively contribute code."
@@ -35246,6 +35336,9 @@ msgstr ""
 msgid "Model experiments"
 msgstr ""
 
+msgid "Model identifier"
+msgstr ""
+
 msgid "Model registry"
 msgstr ""
 
@@ -36777,9 +36870,6 @@ msgid "Notes|Collapse replies"
 msgstr ""
 
 msgid "Notes|Expand replies"
-msgstr ""
-
-msgid "Notes|Internal notes are only visible to members with the role of Planner or higher"
 msgstr ""
 
 msgid "Notes|Internal notes are only visible to members with the role of Reporter or higher"
@@ -41225,9 +41315,6 @@ msgid "Plan"
 msgstr ""
 
 msgid "Plan:"
-msgstr ""
-
-msgid "Planner"
 msgstr ""
 
 msgid "PlantUML"
@@ -48496,9 +48583,6 @@ msgstr ""
 msgid "ScanResultPolicy|%{count} licenses"
 msgstr ""
 
-msgid "ScanResultPolicy|%{listType} according to the %{buttonType}"
-msgstr ""
-
 msgid "ScanResultPolicy|Add new criteria"
 msgstr ""
 
@@ -48509,12 +48593,6 @@ msgid "ScanResultPolicy|Age is:"
 msgstr ""
 
 msgid "ScanResultPolicy|Allow the merge request to proceed, even if not all criteria are met"
-msgstr ""
-
-msgid "ScanResultPolicy|Allowed"
-msgstr ""
-
-msgid "ScanResultPolicy|Allowlist or Denylist"
 msgstr ""
 
 msgid "ScanResultPolicy|Attribute is:"
@@ -48539,9 +48617,6 @@ msgid "ScanResultPolicy|Clear all"
 msgstr ""
 
 msgid "ScanResultPolicy|Customized CI Variables"
-msgstr ""
-
-msgid "ScanResultPolicy|Denied"
 msgstr ""
 
 msgid "ScanResultPolicy|Don't show me this again"
@@ -48602,9 +48677,6 @@ msgid "ScanResultPolicy|License is:"
 msgstr ""
 
 msgid "ScanResultPolicy|License scanning allows only one criteria: Status"
-msgstr ""
-
-msgid "ScanResultPolicy|License status"
 msgstr ""
 
 msgid "ScanResultPolicy|Make approval rules optional using scan execution policies"
@@ -48697,9 +48769,6 @@ msgstr ""
 msgid "ScanResultPolicy|Select licenses"
 msgstr ""
 
-msgid "ScanResultPolicy|Select list type"
-msgstr ""
-
 msgid "ScanResultPolicy|Severity is:"
 msgstr ""
 
@@ -48748,22 +48817,13 @@ msgstr ""
 msgid "ScanResultPolicy|When this policy's criteria %{strongStart}cannot be met:%{strongEnd}"
 msgstr ""
 
-msgid "ScanResultPolicy|You can have only one of the two: deny list or allow list."
-msgstr ""
-
 msgid "ScanResultPolicy|You have selected all protected branches in this policy's rules. To better protect your project, you should leave this setting enabled. %{linkStart}What are the risks of allowing pushing and force pushing?%{linkEnd}"
-msgstr ""
-
-msgid "ScanResultPolicy|allowlist (%{licenceCount} %{licences})"
 msgstr ""
 
 msgid "ScanResultPolicy|any commits"
 msgstr ""
 
 msgid "ScanResultPolicy|any unsigned commits"
-msgstr ""
-
-msgid "ScanResultPolicy|denylist (%{licenceCount} %{licences})"
 msgstr ""
 
 msgid "ScanResultPolicy|license status"
@@ -50064,9 +50124,6 @@ msgstr ""
 msgid "SecurityOrchestration|Merge request approval policies allow a maximum 1 bot message action."
 msgstr ""
 
-msgid "SecurityOrchestration|Merge request approval policies allow a maximum of 1 approver action."
-msgstr ""
-
 msgid "SecurityOrchestration|Merge request approval policies allow a maximum of 5 approver actions."
 msgstr ""
 
@@ -50349,9 +50406,6 @@ msgid "SecurityOrchestration|Sorry, your filter produced no results."
 msgstr ""
 
 msgid "SecurityOrchestration|Source"
-msgstr ""
-
-msgid "SecurityOrchestration|Standard roles"
 msgstr ""
 
 msgid "SecurityOrchestration|Status"
@@ -51880,10 +51934,10 @@ msgstr ""
 msgid "Set the per-user rate limits for the requests to Organizations API."
 msgstr ""
 
-msgid "Set this %{work_item_type} as blocked by %{target}."
+msgid "Set this issue as blocked by %{target}."
 msgstr ""
 
-msgid "Set this %{work_item_type} as blocking %{target}."
+msgid "Set this issue as blocking %{target}."
 msgstr ""
 
 msgid "Set this number to 0 to disable the limit."
@@ -53303,6 +53357,9 @@ msgstr ""
 msgid "Specified URL cannot be used: \"%{reason}\""
 msgstr ""
 
+msgid "Specifies that this issue blocks other issues"
+msgstr ""
+
 msgid "Specify IP ranges that are always allowed for inbound traffic, for use with group-level IP restrictions. Runner and Pages daemon internal IPs should be listed here so that they can access project artifacts."
 msgstr ""
 
@@ -53432,6 +53489,9 @@ msgid "Start thread"
 msgstr ""
 
 msgid "Start time"
+msgstr ""
+
+msgid "Start your Free Ultimate and GitLab Duo Enterprise Trial"
 msgstr ""
 
 msgid "Start your free trial"
@@ -55205,9 +55265,6 @@ msgstr ""
 msgid "The Mattermost token."
 msgstr ""
 
-msgid "The Planner role is suitable for team members who need to manage projects and track work items but do not need to contribute code."
-msgstr ""
-
 msgid "The Slack notifications integration is deprecated and will be removed in a future release. To continue to receive notifications from Slack, use the GitLab for Slack app instead. %{learn_more_link_start}Learn more%{link_end}."
 msgstr ""
 
@@ -56205,7 +56262,7 @@ msgstr ""
 msgid "This %{context} has been scheduled for deletion on %{strongStart}%{date}%{strongEnd}. To cancel the scheduled deletion, you can restore this %{context}, including all its resources."
 msgstr ""
 
-msgid "This %{issuableType} is confidential and should only be visible to team members with at least the Planner role."
+msgid "This %{issuableType} is confidential and should only be visible to team members with at least Reporter access."
 msgstr ""
 
 msgid "This %{issuable} is hidden because its author has been banned."
@@ -56562,7 +56619,7 @@ msgstr ""
 msgid "This issue cannot be made public because it belongs to a confidential epic."
 msgstr ""
 
-msgid "This issue is confidential and should only be visible to team members with at least the Planner role."
+msgid "This issue is confidential and should only be visible to team members with at least Reporter access."
 msgstr ""
 
 msgid "This issue is currently blocked by the following issues:"
@@ -58545,12 +58602,6 @@ msgid "Trial|Select state or province"
 msgstr ""
 
 msgid "Trial|Start free Ultimate + GitLab Duo Enterprise trial"
-msgstr ""
-
-msgid "Trial|Start your free Ultimate and GitLab Duo Enterprise trial"
-msgstr ""
-
-msgid "Trial|Start your free Ultimate and GitLab Duo Enterprise trial on %{group_name}"
 msgstr ""
 
 msgid "Trial|State or province"
@@ -60820,12 +60871,6 @@ msgstr ""
 msgid "ValueStreamAnalytics|The time to successfully deliver a commit into production. This metric reflects the efficiency of CI/CD pipelines."
 msgstr ""
 
-msgid "ValueStreamAnalytics|There was an error while fetching DORA metrics data."
-msgstr ""
-
-msgid "ValueStreamAnalytics|There was an error while fetching flow metrics data."
-msgstr ""
-
 msgid "ValueStreamAnalytics|There was an error while fetching value stream analytics %{requestTypeName} data."
 msgstr ""
 
@@ -62336,7 +62381,25 @@ msgstr ""
 msgid "WikiClone|Clone Wiki repository"
 msgstr ""
 
+msgid "WikiClone|Clone repository"
+msgstr ""
+
 msgid "WikiClone|Git Access"
+msgstr ""
+
+msgid "WikiClone|Go to directory"
+msgstr ""
+
+msgid "WikiClone|Install Gollum"
+msgstr ""
+
+msgid "WikiClone|Start Gollum and edit locally"
+msgstr ""
+
+msgid "WikiClone|Step 1: Clone repository"
+msgstr ""
+
+msgid "WikiClone|Step 2: Install and start Gollum"
 msgstr ""
 
 msgid "WikiEdit|There is already a page with the same title in that path."
@@ -63142,10 +63205,10 @@ msgstr ""
 msgid "WorkItem|This %{workItemType} has open child items. If you close this %{workItemType}, they will remain open."
 msgstr ""
 
-msgid "WorkItem|This %{workItemType} is confidential and should only be visible to team members with at least the Planner role"
+msgid "WorkItem|This %{workItemType} is confidential and should only be visible to team members with at least Reporter access"
 msgstr ""
 
-msgid "WorkItem|This %{workItemType} is confidential and should only be visible to users having at least the Planner role."
+msgid "WorkItem|This %{workItemType} is confidential and should only be visible to users having at least Reporter access."
 msgstr ""
 
 msgid "WorkItem|This %{workItemType} is currently blocked by the following items:"
@@ -63586,6 +63649,9 @@ msgid "You are attempting to update a file that has changed since you started ed
 msgstr ""
 
 msgid "You are being redirected away from GitLab"
+msgstr ""
+
+msgid "You are billed if you exceed this number. %{qsrOverageLinkStart}How does billing work?%{qsrOverageLinkEnd}"
 msgstr ""
 
 msgid "You are currently offline, or the GitLab instance is not reachable."
@@ -64887,10 +64953,10 @@ msgstr ""
 msgid "at"
 msgstr ""
 
-msgid "at least the Planner role"
+msgid "at least the Reporter role"
 msgstr ""
 
-msgid "at least the Planner role, the author, and assignees"
+msgid "at least the Reporter role, the author, and assignees"
 msgstr ""
 
 msgid "attach a new file"
@@ -65957,11 +66023,6 @@ msgstr ""
 
 msgid "lfs objects"
 msgstr ""
-
-msgid "licence"
-msgid_plural "licenses"
-msgstr[0] ""
-msgstr[1] ""
 
 msgid "limit of %{project_limit} reached"
 msgstr ""

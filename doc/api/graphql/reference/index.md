@@ -30906,7 +30906,6 @@ Represents generic policy violation information.
 | ---- | ---- | ----------- |
 | <a id="policyviolationinfoname"></a>`name` | [`String!`](#string) | Represents the name of the violated policy. |
 | <a id="policyviolationinforeporttype"></a>`reportType` | [`ApprovalReportType!`](#approvalreporttype) | Represents the report type. |
-| <a id="policyviolationinfostatus"></a>`status` | [`PolicyViolationStatus`](#policyviolationstatus) | Represents the status of the violated policy. |
 
 ### `PreviewBillableUserChange`
 
@@ -32897,22 +32896,6 @@ four standard [pagination arguments](#pagination-arguments):
 | ---- | ---- | ----------- |
 | <a id="projectvulnerabilitiescountbydayenddate"></a>`endDate` | [`ISO8601Date!`](#iso8601date) | Last day for which to fetch vulnerability history. |
 | <a id="projectvulnerabilitiescountbydaystartdate"></a>`startDate` | [`ISO8601Date!`](#iso8601date) | First day for which to fetch vulnerability history. |
-
-##### `Project.vulnerabilityIdentifierSearch`
-
-Search for vulnerabilities by identifier. Feature flag `vulnerability_filtering_by_identifier` has to be enabled for the project.
-
-DETAILS:
-**Introduced** in GitLab 17.7.
-**Status**: Experiment.
-
-Returns [`[String!]`](#string).
-
-###### Arguments
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="projectvulnerabilityidentifiersearchname"></a>`name` | [`String!`](#string) | Search identifier by name. Substring or partial match search is supported and argument should be greater than 3 characters. |
 
 ##### `Project.vulnerabilityManagementPolicies`
 
@@ -39234,7 +39217,6 @@ Access level of a group or project member.
 | <a id="memberaccesslevelmaintainer"></a>`MAINTAINER` | The Maintainer role is primarily used for managing code reviews, approvals, and administrative settings for projects. This role can also manage project memberships. |
 | <a id="memberaccesslevelminimal_access"></a>`MINIMAL_ACCESS` | The Minimal Access role is for users who need the least amount of access into groups and projects. You can assign this role as a default, before giving a user another role with more permissions. |
 | <a id="memberaccesslevelowner"></a>`OWNER` | The Owner role is normally assigned to the individual or team responsible for managing and maintaining the group or creating the project. This role has the highest level of administrative control, and can manage all aspects of the group or project, including managing other Owners. |
-| <a id="memberaccesslevelplanner"></a>`PLANNER` | The Planner role is suitable for team members who need to manage projects and track work items but do not need to contribute code. |
 | <a id="memberaccesslevelreporter"></a>`REPORTER` | The Reporter role is suitable for team members who need to stay informed about a project or group but do not actively contribute code. |
 
 ### `MemberAccessLevelName`
@@ -39247,7 +39229,6 @@ Name of access levels of a group or project member.
 | <a id="memberaccesslevelnameguest"></a>`GUEST` | Guest access. |
 | <a id="memberaccesslevelnamemaintainer"></a>`MAINTAINER` | Maintainer access. |
 | <a id="memberaccesslevelnameowner"></a>`OWNER` | Owner access. |
-| <a id="memberaccesslevelnameplanner"></a>`PLANNER` | Planner access. |
 | <a id="memberaccesslevelnamereporter"></a>`REPORTER` | Reporter access. |
 
 ### `MemberApprovalStatusType`
@@ -39912,14 +39893,6 @@ Types of security policy project created status.
 | <a id="policyviolationerrortypeartifacts_missing"></a>`ARTIFACTS_MISSING` | Represents error which occurs when pipeline is misconfigured and does not include necessary artifacts to evaluate a policy. |
 | <a id="policyviolationerrortypescan_removed"></a>`SCAN_REMOVED` | Represents mismatch between the scans of the source and target pipelines. |
 | <a id="policyviolationerrortypeunknown"></a>`UNKNOWN` | Represents unknown error. |
-
-### `PolicyViolationStatus`
-
-| Value | Description |
-| ----- | ----------- |
-| <a id="policyviolationstatusfailed"></a>`FAILED` | Represents a failed policy violation. |
-| <a id="policyviolationstatusrunning"></a>`RUNNING` | Represents a running policy violation. |
-| <a id="policyviolationstatuswarning"></a>`WARNING` | Represents a policy violation warning. |
 
 ### `ProductAnalyticsState`
 

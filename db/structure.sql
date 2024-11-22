@@ -7470,7 +7470,6 @@ CREATE TABLE audit_events_group_external_streaming_destinations (
     config jsonb NOT NULL,
     encrypted_secret_token bytea NOT NULL,
     encrypted_secret_token_iv bytea NOT NULL,
-    legacy_destination_ref bigint,
     CONSTRAINT check_97d157fbd0 CHECK ((char_length(name) <= 72))
 );
 
@@ -7566,7 +7565,6 @@ CREATE TABLE audit_events_instance_external_streaming_destinations (
     config jsonb NOT NULL,
     encrypted_secret_token bytea NOT NULL,
     encrypted_secret_token_iv bytea NOT NULL,
-    legacy_destination_ref bigint,
     CONSTRAINT check_219decfb51 CHECK ((char_length(name) <= 72))
 );
 
@@ -17459,18 +17457,6 @@ CREATE VIEW postgres_sequences AS
      LEFT JOIN pg_attribute ON (((dep_pg_class.oid = pg_attribute.attrelid) AND (pg_depend.refobjsubid = pg_attribute.attnum))))
   WHERE (seq_pg_class.relkind = 'S'::"char");
 
-CREATE VIEW postgres_table_sizes AS
- SELECT (((pg_stat_user_tables.schemaname)::text || '.'::text) || (pg_stat_user_tables.relname)::text) AS identifier,
-    pg_stat_user_tables.schemaname AS schema_name,
-    pg_stat_user_tables.relname AS table_name,
-    pg_size_pretty(pg_total_relation_size((((quote_ident((pg_stat_user_tables.schemaname)::text) || '.'::text) || quote_ident((pg_stat_user_tables.relname)::text)))::regclass)) AS total_size,
-    pg_size_pretty(pg_relation_size((((quote_ident((pg_stat_user_tables.schemaname)::text) || '.'::text) || quote_ident((pg_stat_user_tables.relname)::text)))::regclass)) AS table_size,
-    pg_size_pretty((pg_total_relation_size((((quote_ident((pg_stat_user_tables.schemaname)::text) || '.'::text) || quote_ident((pg_stat_user_tables.relname)::text)))::regclass) - pg_relation_size((((quote_ident((pg_stat_user_tables.schemaname)::text) || '.'::text) || quote_ident((pg_stat_user_tables.relname)::text)))::regclass))) AS index_size,
-    pg_total_relation_size((((quote_ident((pg_stat_user_tables.schemaname)::text) || '.'::text) || quote_ident((pg_stat_user_tables.relname)::text)))::regclass) AS size_in_bytes
-   FROM pg_stat_user_tables
-  WHERE (pg_total_relation_size((((quote_ident((pg_stat_user_tables.schemaname)::text) || '.'::text) || quote_ident((pg_stat_user_tables.relname)::text)))::regclass) IS NOT NULL)
-  ORDER BY (pg_total_relation_size((((quote_ident((pg_stat_user_tables.schemaname)::text) || '.'::text) || quote_ident((pg_stat_user_tables.relname)::text)))::regclass)) DESC;
-
 CREATE TABLE programming_languages (
     id bigint NOT NULL,
     name character varying NOT NULL,
@@ -20970,6 +20956,7 @@ CREATE TABLE virtual_registries_packages_maven_cached_responses (
     updated_at timestamp with time zone NOT NULL,
     file_store integer DEFAULT 1 NOT NULL,
     size integer NOT NULL,
+    downloads_count integer DEFAULT 1 NOT NULL,
     relative_path text NOT NULL,
     file text NOT NULL,
     object_storage_key text NOT NULL,
@@ -20984,6 +20971,7 @@ CREATE TABLE virtual_registries_packages_maven_cached_responses (
     CONSTRAINT check_3f121b03fd CHECK ((char_length(file_final_path) <= 1024)),
     CONSTRAINT check_68b105cda6 CHECK ((char_length(file) <= 255)),
     CONSTRAINT check_731cd48dbf CHECK ((char_length(content_type) <= 255)),
+    CONSTRAINT check_c2aad543bf CHECK ((downloads_count > 0)),
     CONSTRAINT check_d35a8e931f CHECK ((char_length(relative_path) <= 255))
 );
 
@@ -32632,8 +32620,6 @@ CREATE UNIQUE INDEX index_vulnerability_flags_on_unique_columns ON vulnerability
 CREATE INDEX index_vulnerability_historical_statistics_on_date_and_id ON vulnerability_historical_statistics USING btree (date, id);
 
 CREATE UNIQUE INDEX index_vulnerability_identifiers_on_project_id_and_fingerprint ON vulnerability_identifiers USING btree (project_id, fingerprint);
-
-CREATE INDEX index_vulnerability_identifiers_on_project_id_and_name ON vulnerability_identifiers USING btree (project_id, name);
 
 CREATE INDEX index_vulnerability_issue_links_on_issue_id ON vulnerability_issue_links USING btree (issue_id);
 
