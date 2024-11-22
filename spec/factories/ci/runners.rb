@@ -6,38 +6,17 @@ FactoryBot.define do
 
     active { true }
     access_level { :not_protected }
-
     runner_type { :instance_type }
-
     creation_state { :finished }
 
     transient do
-      groups { [] }
-      projects { [] }
       token_expires_at { nil }
-      creator { nil }
       without_projects { false }
     end
 
     after(:build) do |runner, evaluator|
-      runner.sharding_key_id ||= evaluator.projects.first&.id if runner.project_type?
-      evaluator.projects.each do |proj|
-        runner.runner_projects << build(:ci_runner_project, runner: runner, project: proj)
-      end
-
-      runner.sharding_key_id ||= evaluator.groups.first&.id if runner.group_type?
-      evaluator.groups.each do |group|
-        runner.runner_namespaces << build(:ci_runner_namespace, runner: runner, namespace: group)
-      end
-
-      runner.creator = evaluator.creator if evaluator.creator
-
-      case runner.runner_type
-      when 'group_type'
-        raise ':groups is mandatory' unless evaluator.groups&.any?
-      when 'project_type'
-        raise ':projects is mandatory' unless evaluator.projects&.any? || evaluator.without_projects
-      end
+      runner.sharding_key_id ||= runner.projects.first&.id if runner.project_type?
+      runner.sharding_key_id ||= runner.groups.first&.id if runner.group_type?
     end
 
     after(:create) do |runner, evaluator|
@@ -88,8 +67,8 @@ FactoryBot.define do
       runner_type { :group_type }
 
       after(:build) do |runner, evaluator|
-        if runner.runner_namespaces.empty?
-          runner.runner_namespaces << build(:ci_runner_namespace, runner: runner)
+        if runner.groups.empty?
+          runner.groups << build(:group)
         end
       end
     end
@@ -98,8 +77,8 @@ FactoryBot.define do
       runner_type { :project_type }
 
       after(:build) do |runner, evaluator|
-        if runner.runner_projects.empty?
-          runner.runner_projects << build(:ci_runner_project, runner: runner)
+        if runner.projects.empty?
+          runner.projects << build(:project)
         end
       end
     end
