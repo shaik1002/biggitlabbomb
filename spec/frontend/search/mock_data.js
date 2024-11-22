@@ -1680,15 +1680,60 @@ export const mockDataForBlobBody = {
 
 export const mockSourceBranches = [
   {
-    text: 'master',
-    value: 'master',
+    text: 'Master Item',
+    value: 'master-item',
   },
   {
-    text: 'feature',
-    value: 'feature',
+    text: 'Feature Item',
+    value: 'feature-item',
   },
   {
-    text: 'develop',
-    value: 'develop',
+    text: 'Develop Item',
+    value: 'develop-item',
+  },
+];
+
+export const mockAxiosAuthors = [
+  {
+    id: 1,
+    username: 'root',
+    name: 'Administrator',
+    state: 'active',
+    locked: false,
+    avatar_url:
+      'https://www.gravatar.com/avatar/8a2ba320206c6d79e89dd41a9081b7ae521d365f2054b3db1ac6462f692b176f?s=80\u0026d=identicon',
+    web_url: 'http://127.0.0.1:3000/root',
+    status_tooltip_html: null,
+    show_status: false,
+    availability: null,
+    path: '/root',
+  },
+  {
+    id: 16,
+    username: 'ivana',
+    name: 'Christene Labadie',
+    state: 'active',
+    locked: false,
+    avatar_url:
+      'https://www.gravatar.com/avatar/f32854b29f94c2bed2ff8e1cb8455c484d4308b384a1a704c26a20dcb4abf5af?s=80\u0026d=identicon',
+    web_url: 'http://127.0.0.1:3000/ivana',
+    status_tooltip_html: null,
+    show_status: false,
+    availability: null,
+    path: '/ivana',
+  },
+  {
+    id: 19,
+    username: 'junie',
+    name: 'Elfrieda Kiehn',
+    state: 'active',
+    locked: false,
+    avatar_url:
+      'https://www.gravatar.com/avatar/3951446ec1a00e38cd80911067c5809fa197315a4c1a4df7d9ce1e3055a9a139?s=80\u0026d=identicon',
+    web_url: 'http://127.0.0.1:3000/junie',
+    status_tooltip_html: null,
+    show_status: false,
+    availability: null,
+    path: '/junie',
   },
 ];

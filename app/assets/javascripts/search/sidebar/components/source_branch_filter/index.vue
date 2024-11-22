@@ -6,7 +6,7 @@ import { s__ } from '~/locale';
 import AjaxCache from '~/lib/utils/ajax_cache';
 import { mergeUrlParams } from '~/lib/utils/url_utility';
 import { InternalEvents } from '~/tracking';
-import BranchDropdown from '~/search/sidebar/components/shared/branch_dropdown.vue';
+import FilterDropdown from '~/search/sidebar/components/shared/filter_dropdown.vue';
 import { BRANCH_REF_TYPE_ICON } from '~/ref/constants';
 import {
   SEARCH_ICON,
@@ -16,18 +16,16 @@ import {
   SOURCE_BRANCH_ENDPOINT_PATH,
 } from '../../constants';
 
-const trackingMixin = InternalEvents.mixin();
-
 export default {
   name: 'SourceBranchFilter',
   components: {
-    BranchDropdown,
+    FilterDropdown,
     GlFormCheckbox,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
   },
-  mixins: [trackingMixin],
+  mixins: [InternalEvents.mixin()],
   data() {
     return {
       sourceBranches: [],
@@ -84,7 +82,6 @@ export default {
     },
     handleSelected(ref) {
       this.selectedBranch = ref;
-
       if (this.toggleState) {
         this.setQuery({ key: SOURCE_BRANCH_PARAM, value: '' });
         this.setQuery({ key: NOT_SOURCE_BRANCH_PARAM, value: ref });
@@ -120,12 +117,12 @@ export default {
     <div class="gl-mb-2 gl-text-sm gl-font-bold" data-testid="source-branch-filter-title">
       {{ s__('GlobalSearch|Source branch') }}
     </div>
-    <branch-dropdown
-      :source-branches="sourceBranches"
+    <filter-dropdown
+      :list-data="sourceBranches"
       :errors="errors"
       :header-text="s__('GlobalSearch|Source branch')"
-      :search-branch-text="showDropdownPlaceholderText"
-      :selected-branch="selectedBranch"
+      :search-text="showDropdownPlaceholderText"
+      :selected-item="selectedBranch"
       :icon="showDropdownPlaceholderIcon"
       :is-loading="isLoading"
       @selected="handleSelected"
@@ -134,7 +131,7 @@ export default {
     />
     <gl-form-checkbox
       v-model="toggleState"
-      class="gl-inline-flex gl-w-full gl-grow gl-justify-between"
+      class="gl-inline-flex gl-w-full gl-grow gl-justify-between gl-pt-4"
       @input="changeCheckboxInput"
     >
       <span v-gl-tooltip="$options.i18n.toggleTooltip" data-testid="branch">
