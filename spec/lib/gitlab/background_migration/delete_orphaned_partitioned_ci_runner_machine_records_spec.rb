@@ -10,24 +10,13 @@ RSpec.describe Gitlab::BackgroundMigration::DeleteOrphanedPartitionedCiRunnerMac
   let(:orphaned_group_runner_manager) { runner_managers.find(3) }
   let(:orphaned_project_runner_manager) { runner_managers.find(5) }
 
-  around do |example|
-    # Allow creating legacy runner managers (created when FK was not present) that are not connected to a runner
-    connection.transaction do
-      connection.execute(<<~SQL)
-        ALTER TABLE group_type_ci_runner_machines_687967fa8a DISABLE TRIGGER ALL;
-        ALTER TABLE project_type_ci_runner_machines_687967fa8a DISABLE TRIGGER ALL;
-      SQL
-
-      example.run
-
-      connection.execute(<<~SQL)
-        ALTER TABLE group_type_ci_runner_machines_687967fa8a ENABLE TRIGGER ALL;
-        ALTER TABLE project_type_ci_runner_machines_687967fa8a ENABLE TRIGGER ALL;
-      SQL
-    end
-  end
-
   before do
+    # Allow creating legacy runner managers (created when FK was not present) that are not connected to a runner
+    connection.execute(<<~SQL)
+      ALTER TABLE group_type_ci_runner_machines_687967fa8a DISABLE TRIGGER ALL;
+      ALTER TABLE project_type_ci_runner_machines_687967fa8a DISABLE TRIGGER ALL;
+    SQL
+
     create_runner_and_runner_manager(id: 1, runner_type: 1, system_xid: 'system1')
     create_runner_and_runner_manager(id: 2, runner_type: 2, sharding_key_id: 89, system_xid: 'system2')
     runner_managers.create!(
@@ -37,6 +26,13 @@ RSpec.describe Gitlab::BackgroundMigration::DeleteOrphanedPartitionedCiRunnerMac
     runner_managers.create!(
       id: 5, runner_id: non_existing_record_id, runner_type: 3, sharding_key_id: 100, system_xid: 'system3'
     )
+  end
+
+  after do
+    connection.execute(<<~SQL)
+      ALTER TABLE group_type_ci_runner_machines_687967fa8a ENABLE TRIGGER ALL;
+      ALTER TABLE project_type_ci_runner_machines_687967fa8a ENABLE TRIGGER ALL;
+    SQL
   end
 
   describe '#perform' do

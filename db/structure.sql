@@ -32621,6 +32621,8 @@ CREATE INDEX index_vulnerability_historical_statistics_on_date_and_id ON vulnera
 
 CREATE UNIQUE INDEX index_vulnerability_identifiers_on_project_id_and_fingerprint ON vulnerability_identifiers USING btree (project_id, fingerprint);
 
+CREATE INDEX index_vulnerability_identifiers_on_project_id_and_name ON vulnerability_identifiers USING btree (project_id, name);
+
 CREATE INDEX index_vulnerability_issue_links_on_issue_id ON vulnerability_issue_links USING btree (issue_id);
 
 CREATE INDEX index_vulnerability_issue_links_on_project_id ON vulnerability_issue_links USING btree (project_id);
@@ -37446,6 +37448,15 @@ ALTER TABLE ONLY analytics_cycle_analytics_stage_aggregations
 
 ALTER TABLE ONLY board_assignees
     ADD CONSTRAINT fk_rails_3f6f926bd5 FOREIGN KEY (board_id) REFERENCES boards(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY instance_type_ci_runner_machines_687967fa8a
+    ADD CONSTRAINT fk_rails_3f92913d27 FOREIGN KEY (runner_id, runner_type) REFERENCES instance_type_ci_runners_e59bb2812d(id, runner_type) ON UPDATE CASCADE ON DELETE CASCADE NOT VALID;
+
+ALTER TABLE ONLY group_type_ci_runner_machines_687967fa8a
+    ADD CONSTRAINT fk_rails_3f92913d27 FOREIGN KEY (runner_id, runner_type) REFERENCES group_type_ci_runners_e59bb2812d(id, runner_type) ON UPDATE CASCADE ON DELETE CASCADE NOT VALID;
+
+ALTER TABLE ONLY project_type_ci_runner_machines_687967fa8a
+    ADD CONSTRAINT fk_rails_3f92913d27 FOREIGN KEY (runner_id, runner_type) REFERENCES project_type_ci_runners_e59bb2812d(id, runner_type) ON UPDATE CASCADE ON DELETE CASCADE NOT VALID;
 
 ALTER TABLE ONLY description_versions
     ADD CONSTRAINT fk_rails_3ff658220b FOREIGN KEY (issue_id) REFERENCES issues(id) ON DELETE CASCADE;

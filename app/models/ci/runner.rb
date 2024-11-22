@@ -13,7 +13,6 @@ module Ci
     include TaggableQueries
     include Presentable
     include EachBatch
-    include Ci::HasRunnerExecutor
     include Ci::HasRunnerStatus
     include Ci::Taggable
 
@@ -330,6 +329,14 @@ module Ci
       end
     end
 
+    # TODO: Remove once https://gitlab.com/gitlab-org/gitlab/-/issues/504277 is closed.
+    def self.sharded_table_proxy_model
+      @sharded_table_proxy_class ||= Class.new(self) do
+        self.table_name = :ci_runners_e59bb2812d
+        self.primary_key = :id
+      end
+    end
+
     def runner_matcher
       Gitlab::Ci::Matching::RunnerMatcher.new({
         runner_ids: [id],
@@ -438,6 +445,14 @@ module Ci
       tag_list.any?
     end
 
+    # TODO: Remove once https://gitlab.com/gitlab-org/gitlab/-/issues/504277 is closed.
+    def ensure_partitioned_runner_record_exists
+      self.class.sharded_table_proxy_model.insert_all(
+        [attributes.except('tag_list')], unique_by: [:id, :runner_type],
+        returning: false, record_timestamps: false
+      )
+    end
+
     def predefined_variables
       Gitlab::Ci::Variables::Collection.new
         .append(key: 'CI_RUNNER_ID', value: id.to_s)
@@ -524,6 +539,10 @@ module Ci
     def ensure_manager(system_xid)
       # rubocop: disable Performance/ActiveRecordSubtransactionMethods -- This is used only in API endpoints outside of transactions
       RunnerManager.safe_find_or_create_by!(runner_id: id, system_xid: system_xid.to_s) do |m|
+        # Avoid inserting partitioned runner managers that refer to a missing ci_runners partitioned record, since
+        # the backfill is not yet finalized.
+        ensure_partitioned_runner_record_exists
+
         m.runner_type = runner_type
         m.sharding_key_id = sharding_key_id
       end

@@ -29,7 +29,7 @@ RSpec.describe Gitlab::BackgroundMigration::BackfillCiRunnersPartitionedTable,
     before do
       # Don't sync records to partitioned table
       connection.execute <<~SQL
-        DROP TRIGGER table_sync_trigger_61879721b5 ON ci_runners;
+        ALTER TABLE ci_runners DISABLE TRIGGER ALL;
       SQL
 
       runners.create!(runner_type: 1)
@@ -41,10 +41,7 @@ RSpec.describe Gitlab::BackgroundMigration::BackfillCiRunnersPartitionedTable,
 
     ensure
       connection.execute <<~SQL
-        CREATE TRIGGER table_sync_trigger_61879721b5
-        AFTER INSERT OR DELETE OR UPDATE ON ci_runners
-        FOR EACH ROW
-        EXECUTE FUNCTION table_sync_function_686d6c7993 ();
+        ALTER TABLE ci_runners ENABLE TRIGGER ALL;
       SQL
     end
 

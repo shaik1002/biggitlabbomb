@@ -28,30 +28,23 @@ RSpec.describe Gitlab::BackgroundMigration::BackfillCiRunnerMachinesPartitionedT
     end
 
     before do
-      # Don't sync records to partitioned table
-      connection.execute <<~SQL
-        DROP TRIGGER table_sync_trigger_61879721b5 ON ci_runners;
-        DROP TRIGGER table_sync_trigger_bc3e7b56bd ON ci_runner_machines;
-      SQL
-
       create_runner_and_runner_manager(runner_type: 1, system_xid: 'system1')
       create_runner_and_runner_manager(runner_type: 2, sharding_key_id: 89, system_xid: 'system2')
-      create_runner_and_runner_manager(runner_type: 2, sharding_key_id: nil, system_xid: 'system3')
       create_runner_and_runner_manager(runner_type: 3, sharding_key_id: 10, system_xid: 'system2')
-      create_runner_and_runner_manager(runner_type: 3, sharding_key_id: nil, system_xid: 'system1')
       create_runner_and_runner_manager(runner_type: 3, sharding_key_id: 100, system_xid: 'system3')
 
+      # Don't sync records to partitioned table
+      connection.execute <<~SQL
+        ALTER TABLE ci_runners DISABLE TRIGGER ALL;
+        ALTER TABLE ci_runner_machines DISABLE TRIGGER ALL;
+      SQL
+
+      create_runner_and_runner_manager(runner_type: 3, sharding_key_id: nil, system_xid: 'system1')
+      create_runner_and_runner_manager(runner_type: 2, sharding_key_id: nil, system_xid: 'system3')
     ensure
       connection.execute <<~SQL
-        CREATE TRIGGER table_sync_trigger_bc3e7b56bd
-        AFTER INSERT OR DELETE OR UPDATE ON ci_runner_machines
-        FOR EACH ROW
-        EXECUTE FUNCTION table_sync_function_686d6c7993 ();
-
-        CREATE TRIGGER table_sync_trigger_61879721b5
-        AFTER INSERT OR DELETE OR UPDATE ON ci_runners
-        FOR EACH ROW
-        EXECUTE FUNCTION table_sync_function_686d6c7993 ();
+        ALTER TABLE ci_runners ENABLE TRIGGER ALL;
+        ALTER TABLE ci_runner_machines ENABLE TRIGGER ALL;
       SQL
     end
 
