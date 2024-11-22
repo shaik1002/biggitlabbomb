@@ -5,7 +5,7 @@ import Vue, { nextTick } from 'vue';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import setWindowLocation from 'helpers/set_window_location_helper';
 import CiConfigMergedPreview from '~/ci/pipeline_editor/components/editor/ci_config_merged_preview.vue';
-import CiValidate from '~/ci/pipeline_editor/components/validate/ci_validate.vue';
+import CiValidate from '~/ci/pipeline_editor/components/validate/ci_validate_prototype.vue';
 import WalkthroughPopover from '~/ci/pipeline_editor/components/popovers/walkthrough_popover.vue';
 import PipelineEditorTabs from '~/ci/pipeline_editor/components/pipeline_editor_tabs.vue';
 import EditorTab from '~/ci/pipeline_editor/components/ui/editor_tab.vue';

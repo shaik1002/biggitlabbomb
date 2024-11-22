@@ -20,7 +20,7 @@ import {
 import getAppStatus from '../graphql/queries/client/app_status.query.graphql';
 import CiConfigMergedPreview from './editor/ci_config_merged_preview.vue';
 import CiEditorHeader from './editor/ci_editor_header.vue';
-import CiValidate from './validate/ci_validate.vue';
+import CiValidatePrototype from './validate/ci_validate_prototype.vue';
 import TextEditor from './editor/text_editor.vue';
 import EditorTab from './ui/editor_tab.vue';
 import WalkthroughPopover from './popovers/walkthrough_popover.vue';
@@ -60,7 +60,7 @@ export default {
   components: {
     CiConfigMergedPreview,
     CiEditorHeader,
-    CiValidate,
+    CiValidatePrototype,
     EditorTab,
     GlAlert,
     GlLoadingIcon,
@@ -221,7 +221,7 @@ export default {
       :title="$options.i18n.tabValidate"
       @click="setCurrentTab($options.tabConstants.VALIDATE_TAB)"
     >
-      <ci-validate :ci-file-content="ciFileContent" />
+      <ci-validate-prototype :ci-config-data="ciConfigData" />
     </editor-tab>
     <editor-tab
       class="gl-mb-3"

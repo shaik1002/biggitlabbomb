@@ -14,5 +14,6 @@ query getCiConfigData($projectPath: ID!, $sha: String, $content: String!) {
     stages {
       ...PipelineStagesConnection
     }
+    warnings
   }
 }

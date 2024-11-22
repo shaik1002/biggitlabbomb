@@ -40357,37 +40357,7 @@ msgstr ""
 msgid "PipelineEditorTutorial|View %{linkStart}.gitlab-ci.yml syntax reference%{linkEnd}"
 msgstr ""
 
-msgid "PipelineEditor|Configuration content has changed. Re-run validation for updated results."
-msgstr ""
-
-msgid "PipelineEditor|Current content in the Edit tab will be used for the simulation."
-msgstr ""
-
-msgid "PipelineEditor|Git push event to the default branch"
-msgstr ""
-
 msgid "PipelineEditor|Lint CI/CD sample"
-msgstr ""
-
-msgid "PipelineEditor|Other pipeline sources are not available yet."
-msgstr ""
-
-msgid "PipelineEditor|Pipeline Source"
-msgstr ""
-
-msgid "PipelineEditor|Pipeline behavior will be simulated including the %{codeStart}rules%{codeEnd} %{codeStart}only%{codeEnd} %{codeStart}except%{codeEnd} and %{codeStart}needs%{codeEnd} job dependencies."
-msgstr ""
-
-msgid "PipelineEditor|Pipeline behavior will be simulated including the %{codeStart}rules%{codeEnd} %{codeStart}only%{codeEnd} %{codeStart}except%{codeEnd} and %{codeStart}needs%{codeEnd} job dependencies. %{linkStart}Learn more%{linkEnd}"
-msgstr ""
-
-msgid "PipelineEditor|Pipeline simulation completed with errors"
-msgstr ""
-
-msgid "PipelineEditor|Simulated a %{codeStart}git push%{codeEnd} event for a default branch. %{codeStart}Rules%{codeEnd}, %{codeStart}only%{codeEnd}, %{codeStart}except%{codeEnd}, and %{codeStart}needs%{codeEnd} job dependencies logic have been evaluated. %{linkStart}Learn more%{linkEnd}"
-msgstr ""
-
-msgid "PipelineEditor|Simulation completed successfully"
 msgstr ""
 
 msgid "PipelineEditor|The CI/CD configuration is continuously validated. Errors and warnings are displayed when the CI/CD configuration file is not empty."
@@ -40400,21 +40370,6 @@ msgid "PipelineEditor|The pipeline visualization is displayed when the CI/CD con
 msgstr ""
 
 msgid "PipelineEditor|This tab will be usable when the CI/CD configuration file is populated with valid syntax."
-msgstr ""
-
-msgid "PipelineEditor|Validate pipeline"
-msgstr ""
-
-msgid "PipelineEditor|Validate pipeline under selected conditions"
-msgstr ""
-
-msgid "PipelineEditor|Validate pipeline under simulated conditions"
-msgstr ""
-
-msgid "PipelineEditor|Validating pipeline... It can take up to a minute."
-msgstr ""
-
-msgid "PipelineEditor|Waiting for CI content to load..."
 msgstr ""
 
 msgid "PipelineGraph|Are you sure you want to retry %{jobName}?"
@@ -44974,9 +44929,6 @@ msgid "ProtectedTag|What are protected tags?"
 msgstr ""
 
 msgid "ProtectedTag|default"
-msgstr ""
-
-msgid "Provide Feedback"
 msgstr ""
 
 msgid "Provide a number our sales team can use to call you."
