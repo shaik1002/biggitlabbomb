@@ -8884,6 +8884,28 @@ CREATE SEQUENCE ci_group_variables_id_seq
 
 ALTER SEQUENCE ci_group_variables_id_seq OWNED BY ci_group_variables.id;
 
+CREATE TABLE ci_instance_runner_monthly_usages (
+    id bigint NOT NULL,
+    runner_id bigint NOT NULL,
+    date date NOT NULL,
+    runner_duration bigint DEFAULT 0 NOT NULL,
+    amount_used numeric(18,4) DEFAULT 0.0 NOT NULL,
+    project_id bigint,
+    namespace_id bigint,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    CONSTRAINT ci_instance_runner_monthly_usages_year_month_constraint CHECK ((date = date_trunc('month'::text, (date)::timestamp with time zone)))
+);
+
+CREATE SEQUENCE ci_instance_runner_monthly_usages_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE ci_instance_runner_monthly_usages_id_seq OWNED BY ci_instance_runner_monthly_usages.id;
+
 CREATE TABLE ci_instance_variables (
     id bigint NOT NULL,
     variable_type smallint DEFAULT 1 NOT NULL,
@@ -22967,6 +22989,8 @@ ALTER TABLE ONLY ci_freeze_periods ALTER COLUMN id SET DEFAULT nextval('ci_freez
 
 ALTER TABLE ONLY ci_group_variables ALTER COLUMN id SET DEFAULT nextval('ci_group_variables_id_seq'::regclass);
 
+ALTER TABLE ONLY ci_instance_runner_monthly_usages ALTER COLUMN id SET DEFAULT nextval('ci_instance_runner_monthly_usages_id_seq'::regclass);
+
 ALTER TABLE ONLY ci_instance_variables ALTER COLUMN id SET DEFAULT nextval('ci_instance_variables_id_seq'::regclass);
 
 ALTER TABLE ONLY ci_job_token_authorizations ALTER COLUMN id SET DEFAULT nextval('ci_job_token_authorizations_id_seq'::regclass);
@@ -24970,6 +24994,9 @@ ALTER TABLE ONLY ci_freeze_periods
 
 ALTER TABLE ONLY ci_group_variables
     ADD CONSTRAINT ci_group_variables_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY ci_instance_runner_monthly_usages
+    ADD CONSTRAINT ci_instance_runner_monthly_usages_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY ci_instance_variables
     ADD CONSTRAINT ci_instance_variables_pkey PRIMARY KEY (id);
@@ -29242,6 +29269,12 @@ CREATE INDEX index_ci_finished_pipeline_ch_sync_events_for_partitioned_query ON 
 CREATE INDEX index_ci_freeze_periods_on_project_id ON ci_freeze_periods USING btree (project_id);
 
 CREATE UNIQUE INDEX index_ci_group_variables_on_group_id_and_key_and_environment ON ci_group_variables USING btree (group_id, key, environment_scope);
+
+CREATE INDEX index_ci_instance_runner_monthly_usages_on_namespace_and_month ON ci_instance_runner_monthly_usages USING btree (namespace_id, date);
+
+CREATE INDEX index_ci_instance_runner_monthly_usages_on_project_and_month ON ci_instance_runner_monthly_usages USING btree (project_id, date);
+
+CREATE INDEX index_ci_instance_runner_monthly_usages_on_runner_and_month ON ci_instance_runner_monthly_usages USING btree (runner_id, date);
 
 CREATE UNIQUE INDEX index_ci_instance_variables_on_key ON ci_instance_variables USING btree (key);
 
