@@ -31,6 +31,7 @@ Event type                                   | Trigger
 [Release event](#release-events)             | A release is created, edited, or deleted.
 [Emoji event](#emoji-events)                 | An emoji reaction is added or removed.
 [Project or group access token event](#project-and-group-access-token-events) | A project or group access token will expire in seven days.
+[Vulnerability event](#vulnerability-events) | A new vulnerability is created.
 
 **Footnotes:**
 
@@ -2293,3 +2294,7 @@ Payload example for group:
   "event_name": "expiring_access_token"
 }
 ```
+
+## Vulnerability events
+
+BEING FINALIZED.

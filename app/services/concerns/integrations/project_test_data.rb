@@ -110,6 +110,38 @@ module Integrations
       Gitlab::DataBuilder::ResourceAccessToken.build(resource_access_token, :expiring, project)
     end
 
+    def vulnerability_events_data
+      return unless ::Feature.enabled?(:vulnerabilities_as_webhook_events, project)
+
+      vulnerability_finding = Vulnerabilities::Finding.new(
+        id: 1,
+        project: project,
+        name: 'vulnerability_finding_for_webhook_event',
+        severity: :low,
+        report_type: :sast,
+        metadata_version: 'sast:1.0',
+        created_at: Time.zone.now - 1.hour,
+        updated_at: Time.zone.now - 1.hour
+      )
+
+      vulnerability = Vulnerability.new(
+        id: 1,
+        author: current_user,
+        project: project,
+        title: 'vulnerability_for_webhook_event',
+        severity: :low,
+        confidence: :medium,
+        report_type: :sast,
+        vulnerability_finding: vulnerability_finding,
+        dismissed_by: current_user,
+        dismissed_at: Time.zone.now,
+        created_at: Time.zone.now - 1.hour,
+        updated_at: Time.zone.now
+      )
+
+      Gitlab::DataBuilder::Vulnerability.build(vulnerability)
+    end
+
     def current_user_events_data
       {
         current_user: current_user

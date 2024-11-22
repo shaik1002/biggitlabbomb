@@ -58,6 +58,15 @@ RSpec.describe ProjectHook, feature_category: :webhooks do
     end
   end
 
+  describe '.vulnerability_hooks' do
+    it 'returns hooks for vulnerability events only' do
+      project = build(:project)
+      hook = create(:project_hook, project: project, vulnerability_events: true)
+      create(:project_hook, project: project, vulnerability_events: false)
+      expect(described_class.vulnerability_hooks).to eq([hook])
+    end
+  end
+
   describe '#parent' do
     it 'returns the associated project' do
       project = build(:project)

@@ -61994,6 +61994,9 @@ msgstr ""
 msgid "Webhooks|A new tag is pushed to the repository."
 msgstr ""
 
+msgid "Webhooks|A new vulnerability has been discovered."
+msgstr ""
+
 msgid "Webhooks|A pipeline's status changes."
 msgstr ""
 
@@ -62193,6 +62196,9 @@ msgid "Webhooks|URL preview"
 msgstr ""
 
 msgid "Webhooks|Used to validate received payloads. Sent with the request in the %{code_start}X-Gitlab-Token%{code_end} HTTP header."
+msgstr ""
+
+msgid "Webhooks|Vulnerability events"
 msgstr ""
 
 msgid "Webhooks|Webhook disabled"

@@ -243,5 +243,34 @@ RSpec.describe TestHooks::ProjectService, feature_category: :code_testing do
         expect(service.execute).to include(success_result)
       end
     end
+
+    context 'vulnerability_events' do
+      let(:trigger) { 'vulnerability_events' }
+      let(:trigger_key) { :vulnerability_hooks }
+
+      it 'executes hook' do
+        freeze_time do
+          expected_data = {
+            object_attributes: {
+              confidence: "medium",
+              confidence_overridden: false,
+              dismissed_at: Time.current,
+              dismissed_by_id: current_user.id,
+              identifiers: [],
+              report_type: "sast",
+              severity: "low",
+              severity_overridden: false,
+              state: "detected",
+              title: "vulnerability_for_webhook_event",
+              url: "#{project.web_url}/-/security/vulnerabilities/1"
+            },
+            object_kind: "vulnerability"
+          }
+
+          expect(hook).to receive(:execute).with(expected_data, trigger_key, force: true).and_return(success_result)
+          expect(service.execute).to include(success_result)
+        end
+      end
+    end
   end
 end
