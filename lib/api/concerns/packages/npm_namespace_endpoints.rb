@@ -15,6 +15,16 @@ module API
           helpers do
             include Gitlab::Utils::StrongMemoize
 
+            def generate_metadata_service(packages)
+              ::Packages::Npm::GenerateMetadataService.new(params[:package_name], packages)
+            end
+
+            def generate_metadata_for_namespace_service(current_user, group_or_namespace)
+              ::Packages::Npm::GenerateMetadataForNamespaceService.new(
+                params[:package_name], nil, { current_user: current_user, group_or_namespace: group_or_namespace }
+              )
+            end
+
             def project_id_or_nil
               return unless group_or_namespace
 
@@ -97,7 +107,13 @@ module API
 
               not_found!('Packages') if packages.empty?
 
-              metadata = generate_metadata_service(packages).execute.payload
+              metadata =
+                if Feature.enabled?(:npm_allow_packages_in_multiple_projects, group_or_namespace)
+                  generate_metadata_for_namespace_service(current_user, group_or_namespace).execute.payload
+                else
+                  generate_metadata_service(packages).execute.payload
+                end
+
               present metadata, with: ::API::Entities::NpmPackage
             end
           end

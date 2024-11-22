@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.shared_examples 'generates metadata response "on-the-fly"' do
+RSpec.shared_examples 'generates metadata response "on-the-fly"' do |service = ::Packages::Npm::GenerateMetadataService|
   let(:metadata) do
     {
       'dist-tags' => {
@@ -31,7 +31,7 @@ RSpec.shared_examples 'generates metadata response "on-the-fly"' do
   end
 
   it 'generates metadata response "on-the-fly"', :aggregate_failures do
-    expect(Packages::Npm::GenerateMetadataService).to receive(:new).and_call_original
+    expect(service).to receive(:new).and_call_original
 
     subject
 

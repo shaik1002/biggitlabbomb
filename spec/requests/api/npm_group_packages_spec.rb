@@ -129,7 +129,19 @@ RSpec.describe API::NpmGroupPackages, feature_category: :package_registry do
 
       subject { get(url) }
 
-      it_behaves_like 'generates metadata response "on-the-fly"'
+      it_behaves_like 'generates metadata response "on-the-fly"', ::Packages::Npm::GenerateMetadataForNamespaceService
+    end
+
+    context 'when metadata cache exists and npm_allow_packages_in_multiple_projects is disabled' do
+      before do
+        stub_feature_flags(npm_allow_packages_in_multiple_projects: false)
+      end
+
+      let_it_be(:npm_metadata_cache) { create(:npm_metadata_cache, package_name: package.name, project_id: project.id) }
+
+      subject { get(url) }
+
+      it_behaves_like 'generates metadata response "on-the-fly"', ::Packages::Npm::GenerateMetadataService
     end
   end
 

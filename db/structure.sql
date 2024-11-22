@@ -6899,6 +6899,9 @@ CREATE TABLE application_settings (
     elasticsearch_retry_on_failure integer DEFAULT 0 NOT NULL,
     integrations jsonb DEFAULT '{}'::jsonb NOT NULL,
     user_seat_management jsonb DEFAULT '{}'::jsonb NOT NULL,
+    secret_detection_service_url text DEFAULT ''::text NOT NULL,
+    encrypted_secret_detection_service_auth_token bytea,
+    encrypted_secret_detection_service_auth_token_iv bytea,
     resource_usage_limits jsonb DEFAULT '{}'::jsonb NOT NULL,
     show_migrate_from_jenkins_banner boolean DEFAULT true NOT NULL,
     CONSTRAINT app_settings_container_reg_cleanup_tags_max_list_size_positive CHECK ((container_registry_cleanup_tags_service_max_list_size >= 0)),
@@ -6963,6 +6966,7 @@ CREATE TABLE application_settings (
     CONSTRAINT check_application_settings_sign_in_restrictions_is_hash CHECK ((jsonb_typeof(sign_in_restrictions) = 'object'::text)),
     CONSTRAINT check_application_settings_transactional_emails_is_hash CHECK ((jsonb_typeof(transactional_emails) = 'object'::text)),
     CONSTRAINT check_b8c74ea5b3 CHECK ((char_length(deactivation_email_additional_text) <= 1000)),
+    CONSTRAINT check_babd774f3c CHECK ((char_length(secret_detection_service_url) <= 255)),
     CONSTRAINT check_bf5157a366 CHECK ((char_length(required_instance_ci_template) <= 1024)),
     CONSTRAINT check_cdfbd99405 CHECK ((char_length(security_txt_content) <= 2048)),
     CONSTRAINT check_d03919528d CHECK ((char_length(container_registry_vendor) <= 255)),
@@ -7466,6 +7470,7 @@ CREATE TABLE audit_events_group_external_streaming_destinations (
     config jsonb NOT NULL,
     encrypted_secret_token bytea NOT NULL,
     encrypted_secret_token_iv bytea NOT NULL,
+    legacy_destination_ref bigint,
     CONSTRAINT check_97d157fbd0 CHECK ((char_length(name) <= 72))
 );
 
@@ -7561,6 +7566,7 @@ CREATE TABLE audit_events_instance_external_streaming_destinations (
     config jsonb NOT NULL,
     encrypted_secret_token bytea NOT NULL,
     encrypted_secret_token_iv bytea NOT NULL,
+    legacy_destination_ref bigint,
     CONSTRAINT check_219decfb51 CHECK ((char_length(name) <= 72))
 );
 
@@ -31365,6 +31371,8 @@ CREATE INDEX index_packages_packages_on_creator_id ON packages_packages USING bt
 
 CREATE INDEX index_packages_packages_on_id_and_created_at ON packages_packages USING btree (id, created_at);
 
+CREATE INDEX index_packages_packages_on_name_and_id ON packages_packages USING btree (name, id);
+
 CREATE INDEX index_packages_packages_on_name_trigram ON packages_packages USING gin (name gin_trgm_ops);
 
 CREATE INDEX index_packages_packages_on_project_id_and_created_at ON packages_packages USING btree (project_id, created_at);
@@ -32918,8 +32926,6 @@ CREATE INDEX p_ci_builds_scheduled_at_idx ON ONLY p_ci_builds USING btree (sched
 CREATE UNIQUE INDEX p_ci_builds_token_encrypted_partition_id_idx ON ONLY p_ci_builds USING btree (token_encrypted, partition_id) WHERE (token_encrypted IS NOT NULL);
 
 CREATE INDEX p_ci_job_artifacts_expire_at_job_id_idx1 ON ONLY p_ci_job_artifacts USING btree (expire_at, job_id) WHERE ((locked = 2) AND (expire_at IS NOT NULL));
-
-CREATE INDEX package_name_index ON packages_packages USING btree (name);
 
 CREATE INDEX packages_packages_failed_verification ON packages_package_files USING btree (verification_retry_at NULLS FIRST) WHERE (verification_state = 3);
 
