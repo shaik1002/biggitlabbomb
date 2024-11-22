@@ -2,7 +2,6 @@
 import { GlLoadingIcon, GlKeysetPagination } from '@gitlab/ui';
 import { get } from 'lodash';
 import ProjectsList from '~/vue_shared/components/projects_list/projects_list.vue';
-import ProjectsListEmptyState from '~/vue_shared/components/projects_list/projects_list_empty_state.vue';
 import { DEFAULT_PER_PAGE } from '~/api';
 import { __ } from '~/locale';
 import { createAlert } from '~/alert';
@@ -27,7 +26,6 @@ export default {
     GlLoadingIcon,
     GlKeysetPagination,
     ProjectsList,
-    ProjectsListEmptyState,
   },
   inject: ['programmingLanguages'],
   props: {
@@ -172,5 +170,4 @@ export default {
       <gl-keyset-pagination v-bind="pageInfo" @prev="onPrev" @next="onNext" />
     </div>
   </div>
-  <projects-list-empty-state v-else :search="search" />
 </template>

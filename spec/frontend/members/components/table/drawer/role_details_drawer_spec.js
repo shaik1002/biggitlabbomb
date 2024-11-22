@@ -16,9 +16,7 @@ jest.mock('~/lib/utils/dom_utils', () => ({
 
 describe('Role details drawer', () => {
   const dropdownItems = roleDropdownItems(updateableMember);
-  const currentRole = dropdownItems.flatten.find(
-    (role) => role.accessLevel === updateableMember.accessLevel.integerValue,
-  );
+  const currentRole = dropdownItems.flatten[5];
   const newRole = dropdownItems.flatten[2];
   const saveRoleStub = jest.fn();
   let wrapper;
@@ -100,7 +98,7 @@ describe('Role details drawer', () => {
       });
 
       it('shows the role description', () => {
-        expect(findRoleDescription().text()).toBe(updateableMember.accessLevel.description);
+        expect(findRoleDescription().text()).toBe(currentRole.description);
       });
     });
 

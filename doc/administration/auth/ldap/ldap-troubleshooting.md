@@ -1,5 +1,5 @@
 ---
-stage: Software Supply Chain Security
+stage: Govern
 group: Authentication
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
@@ -385,7 +385,7 @@ DETAILS:
 
 #### Memberships not granted
 
-Sometimes you may think a particular user should be added to a GitLab group through
+Sometimes you may think a particular user should be added to a GitLab group via
 LDAP group sync, but for some reason it's not happening. You can check several
 things to debug the situation.
 

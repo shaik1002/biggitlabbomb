@@ -3,8 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe Gitlab::Ci::Pipeline::Chain::Helpers, feature_category: :continuous_integration do
-  let_it_be(:project) { create(:project) }
-  let(:pipeline) { build(:ci_empty_pipeline, project_id: project.id) }
+  let(:pipeline) { build(:ci_empty_pipeline) }
   let(:command) { instance_double(::Gitlab::Ci::Pipeline::Chain::Command, save_incompleted: true) }
   let(:message) { 'message' }
 

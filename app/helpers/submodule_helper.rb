@@ -27,17 +27,7 @@ module SubmoduleHelper
       [
         url_helpers.namespace_project_path(namespace, project),
         url_helpers.namespace_project_tree_path(namespace, project, submodule_item_id),
-        (
-
-          if old_submodule_item_id
-            url_helpers.namespace_project_compare_path(
-              namespace, project,
-              to: submodule_item_id,
-              from: old_submodule_item_id
-            )
-          end
-
-        )
+        (url_helpers.namespace_project_compare_path(namespace, project, to: submodule_item_id, from: old_submodule_item_id) if old_submodule_item_id)
       ]
     elsif relative_self_url?(url)
       relative_self_links(url, submodule_item_id, old_submodule_item_id, repository.project)
@@ -149,13 +139,7 @@ module SubmoduleHelper
       [
         url_helpers.namespace_project_path(target_namespace_path, submodule_base),
         url_helpers.namespace_project_tree_path(target_namespace_path, submodule_base, commit),
-
-        (if old_commit
-           url_helpers.namespace_project_compare_path(
-             target_namespace_path, submodule_base, to: commit, from: old_commit
-           )
-         end)
-
+        (url_helpers.namespace_project_compare_path(target_namespace_path, submodule_base, to: commit, from: old_commit) if old_commit)
       ]
     rescue ActionController::UrlGenerationError
       [nil, nil, nil]

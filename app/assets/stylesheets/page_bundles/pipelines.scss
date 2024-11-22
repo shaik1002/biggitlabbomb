@@ -28,15 +28,6 @@
 
 // Pipeline mini graph
 .pipeline-mini-graph-stage-container {
-  // Temoorarily sets a max height for the dropdown
-  // until GlDisclosureDropdown supports adding
-  // a max-height value
-  // see https://gitlab.com/gitlab-org/gitlab-ui/-/issues/3010
-  // stylelint-disable-next-line gitlab/no-gl-class
-  .gl-new-dropdown-inner {
-    max-height: $dropdown-max-height-lg !important;
-  }
-
   &:last-child {
     margin-right: 0;
   }
@@ -49,6 +40,52 @@
       right: -4px;
       top: 12px;
       width: 4px;
+    }
+  }
+}
+
+// Action icons inside dropdowns:
+// mini graph in pipelines table
+// mini graph in MR widget pipeline
+// mini graph in Commit widget pipeline
+.mini-pipeline-graph-dropdown-menu {
+  @include pipeline-graph-dropdown-menu();
+
+  &::before,
+  &::after {
+    content: '';
+    display: inline-block;
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-color: transparent;
+    border-style: solid;
+    top: -6px;
+    left: 50%;
+    transform: translate(-50%, 0);
+    border-width: 0 5px 6px;
+
+    @include media-breakpoint-down(sm) {
+      left: 100%;
+      margin-left: -12px;
+    }
+  }
+
+  &::before {
+    border-width: 0 5px 5px;
+    border-bottom-color: $border-color;
+  }
+
+  /**
+   * Center dropdown menu in mini graph
+   */
+  .dropdown &.dropdown-menu {
+    transform: translate(-80%, 0);
+
+    @media (min-width: map-get($grid-breakpoints, md)) {
+      transform: translate(-50%, 0);
+      right: auto;
+      left: 50%;
     }
   }
 }

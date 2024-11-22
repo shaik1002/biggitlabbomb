@@ -68,7 +68,7 @@ module Gitlab
 
       def events_worker_args(event_class, events)
         events
-          .map { |event| event.data.deep_stringify_keys.to_h }
+          .map { |event| event.data.deep_stringify_keys }
           .each_slice(group_size)
           .map { |events_data_group| [event_class.name, events_data_group] }
       end

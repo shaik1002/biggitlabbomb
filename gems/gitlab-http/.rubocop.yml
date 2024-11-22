@@ -1,6 +1,5 @@
 inherit_from:
   - ../config/rubocop.yml
-  - .rubocop_todo.yml
 
 Gemfile/MissingFeatureCategory:
   Enabled: false
@@ -18,7 +17,7 @@ Lint/DuplicateBranch:
 RSpec/MultipleMemoizedHelpers:
   Enabled: false
 
-RSpec/SpecFilePathFormat:
+RSpec/FilePath:
   CustomTransform:
     HTTP_V2: http_v2
 

@@ -4,8 +4,6 @@ module Gitlab
   module GithubImport
     module Importer
       class DiffNoteImporter
-        include Gitlab::GithubImport::PushPlaceholderReferences
-
         DiffNoteCreationError = Class.new(ActiveRecord::RecordInvalid)
 
         # note - An instance of `Gitlab::GithubImport::Representation::DiffNote`
@@ -15,7 +13,6 @@ module Gitlab
           @note = note
           @project = project
           @client = client
-          @mapper = Gitlab::GithubImport::ContributionsMapper.new(project)
         end
 
         def execute
@@ -43,7 +40,7 @@ module Gitlab
 
         private
 
-        attr_reader :note, :project, :client, :author_id, :author_found, :mapper
+        attr_reader :note, :project, :client, :author_id, :author_found
 
         def build_author_attributes
           @author_id, @author_found = user_finder.author_id_for(note)
@@ -74,18 +71,13 @@ module Gitlab
             line_code: note.line_code,
             created_at: note.created_at,
             updated_at: note.updated_at,
-            st_diff: note.diff_hash.to_yaml,
-            imported_from: ::Import::HasImportSource::IMPORT_SOURCES[:github]
+            st_diff: note.diff_hash.to_yaml
           }
 
           diff_note = LegacyDiffNote.new(attributes.merge(importing: true))
           diff_note.validate!
 
-          ids = ApplicationRecord.legacy_bulk_insert(LegacyDiffNote.table_name, [attributes], return_ids: true)
-
-          return unless mapper.user_mapping_enabled?
-
-          push_refs_with_ids(ids, LegacyDiffNote, mapper.user_mapper)
+          ApplicationRecord.legacy_bulk_insert(LegacyDiffNote.table_name, [attributes])
         end
         # rubocop:enabled Gitlab/BulkInsert
 
@@ -103,15 +95,10 @@ module Gitlab
             commit_id: note.original_commit_id,
             created_at: note.created_at,
             updated_at: note.updated_at,
-            position: note.diff_position,
-            imported_from: ::Import::SOURCE_GITHUB
-          }).execute(importing: true)
+            position: note.diff_position
+          }).execute
 
           raise DiffNoteCreationError, record unless record.persisted?
-
-          return unless mapper.user_mapping_enabled?
-
-          push_with_record(record, :author_id, note.author.id, mapper.user_mapper)
         end
 
         def note_body

@@ -232,7 +232,7 @@ export default {
           :restricted-tool-bar-items="$options.restrictedToolBarItems"
           markdown-docs-path=""
           :enable-preview="false"
-          class="gl-border gl-mt-0 gl-rounded-base gl-border-section"
+          class="bordered-box gl-mt-0"
         >
           <template #textarea>
             <gl-form-textarea
@@ -278,25 +278,19 @@ export default {
           v-if="showSaveAndAdd"
           variant="confirm"
           category="secondary"
-          data-testid="save-and-add-button"
           :disabled="!isTimelineTextValid"
           :loading="isEventProcessed"
           @click="handleSave(true)"
         >
           {{ $options.i18n.saveAndAdd }}
         </gl-button>
-        <gl-button
-          :disabled="isEventProcessed"
-          data-testid="cancel-button"
-          @click="$emit('cancel')"
-        >
+        <gl-button :disabled="isEventProcessed" @click="$emit('cancel')">
           {{ $options.i18n.cancel }}
         </gl-button>
         <gl-button
           v-if="isEditing"
           variant="danger"
           class="gl-ml-auto"
-          data-testid="delete-button"
           :disabled="isEventProcessed"
           @click="$emit('delete')"
         >

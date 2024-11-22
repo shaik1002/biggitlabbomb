@@ -6,7 +6,7 @@ import { debounce, clamp } from 'lodash';
 import { InternalEvents } from '~/tracking';
 import { visitUrl } from '~/lib/utils/url_utility';
 import { DEFAULT_DEBOUNCE_AND_THROTTLE_MS } from '~/lib/utils/constants';
-import { s__, sprintf } from '~/locale';
+import { sprintf } from '~/locale';
 import {
   ARROW_DOWN_KEY,
   ARROW_UP_KEY,
@@ -45,8 +45,6 @@ import {
   SEARCH_SHORTCUTS_MIN_CHARACTERS,
   SEARCH_MODAL_ID,
   KEY_K,
-  KEY_N,
-  KEY_P,
   SEARCH_INPUT_SELECTOR,
   SEARCH_RESULTS_ITEM_SELECTOR,
 } from '../constants';
@@ -54,6 +52,7 @@ import CommandPaletteItems from '../command_palette/command_palette_items.vue';
 import FakeSearchInput from '../command_palette/fake_search_input.vue';
 import {
   COMMON_HANDLES,
+  SEARCH_OR_COMMAND_MODE_PLACEHOLDER,
   COMMAND_HANDLE,
   USER_HANDLE,
   PROJECT_HANDLE,
@@ -80,7 +79,7 @@ export default {
     SEARCH_DESCRIBED_BY_WITH_RESULTS,
     SEARCH_DESCRIBED_BY_DEFAULT,
     SEARCH_DESCRIBED_BY_UPDATED,
-    SEARCH_OR_COMMAND_MODE_PLACEHOLDER: s__('GlobalSearch|Type to search...'),
+    SEARCH_OR_COMMAND_MODE_PLACEHOLDER,
     SEARCH_RESULTS_LOADING,
     MIN_SEARCH_TERM,
     COMMAND_PALETTE_TIP,
@@ -104,8 +103,6 @@ export default {
       nextFocusedItemIndex: null,
       commandPaletteDropdownItems,
       commandPaletteDropdownOpen: false,
-      focusIndex: -1,
-      childListItems: [],
     };
   },
   computed: {
@@ -162,7 +159,7 @@ export default {
       return '';
     },
     commandHighlightClass() {
-      return darkModeEnabled() ? '!gl-bg-subtle' : '!gl-bg-strong';
+      return darkModeEnabled() ? '!gl-bg-gray-10' : '!gl-bg-gray-50';
     },
   },
   watch: {
@@ -192,21 +189,8 @@ export default {
       event.stopPropagation();
       event.preventDefault();
     },
-    getListItemsAndFocusIndex() {
-      const childItems = this.$refs.resultsList?.querySelectorAll('.gl-new-dropdown-item') || [];
-      if (childItems.length !== this.childListItems.length) {
-        this.childListItems = childItems;
-
-        Array.from(childItems).forEach((item, index) => {
-          if (item === document.activeElement) {
-            this.focusIndex = index;
-          }
-        });
-      }
-    },
     onKeydown(event) {
       const { code, target } = event;
-
       let stop = true;
       const isSearchInput = target && target?.matches(SEARCH_INPUT_SELECTOR);
       const elements = this.getFocusableOptions();
@@ -264,22 +248,7 @@ export default {
       }
     },
     onKeyComboDown(event) {
-      const { code, metaKey, ctrlKey } = event;
-
-      this.getListItemsAndFocusIndex();
-
-      if (code === KEY_P && ctrlKey) {
-        this.focusIndex =
-          this.focusIndex > 0 ? this.focusIndex - 1 : this.childListItems.length - 1;
-        this.childListItems[this.focusIndex]?.focus();
-      }
-
-      if (code === KEY_N && ctrlKey) {
-        this.focusIndex =
-          this.focusIndex < this.childListItems.length - 1 ? this.focusIndex + 1 : 0;
-        this.childListItems[this.focusIndex]?.focus();
-      }
-
+      const { code, metaKey } = event;
       if (code === KEY_K && metaKey) {
         if (!this.commandPaletteDropdownOpen) {
           this.$refs.commandDropdown.open();
@@ -431,7 +400,7 @@ export default {
       :aria-label="$options.i18n.SEARCH_OR_COMMAND_MODE_PLACEHOLDER"
       class="gl-relative gl-w-full gl-rounded-lg gl-pb-0"
     >
-      <div class="input-box-wrapper gl-border-b -gl-mb-1 gl-bg-default gl-p-2">
+      <div class="input-box-wrapper gl-border-b -gl-mb-1 gl-bg-white gl-p-2">
         <gl-search-box-by-type
           id="search"
           ref="searchInput"
@@ -478,10 +447,12 @@ export default {
               :handle="commandChar"
               @updated="highlightFirstCommand"
             />
+
+            <global-search-default-items v-else-if="showDefaultItems" />
+
             <template v-else>
+              <global-search-autocomplete-items />
               <global-search-scoped-items v-if="showScopedSearchItems" />
-              <global-search-default-items v-if="showDefaultItems" />
-              <global-search-autocomplete-items v-else />
             </template>
           </div>
         </scroll-scrim>
@@ -511,7 +482,7 @@ export default {
     </form>
     <template #modal-footer>
       <div class="gl-m-0 gl-flex gl-grow gl-justify-between gl-align-middle">
-        <span class="gl-text-subtle"
+        <span class="gl-text-gray-500"
           >{{ $options.i18n.COMMAND_PALETTE_TIP }} <command-palette-lottery
         /></span>
         <span

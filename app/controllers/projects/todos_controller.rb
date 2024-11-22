@@ -6,7 +6,7 @@ class Projects::TodosController < Projects::ApplicationController
 
   before_action :authenticate_user!, only: [:create]
 
-  feature_category :notifications
+  feature_category :team_planning
   urgency :low
 
   private

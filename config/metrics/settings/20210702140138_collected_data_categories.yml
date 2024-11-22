@@ -14,7 +14,7 @@ instrumentation_class: CollectedDataCategoriesMetric
 distribution:
 - ce
 - ee
-tiers:
+tier:
 - free
 - premium
 - ultimate

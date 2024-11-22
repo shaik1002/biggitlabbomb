@@ -10,6 +10,7 @@ import { getPackageTypeLabel } from '~/packages_and_registries/package_registry/
 import MetadataItem from '~/vue_shared/components/registry/metadata_item.vue';
 import TitleArea from '~/vue_shared/components/registry/title_area.vue';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
 export default {
   name: 'PackageTitle',
@@ -25,6 +26,7 @@ export default {
   directives: {
     GlResizeObserver: GlResizeObserverDirective,
   },
+  mixins: [glFeatureFlagsMixin()],
   inject: ['isGroupPage'],
   i18n: {
     lastDownloadedAt: s__('PackageRegistry|Last downloaded %{dateTime}'),
@@ -64,7 +66,10 @@ export default {
       return Boolean(this.packageEntity.tags?.nodes && this.packageEntity.tags?.nodes.length);
     },
     showBadgeProtected() {
-      return Boolean(this.packageEntity?.protectionRuleExists);
+      return (
+        Boolean(this.glFeatures.packagesProtectedPackages) &&
+        Boolean(this.packageEntity?.protectionRuleExists)
+      );
     },
   },
   mounted() {

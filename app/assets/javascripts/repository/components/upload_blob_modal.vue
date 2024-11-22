@@ -5,9 +5,9 @@ import {
   GlFormGroup,
   GlFormInput,
   GlFormTextarea,
+  GlToggle,
   GlButton,
   GlAlert,
-  GlFormCheckbox,
 } from '@gitlab/ui';
 import FileIcon from '~/vue_shared/components/file_icon.vue';
 import { createAlert } from '~/alert';
@@ -39,11 +39,11 @@ export default {
     GlFormGroup,
     GlFormInput,
     GlFormTextarea,
+    GlToggle,
     GlButton,
     UploadDropzone,
     GlAlert,
     FileIcon,
-    GlFormCheckbox,
   },
   i18n: {
     COMMIT_LABEL,
@@ -248,11 +248,14 @@ export default {
         :label="$options.i18n.TARGET_BRANCH_LABEL"
         label-for="branch_name"
       >
-        <gl-form-input id="branch_name" v-model="target" :disabled="loading" name="branch_name" />
+        <gl-form-input v-model="target" :disabled="loading" name="branch_name" />
       </gl-form-group>
-      <gl-form-checkbox v-if="showCreateNewMrToggle" v-model="createNewMr" :disabled="loading">
-        {{ $options.i18n.TOGGLE_CREATE_MR_LABEL }}
-      </gl-form-checkbox>
+      <gl-toggle
+        v-if="showCreateNewMrToggle"
+        v-model="createNewMr"
+        :disabled="loading"
+        :label="$options.i18n.TOGGLE_CREATE_MR_LABEL"
+      />
       <gl-alert v-if="!canPushCode" variant="info" :dismissible="false" class="gl-mt-3">
         {{ $options.i18n.NEW_BRANCH_IN_FORK }}
       </gl-alert>

@@ -63,7 +63,7 @@ It can take a few hours to validate a certificate provisioned through ACM. To av
 
 Below is a diagram of the recommended architecture.
 
-![Scaled down 2 Availability Zone Non-HA AWS architecture](img/aws_ha_architecture_diagram_v17_0.png)
+![AWS architecture diagram](img/aws_ha_architecture_diagram_v17_0.png)
 
 ## AWS costs
 
@@ -149,7 +149,7 @@ We now create a VPC, a virtual networking environment that you control:
    `10.0.0.0/16`. If you don't require dedicated hardware, you can leave
    "Tenancy" as default. Select **Create VPC** when ready.
 
-   ![Create a VPC for GitLab cloud infrastructure](img/create_vpc_v17_0.png)
+   ![Create VPC](img/create_vpc_v17_0.png)
 
 1. Select the VPC, select **Actions**, select **Edit VPC Settings** and check **Enable DNS resolution**. Select **Save** when done.
 
@@ -193,7 +193,7 @@ create a new one:
 1. Select it from the table, and then under the **Actions** dropdown list choose
    "Attach to VPC".
 
-   ![Create an internet gateway](img/create_gateway_v17_0.png)
+   ![Create gateway](img/create_gateway_v17_0.png)
 
 1. Choose `gitlab-vpc` from the list and hit **Attach**.
 
@@ -409,7 +409,7 @@ persistence and is used to store session data, temporary cache information, and 
    Select the VPC we created earlier (`gitlab-vpc`) and ensure the selected subnets table only contains the [private subnets](#subnets).
 1. Select **Create** when ready.
 
-   ![Create a subnet group](img/ec_subnet_v17_0.png)
+   ![ElastiCache subnet](img/ec_subnet_v17_0.png)
 
 ### Create the Redis Cluster
 
@@ -833,7 +833,7 @@ Because our instances are created by the auto scaling group, go back to your ins
 
 ## Health check and monitoring with Prometheus
 
-Apart from Amazon CloudWatch, which you can enable on various services,
+Apart from Amazon's Cloudwatch which you can enable on various services,
 GitLab provides its own integrated monitoring solution based on Prometheus.
 For more information about how to set it up, see
 [GitLab Prometheus](../../administration/monitoring/prometheus/index.md).

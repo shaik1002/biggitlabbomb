@@ -15,11 +15,6 @@ module MergeRequests
         merge_request.title = merge_request.draft_title
       end
 
-      if params.key?(:merge_after)
-        merge_after = params.delete(:merge_after)
-        UpdateMergeScheduleService.new(merge_request, merge_after: merge_after).execute
-      end
-
       update_merge_request_with_specialized_service(merge_request) || general_fallback(merge_request)
     end
 
@@ -77,7 +72,7 @@ module MergeRequests
     def after_update(merge_request, old_associations)
       super
 
-      merge_request.cache_merge_request_closes_issues!(current_user) unless merge_request.auto_merge_enabled?
+      merge_request.cache_merge_request_closes_issues!(current_user)
       @trigger_work_item_updated = true
     end
 
@@ -238,7 +233,7 @@ module MergeRequests
         # email template itself, see `change_in_merge_request_draft_status_email` template.
         notify_draft_status_changed(merge_request)
         trigger_merge_request_status_updated(merge_request)
-        publish_draft_change_event(merge_request)
+        publish_draft_change_event(merge_request) if Feature.enabled?(:merge_when_checks_pass, project)
       end
 
       if !old_title_draft && new_title_draft

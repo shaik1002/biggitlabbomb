@@ -29,8 +29,13 @@
 
       .timeline-content {
         margin-left: $note-spacing-left;
-        @apply gl-bg-section gl-border gl-border-section gl-rounded-base;
+        @apply gl-border gl-rounded-base;
         padding: $gl-padding-4 $gl-padding-8;
+
+        // stylelint-disable-next-line gitlab/no-gl-class
+        .gl-dark & {
+          @apply gl-bg-strong gl-border-default;
+        }
       }
 
       .note-header-info {
@@ -59,17 +64,22 @@
 
             .timeline-content {
               margin-left: $note-spacing-left;
-              @apply gl-bg-section gl-border gl-border-b-subtle dark:gl-border-section gl-rounded-t-base;
+              @apply gl-border gl-border-b-subtle gl-rounded-t-base;
               padding: $gl-padding-4 $gl-padding-8;
+
+              // stylelint-disable-next-line gitlab/no-gl-class
+              .gl-dark & {
+                @apply gl-bg-strong gl-border-default;
+              }
             }
           }
 
           &:not(:first-of-type) .timeline-entry-inner {
             margin-left: $note-spacing-left;
-            @apply gl-bg-subtle gl-border-l gl-border-l-section gl-border-r gl-border-r-section;
+            @apply gl-bg-subtle gl-border-l gl-border-r;
 
             .timeline-content {
-              @apply gl-p-3 gl-pl-5;
+              padding: $gl-padding-8 $gl-padding-8 $gl-padding-8 18px;
             }
 
             .timeline-discussion-body-footer {
@@ -92,7 +102,7 @@
       }
 
       .discussion-reply-holder {
-        @apply gl-border gl-border-section gl-border-t-0;
+        @apply gl-border-1 gl-border-solid gl-border-default gl-border-t-0;
         @apply gl-bg-subtle;
       }
     }
@@ -232,7 +242,7 @@
 .discussion-header,
 .note-header-info {
   a {
-    @apply gl-text-default;
+    color: var(--gl-text-color-default);
 
     &:hover,
     &.hover {
@@ -282,10 +292,16 @@
 
   .timeline-content {
     padding: $gl-padding-8 !important;
-    @apply gl-bg-section gl-border gl-border-section gl-rounded-base;
+    @apply gl-border gl-rounded-base;
+
+    // stylelint-disable-next-line gitlab/no-gl-class
+    .gl-dark & {
+      @apply gl-bg-strong gl-border-b;
+    }
 
     &.expanded {
-      @apply gl-border-b-0;
+      // Render border invisible
+      border-bottom: 1px solid var(--gl-background-color-subtle);
       border-bottom-left-radius: 0;
       border-bottom-right-radius: 0;
     }
@@ -335,13 +351,11 @@
 }
 
 .note-headline-light,
-.discussion-headline-light,
-.note-timestamp time {
+.discussion-headline-light {
   @apply gl-text-subtle;
 }
 
-.discussion-headline-light a,
-.note-timestamp:hover time {
+.discussion-headline-light a {
   @apply gl-text-link;
 }
 

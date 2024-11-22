@@ -1,7 +1,8 @@
 ---
 data_category: optional
 key_path: redis_hll_counters.deploy_token_packages.i_package_tag_deploy_token_monthly
-description: Count of distinct deploy tokens that have interacted with package tags in the package registry in the last 28 days
+description: A monthly count of package tags published to the registry using a deploy
+  token
 product_group: package_registry
 value_type: number
 status: removed
@@ -14,7 +15,7 @@ options:
 distribution:
 - ee
 - ce
-tiers:
+tier:
 - free
 - premium
 - ultimate

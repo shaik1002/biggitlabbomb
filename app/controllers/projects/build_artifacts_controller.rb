@@ -2,6 +2,7 @@
 
 class Projects::BuildArtifactsController < Projects::ApplicationController
   include ExtractsPath
+  include RendersBlob
 
   before_action :authorize_read_build!
   before_action :extract_ref_name_and_path
@@ -26,12 +27,7 @@ class Projects::BuildArtifactsController < Projects::ApplicationController
   end
 
   def latest_succeeded
-    redirect_to latest_succeeded_project_artifacts_path(
-      project,
-      job,
-      ref_name_and_path: params[:ref_name_and_path],
-      job: params[:job]
-    )
+    redirect_to latest_succeeded_project_artifacts_path(project, job, ref_name_and_path: params[:ref_name_and_path], job: params[:job])
   end
 
   private

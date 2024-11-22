@@ -3,9 +3,9 @@
 require 'spec_helper'
 
 RSpec.describe Sidebars::Organizations::Menus::ManageMenu, feature_category: :navigation do
-  let(:organization) { build(:organization) }
-  let(:user) { build(:user) }
-  let(:context) { Sidebars::Context.new(current_user: user, container: organization) }
+  let_it_be(:organization) { build(:organization) }
+  let_it_be(:user) { build(:user) }
+  let_it_be(:context) { Sidebars::Context.new(current_user: user, container: organization) }
 
   subject(:menu) { described_class.new(context) }
 
@@ -33,9 +33,7 @@ RSpec.describe Sidebars::Organizations::Menus::ManageMenu, feature_category: :na
       let(:item_id) { :organization_users }
 
       context 'when current user has permissions' do
-        before do
-          create(:organization_owner, user: user, organization: organization) # rubocop: disable RSpec/FactoryBot/AvoidCreate -- does not work with build_stubbed
-        end
+        let_it_be(:organization_user) { create(:organization_user, user: user, organization: organization) } # rubocop: disable RSpec/FactoryBot/AvoidCreate -- does not work with build_stubbed
 
         it { is_expected.not_to be_nil }
       end

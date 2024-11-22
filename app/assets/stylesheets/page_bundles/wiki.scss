@@ -28,8 +28,7 @@
 
   li > .wiki-list {
     min-height: 30px;
-    @apply gl-mx-2;
-    margin-bottom: 1px;
+    padding: 0 $gl-padding-8;
 
     &:hover,
     &.active {

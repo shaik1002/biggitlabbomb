@@ -4,7 +4,7 @@
 
 require 'spec_helper'
 
-RSpec.describe 'Dashboard > User sorts todos', feature_category: :notifications do
+RSpec.describe 'Dashboard > User sorts todos', feature_category: :team_planning do
   let(:user)    { create(:user) }
   let(:project) { create(:project) }
 
@@ -14,7 +14,6 @@ RSpec.describe 'Dashboard > User sorts todos', feature_category: :notifications 
 
   before do
     project.add_developer(user)
-    stub_feature_flags(todos_vue_application: false)
   end
 
   context 'sort options' do

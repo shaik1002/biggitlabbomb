@@ -9,11 +9,9 @@ module Pajamas
 
     # @param [String] title
     # @param [Symbol] state
-    # @param [Hash] button_options
-    def initialize(title: nil, state: :closed, button_options: {})
+    def initialize(title: nil, state: :closed)
       @title = title
       @state = filter_attribute(state.to_sym, STATE_OPTIONS)
-      @button_options = button_options
     end
 
     def icon
@@ -24,7 +22,7 @@ module Pajamas
       @state == :opened ? { class: 'show' } : {}
     end
 
-    def expanded?
+    def expanded
       @state == :opened
     end
   end

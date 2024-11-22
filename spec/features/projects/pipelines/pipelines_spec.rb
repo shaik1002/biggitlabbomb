@@ -353,8 +353,8 @@ RSpec.describe 'Pipelines', :js, feature_category: :continuous_integration do
             wait_for_all_requests
           end
 
-          it 'enqueues manual action job' do
-            expect(manual.reload).to be_pending
+          it 'enqueues manual action job', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/409984' do
+            expect(page).to have_selector('[data-testid="pipelines-manual-actions-dropdown"] .gl-dropdown-toggle:disabled')
           end
         end
       end
@@ -414,15 +414,14 @@ RSpec.describe 'Pipelines', :js, feature_category: :continuous_integration do
               click_button 'delayed job 1'
             end
 
-            # Click on the manual action dropdown and check if a request has been made
-            find(manual_action_selector).click
+            # Wait for UI to transition to ensure a request has been made
             within(manual_action_dropdown) { find('.gl-spinner') }
             within(manual_action_dropdown) { find_by_testid('play-icon') }
 
             wait_for_requests
           end
 
-          it 'enqueues the delayed job', :js do
+          it 'enqueues the delayed job', :js, quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/410129' do
             expect(delayed_job.reload).to be_pending
           end
         end
@@ -617,7 +616,7 @@ RSpec.describe 'Pipelines', :js, feature_category: :continuous_integration do
 
               wait_for_requests
 
-              within first('[data-testid="job-item"]') do
+              within first('[data-testid="job-with-link"]') do
                 expect(find_by_testid('play-icon')).to be_visible
               end
 

@@ -3,7 +3,6 @@
 require 'spec_helper'
 
 RSpec.describe Gitlab::BackgroundMigration::BackfillOrDropCiPipelineOnProjectId,
-  :suppress_partitioning_routing_analyzer,
   feature_category: :continuous_integration,
   migration: :gitlab_ci do
   let(:project_id_with_build) { 137 }

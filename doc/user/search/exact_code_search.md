@@ -1,5 +1,5 @@
 ---
-stage: Foundations
+stage: Data Stores
 group: Global Search
 info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments"
 ---
@@ -32,9 +32,6 @@ and is used by default in groups where the feature is enabled.
 - For [GitLab self-managed](../../subscriptions/self_managed/index.md), an administrator must
   [install Zoekt](../../integration/exact_code_search/zoekt.md#install-zoekt) and
   [enable exact code search](../../integration/exact_code_search/zoekt.md#enable-exact-code-search).
-
-In user preferences, you can [disable exact code search](../profile/preferences.md#disable-exact-code-search)
-to use [advanced search](advanced_search.md) instead.
 
 ## Zoekt search API
 

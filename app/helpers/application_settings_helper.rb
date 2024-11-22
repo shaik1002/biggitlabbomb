@@ -278,7 +278,6 @@ module ApplicationSettingsHelper
       :email_author_in_body,
       :email_confirmation_setting,
       :enabled_git_access_protocol,
-      :enforce_ci_inbound_job_token_scope_enabled,
       :enforce_terms,
       :error_tracking_enabled,
       :error_tracking_api_url,
@@ -319,7 +318,6 @@ module ApplicationSettingsHelper
       :jira_connect_application_key,
       :jira_connect_public_key_storage_enabled,
       :jira_connect_proxy_url,
-      :jira_connect_additional_audience_url,
       :math_rendering_limits_enabled,
       :max_artifacts_content_include_size,
       :max_artifacts_size,
@@ -502,9 +500,7 @@ module ApplicationSettingsHelper
       :pipeline_limit_per_project_user_sha,
       :invitation_flow_enforcement,
       :can_create_group,
-      :can_create_organization,
       :bulk_import_concurrent_pipeline_batch_limit,
-      :concurrent_relation_batch_export_limit,
       :bulk_import_enabled,
       :bulk_import_max_download_file_size,
       :silent_admin_exports_enabled,
@@ -512,7 +508,6 @@ module ApplicationSettingsHelper
       :allow_runner_registration_token,
       :user_defaults_to_private_profile,
       :deactivation_email_additional_text,
-      :resource_token_expiry_inherited_members,
       :projects_api_rate_limit_unauthenticated,
       :group_api_limit,
       :group_invited_groups_api_limit,
@@ -541,11 +536,9 @@ module ApplicationSettingsHelper
       :ai_action_api_rate_limit,
       :code_suggestions_api_rate_limit,
       :require_personal_access_token_expiry,
-      :observability_backend_ssl_verification_enabled,
-      :show_migrate_from_jenkins_banner
+      :observability_backend_ssl_verification_enabled
     ].tap do |settings|
       unless Gitlab.com?
-        settings << :resource_usage_limits
         settings << :deactivate_dormant_users
         settings << :deactivate_dormant_users_period
         settings << :nuget_skip_metadata_url_validation

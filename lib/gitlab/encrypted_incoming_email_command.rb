@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# rubocop:disable Rails/Output
 module Gitlab
   class EncryptedIncomingEmailCommand < EncryptedCommandBase
     DISPLAY_NAME = "INCOMING_EMAIL"
@@ -19,3 +20,4 @@ module Gitlab
     end
   end
 end
+# rubocop:enable Rails/Output

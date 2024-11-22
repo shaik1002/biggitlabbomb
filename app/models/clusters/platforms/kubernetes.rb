@@ -236,7 +236,9 @@ module Clusters
       def build_kube_client!
         raise "Incomplete settings" unless api_url
 
-        raise "Either username/password or token is required to access API" unless (username && password) || token
+        unless (username && password) || token
+          raise "Either username/password or token is required to access API"
+        end
 
         Gitlab::Kubernetes::KubeClient.new(
           api_url,
@@ -288,7 +290,9 @@ module Clusters
       end
 
       def no_namespace
-        errors.add(:namespace, 'only allowed for project cluster') if namespace
+        if namespace
+          errors.add(:namespace, 'only allowed for project cluster')
+        end
       end
 
       def prevent_modification

@@ -41,5 +41,3 @@ module QA
     end
   end
 end
-
-QA::Page::Project::Registry::Show.prepend_mod_with('Page::Project::Registry::Show', namespace: QA)

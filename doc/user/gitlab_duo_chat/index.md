@@ -7,7 +7,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 # GitLab Duo Chat
 
 DETAILS:
-**Tier:** Premium with GitLab Duo Pro, Ultimate with GitLab Duo Pro or Enterprise - [Start a trial](https://about.gitlab.com/solutions/gitlab-duo-pro/sales/?type=free-trial)
+**Tier: GitLab.com and Self-managed:** For a limited time, Premium or Ultimate. On October 17, 2024, Premium with GitLab Duo Pro or Ultimate with [GitLab Duo Pro or Enterprise](https://about.gitlab.com/gitlab-duo/#pricing). **GitLab Dedicated:** GitLab Duo Pro or Enterprise.
 **Offering:** GitLab.com, Self-managed, GitLab Dedicated
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/117695) as an [experiment](../../policy/experiment-beta-support.md#experiment) for SaaS in GitLab 16.0.
@@ -15,10 +15,20 @@ DETAILS:
 > - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/11251) as a [beta](../../policy/experiment-beta-support.md#beta) for self-managed in GitLab 16.8.
 > - Changed from Ultimate to [Premium](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/142808) tier in GitLab 16.9 while in [beta](../../policy/experiment-beta-support.md#beta).
 > - Changed to [generally available](../../policy/experiment-beta-support.md#generally-available-ga) in GitLab 16.11.
-> - Changed to require GitLab Duo add-on in GitLab 17.6 and later.
+> - Freely available for Ultimate and Premium users for a limited time.
 
 GitLab Duo Chat is your personal AI-powered assistant for boosting productivity.
 It can assist various tasks of your daily work with the AI-generated content.
+
+> For a limited time, the following users have free access to GitLab Duo Chat:
+>
+> - GitLab.com users who are members of at least one group with a Premium or Ultimate subscription.
+> - GitLab self-managed users with a Premium or Ultimate subscription.
+>
+> On October 17, 2024, a subscription add-on will be required for continued access to GitLab Duo Chat.
+> Learn more about [Duo Pro and Duo Enterprise pricing](https://about.gitlab.com/gitlab-duo/#pricing).
+
+For GitLab Dedicated, you must have GitLab Duo Pro or Enterprise.
 
 ## Supported editor extensions
 
@@ -46,8 +56,6 @@ In the GitLab UI, GitLab Duo Chat knows about these areas:
 | Issues        | From the issue, ask about `this issue`, `this`, or the URL. From any UI area, ask about the URL.                 |
 | Code files    | From the single file, ask about `this code` or `this file`. From any UI area, ask about the URL.                 |
 | Merge requests | From the merge request, ask about `this merge request`, `this`, or the URL. For more information, see [Ask about a specific merge request](examples.md#ask-about-a-specific-merge-request). |
-| Commits        | From the commit, ask about `this commit` or `this`. From any UI area, ask about the URL.                        |
-| Pipeline jobs  | From the pipeline job, ask about `this pipeline job` or `this`. From any UI area, ask about the URL.            |
 
 In the IDEs, GitLab Duo Chat knows about these areas:
 
@@ -123,7 +131,7 @@ If you have selected code in the editor, this selection is sent along with your 
 
 ### In the editor window
 
-> - Introduced as [generally available](https://gitlab.com/groups/gitlab-org/-/epics/15218) in the GitLab Workflow extension for VS Code 5.15.0.
+> - [Generally available](https://gitlab.com/groups/gitlab-org/-/epics/15218) in the GitLab Workflow extension for VS Code 5.15.0.
 
 To open GitLab Duo Chat in the editor window, use any of these methods:
 
@@ -195,7 +203,7 @@ After GitLab Duo Chat opens:
 
 ### In the editor window
 
-> - Introduced as [generally available](https://gitlab.com/groups/gitlab-org/editor-extensions/-/epics/80) in GitLab Duo 3.0.0.
+> - [Generally available](https://gitlab.com/groups/gitlab-org/editor-extensions/-/epics/80) in GitLab Duo 3.0.0.
 
 To open GitLab Duo Chat in the editor window, use any of these methods:
 

@@ -250,5 +250,3 @@ module API
     end
   end
 end
-
-API::APIGuard::HelperMethods.prepend_mod

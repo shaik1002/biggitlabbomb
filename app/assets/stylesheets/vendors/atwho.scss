@@ -9,12 +9,11 @@
   @apply gl-text-default;
 
   border-radius: $gl-border-radius-large;
-  @apply gl-shadow-md;
+  @include gl-shadow-md;
 
 
   small {
     font-size: $gl-font-size-sm;
-    @apply gl-text-subtle;
   }
 
   small.description {
@@ -58,7 +57,7 @@
       line-height: $gl-line-height-16;
 
       &.cur {
-        @apply gl-focus;
+        @include gl-focus;
         color: var(--gl-dropdown-option-text-color-hover);
         background-color: var(--gl-dropdown-option-background-color-unselected-hover);
 

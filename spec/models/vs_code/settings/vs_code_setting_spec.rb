@@ -14,8 +14,7 @@ RSpec.describe VsCode::Settings::VsCodeSetting, feature_category: :web_ide do
   end
 
   describe 'validates the uniqueness of attributes' do
-    it { is_expected.to validate_uniqueness_of(:setting_type).scoped_to([:user_id, :settings_context_hash]) }
-    it { is_expected.to validate_uniqueness_of(:settings_context_hash).scoped_to([:user_id, :setting_type]) }
+    it { is_expected.to validate_uniqueness_of(:setting_type).scoped_to([:user_id]) }
   end
 
   describe 'relationship validation' do

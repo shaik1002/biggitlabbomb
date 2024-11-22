@@ -1,59 +1,27 @@
-import { GlAvatar, GlBadge, GlTab, GlTabs, GlIcon, GlSprintf, GlLink } from '@gitlab/ui';
-import VueRouter from 'vue-router';
+import { shallowMount } from '@vue/test-utils';
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
-import { mountExtended, shallowMountExtended } from 'helpers/vue_test_utils_helper';
 import * as Sentry from '~/sentry/sentry_browser_wrapper';
 import { visitUrlWithAlerts } from '~/lib/utils/url_utility';
 import { createAlert } from '~/alert';
 import { ShowMlModelVersion } from '~/ml/model_registry/apps';
 import ModelVersionDetail from '~/ml/model_registry/components/model_version_detail.vue';
-import ModelVersionPerformance from '~/ml/model_registry/components/model_version_performance.vue';
-import ModelVersionArtifacts from '~/ml/model_registry/components/model_version_artifacts.vue';
 import ModelVersionActionsDropdown from '~/ml/model_registry/components/model_version_actions_dropdown.vue';
+import ModeldVersionEdit from '~/ml/model_registry/components/model_version_edit.vue';
 import deleteModelVersionMutation from '~/ml/model_registry/graphql/mutations/delete_model_version.mutation.graphql';
 import TitleArea from '~/vue_shared/components/registry/title_area.vue';
 import LoadOrErrorOrShow from '~/ml/model_registry/components/load_or_error_or_show.vue';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import getModelVersionQuery from '~/ml/model_registry/graphql/queries/get_model_version.query.graphql';
 import waitForPromises from 'helpers/wait_for_promises';
-import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 
 import {
   deleteModelVersionResponses,
-  modelVersionQueryWithAuthor,
-  modelVersionWithCandidateAndAuthor,
+  modelVersionQuery,
+  modelVersionWithCandidate,
 } from '../graphql_mock_data';
 
-jest.mock('~/ml/model_registry/components/model_version_detail.vue', () => {
-  const { props } = jest.requireActual(
-    '~/ml/model_registry/components/model_version_detail.vue',
-  ).default;
-  return {
-    props,
-    render() {},
-  };
-});
-
-jest.mock('~/ml/model_registry/components/model_version_performance.vue', () => {
-  const { props } = jest.requireActual(
-    '~/ml/model_registry/components/model_version_performance.vue',
-  ).default;
-  return {
-    props,
-    render() {},
-  };
-});
-
-jest.mock('~/ml/model_registry/components/model_version_artifacts.vue', () => {
-  const { props } = jest.requireActual(
-    '~/ml/model_registry/components/model_version_artifacts.vue',
-  ).default;
-  return {
-    props,
-    render() {},
-  };
-});
+Vue.use(VueApollo);
 
 jest.mock('~/alert');
 jest.mock('~/lib/utils/url_utility', () => ({
@@ -61,11 +29,9 @@ jest.mock('~/lib/utils/url_utility', () => ({
   visitUrlWithAlerts: jest.fn(),
 }));
 
-let wrapper;
-let apolloProvider;
 describe('ml/model_registry/apps/show_model_version.vue', () => {
-  Vue.use(VueApollo);
-  Vue.use(VueRouter);
+  let wrapper;
+  let apolloProvider;
 
   beforeEach(() => {
     jest.spyOn(Sentry, 'captureException').mockImplementation();
@@ -75,26 +41,24 @@ describe('ml/model_registry/apps/show_model_version.vue', () => {
     apolloProvider = null;
   });
 
-  const createWrapper = ({
-    resolver = jest.fn().mockResolvedValue(modelVersionQueryWithAuthor),
+  const createWrapper = (
+    resolver = jest.fn().mockResolvedValue(modelVersionQuery),
     deleteResolver = jest.fn().mockResolvedValue(deleteModelVersionResponses.success),
     canWriteModelRegistry = true,
-    mountFn = shallowMountExtended,
-  } = {}) => {
+  ) => {
     const requestHandlers = [
       [getModelVersionQuery, resolver],
       [deleteModelVersionMutation, deleteResolver],
     ];
     apolloProvider = createMockApollo(requestHandlers);
 
-    wrapper = mountFn(ShowMlModelVersion, {
+    wrapper = shallowMount(ShowMlModelVersion, {
       propsData: {
         modelName: 'blah',
         versionName: '1.2.3',
         modelId: 1,
         modelVersionId: 2,
         projectPath: 'path/to/project',
-        editModelVersionPath: 'edit/model/version/path',
         canWriteModelRegistry,
         importPath: 'path/to/import',
         modelPath: 'path/to/model',
@@ -104,31 +68,15 @@ describe('ml/model_registry/apps/show_model_version.vue', () => {
       apolloProvider,
       stubs: {
         LoadOrErrorOrShow,
-        GlTab,
-        GlBadge,
-        GlSprintf,
-        GlLink,
-        TimeAgoTooltip,
       },
     });
-
-    return waitForPromises();
   };
 
   const findTitleArea = () => wrapper.findComponent(TitleArea);
   const findModelVersionDetail = () => wrapper.findComponent(ModelVersionDetail);
   const findModelVersionActionsDropdown = () => wrapper.findComponent(ModelVersionActionsDropdown);
   const findLoadOrErrorOrShow = () => wrapper.findComponent(LoadOrErrorOrShow);
-  const findModelMetadata = () => wrapper.findByTestId('metadata');
-  const findTimeAgoTooltip = () => wrapper.findComponent(TimeAgoTooltip);
-  const findModelVersionEditButton = () => wrapper.findByTestId('edit-model-version-button');
-  const findTabs = () => wrapper.findComponent(GlTabs);
-  const findDetailTab = () => wrapper.findAllComponents(GlTab).at(0);
-  const findArtifactsTab = () => wrapper.findAllComponents(GlTab).at(1);
-  const findArtifactsCountBadge = () => findArtifactsTab().findComponent(GlBadge);
-  const findPerformanceTab = () => wrapper.findAllComponents(GlTab).at(2);
-  const findModelVersionPerformance = () => wrapper.findComponent(ModelVersionPerformance);
-  const findModelVersionArtifacts = () => wrapper.findComponent(ModelVersionArtifacts);
+  const findEditButton = () => wrapper.findComponent(ModeldVersionEdit);
 
   it('renders the title', () => {
     createWrapper();
@@ -136,53 +84,10 @@ describe('ml/model_registry/apps/show_model_version.vue', () => {
     expect(findTitleArea().props('title')).toBe('blah / 1.2.3');
   });
 
-  describe('Model version edit button', () => {
-    beforeEach(() => createWrapper());
-
-    it('displays model version edit button', () => {
-      expect(findModelVersionEditButton().props()).toMatchObject({
-        variant: 'confirm',
-        category: 'primary',
-      });
-    });
-
-    describe('when user has no permission to write model registry', () => {
-      it('does not display model edit button', () => {
-        createWrapper({ canWriteModelRegistry: false });
-        expect(findModelVersionEditButton().exists()).toBe(false);
-      });
-    });
-  });
-
-  describe('Sidebar', () => {
-    const findSidebarAuthorLink = () => wrapper.findByTestId('sidebar-author-link');
-    const findAvatar = () => wrapper.findComponent(GlAvatar);
-
-    it('displays sidebar author link', async () => {
-      const resolver = jest.fn().mockResolvedValue(modelVersionQueryWithAuthor);
-
-      createWrapper({ resolver });
-
-      await waitForPromises();
-
-      expect(findSidebarAuthorLink().attributes('href')).toBe('path/to/user');
-      expect(findSidebarAuthorLink().text()).toBe('Root');
-      expect(findAvatar().props('src')).toBe('path/to/avatar');
-    });
-
-    describe('when model does not get loaded', () => {
-      it('does not displays sidebar author link', async () => {
-        createWrapper({ resolver: jest.fn().mockRejectedValue(new Error('Failure!')) });
-        await waitForPromises();
-        expect(findSidebarAuthorLink().exists()).toBe(false);
-      });
-    });
-  });
-
   it('Requests data with the right parameters', async () => {
-    const resolver = jest.fn().mockResolvedValue(modelVersionQueryWithAuthor);
+    const resolver = jest.fn().mockResolvedValue(modelVersionQuery);
 
-    createWrapper({ resolver });
+    createWrapper(resolver);
 
     await waitForPromises();
 
@@ -194,96 +99,17 @@ describe('ml/model_registry/apps/show_model_version.vue', () => {
     );
   });
 
-  describe('Tabs', () => {
-    beforeEach(() => createWrapper());
-
-    it('has a details tab', () => {
-      expect(findDetailTab().attributes('title')).toBe('Version card');
-    });
-
-    it('shows the number of artifacts in the tab', () => {
-      expect(findArtifactsCountBadge().text()).toBe(
-        modelVersionWithCandidateAndAuthor.artifactsCount.toString(),
-      );
-    });
-
-    it('has a performance tab', () => {
-      expect(findPerformanceTab().attributes('title')).toBe('Performance');
-    });
-
-    it('has an artifacts tab', () => {
-      expect(findArtifactsTab().text()).toContain('Artifacts');
-    });
-  });
-
-  it('Show version metadata', async () => {
+  it('Displays data when loaded', async () => {
     createWrapper();
 
     await waitForPromises();
 
-    expect(findModelMetadata().findComponent(GlIcon).props('name')).toBe('machine-learning');
-    expect(findModelMetadata().text()).toBe('Version created in 3 years by Root');
-
-    expect(findTimeAgoTooltip().props('time')).toBe(modelVersionWithCandidateAndAuthor.createdAt);
-    expect(findTimeAgoTooltip().props('tooltipPlacement')).toBe('top');
-
-    expect(findModelMetadata().findComponent(GlLink).attributes('href')).toBe('path/to/user');
-    expect(findModelMetadata().findComponent(GlLink).text()).toBe('Root');
-  });
-
-  describe('Navigation', () => {
-    it.each(['#/', '#/unknown-tab'])('shows details when location hash is `%s`', async (path) => {
-      await createWrapper({ mountFn: mountExtended });
-
-      await wrapper.vm.$router.push({ path });
-
-      expect(findTabs().props('value')).toBe(0);
-      expect(findModelVersionDetail().exists()).toBe(true);
-      expect(findModelVersionPerformance().exists()).toBe(false);
-      expect(findModelVersionArtifacts().exists()).toBe(false);
-    });
-
-    it('shows model details when location hash is default', async () => {
-      await createWrapper({ mountFn: mountExtended });
-
-      expect(findTabs().props('value')).toBe(0);
-      expect(findModelVersionDetail().props('modelVersion')).toMatchObject(
-        modelVersionWithCandidateAndAuthor,
-      );
-      expect(findModelVersionArtifacts().exists()).toBe(false);
-      expect(findModelVersionPerformance().exists()).toBe(false);
-    });
-
-    it('shows model artifacts when location hash is `#/artifacts`', async () => {
-      await createWrapper({ mountFn: mountExtended });
-
-      await wrapper.vm.$router.push({ path: '/artifacts' });
-
-      expect(findTabs().props('value')).toBe(1);
-      expect(findModelVersionDetail().exists()).toBe(false);
-      expect(findModelVersionPerformance().exists()).toBe(false);
-      expect(findModelVersionArtifacts().props('modelVersion')).toMatchObject(
-        modelVersionWithCandidateAndAuthor,
-      );
-    });
-
-    it('shows model performance when location hash is `#/performance`', async () => {
-      await createWrapper({ mountFn: mountExtended });
-
-      await wrapper.vm.$router.push({ path: '/performance' });
-
-      expect(findTabs().props('value')).toBe(2);
-      expect(findModelVersionDetail().exists()).toBe(false);
-      expect(findModelVersionArtifacts().exists()).toBe(false);
-      expect(findModelVersionPerformance().props('modelVersion')).toMatchObject(
-        modelVersionWithCandidateAndAuthor,
-      );
-    });
+    expect(findModelVersionDetail().props('modelVersion')).toMatchObject(modelVersionWithCandidate);
   });
 
   it('Shows error message on error', async () => {
     const error = new Error('Failure!');
-    createWrapper({ resolver: jest.fn().mockRejectedValue(error) });
+    createWrapper(jest.fn().mockRejectedValue(error));
 
     await waitForPromises();
 
@@ -330,7 +156,7 @@ describe('ml/model_registry/apps/show_model_version.vue', () => {
 
   it('Displays an alert upon failed delete mutation', async () => {
     const failedDeleteResolver = jest.fn().mockResolvedValue(deleteModelVersionResponses.failure);
-    createWrapper({ resolver: undefined, deleteResolver: failedDeleteResolver });
+    createWrapper(undefined, failedDeleteResolver);
 
     findModelVersionActionsDropdown().vm.$emit('delete-model-version');
 
@@ -345,10 +171,7 @@ describe('ml/model_registry/apps/show_model_version.vue', () => {
 
   it('Logs to sentry upon failed delete mutation', async () => {
     const failedDeleteResolver = jest.fn().mockResolvedValue(deleteModelVersionResponses.failure);
-    createWrapper({
-      resolver: undefined,
-      deleteResolver: failedDeleteResolver,
-    });
+    createWrapper(undefined, failedDeleteResolver);
 
     findModelVersionActionsDropdown().vm.$emit('delete-model-version');
 
@@ -363,22 +186,14 @@ describe('ml/model_registry/apps/show_model_version.vue', () => {
   });
 
   it('Does not display the edit button when user is not allowed to write', async () => {
-    createWrapper({
-      resolver: undefined,
-      deleteResolver: undefined,
-      canWriteModelRegistry: false,
-    });
+    createWrapper(undefined, undefined, false);
     await waitForPromises();
-    expect(findModelVersionEditButton().exists()).toBe(false);
+    expect(findEditButton().exists()).toBe(false);
   });
 
   it('Displays the edit button when user is allowed to write', async () => {
-    createWrapper({
-      resolve: undefined,
-      deleteResolver: undefined,
-      canWriteModelRegistry: true,
-    });
+    createWrapper(undefined, undefined, true);
     await waitForPromises();
-    expect(findModelVersionEditButton().exists()).toBe(true);
+    expect(findEditButton().exists()).toBe(true);
   });
 });

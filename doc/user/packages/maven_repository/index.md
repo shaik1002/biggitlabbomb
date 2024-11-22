@@ -614,16 +614,16 @@ Remember to adjust the Maven version, Java version, and other specifics accordin
 This example configures a pipeline that builds and publishes a Maven package:
 
 ```yaml
-default:
-  image: maven:3.8.5-openjdk-17
-  cache:
-    paths:
-      - .m2/repository/
-      - target/
+image: maven:3.8.5-openjdk-17
 
 variables:
   MAVEN_CLI_OPTS: "-s .m2/settings.xml --batch-mode"
   MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
+
+cache:
+  paths:
+    - .m2/repository/
+    - target/
 
 stages:
   - build
@@ -653,16 +653,16 @@ publish:
 For larger projects with multiple modules, you can use parallel jobs to speed up the build process:
 
 ```yaml
-default:
-  image: maven:3.8.5-openjdk-17
-  cache:
-    paths:
-      - .m2/repository/
-      - target/
+image: maven:3.8.5-openjdk-17
 
 variables:
   MAVEN_CLI_OPTS: "-s .m2/settings.xml --batch-mode"
   MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
+
+cache:
+  paths:
+    - .m2/repository/
+    - target/
 
 stages:
   - build
@@ -695,16 +695,16 @@ publish:
 This example creates versioned releases when a tag is pushed:
 
 ```yaml
-default:
-  image: maven:3.8.5-openjdk-17
-  cache:
-    paths:
-      - .m2/repository/
-      - target/
+image: maven:3.8.5-openjdk-17
 
 variables:
   MAVEN_CLI_OPTS: "-s .m2/settings.xml --batch-mode"
   MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
+
+cache:
+  paths:
+    - .m2/repository/
+    - target/
 
 stages:
   - build
@@ -726,8 +726,8 @@ publish:
   stage: publish
   script:
     - mvn $MAVEN_CLI_OPTS deploy
-  rules:
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  only:
+    - main
 
 release:
   stage: release
@@ -743,16 +743,16 @@ release:
 This example publishes packages only when certain files are changed:
 
 ```yaml
-default:
-  image: maven:3.8.5-openjdk-17
-  cache:
-    paths:
-      - .m2/repository/
-      - target/
+image: maven:3.8.5-openjdk-17
 
 variables:
   MAVEN_CLI_OPTS: "-s .m2/settings.xml --batch-mode"
   MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
+
+cache:
+  paths:
+    - .m2/repository/
+    - target/
 
 stages:
   - build
@@ -773,11 +773,12 @@ publish:
   stage: publish
   script:
     - mvn $MAVEN_CLI_OPTS deploy
+  only:
+    - main
   rules:
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-      changes:
-        - pom.xml
-        - src/**/*
+    - changes:
+      - pom.xml
+      - src/**/*
 ```
 
 ### Integration with code quality and security scans
@@ -785,12 +786,7 @@ publish:
 This example integrates code quality checks and security scans into the pipeline:
 
 ```yaml
-default:
-  image: maven:3.8.5-openjdk-17
-  cache:
-    paths:
-      - .m2/repository/
-      - target/
+image: maven:3.8.5-openjdk-17
 
 variables:
   MAVEN_CLI_OPTS: "-s .m2/settings.xml --batch-mode"
@@ -799,6 +795,11 @@ variables:
 include:
   - template: Security/SAST.gitlab-ci.yml
   - template: Code-Quality.gitlab-ci.yml
+
+cache:
+  paths:
+    - .m2/repository/
+    - target/
 
 stages:
   - build
@@ -1192,7 +1193,7 @@ Dependency conflicts can be resolved by:
 This is typically a SSL certificate issue. To resolve:
 
 - Ensure your JDK trusts the GitLab server's SSL certificate.
-- If using a self-signed certificate, add it to the truststore of your JDK.
+- If using a self-signed certificate, add it to your JDK's truststore.
 - As a last resort, you can disable SSL verification in Maven settings. Not recommended for production.
 
 ### "No plugin found for prefix" pipeline errors

@@ -4,7 +4,7 @@ import { RENDER_ALL_SLOTS_TEMPLATE, stubComponent } from 'helpers/stub_component
 import { mockTracking, unmockTracking } from 'helpers/tracking_helper';
 import { mountExtended, shallowMountExtended } from 'helpers/vue_test_utils_helper';
 import InviteModalBase from '~/invite_members/components/invite_modal_base.vue';
-import ContentTransition from '~/invite_members/components/content_transition.vue';
+import ContentTransition from '~/vue_shared/components/content_transition.vue';
 import RoleSelector from '~/members/components/role_selector.vue';
 import { roleDropdownItems } from '~/members/utils';
 
@@ -227,7 +227,7 @@ describe('InviteModalBase', () => {
 
     describe('when users limit is not reached', () => {
       const textRegex =
-        /Select a role\s*Read more about role permissions. You can change this later.\s*Access expiration date \(optional\)/;
+        /Select a role\s*Read more about role permissions\s*Access expiration date \(optional\)/;
 
       beforeEach(() => {
         createComponent({ props: { reachedLimit: false }, stubs: { GlModal, GlFormGroup } });

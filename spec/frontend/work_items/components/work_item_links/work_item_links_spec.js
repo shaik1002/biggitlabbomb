@@ -18,11 +18,7 @@ import WorkItemChildrenWrapper from '~/work_items/components/work_item_links/wor
 import WorkItemDetailModal from '~/work_items/components/work_item_detail_modal.vue';
 import WorkItemAbuseModal from '~/work_items/components/work_item_abuse_modal.vue';
 import WorkItemMoreActions from '~/work_items/components/shared/work_item_more_actions.vue';
-import {
-  FORM_TYPES,
-  WORKITEM_LINKS_SHOWLABELS_LOCALSTORAGEKEY,
-  WORKITEM_TREE_SHOWCLOSED_LOCALSTORAGEKEY,
-} from '~/work_items/constants';
+import { FORM_TYPES } from '~/work_items/constants';
 import getWorkItemTreeQuery from '~/work_items/graphql/work_item_tree.query.graphql';
 
 import { useLocalStorageSpy } from 'helpers/local_storage_helper';
@@ -34,7 +30,6 @@ import {
   workItemHierarchyTreeEmptyResponse,
   workItemHierarchyNoUpdatePermissionResponse,
   workItemByIidResponseFactory,
-  workItemHierarchyTreeSingleClosedItemResponse,
   mockWorkItemCommentNote,
 } from '../../mock_data';
 
@@ -318,8 +313,8 @@ describe('WorkItemLinks', () => {
     useLocalStorageSpy();
 
     beforeEach(async () => {
-      jest.spyOn(utils, 'getToggleFromLocalStorage');
-      jest.spyOn(utils, 'saveToggleToLocalStorage');
+      jest.spyOn(utils, 'getShowLabelsFromLocalStorage');
+      jest.spyOn(utils, 'saveShowLabelsToLocalStorage');
       await createComponent();
     });
 
@@ -357,40 +352,13 @@ describe('WorkItemLinks', () => {
       expect(findWorkItemLinkChildrenWrapper().props('showLabels')).toBe(true);
     });
 
-    it('calls saveToggleToLocalStorage on toggle-show-labels', () => {
+    it('calls saveShowLabelsToLocalStorage on toggle', () => {
       findMoreActions().vm.$emit('toggle-show-labels');
-      expect(utils.saveToggleToLocalStorage).toHaveBeenCalled();
+      expect(utils.saveShowLabelsToLocalStorage).toHaveBeenCalled();
     });
 
-    it('calls getToggleFromLocalStorage on mount for toggle-show-labels', () => {
-      expect(utils.getToggleFromLocalStorage).toHaveBeenCalledWith(
-        WORKITEM_LINKS_SHOWLABELS_LOCALSTORAGEKEY,
-      );
+    it('calls getShowLabelsFromLocalStorage on mount', () => {
+      expect(utils.getShowLabelsFromLocalStorage).toHaveBeenCalled();
     });
-
-    it('calls saveToggleToLocalStorage on toggle-show-closed', () => {
-      findMoreActions().vm.$emit('toggle-show-closed');
-      expect(utils.saveToggleToLocalStorage).toHaveBeenCalled();
-    });
-
-    it('calls getToggleFromLocalStorage on mount for toggle-show-closed', () => {
-      expect(utils.getToggleFromLocalStorage).toHaveBeenCalledWith(
-        WORKITEM_TREE_SHOWCLOSED_LOCALSTORAGEKEY,
-      );
-    });
-  });
-
-  it('displays no child items open message', async () => {
-    await createComponent({
-      fetchHandler: jest.fn().mockResolvedValue(workItemHierarchyTreeSingleClosedItemResponse),
-    });
-
-    expect(wrapper.findByTestId('work-item-no-child-items-open').exists()).toBe(false);
-
-    await findMoreActions().vm.$emit('toggle-show-closed');
-
-    expect(wrapper.findByTestId('work-item-no-child-items-open').text()).toBe(
-      'No child items are currently open.',
-    );
   });
 });

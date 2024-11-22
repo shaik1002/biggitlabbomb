@@ -1,12 +1,10 @@
 ---
 stage: AI-powered
-group: Duo Workflow
+group: AI Framework
 info: Any user with at least the Maintainer role can merge updates to this content. For details, see https://docs.gitlab.com/ee/development/development_processes.html#development-guidelines-review.
 ---
 
 # Setting up local development for Duo Workflow
-
-This detailed guide describes setting up the local development environment for [Duo Workflow](../../user/duo_workflow/index.md). Alternatively, you can also [set up Duo Workflow directly with GDK](https://gitlab.com/gitlab-org/gitlab-development-kit/-/blob/main/doc/howto/duo_workflow.md?ref_type=heads).
 
 ## Prerequisites
 
@@ -42,7 +40,6 @@ This detailed guide describes setting up the local development environment for [
 1. Set up [GitLab Runner with GDK](https://gitlab.com/gitlab-org/gitlab-development-kit/blob/main/doc/howto/runner.md) so you can create CI jobs locally to test Workflow.
 1. Create a [personal access token](../../user/profile/personal_access_tokens.md) in your local GitLab instance with the `api` scope. Save this value and use it in the next step.
 1. Run GDK with an Ultimate license.
-1. If you're running GitLab in SaaS mode, you'll need to turn on the `beta and experimental features` functionality, as they are [turned off by default](../../user/gitlab_duo/turn_on_off.md#turn-on-beta-and-experimental-features). In the group settings for the project you'll run workflow against, ensure that the `Use experiment and beta Duo features` checkbox is checked.
 1. Manually create a Workflow using the following `curl` request; the output will be a workflow ID that is referred to as `$WORKFLOW_ID` throughout the rest of these docs:
 
    ```shell
@@ -57,7 +54,7 @@ This detailed guide describes setting up the local development environment for [
 
 ## Set up the Duo Workflow Service
 
-1. Clone the [Duo Workflow Service repository](https://gitlab.com/gitlab-org/duo-workflow/duo-workflow-service).
++1. Clone the [Duo Workflow Service repository](https://gitlab.com/gitlab-org/duo-workflow/duo-workflow-service).
 
    ```shell
      git clone git@gitlab.com:gitlab-org/duo-workflow/duo-workflow-service.git
@@ -180,17 +177,7 @@ Executor.
 If you would like to start Duo Workflow with the VS Code extension instead,
 follow [these steps](../../user/duo_workflow/index.md#prerequisites).
 
-If you would like to start Duo Workflow with a locally running VS Code extension and GitLab Language Server (for debugging or making changes to the extension)
-
-1. Clone [language server](https://gitlab.com/gitlab-org/editor-extensions/gitlab-lsp).
-1. Clone [VSCode extension](https://gitlab.com/gitlab-org/gitlab-vscode-extension).
-1. Change directory (`cd`) into language server.
-1. Run `npm install`.
-1. Run `npm run watch -- --editor=vscode --packages webview-duo-workflow workflow-api --vscode-path path-to-vscode-extension-from-step-2`.
-1. Open VSCode extension project in VSCode.
-1. Click **Run and Debug**, choose **Run Extension** in the dropdown and select **Play**.
-1. If prompted with **All installed extensions are temporarily disabled**, do not click **Reload and Enable extensions** because that will use native extensions.
-1. In the command palette, run `GitLab: Show Duo Workflow`.
+If you are debugging or making changes to the VSCode extension and need to run the extension in development mode, you can do that following [these instructions](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/blob/main/CONTRIBUTING.md#configuring-development-environment).
 
 ## Troubleshooting
 

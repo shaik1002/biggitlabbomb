@@ -136,7 +136,7 @@ To view when the data was most recently updated, in the right corner next to **E
 Value stream analytics measures each stage from its start event to its end event.
 Only items that have reached their end event are included in the stage time calculation.
 
-By default, blocked issues are not included in the lifecycle overview.
+By default, blocked issues are not included in the life cycle overview.
 However, you can use custom labels (for example `workflow::blocked`) to track them.
 
 You can customize stages in value stream analytics based on pre-defined events.
@@ -449,6 +449,11 @@ DETAILS:
 **Tier:** Premium, Ultimate
 **Offering:** GitLab.com, Self-managed, GitLab Dedicated
 
+> - **New value stream** feature [changed](https://gitlab.com/gitlab-org/gitlab/-/issues/381002) from a dialog to a page in GitLab 16.11 [with a flag](../../../administration/feature_flags.md) named `vsa_standalone_settings_page`. Disabled by default.
+
+FLAG:
+On self-managed GitLab, by default the **New value stream** feature is not available. To make it available, an administrator can enable the [feature flag](../../../administration/feature_flags.md) named `vsa_standalone_settings_page`. On GitLab.com and GitLab Dedicated, this feature is not available. This feature is not ready for production use.
+
 ### Create a value stream with GitLab default stages
 
 When you create a value stream, you can use GitLab default stages and hide or re-order them. You can also
@@ -503,7 +508,7 @@ To learn more about the implementation, see the blog post [Applying GitLab Label
 
 #### Example for custom value stream configuration
 
-![Example configuration](img/object_hierarchy_v14_10.png "Example custom value stream configuration")
+![Example configuration](img/object_hierarchy_example_V14_10.png "Example custom value stream configuration")
 
 In the example above, two independent value streams are set up for two teams that are using different development workflows in the **Test Group** (top-level namespace).
 
@@ -514,6 +519,11 @@ The first value stream uses standard timestamp-based events for defining the sta
 DETAILS:
 **Tier:** Premium, Ultimate
 **Offering:** GitLab.com, Self-managed, GitLab Dedicated
+
+> - **Edit value stream** feature [changed](https://gitlab.com/gitlab-org/gitlab/-/issues/381002) from a dialog to a page in GitLab 16.11 [with a flag](../../../administration/feature_flags.md) named `vsa_standalone_settings_page`. Disabled by default.
+
+FLAG:
+On self-managed GitLab, by default the **Edit value stream** feature is not available. To make it available, an administrator can enable the [feature flag](../../../administration/feature_flags.md) named `vsa_standalone_settings_page`. On GitLab.com and GitLab Dedicated, this feature is not available. This feature is not ready for production use.
 
 After you create a value stream, you can customize it to suit your purposes. To edit a value stream:
 
@@ -731,12 +741,11 @@ group(fullPath: "your-group-path") {
 ## Forecast deployment frequency with Value Stream Forecasting
 
 DETAILS:
-**Tier:** Ultimate with GitLab Duo Enterprise - [Start a trial](https://about.gitlab.com/solutions/gitlab-duo-pro/sales/?type=free-trial)
+**Tier: GitLab.com and Self-managed:** For a limited time, Ultimate. On October 17, 2024, Ultimate with [GitLab Duo Enterprise](https://about.gitlab.com/gitlab-duo/#pricing). **GitLab Dedicated:** GitLab Duo Enterprise.
 **Offering:** GitLab.com, Self-managed, GitLab Dedicated
 **Status:** Experiment
 
 > - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/10228) in GitLab 16.2 as an [experiment](../../../policy/experiment-beta-support.md#experiment).
-> - Changed to require GitLab Duo add-on in GitLab 17.6 and later.
 
 Improve your planning and decision-making by predicting productivity metrics and
 identifying anomalies across your software development lifecycle.
@@ -760,7 +769,7 @@ a duration that is half of the selected date range.
 For example, if you select a 30-day range, a forecast for the following 15 days
 is displayed.
 
-![Forecast deployment frequency](img/forecast_deployment_frequency_v16_5.png)
+![Forecast deployment frequency](img/forecast_deployment_frequency.png)
 
 Provide feedback on this experimental feature in [issue 416833](https://gitlab.com/gitlab-org/gitlab/-/issues/416833).
 

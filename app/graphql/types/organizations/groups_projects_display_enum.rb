@@ -9,7 +9,7 @@ module Types
       UserPreference.organization_groups_projects_displays.each_key do |field|
         value field.upcase, value: field,
           description: "Display organization #{field} list.",
-          experiment: { milestone: '17.2' }
+          alpha: { milestone: '17.2' }
       end
     end
   end

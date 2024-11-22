@@ -19,7 +19,7 @@ export default {
 
 <template>
   <span id="popovercontainer" class="gl-ml-2">
-    <gl-icon id="issue-type-info" name="question-o" variant="info" />
+    <gl-icon id="issue-type-info" name="question-o" class="gl-text-blue-600" />
 
     <gl-popover
       target="issue-type-info"

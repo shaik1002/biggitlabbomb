@@ -6,10 +6,6 @@ module Mutations
       class Play < Base
         graphql_name 'JobPlay'
 
-        argument :id, ::Types::GlobalIDType[::Ci::Processable],
-          required: true,
-          description: 'ID of the job to mutate.'
-
         field :job,
           Types::Ci::JobType,
           null: true,
@@ -25,9 +21,10 @@ module Mutations
 
         def resolve(id:, variables:)
           job = authorized_find!(id: id)
+          project = job.project
           variables = variables.map(&:to_h)
 
-          job.play(current_user, variables)
+          ::Ci::PlayBuildService.new(project, current_user).execute(job, variables)
 
           {
             job: job,

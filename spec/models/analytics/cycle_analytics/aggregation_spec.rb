@@ -12,7 +12,7 @@ RSpec.describe Analytics::CycleAnalytics::Aggregation, type: :model, feature_cat
 
     %i[incremental_runtimes_in_seconds incremental_processed_records full_runtimes_in_seconds full_processed_records].each do |column|
       it "validates the array length of #{column}" do
-        record = described_class.new(column => Array.new(11, 1))
+        record = described_class.new(column => [1] * 11)
 
         expect(record).to be_invalid
         expect(record.errors).to have_key(column)
@@ -84,14 +84,14 @@ RSpec.describe Analytics::CycleAnalytics::Aggregation, type: :model, feature_cat
       end
     end
 
-    describe '#complete' do
+    describe '#reset_full_run_cursors' do
       it 'resets all full run cursors to nil' do
         aggregation.last_full_issues_id = 111
         aggregation.last_full_issues_updated_at = Time.current
         aggregation.last_full_merge_requests_id = 111
         aggregation.last_full_merge_requests_updated_at = Time.current
 
-        aggregation.complete
+        aggregation.reset_full_run_cursors
 
         expect(aggregation).to have_attributes(
           last_full_issues_id: nil,

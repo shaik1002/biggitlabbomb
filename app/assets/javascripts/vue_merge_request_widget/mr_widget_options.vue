@@ -194,9 +194,9 @@ export default {
       return !hasCI && mergeRequestAddCiConfigPath && !isDismissedSuggestPipeline;
     },
     showRenderMigrateFromJenkins() {
-      const { hasCI, isDismissedJenkinsMigration, ciIntegrationJenkins } = this.mr;
+      const { hasCI, isIntegrationJenkinsDismissed, ciIntegrationJenkins } = this.mr;
 
-      return hasCI && !isDismissedJenkinsMigration && ciIntegrationJenkins;
+      return hasCI && !isIntegrationJenkinsDismissed && ciIntegrationJenkins;
     },
     shouldRenderCollaborationStatus() {
       return this.mr.allowCollaboration && this.mr.isOpen;
@@ -501,7 +501,7 @@ export default {
       this.mr.isDismissedSuggestPipeline = true;
     },
     dismissMigrateFromJenkins() {
-      this.mr.isDismissedJenkinsMigration = true;
+      this.mr.isIntegrationJenkinsDismissed = true;
     },
   },
 };
@@ -526,8 +526,6 @@ export default {
       v-if="showRenderMigrateFromJenkins"
       class="mr-widget-workflow"
       :human-access="formattedHumanAccess"
-      :path="mr.userCalloutsPath"
-      :feature-id="mr.migrateJenkinsFeatureId"
       @dismiss="dismissMigrateFromJenkins"
     />
     <mr-widget-pipeline-container
@@ -572,7 +570,7 @@ export default {
             v-if="autoMergeEnabled"
             :mr="mr"
             :service="service"
-            class="gl-border-b gl-border-b-section"
+            class="gl-border-b-1 gl-border-gray-100 gl-border-b-solid"
           />
           <merge-checks :mr="mr" :service="service" />
         </template>

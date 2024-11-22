@@ -404,14 +404,12 @@ RSpec.describe NotificationService, :mailer, feature_category: :team_planning do
               owner1,
               project_bot.resource_bot_resource,
               expiring_token,
-              {},
               mail: "bot_resource_access_token_about_to_expire_email"
             ).and(
               have_enqueued_email(
                 owner2,
                 project_bot.resource_bot_resource,
                 expiring_token,
-                {},
                 mail: "bot_resource_access_token_about_to_expire_email"
               )
             )
@@ -468,7 +466,6 @@ RSpec.describe NotificationService, :mailer, feature_category: :team_planning do
                 owner1,
                 project_bot.resource_bot_resource,
                 [expiring_token_1, expiring_token_2],
-                {},
                 mail: "bot_resource_access_token_about_to_expire_email"
               )
             )
@@ -478,7 +475,6 @@ RSpec.describe NotificationService, :mailer, feature_category: :team_planning do
                 owner2,
                 project_bot.resource_bot_resource,
                 [expiring_token_1, expiring_token_2],
-                {},
                 mail: "bot_resource_access_token_about_to_expire_email"
               )
             )
@@ -500,14 +496,12 @@ RSpec.describe NotificationService, :mailer, feature_category: :team_planning do
               maintainer,
               project_bot.resource_bot_resource,
               expiring_token,
-              {},
               mail: "bot_resource_access_token_about_to_expire_email"
             ).and(
               have_enqueued_email(
                 project.owner,
                 project_bot.resource_bot_resource,
                 expiring_token,
-                {},
                 mail: "bot_resource_access_token_about_to_expire_email"
               )
             )
@@ -526,7 +520,6 @@ RSpec.describe NotificationService, :mailer, feature_category: :team_planning do
                 maintainer,
                 project_bot.resource_bot_resource,
                 expiring_token,
-                {},
                 mail: "bot_resource_access_token_about_to_expire_email"
               )
             )
@@ -536,7 +529,6 @@ RSpec.describe NotificationService, :mailer, feature_category: :team_planning do
                 project.owner,
                 project_bot.resource_bot_resource,
                 expiring_token,
-                {},
                 mail: "bot_resource_access_token_about_to_expire_email"
               )
             )
@@ -552,7 +544,7 @@ RSpec.describe NotificationService, :mailer, feature_category: :team_planning do
       subject(:notification_service) { notification.access_token_about_to_expire(user, [pat.name]) }
 
       it 'sends email to the token owner' do
-        expect { notification_service }.to have_enqueued_email(user, [pat.name], {}, mail: "access_token_about_to_expire_email")
+        expect { notification_service }.to have_enqueued_email(user, [pat.name], mail: "access_token_about_to_expire_email")
       end
 
       it "logs notication sent message" do

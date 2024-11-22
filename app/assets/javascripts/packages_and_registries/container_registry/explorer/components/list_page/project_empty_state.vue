@@ -2,7 +2,6 @@
 import { GlEmptyState, GlSprintf, GlLink, GlFormInputGroup, GlFormInput } from '@gitlab/ui';
 import { s__ } from '~/locale';
 import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
-import { helpPagePath } from '~/helpers/help_page_helper';
 import {
   COPY_LOGIN_TITLE,
   COPY_BUILD_TITLE,
@@ -36,9 +35,6 @@ export default {
       'ContainerRegistry|You can add an image to this registry with the following commands:',
     ),
   },
-  containerRegistryHelpUrl: helpPagePath('user/packages/container_registry/index'),
-  twoFactorAuthHelpUrl: helpPagePath('user/profile/account/two_factor_authentication'),
-  personalAccessTokensHelpUrl: helpPagePath('user/profile/personal_access_tokens'),
 };
 </script>
 <template>
@@ -51,9 +47,7 @@ export default {
       <p>
         <gl-sprintf :message="$options.i18n.introText">
           <template #docLink="{ content }">
-            <gl-link :href="$options.containerRegistryHelpUrl" target="_blank">{{
-              content
-            }}</gl-link>
+            <gl-link :href="config.helpPagePath" target="_blank">{{ content }}</gl-link>
           </template>
         </gl-sprintf>
       </p>
@@ -61,10 +55,10 @@ export default {
       <p>
         <gl-sprintf :message="$options.i18n.notLoggedInMessage">
           <template #twofaDocLink="{ content }">
-            <gl-link :href="$options.twoFactorAuthHelpUrl" target="_blank">{{ content }}</gl-link>
+            <gl-link :href="config.twoFactorAuthHelpLink" target="_blank">{{ content }}</gl-link>
           </template>
           <template #personalAccessTokensDocLink="{ content }">
-            <gl-link :href="$options.personalAccessTokensHelpUrl" target="_blank">{{
+            <gl-link :href="config.personalAccessTokensHelpLink" target="_blank">{{
               content
             }}</gl-link>
           </template>

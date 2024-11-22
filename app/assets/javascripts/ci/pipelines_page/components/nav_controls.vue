@@ -7,7 +7,6 @@ export default {
     GlButton,
     GlLink,
   },
-  inject: ['pipelinesAnalyticsPath'],
   props: {
     isResetCacheButtonLoading: {
       type: Boolean,
@@ -20,6 +19,11 @@ export default {
       default: null,
     },
     resetCachePath: {
+      type: String,
+      required: false,
+      default: null,
+    },
+    pipelinesAnalyticsPath: {
       type: String,
       required: false,
       default: null,

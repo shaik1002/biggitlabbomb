@@ -857,7 +857,7 @@ RSpec.describe MergeRequests::UpdateService, :mailer, feature_category: :code_re
 
       context 'when auto merge is enabled and target branch changed' do
         before do
-          AutoMergeService.new(project, user, { sha: merge_request.diff_head_sha }).execute(merge_request, AutoMergeService::STRATEGY_MERGE_WHEN_CHECKS_PASS)
+          AutoMergeService.new(project, user, { sha: merge_request.diff_head_sha }).execute(merge_request, AutoMergeService::STRATEGY_MERGE_WHEN_PIPELINE_SUCCEEDS)
         end
 
         it 'calls MergeRequests::ResolveTodosService#async_execute' do
@@ -920,6 +920,16 @@ RSpec.describe MergeRequests::UpdateService, :mailer, feature_category: :code_re
           end
         end
 
+        context 'when merge_when_checks_pass is disabled' do
+          before do
+            stub_feature_flags(merge_when_checks_pass: false)
+          end
+
+          it 'does not publish a DraftStateChangeEvent' do
+            expect { update_merge_request(title: 'New title') }.not_to publish_event(MergeRequests::DraftStateChangeEvent)
+          end
+        end
+
         context 'when removing through wip_event param' do
           it 'removes Draft from the title' do
             expect { update_merge_request({ wip_event: "ready" }) }
@@ -954,6 +964,16 @@ RSpec.describe MergeRequests::UpdateService, :mailer, feature_category: :code_re
             }
 
             expect { update_merge_request(title: 'Draft: New title') }.to publish_event(MergeRequests::DraftStateChangeEvent).with(expected_data)
+          end
+        end
+
+        context 'when merge_when_checks_pass is disabled' do
+          before do
+            stub_feature_flags(merge_when_checks_pass: false)
+          end
+
+          it 'does not publish a DraftStateChangeEvent' do
+            expect { update_merge_request(title: 'Draft: New title') }.not_to publish_event(MergeRequests::DraftStateChangeEvent)
           end
         end
 
@@ -1128,22 +1148,6 @@ RSpec.describe MergeRequests::UpdateService, :mailer, feature_category: :code_re
         expect do
           service.execute(merge_request.reload)
         end.to change { MergeRequestsClosingIssues.count }.from(3).to(1)
-      end
-
-      context 'when merge request has auto merge enabled' do
-        before do
-          merge_request.update!(auto_merge_enabled: true, merge_user: user)
-        end
-
-        it 'does not create `MergeRequestsClosingIssues` records' do
-          issue_closing_opts = { description: "Closes #{first_issue.to_reference} and #{second_issue.to_reference}" }
-          service = described_class.new(project: project, current_user: user, params: issue_closing_opts)
-          allow(service).to receive(:execute_hooks)
-
-          expect do
-            service.execute(merge_request)
-          end.to not_change { MergeRequestsClosingIssues.count }.from(0)
-        end
       end
 
       it_behaves_like 'merge request update that triggers work item updated subscription' do

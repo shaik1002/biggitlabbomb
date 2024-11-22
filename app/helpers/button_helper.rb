@@ -57,7 +57,9 @@ module ButtonHelper
     target = data.delete(:target)
     data[:clipboard_target] = target if target
 
-    data = { toggle: 'tooltip', placement: 'bottom', container: 'body', html: 'true' }.merge(data) unless hide_tooltip
+    unless hide_tooltip
+      data = { toggle: 'tooltip', placement: 'bottom', container: 'body', html: 'true' }.merge(data)
+    end
 
     render ::Pajamas::ButtonComponent.new(
       icon: hide_button_icon ? nil : 'copy-to-clipboard',

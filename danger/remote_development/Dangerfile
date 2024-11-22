@@ -1,3 +1,0 @@
-# frozen_string_literal: true
-
-remote_development.add_comment_if_shared_context_updated

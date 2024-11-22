@@ -3,8 +3,6 @@ data_category: optional
 key_path: usage_activity_by_stage.manage.projects_imported.manifest
 description: Distinct count of users that imported projects using Manifest file
 product_group: import_and_integrate
-product_categories:
-- importers
 value_type: number
 status: removed
 time_frame: all
@@ -12,7 +10,7 @@ data_source: database
 distribution:
 - ce
 - ee
-tiers:
+tier:
 - free
 - premium
 - ultimate

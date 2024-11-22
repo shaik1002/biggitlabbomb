@@ -1,5 +1,5 @@
 ---
-stage: Software Supply Chain Security
+stage: Govern
 group: Anti-Abuse
 info: Any user with at least the Maintainer role can merge updates to this content. For details, see https://docs.gitlab.com/ee/development/development_processes.html#development-guidelines-review.
 ---
@@ -94,7 +94,7 @@ To view logs associated with the [credit card stage](../security/identity_verifi
 - Query the GitLab production logs with the following KQL:
 
   ```plaintext
-  json.controller:"GitlabSubscriptions::SubscriptionsController" AND json.action:"payment_form" AND json.params.value:"cc_registration_validation"
+  json.controller:"SubscriptionsController" AND json.action:"payment_form" AND json.params.value:"cc_registration_validation"
   ```
 
 ## Code walkthrough

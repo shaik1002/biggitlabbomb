@@ -23,7 +23,7 @@ RSpec.describe 'Merge Requests > Filters generic behavior', :js, feature_categor
 
   context 'when filtered by a label' do
     before do
-      select_tokens 'Label', '=', bug.title, submit: true
+      input_filtered_search('label:=~bug')
     end
 
     describe 'state tabs' do
@@ -33,21 +33,21 @@ RSpec.describe 'Merge Requests > Filters generic behavior', :js, feature_categor
         expect(page).not_to have_content 'Bugfix2'
         expect(page).not_to have_content 'Feature'
 
-        click_link 'Merged'
+        find('.issues-state-filters [data-state="merged"]').click
 
         expect(page).to have_issuable_counts(open: 1, merged: 1, closed: 1, all: 3)
         expect(page).not_to have_content 'Bugfix1'
         expect(page).to have_content 'Bugfix2'
         expect(page).not_to have_content 'Feature'
 
-        click_link 'Closed'
+        find('.issues-state-filters [data-state="closed"]').click
 
         expect(page).to have_issuable_counts(open: 1, merged: 1, closed: 1, all: 3)
         expect(page).not_to have_content 'Bugfix1'
         expect(page).not_to have_content 'Bugfix2'
         expect(page).to have_content 'Feature'
 
-        click_link 'All'
+        find('.issues-state-filters [data-state="all"]').click
 
         expect(page).to have_issuable_counts(open: 1, merged: 1, closed: 1, all: 3)
         expect(page).to have_content 'Bugfix1'
@@ -58,12 +58,25 @@ RSpec.describe 'Merge Requests > Filters generic behavior', :js, feature_categor
 
     describe 'clear button' do
       it 'allows user to remove filtered labels' do
-        find_by_testid('filtered-search-clear-button').click
+        first('.clear-search').click
+        filtered_search.send_keys(:enter)
 
         expect(page).to have_issuable_counts(open: 1, merged: 1, closed: 1, all: 3)
         expect(page).to have_content 'Bugfix1'
         expect(page).not_to have_content 'Bugfix2'
         expect(page).not_to have_content 'Feature'
+      end
+    end
+  end
+
+  context 'filter dropdown' do
+    it 'filters by label name' do
+      filtered_search.set('label:=')
+      filtered_search.send_keys('~bug')
+
+      page.within '.filter-dropdown' do
+        expect(page).not_to have_content 'enhancement'
+        expect(page).to have_content 'bug'
       end
     end
   end

@@ -28,7 +28,7 @@ class RegistrationsController < Devise::RegistrationsController
 
   feature_category :instance_resiliency
 
-  helper_method :arkose_labs_enabled?, :preregistration_tracking_label, :onboarding_status_presenter
+  helper_method :arkose_labs_enabled?, :preregistration_tracking_label, :onboarding_status
 
   def new
     @resource = build_resource
@@ -146,21 +146,21 @@ class RegistrationsController < Devise::RegistrationsController
 
   private
 
-  def onboarding_status_presenter
-    Onboarding::StatusPresenter.new(onboarding_status_params, session['user_return_to'], resource)
+  def onboarding_status
+    Onboarding::Status.new(onboarding_status_params, session, resource)
   end
-  strong_memoize_attr :onboarding_status_presenter
+  strong_memoize_attr :onboarding_status
 
   # rubocop:disable Gitlab/NoCodeCoverageComment -- Fully tested in EE and tested in Foss through feature specs in spec/features/invites_spec.rb
   # :nocov:
   def onboarding_status_params
-    # Onboarding::StatusPresenter does not use any params in CE, we'll override in EE
+    # Onboarding::Status does not use any params in CE, we'll override in EE
     {}
   end
   # rubocop:enable Gitlab/NoCodeCoverageComment
 
   def allow_flash_content?(user)
-    user.blocked_pending_approval? || onboarding_status_presenter.single_invite?
+    user.blocked_pending_approval? || onboarding_status.single_invite?
   end
 
   def track_successful_user_creation(user)
@@ -190,7 +190,6 @@ class RegistrationsController < Devise::RegistrationsController
   end
 
   def check_captcha
-    set_current_organization
     return unless show_recaptcha_sign_up?
     return unless Gitlab::Recaptcha.load_configurations!
 
@@ -314,7 +313,7 @@ class RegistrationsController < Devise::RegistrationsController
     # overridden by EE module
   end
 
-  def arkose_labs_enabled?(user:) # rubocop:disable Lint/UnusedMethodArgument -- Param is unused here but used in EE override
+  def arkose_labs_enabled?(user: nil) # rubocop:disable Lint/UnusedMethodArgument -- Param is unused here but used in EE override
     false
   end
 

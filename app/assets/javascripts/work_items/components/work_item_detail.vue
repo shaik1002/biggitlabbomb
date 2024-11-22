@@ -104,13 +104,7 @@ export default {
     WorkItemAbuseModal,
   },
   mixins: [glFeatureFlagMixin()],
-  inject: [
-    'fullPath',
-    'reportAbusePath',
-    'groupPath',
-    'hasSubepicsFeature',
-    'hasLinkedItemsEpicsFeature',
-  ],
+  inject: ['fullPath', 'reportAbusePath', 'groupPath', 'hasSubepicsFeature'],
   props: {
     isModal: {
       type: Boolean,
@@ -380,9 +374,7 @@ export default {
       return !this.isModal && !this.editMode && !this.isDrawer;
     },
     workItemLinkedItems() {
-      return this.workItemType === WORK_ITEM_TYPE_VALUE_EPIC
-        ? this.isWidgetPresent(WIDGET_TYPE_LINKED_ITEMS) && this.hasLinkedItemsEpicsFeature
-        : this.isWidgetPresent(WIDGET_TYPE_LINKED_ITEMS);
+      return this.isWidgetPresent(WIDGET_TYPE_LINKED_ITEMS);
     },
     showWorkItemTree() {
       return this.isWidgetPresent(WIDGET_TYPE_HIERARCHY) && this.allowedChildTypes?.length > 0;
@@ -426,9 +418,6 @@ export default {
         variables: { id: this.workItem.id, atVersion: null },
       };
     },
-    iid() {
-      return this.workItemIid || this.workItem.iid;
-    },
   },
   mounted() {
     if (this.modalWorkItemId) {
@@ -439,9 +428,6 @@ export default {
     }
   },
   methods: {
-    handleWorkItemCreated() {
-      this.$apollo.queries.workItem.refetch();
-    },
     enableEditMode() {
       this.editMode = true;
     },
@@ -608,7 +594,7 @@ export default {
         variables: {
           files: this.filesToBeSaved,
           projectPath: this.fullPath,
-          iid: this.iid,
+          iid: this.workItemIid,
         },
         context: {
           hasUpload: true,
@@ -648,7 +634,7 @@ export default {
         cache,
         todos,
         fullPath: this.workItemFullPath,
-        iid: this.iid,
+        iid: this.workItemIid,
       });
     },
   },
@@ -677,7 +663,7 @@ export default {
       @deleteWorkItem="$emit('deleteWorkItem', { workItemType, workItemId: workItem.id })"
       @toggleWorkItemConfidentiality="toggleConfidentiality"
       @error="updateError = $event"
-      @promotedToObjective="$emit('promotedToObjective', iid)"
+      @promotedToObjective="$emit('promotedToObjective', workItemIid)"
       @toggleEditMode="enableEditMode"
       @workItemStateUpdated="$emit('workItemStateUpdated')"
       @toggleReportAbuseModal="toggleReportAbuseModal"
@@ -756,7 +742,7 @@ export default {
                 :subscribed-to-notifications="workItemNotificationsSubscribed"
                 :work-item-type="workItemType"
                 :work-item-type-id="workItemTypeId"
-                :work-item-iid="iid"
+                :work-item-iid="workItemIid"
                 :can-delete="canDelete"
                 :can-update="canUpdate"
                 :is-confidential="workItem.confidential"
@@ -772,10 +758,9 @@ export default {
                 @deleteWorkItem="$emit('deleteWorkItem', { workItemType, workItemId: workItem.id })"
                 @toggleWorkItemConfidentiality="toggleConfidentiality"
                 @error="updateError = $event"
-                @promotedToObjective="$emit('promotedToObjective', iid)"
+                @promotedToObjective="$emit('promotedToObjective', workItemIid)"
                 @workItemStateUpdated="$emit('workItemStateUpdated')"
                 @toggleReportAbuseModal="toggleReportAbuseModal"
-                @workItemCreated="handleWorkItemCreated"
               />
             </div>
             <gl-button
@@ -802,7 +787,7 @@ export default {
             <work-item-created-updated
               v-if="!editMode"
               :full-path="workItemFullPath"
-              :work-item-iid="iid"
+              :work-item-iid="workItemIid"
               :update-in-progress="updateInProgress"
             />
           </div>
@@ -827,7 +812,7 @@ export default {
                   :work-item-id="workItem.id"
                   :work-item-fullpath="workItemFullPath"
                   :award-emoji="workItemAwardEmoji.awardEmoji"
-                  :work-item-iid="iid"
+                  :work-item-iid="workItemIid"
                   @error="updateError = $event"
                   @emoji-updated="$emit('work-item-emoji-updated', $event)"
                 />
@@ -859,7 +844,7 @@ export default {
               v-if="hasDesignWidget"
               :class="{ 'gl-mt-0': isDrawer }"
               :work-item-id="workItem.id"
-              :work-item-iid="iid"
+              :work-item-iid="workItemIid"
               :upload-error="designUploadError"
               @dismissError="designUploadError = null"
             />
@@ -871,12 +856,11 @@ export default {
               :work-item-type="workItemType"
               :parent-work-item-type="workItem.workItemType.name"
               :work-item-id="workItem.id"
-              :work-item-iid="iid"
+              :work-item-iid="workItemIid"
               :can-update="canUpdate"
               :can-update-children="canUpdateChildren"
               :confidential="workItem.confidential"
               :allowed-child-types="allowedChildTypes"
-              :is-drawer="isDrawer"
               @show-modal="openInModal"
               @addChild="$emit('addChild')"
               @childrenLoaded="hasChildren = $event"
@@ -885,7 +869,7 @@ export default {
               v-if="workItemLinkedItems"
               :is-group="isGroupWorkItem"
               :work-item-id="workItem.id"
-              :work-item-iid="iid"
+              :work-item-iid="workItemIid"
               :work-item-full-path="workItemFullPath"
               :work-item-type="workItem.workItemType.name"
               :can-admin-work-item-link="canAdminWorkItemLink"

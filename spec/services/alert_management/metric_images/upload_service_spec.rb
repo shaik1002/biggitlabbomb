@@ -64,8 +64,7 @@ RSpec.describe AlertManagement::MetricImages::UploadService, feature_category: :
           }
         end
 
-        it_behaves_like 'no metric saved, an error given',
-          /File does not have a supported extension. Only png, jpg, jpeg, gif, bmp, tiff, ico, and webp are supported/
+        it_behaves_like 'no metric saved, an error given', /File does not have a supported extension. Only png, jpg, jpeg, gif, bmp, tiff, ico, and webp are supported/ # rubocop: disable Layout/LineLength
       end
 
       context 'user is guest' do

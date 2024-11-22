@@ -74,8 +74,13 @@
 .dropdown-menu-close {
   &:active,
   &:focus {
-    @apply gl-focus;
+    @include gl-focus;
   }
+}
+
+// Get search dropdown to line up with other nav dropdowns
+.search-input-container .dropdown-menu {
+  margin-top: 11px;
 }
 
 .dropdown-toggle,
@@ -137,6 +142,10 @@
   line-height: $gl-line-height;
   width: 160px;
 
+  &:hover {
+    @apply gl-shadow-inner-1-gray-400;
+  }
+
   &:hover,
   &:focus {
     background-color: $gray-50;
@@ -152,7 +161,7 @@
   .dropdown-menu-toggle-icon {
     position: absolute;
     right: $gl-padding-8;
-    @apply gl-fill-icon-subtle;
+    color: $gray-500;
   }
 }
 
@@ -333,7 +342,7 @@
   .unclickable {
     cursor: not-allowed;
     padding: 5px 8px;
-    @apply gl-text-subtle;
+    color: $gl-text-color-secondary;
   }
 
   .badge.badge-pill + span:not(.badge):not(.badge-pill) {
@@ -535,7 +544,7 @@
           mask-repeat: no-repeat;
           mask-size: cover;
           mask-position: center center;
-          background: var(--gl-dropdown-option-indicator-color-selected-default);
+          background: $black-normal;
         }
       }
     }
@@ -584,7 +593,7 @@
     position: absolute;
     top: $gl-padding-8;
     right: 20px;
-    @apply gl-fill-icon-subtle;
+    color: $gray-500;
     font-size: 12px;
     pointer-events: none;
   }
@@ -628,7 +637,7 @@
   outline: 0;
 
   &:focus {
-    @apply gl-focus;
+    @include gl-focus;
   }
 
   &:hover {
@@ -644,7 +653,7 @@
 }
 
 .dropdown-info-note {
-  @apply gl-text-subtle;
+  color: $gl-text-color-secondary;
   text-align: center;
 }
 
@@ -733,7 +742,7 @@
 
 .dropdown-menu-inner-content {
   display: block;
-  @apply gl-text-subtle;
+  color: $gl-text-color-secondary;
 }
 
 .dropdown-toggle-text {

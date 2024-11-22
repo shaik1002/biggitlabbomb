@@ -16,7 +16,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/Azure/azure-sdk-for-go/sdk/storage/azblob"
 	"github.com/Azure/azure-sdk-for-go/sdk/storage/azblob/container"
 	"github.com/BurntSushi/toml"
@@ -267,7 +266,7 @@ func (c *Config) RegisterGoCloudURLOpeners() error {
 	c.ObjectStorageConfig.URLMux = new(blob.URLMux)
 
 	creds := c.ObjectStorageCredentials
-	if strings.EqualFold(creds.Provider, "AzureRM") && creds.AzureCredentials.AccountName != "" {
+	if strings.EqualFold(creds.Provider, "AzureRM") && creds.AzureCredentials.AccountName != "" && creds.AzureCredentials.AccountKey != "" {
 		urlOpener := creds.AzureCredentials.getURLOpener()
 		c.ObjectStorageConfig.URLMux.RegisterBucket(azureblob.Scheme, urlOpener)
 	}
@@ -289,22 +288,12 @@ func (creds *AzureCredentials) getURLOpener() *azureblob.URLOpener {
 	}
 
 	clientFunc := func(svcURL azureblob.ServiceURL, containerName azureblob.ContainerName) (*container.Client, error) {
-		containerURL := fmt.Sprintf("%s/%s", svcURL, containerName)
-
-		if creds.AccountKey != "" {
-			sharedKeyCred, err := azblob.NewSharedKeyCredential(creds.AccountName, creds.AccountKey)
-			if err != nil {
-				return nil, fmt.Errorf("error creating Azure credentials: %w", err)
-			}
-			return container.NewClientWithSharedKeyCredential(containerURL, sharedKeyCred, &container.ClientOptions{})
-		}
-
-		creds, err := azidentity.NewDefaultAzureCredential(nil)
+		sharedKeyCred, err := azblob.NewSharedKeyCredential(creds.AccountName, creds.AccountKey)
 		if err != nil {
-			return nil, fmt.Errorf("error creating default Azure credentials: %w", err)
+			return nil, fmt.Errorf("error creating Azure credentials: %w", err)
 		}
-
-		return container.NewClient(containerURL, creds, nil)
+		containerURL := fmt.Sprintf("%s/%s", svcURL, containerName)
+		return container.NewClientWithSharedKeyCredential(containerURL, sharedKeyCred, &container.ClientOptions{})
 	}
 
 	return &azureblob.URLOpener{

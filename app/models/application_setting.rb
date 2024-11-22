@@ -5,6 +5,7 @@ class ApplicationSetting < ApplicationRecord
   include CacheMarkdownField
   include TokenAuthenticatable
   include ChronicDurationAttribute
+  include IgnorableColumns
   include Sanitizable
 
   ignore_columns %i[
@@ -516,16 +517,6 @@ class ApplicationSetting < ApplicationRecord
     allow_blank: true,
     public_url: ADDRESSABLE_URL_VALIDATION_OPTIONS
 
-  jsonb_accessor :integrations,
-    jira_connect_additional_audience_url: :string
-
-  validates :jira_connect_additional_audience_url,
-    length: { maximum: 255, message: N_('is too long (maximum is %{count} characters)') },
-    allow_blank: true,
-    public_url: ADDRESSABLE_URL_VALIDATION_OPTIONS
-
-  validates :integrations, json_schema: { filename: "application_setting_integrations" }
-
   with_options(presence: true, if: :slack_app_enabled?) do
     validates :slack_app_id
     validates :slack_app_secret
@@ -540,7 +531,6 @@ class ApplicationSetting < ApplicationRecord
       :concurrent_bitbucket_import_jobs_limit,
       :concurrent_bitbucket_server_import_jobs_limit,
       :concurrent_github_import_jobs_limit,
-      :concurrent_relation_batch_export_limit,
       :container_registry_token_expire_delay,
       :housekeeping_optimize_repository_period,
       :inactive_projects_delete_after_months,
@@ -630,14 +620,10 @@ class ApplicationSetting < ApplicationRecord
       :users_get_by_id_limit
   end
 
-  attribute :resource_usage_limits, :ind_jsonb, default: -> { {} }
-  validates :resource_usage_limits, json_schema: { filename: 'resource_usage_limits' }
-
   jsonb_accessor :rate_limits,
     concurrent_bitbucket_import_jobs_limit: [:integer, { default: 100 }],
     concurrent_bitbucket_server_import_jobs_limit: [:integer, { default: 100 }],
     concurrent_github_import_jobs_limit: [:integer, { default: 1000 }],
-    concurrent_relation_batch_export_limit: [:integer, { default: 8 }],
     downstream_pipeline_trigger_limit_per_project_user_sha: [:integer, { default: 0 }],
     group_api_limit: [:integer, { default: 400 }],
     group_invited_groups_api_limit: [:integer, { default: 60 }],
@@ -673,11 +659,6 @@ class ApplicationSetting < ApplicationRecord
   validates :rate_limits, json_schema: { filename: "application_setting_rate_limits" }
 
   validates :importers, json_schema: { filename: "application_setting_importers" }
-
-  jsonb_accessor :transactional_emails,
-    resource_token_expiry_inherited_members: [:boolean, { default: true }]
-
-  validates :transactional_emails, json_schema: { filename: "application_setting_transactional_emails" }
 
   jsonb_accessor :package_registry, nuget_skip_metadata_url_validation: [:boolean, { default: false }]
 

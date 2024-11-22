@@ -21,12 +21,9 @@ To set up the GitLab for Jira Cloud app on your self-managed instance, do one of
 - [Install the GitLab for Jira Cloud app manually](#install-the-gitlab-for-jira-cloud-app-manually).
 
 <i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
-For an overview, see:
-
-- [Installing the GitLab for Jira Cloud app from the Atlassian Marketplace for a self-managed instance](https://youtu.be/RnDw4PzmdW8?list=PL05JrBw4t0Koazgli_PmMQCER2pVH7vUT)
-  <!-- Video published on 2024-10-30 -->
-- [Installing the GitLab for Jira Cloud app manually for a self-managed instance](https://youtu.be/fs02xS8BElA?list=PL05JrBw4t0Koazgli_PmMQCER2pVH7vUT)
-  <!-- Video published on 2024-10-30 -->
+For an overview, see
+[Configure the GitLab for Jira Cloud app from the Atlassian Marketplace with a self-managed instance](https://www.youtube.com/watch?v=dka9fLoGsno&t=1665s).
+<!-- Video published on 2024-06-27 -->
 
 If you [install the GitLab for Jira Cloud app from the Atlassian Marketplace](#install-the-gitlab-for-jira-cloud-app-from-the-atlassian-marketplace),
 you can use the [project toolchain](https://support.atlassian.com/jira-software-cloud/docs/what-is-the-connections-feature/) developed and maintained
@@ -164,11 +161,6 @@ to check if Jira Cloud is linked to:
   ```
 
 ## Install the GitLab for Jira Cloud app manually
-
-WARNING:
-In GitLab 17.5 and earlier, you might encounter an issue when you install the GitLab for Jira Cloud app manually.
-For more information, see [issue 505372](https://gitlab.com/gitlab-org/gitlab/-/issues/505372).
-This issue does not affect [installations from the Atlassian Marketplace](#install-the-gitlab-for-jira-cloud-app-from-the-atlassian-marketplace).
 
 If you do not want to [use the official Atlassian Marketplace listing](#install-the-gitlab-for-jira-cloud-app-from-the-atlassian-marketplace),
 install the GitLab for Jira Cloud app manually.
@@ -417,22 +409,3 @@ You must use the reverse proxy FQDN only to connect Jira Cloud to GitLab.
 You must continue to access GitLab from the internal GitLab FQDN.
 If you access GitLab from the reverse proxy FQDN, GitLab might not work as expected.
 For more information, see [issue 21319](https://gitlab.com/gitlab-org/gitlab/-/issues/21319).
-
-### Set an additional JWT audience
-
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/498587) in GitLab 17.7.
-
-When GitLab receives a JWT token from Jira,
-GitLab verifies the token by checking the JWT audience.
-By default, the audience is derived from your internal GitLab FQDN.
-
-In some reverse proxy configurations, you might have to set
-the reverse proxy FQDN as an additional JWT audience.
-To set an additional JWT audience:
-
-1. On the left sidebar, at the bottom, select **Admin**.
-1. Select **Settings > General**.
-1. Expand **GitLab for Jira App**.
-1. In **Jira Connect Additional Audience URL**, enter the additional audience
-   (for example, `https://gitlab.mycompany.com`).
-1. Select **Save changes**.

@@ -3,8 +3,6 @@ data_category: operational
 key_path: usage_activity_by_stage_monthly.create.merge_requests_users
 description: Distinct count of users performing merge request actions like closed, merged, created, commented
 product_group: code_review
-product_categories:
-- code_review_workflow
 value_type: number
 status: removed
 time_frame: 28d
@@ -12,7 +10,7 @@ data_source: redis_hll
 distribution:
 - ce
 - ee
-tiers:
+tier:
 - free
 - premium
 - ultimate

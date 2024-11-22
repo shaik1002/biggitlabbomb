@@ -1,6 +1,5 @@
 <script>
 import { GlAlert } from '@gitlab/ui';
-import DependencyProxyPackagesSettings from 'ee_component/packages_and_registries/settings/project/components/dependency_proxy_packages_settings.vue';
 import { historyReplaceState } from '~/lib/utils/common_utils';
 import { getParameterByName } from '~/lib/utils/url_utility';
 import {
@@ -10,7 +9,6 @@ import {
 import ContainerExpirationPolicy from '~/packages_and_registries/settings/project/components/container_expiration_policy.vue';
 import ContainerProtectionRules from '~/packages_and_registries/settings/project/components/container_protection_rules.vue';
 import PackagesCleanupPolicy from '~/packages_and_registries/settings/project/components/packages_cleanup_policy.vue';
-import PackagesProtectionRules from '~/packages_and_registries/settings/project/components/packages_protection_rules.vue';
 import MetadataDatabaseAlert from '~/packages_and_registries/shared/components/container_registry_metadata_database_alert.vue';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
@@ -18,11 +16,15 @@ export default {
   components: {
     ContainerExpirationPolicy,
     ContainerProtectionRules,
-    DependencyProxyPackagesSettings,
+    DependencyProxyPackagesSettings: () =>
+      import(
+        'ee_component/packages_and_registries/settings/project/components/dependency_proxy_packages_settings.vue'
+      ),
     GlAlert,
     MetadataDatabaseAlert,
     PackagesCleanupPolicy,
-    PackagesProtectionRules,
+    PackagesProtectionRules: () =>
+      import('~/packages_and_registries/settings/project/components/packages_protection_rules.vue'),
   },
   mixins: [glFeatureFlagsMixin()],
   inject: [
@@ -40,6 +42,9 @@ export default {
     };
   },
   computed: {
+    showProtectedPackagesSettings() {
+      return this.showPackageRegistrySettings && this.glFeatures.packagesProtectedPackages;
+    },
     showProtectedContainersSettings() {
       return (
         this.glFeatures.containerRegistryProtectedContainers && this.showContainerRegistrySettings
@@ -78,10 +83,8 @@ export default {
     >
       {{ $options.i18n.UPDATE_SETTINGS_SUCCESS_MESSAGE }}
     </gl-alert>
-    <template v-if="showPackageRegistrySettings">
-      <packages-protection-rules />
-      <packages-cleanup-policy />
-    </template>
+    <packages-protection-rules v-if="showProtectedPackagesSettings" />
+    <packages-cleanup-policy v-if="showPackageRegistrySettings" />
     <container-protection-rules v-if="showProtectedContainersSettings" />
     <container-expiration-policy v-if="showContainerRegistrySettings" />
     <dependency-proxy-packages-settings v-if="showDependencyProxySettings" />

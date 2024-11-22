@@ -18,7 +18,7 @@
 .group-row {
   .description p {
     margin-bottom: 0;
-    @apply gl-text-subtle;
+    color: $gl-text-color-secondary;
   }
 }
 
@@ -35,6 +35,12 @@
 
   .shared_runners_limit_over_quota {
     color: $red-500;
+  }
+}
+
+.groups-list-tree-container {
+  > .group-list-tree > .group-row.has-children:first-child {
+    border-top: 0;
   }
 }
 
@@ -155,7 +161,7 @@
       position: relative;
       min-width: 250px;
       text-align: right;
-      @apply gl-text-subtle;
+      color: $gl-text-color-secondary;
     }
   }
 }

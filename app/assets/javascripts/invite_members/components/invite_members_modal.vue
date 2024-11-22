@@ -15,7 +15,6 @@ import {
   BLOCKED_SEAT_OVERAGES_ERROR_REASON,
   BLOCKED_SEAT_OVERAGES_BODY,
   BLOCKED_SEAT_OVERAGES_CTA,
-  BLOCKED_SEAT_OVERAGES_CTA_DOCS,
   USERS_FILTER_ALL,
   MEMBER_MODAL_LABELS,
   INVITE_MEMBER_MODAL_TRACKING_CATEGORY,
@@ -25,7 +24,6 @@ import { getInvalidFeedbackMessage } from '../utils/get_invalid_feedback_message
 import {
   displaySuccessfulInvitationAlert,
   reloadOnInvitationSuccess,
-  markLocalStorageForQueuedAlert,
 } from '../utils/trigger_successful_invite_alert';
 import ModalConfetti from './confetti.vue';
 import MembersTokenSelect from './members_token_select.vue';
@@ -52,9 +50,6 @@ export default {
   inject: {
     addSeatsHref: {
       default: '',
-    },
-    hasBsoEnabled: {
-      default: false,
     },
   },
   props: {
@@ -129,6 +124,7 @@ export default {
       modalId: uniqueId('invite-members-modal-'),
       newUsersToInvite: [],
       usersWithWarning: {},
+      warningTitle: '',
       invalidMembers: {},
       source: 'unknown',
       mode: 'default',
@@ -208,9 +204,6 @@ export default {
     },
     shouldShowSeatOverageNotification() {
       return this.errorReason === BLOCKED_SEAT_OVERAGES_ERROR_REASON && this.addSeatsHref;
-    },
-    primaryButtonText() {
-      return this.hasBsoEnabled ? BLOCKED_SEAT_OVERAGES_CTA_DOCS : BLOCKED_SEAT_OVERAGES_CTA;
     },
   },
   watch: {
@@ -297,16 +290,17 @@ export default {
         const payload = this.getInvitePayload({ accessLevel, expiresAt, memberRoleId });
         const response = await apiAddByInvite(this.id, payload);
 
-        const { error, message, usersWithWarning } = responseFromSuccess(response);
+        const { error, message, usersWithWarning, warningTitle } = responseFromSuccess(response);
 
         this.usersWithWarning = usersWithWarning;
+        this.warningTitle = warningTitle;
 
         if (error) {
           this.errorReason = response.data.reason;
           this.showErrors(message);
-        } else if (this.hasUsersWithWarning) {
-          markLocalStorageForQueuedAlert();
-        } else if (!this.hasInvalidMembers) {
+        }
+
+        if (!this.hasInvalidMembers && !this.hasUsersWithWarning) {
           this.onInviteSuccess();
         }
       } catch (error) {
@@ -360,6 +354,7 @@ export default {
       this.errorReason = '';
       this.invalidFeedbackMessage = '';
       this.usersWithWarning = {};
+      this.warningTitle = '';
       this.invalidMembers = {};
     },
     clearEmptyInviteError() {
@@ -377,6 +372,7 @@ export default {
   labels: MEMBER_MODAL_LABELS,
   i18n: {
     BLOCKED_SEAT_OVERAGES_BODY,
+    BLOCKED_SEAT_OVERAGES_CTA,
   },
 };
 </script>
@@ -475,6 +471,20 @@ export default {
             </gl-button>
           </template>
         </gl-alert>
+        <gl-alert
+          v-if="hasUsersWithWarning"
+          class="gl-mb-4"
+          variant="warning"
+          :dismissible="false"
+          :title="warningTitle"
+          data-testid="alert-member-warning"
+        >
+          <ul class="gl-mb-0 gl-pl-5">
+            <li v-for="(warningMessage, user) in usersWithWarning" :key="user">
+              <strong>{{ tokenName(user) }}:</strong> {{ warningMessage }}
+            </li>
+          </ul>
+        </gl-alert>
         <user-limit-notification
           v-else-if="showUserLimitNotification"
           class="gl-mb-5"
@@ -512,7 +522,7 @@ export default {
         dismissable
         data-testid="seat-overages-alert"
         :primary-button-link="addSeatsHref"
-        :primary-button-text="primaryButtonText"
+        :primary-button-text="$options.i18n.BLOCKED_SEAT_OVERAGES_CTA"
         @dismiss="errorReason = false"
       >
         {{ $options.i18n.BLOCKED_SEAT_OVERAGES_BODY }}

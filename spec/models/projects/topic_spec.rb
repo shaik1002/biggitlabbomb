@@ -65,15 +65,12 @@ RSpec.describe Projects::Topic do
     end
 
     describe 'order_by_non_private_projects_count' do
-      let_it_be(:topic1) { create(:topic, name: 'topicB', organization: organization) }
-      let_it_be(:topic2) { create(:topic, name: 'topicC', organization: organization) }
-      let_it_be(:topic3) { create(:topic, name: 'topicA', organization: organization) }
-      let_it_be(:project2) { create(:project, :public, topic_list: 'topicC, topicA', organization: organization) }
-      let_it_be(:project3) { create(:project, :public, topic_list: 'topicC', organization: organization) }
-
-      let_it_be(:project1) do
-        create(:project, :public, topic_list: 'topicC, topicA, topicB', organization: organization)
-      end
+      let!(:topic1) { create(:topic, name: 'topicB', organization: organization) }
+      let!(:topic2) { create(:topic, name: 'topicC', organization: organization) }
+      let!(:topic3) { create(:topic, name: 'topicA', organization: organization) }
+      let!(:project1) { create(:project, :public, topic_list: 'topicC, topicA, topicB', organization: organization) }
+      let!(:project2) { create(:project, :public, topic_list: 'topicC, topicA', organization: organization) }
+      let!(:project3) { create(:project, :public, topic_list: 'topicC', organization: organization) }
 
       it 'sorts topics by non_private_projects_count' do
         topics = described_class.order_by_non_private_projects_count
@@ -83,9 +80,9 @@ RSpec.describe Projects::Topic do
     end
 
     describe 'reorder_by_similarity' do
-      let_it_be(:topic1) { create(:topic, name: 'my-topic') }
-      let_it_be(:topic2) { create(:topic, name: 'other') }
-      let_it_be(:topic3) { create(:topic, name: 'topic2') }
+      let!(:topic1) { create(:topic, name: 'my-topic') }
+      let!(:topic2) { create(:topic, name: 'other') }
+      let!(:topic3) { create(:topic, name: 'topic2') }
 
       it 'sorts topics by similarity' do
         topics = described_class.reorder_by_similarity('topic')

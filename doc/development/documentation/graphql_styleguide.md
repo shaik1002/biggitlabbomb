@@ -10,9 +10,9 @@ description: "Writing styles, markup, formatting, and other standards for GraphQ
 GraphQL APIs are different from [RESTful APIs](restful_api_styleguide.md). Reference
 information is generated in our [GraphQL API resources](../../api/graphql/reference/index.md) page.
 
-However, it's helpful to include examples for how to use GraphQL for different
-use cases, with samples that readers can use directly in the GraphQL explorer, called
-[GraphiQL](../api_graphql_styleguide.md#graphiql).
+However, it's helpful to include examples on how to use GraphQL for different
+*use cases*, with samples that readers can use directly in the
+[GraphiQL explorer](../api_graphql_styleguide.md#graphiql).
 
 This section describes the steps required to add your GraphQL examples to
 GitLab documentation.
@@ -20,67 +20,65 @@ GitLab documentation.
 ## Add a dedicated GraphQL page
 
 To create a dedicated GraphQL page, create a new `.md` file in the
-`doc/api/graphql/` directory. Give the file a functional name, like
+`doc/api/graphql/` directory. Give that file a functional name, such as
 `import_from_specific_location.md`.
 
-## Add metadata
+## Start the page with an explanation
 
-Add descriptive content and a title at the top of the page, for example:
-
-```markdown
----
-stage: Create
-group: Source Code
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
----
-
-# List branch rules for a project by using GraphQL
-
-DETAILS:
-**Tier:** Free, Premium, Ultimate
-**Offering:** GitLab.com, Self-managed, GitLab Dedicated
-```
-
-For help editing this content for your use case, ask a technical writer.
-
-## Add content
-
-Now add the body text. You can use this content as a starting point
-and replace the text with your own information.
+Include a page title that describes the GraphQL functionality in a few words,
+such as:
 
 ```markdown
-You can query for branch rules in a given project by using:
-
-- GraphiQL.
-- [`cURL`](getting_started.md#command-line).
-
-## Use GraphiQL
-
-You can use GraphiQL to list the branch rules for a project.
-
-1. Open GraphiQL:
-   - For GitLab.com, use: `https://gitlab.com/-/graphql-explorer`
-   - For self-managed GitLab, use: `https://gitlab.example.com/-/graphql-explorer`
-1. Copy the following text and paste it in the left window.
-
-   <graphql codeblock here>
-
-1. Select **Play**.
-
-## Related topics:
-
-- [GraphQL API reference](reference/index.md)
+# Search for [substitute kind of data]
 ```
+
+Describe the search. One sentence may be all you need. More information may
+help readers learn how to use the example for their GitLab deployments.
+
+## Include a procedure using the GraphiQL explorer
+
+The GraphiQL explorer can help readers test queries with working deployments.
+Set up the section with the following:
+
+- Use the following title:
+
+  ```markdown
+  ## Set up the GraphiQL explorer
+  ```
+
+- Include a code block with the query that anyone can include in their
+  instance of the GraphiQL explorer:
+
+  ````markdown
+  ```graphql
+  query {
+    <insert queries here>
+  }
+  ```
+  ````
+
+- Tell the user what to do:
+
+  ```markdown
+  1. Open the GraphiQL explorer tool in the following URL: `https://gitlab.com/-/graphql-explorer`.
+  1. Paste the `query` listed above into the left window of your GraphiQL explorer tool.
+  1. Select **Play** to get the result shown here:
+  ```
+
+- Include a screenshot of the result in the GraphiQL explorer. Follow the naming
+  convention described in [Image requirements](styleguide/index.md#image-requirements).
+- Follow up with an example of what you can do with the output. Make sure the
+  example is something that readers can do on their own deployments.
+- Include a link to the [GraphQL API resources](../../api/graphql/reference/index.md).
 
 ## Add the GraphQL example to the global navigation
 
-Include a link to your new document in the global navigation (the list on the
+You should include a link for your new document in the global navigation (the list on the
 left side of the documentation website). To do so, open a second MR, against the
 [GitLab documentation repository](https://gitlab.com/gitlab-org/gitlab-docs/).
 
-The global navigation is set in the
-[`navigation.yaml`](https://gitlab.com/gitlab-org/gitlab-docs/-/blob/main/content/_data/navigation.yaml) file,
-in the `content/_data` subdirectory. You can find the GraphQL section under the
+We store our global navigation in the [`navigation.yaml`](https://gitlab.com/gitlab-org/gitlab-docs/-/blob/main/content/_data/navigation.yaml) file, in the
+`content/_data` subdirectory. You can find the GraphQL section under the
 following line:
 
 ```yaml

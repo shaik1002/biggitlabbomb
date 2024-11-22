@@ -751,7 +751,7 @@ RSpec.describe ProjectPresenter do
           label: a_string_ending_with('GitLab Pages'),
           link: Gitlab::Pages::UrlBuilder
           .new(project)
-          .pages_url,
+          .pages_url(with_unique_domain: true),
           class_modifier: 'btn-default'
         )
       end

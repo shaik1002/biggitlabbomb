@@ -55,9 +55,6 @@
     "manage_security_policy_link": {
       "type": "boolean"
     },
-    "read_admin_dashboard": {
-      "type": "boolean"
-    },
     "read_code": {
       "type": "boolean"
     },
@@ -67,9 +64,6 @@
     "read_dependency": {
       "type": "boolean"
     },
-    "read_runners": {
-      "type": "boolean"
-    },
     "read_vulnerability": {
       "type": "boolean"
     },
@@ -77,6 +71,9 @@
       "type": "boolean"
     },
     "remove_project": {
+      "type": "boolean"
+    },
+    "read_runners": {
       "type": "boolean"
     }
   }

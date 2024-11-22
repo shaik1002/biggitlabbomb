@@ -194,30 +194,6 @@ RSpec.describe Import::ReassignPlaceholderUserRecordsService, feature_category: 
         )
       end
 
-      it 'calls UserProjectAccessChangedService' do
-        expect_next_instance_of(UserProjectAccessChangedService, reassign_to_user.id) do |service|
-          expect(service).to receive(:execute)
-        end
-
-        service.execute
-      end
-
-      it 'does not call UserProjectAccessChangedService when there are no memberships created' do
-        Import::Placeholders::Membership.delete_all
-
-        expect(UserProjectAccessChangedService).not_to receive(:new)
-
-        expect { service.execute }.not_to change { Member.count }
-      end
-
-      it 'does not call UserProjectAccessChangedService when only group memberships are created' do
-        Import::Placeholders::Membership.where(project: project).delete_all
-
-        expect(UserProjectAccessChangedService).not_to receive(:new)
-
-        expect { service.execute }.to change { GroupMember.count }.by(1)
-      end
-
       it 'deletes reassigned placeholder references and memberships for the source user' do
         expect { service.execute }
           .to change { Import::SourceUserPlaceholderReference.where(source_user: source_user).count }.to(0)
@@ -227,7 +203,6 @@ RSpec.describe Import::ReassignPlaceholderUserRecordsService, feature_category: 
       context 'when reassigned by user no longer exists' do
         before do
           source_user.reassigned_by_user.destroy!
-          source_user.reload
         end
 
         it 'can still create memberships' do
@@ -235,8 +210,7 @@ RSpec.describe Import::ReassignPlaceholderUserRecordsService, feature_category: 
         end
 
         it 'logs a warning' do
-          allow(Import::Framework::Logger).to receive(:warn)
-          expect(Import::Framework::Logger).to receive(:warn).with(
+          expect(::Import::Framework::Logger).to receive(:warn).with(
             hash_including(
               message: 'Reassigned by user was not found, this may affect membership checks',
               source_user_id: source_user.id
@@ -532,40 +506,6 @@ RSpec.describe Import::ReassignPlaceholderUserRecordsService, feature_category: 
       end
     end
 
-    context 'when a placeholder reference model and column have been renamed' do
-      let_it_be(:old_model) { 'OldModel' }
-      let_it_be(:old_user_reference_column) { 'olduser_id' }
-
-      let_it_be(:merge_request_referenced_by_old_name) { create(:merge_request, author_id: placeholder_user_id) }
-
-      let_it_be(:outdated_placeholder_reference) do
-        create(
-          :import_source_user_placeholder_reference,
-          source_user: source_user,
-          model: old_model,
-          numeric_key: merge_request_referenced_by_old_name.id,
-          alias_version: 1,
-          user_reference_column: old_user_reference_column
-        )
-      end
-
-      before do
-        allow(Import::PlaceholderReferences::AliasResolver).to receive(:aliased_model).and_call_original
-        allow(Import::PlaceholderReferences::AliasResolver).to receive(:aliased_column).and_call_original
-
-        allow(Import::PlaceholderReferences::AliasResolver).to receive(:aliased_model)
-          .with('OldModel', version: 1).and_return(MergeRequest)
-
-        allow(Import::PlaceholderReferences::AliasResolver).to receive(:aliased_column)
-          .with('OldModel', 'olduser_id', version: 1).and_return('author_id')
-      end
-
-      it 'reassigns the right record' do
-        expect { service.execute }.to change { merge_request_referenced_by_old_name.reload.author_id }
-          .from(placeholder_user_id).to(real_user_id)
-      end
-    end
-
     context 'when a placeholder reference is for a nonexistant model' do
       let_it_be(:invalid_model) { 'ThisWillNeverMapToARealModel' }
       let_it_be(:user_reference_column) { 'user_id' }
@@ -579,15 +519,10 @@ RSpec.describe Import::ReassignPlaceholderUserRecordsService, feature_category: 
         )
       end
 
-      before do
-        allow(Gitlab::ErrorTracking).to receive(:track_and_raise_for_dev_exception)
-      end
-
       it 'logs an error' do
         expect(::Import::Framework::Logger).to receive(:error).with(
           hash_including(
             message: "#{invalid_model} is not a model, #{user_reference_column} cannot be reassigned.",
-            error: "ALIASES must be extended to include ThisWillNeverMapToARealModel for version 1",
             source_user_id: source_user.id
           )
         )

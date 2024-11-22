@@ -25,7 +25,7 @@ module QA
         end
 
         it(
-          'member retains indirect membership in imported project', :blocking,
+          'member retains indirect membership in imported project',
           testcase: 'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/354416'
         ) do
           expect_project_import_finished_successfully
@@ -43,7 +43,7 @@ module QA
         end
 
         it(
-          'member retains direct membership in imported project', :blocking,
+          'member retains direct membership in imported project',
           testcase: 'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/354417'
         ) do
           expect_project_import_finished_successfully

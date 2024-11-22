@@ -4,9 +4,9 @@ module SourcegraphHelper
   def sourcegraph_url_message
     message =
       if Gitlab::CurrentSettings.sourcegraph_url_is_com?
-        s_('SourcegraphPreferences|Uses %{linkStart}Sourcegraph.com%{linkEnd}.')
+        s_('SourcegraphPreferences|Uses %{linkStart}Sourcegraph.com%{linkEnd}.').html_safe
       else
-        s_('SourcegraphPreferences|Uses a custom %{linkStart}Sourcegraph instance%{linkEnd}.')
+        s_('SourcegraphPreferences|Uses a custom %{linkStart}Sourcegraph instance%{linkEnd}.').html_safe
       end
 
     experimental_message =

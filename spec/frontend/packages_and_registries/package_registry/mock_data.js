@@ -471,16 +471,3 @@ export const packagesListQuery = ({ type = 'group', extend = {}, extendPaginatio
     },
   },
 });
-
-export const errorPackagesListQuery = ({ type = 'group', extend = {} } = {}) => ({
-  data: {
-    [type]: {
-      id: '1',
-      packages: {
-        ...extend,
-        __typename: 'PackageConnection',
-      },
-      __typename: capitalize(type),
-    },
-  },
-});

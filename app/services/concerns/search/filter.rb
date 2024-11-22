@@ -8,7 +8,9 @@ module Search
       {
         state: params[:state],
         confidential: params[:confidential],
-        include_archived: params[:include_archived]
+        include_archived: params[:include_archived],
+        num_context_lines: params[:num_context_lines]&.to_i,
+        hybrid_similarity: params[:hybrid_similarity]&.to_f
       }
     end
   end

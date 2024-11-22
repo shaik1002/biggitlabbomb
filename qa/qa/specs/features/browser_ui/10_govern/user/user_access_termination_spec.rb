@@ -25,6 +25,10 @@ module QA
         @project = create(:project, :with_readme, name: 'project-for-user-group-access-termination', group: group)
       end
 
+      after(:all) do
+        @sandbox.remove_via_api!
+      end
+
       context 'when parent group membership is terminated' do
         before do
           @sandbox.remove_member(@user)

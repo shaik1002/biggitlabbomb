@@ -211,9 +211,9 @@ The 3 status items are defined as follows:
 To find more details about failed items, check
 [the `gitlab-rails/geo.log` file](../../../logs/log_parsing.md#find-most-common-geo-sync-errors)
 
-If you notice synchronization or verification failures, you can try to [resolve them](replication.md).
+If you notice replication or verification failures, you can try to [resolve them](replication.md#fixing-non-postgresql-replication-failures).
 
-If there are Repository check failures, you can try to [resolve them](synchronization_verification.md#find-repository-check-failures-in-a-geo-secondary-site).
+If there are Repository check failures, you can try to [resolve them](synchronization.md#find-repository-check-failures-in-a-geo-secondary-site).
 
 ##### Fixing errors found when running the Geo check Rake task
 
@@ -489,7 +489,7 @@ has the correct permissions.
 Geo cannot reuse an existing tracking database.
 
 It is safest to use a fresh secondary, or reset the whole secondary by following
-[Resetting Geo secondary site replication](synchronization_verification.md#resetting-geo-secondary-site-replication).
+[Resetting Geo secondary site replication](replication.md#resetting-geo-secondary-site-replication).
 
 It is risky to reuse a secondary site without resetting it because the secondary site may have missed some Geo events. For example, missed deletion events lead to the secondary site permanently having data that should be deleted. Similarly, losing an event which physically moves the location of data leads to data permanently orphaned in one location, and missing in the other location until it is re-verified. This is why GitLab switched to hashed storage, since it makes moving data unnecessary. There may be other unknown problems due to lost events.
 
@@ -541,7 +541,7 @@ This error message indicates that the replica database in the **secondary** site
 
 To restore the database and resume replication, you can do one of the following:
 
-- [Reset the Geo secondary site replication](synchronization_verification.md#resetting-geo-secondary-site-replication).
+- [Reset the Geo secondary site replication](replication.md#resetting-geo-secondary-site-replication).
 - [Set up a new Geo secondary using the Linux package](../../setup/index.md#using-linux-package-installations).
 
 If you set up a new secondary from scratch, you must also [remove the old site from the Geo cluster](../remove_geo_site.md#removing-secondary-geo-sites).
@@ -570,21 +570,6 @@ If you are using the Linux package installation, something might have failed dur
 
 This can be caused by orphaned records in the project registry. They are being cleaned
 periodically using a registry worker, so give it some time to fix it itself.
-
-### Failed checksums on primary site
-
-Failed checksums identified by the Geo Primary Verification information screen can be caused by missing files or mismatched checksums. You can find error messages like `"Repository cannot be checksummed because it does not exist"` or `"File is not checksummable"` in the `gitlab-rails/geo.log` file. 
-
-For additional information about failed items, run the [integrity check Rake tasks](../../../raketasks/check.md#uploaded-files-integrity):
-
-```ruby
-sudo gitlab-rake gitlab:artifacts:check
-sudo gitlab-rake gitlab:ci_secure_files:check
-sudo gitlab-rake gitlab:lfs:check
-sudo gitlab-rake gitlab:uploads:check
-```
-
-For detailed information about individual errors, use the `VERBOSE=1` variable.
 
 ### Secondary site shows "Unhealthy" in UI
 

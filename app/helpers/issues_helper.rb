@@ -54,9 +54,9 @@ module IssuesHelper
   def awards_sort(awards)
     awards.sort_by do |award, award_emojis|
       case award
-      when AwardEmoji::THUMBS_UP
+      when "thumbsup"
         0
-      when AwardEmoji::THUMBS_DOWN
+      when "thumbsdown"
         1
       else
         2

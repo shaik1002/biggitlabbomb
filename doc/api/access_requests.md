@@ -1,5 +1,5 @@
 ---
-stage: Software Supply Chain Security
+stage: Govern
 group: Authentication
 info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments"
 ---
@@ -18,7 +18,6 @@ following levels are recognized:
 - No access (`0`)
 - Minimal access (`5`)
 - Guest (`10`)
-- Planner (`15`)
 - Reporter (`20`)
 - Developer (`30`)
 - Maintainer (`40`)
@@ -34,7 +33,7 @@ GET /projects/:id/access_requests
 ```
 
 | Attribute | Type           | Required | Description |
-|-----------|----------------|----------|-------------|
+| --------- | -------------- | -------- | ----------- |
 | `id`      | integer/string | yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths) |
 
 Example request:
@@ -53,20 +52,16 @@ Example response:
    "username": "raymond_smith",
    "name": "Raymond Smith",
    "state": "active",
-   "locked": false,
-   "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/1/avatar.png",
-   "web_url": "https://gitlab.com/raymond_smith",
-   "requested_at": "2024-10-22T14:13:35Z"
+   "created_at": "2012-10-22T14:13:35Z",
+   "requested_at": "2012-10-22T14:13:35Z"
  },
  {
    "id": 2,
    "username": "john_doe",
    "name": "John Doe",
    "state": "active",
-   "locked": false,
-   "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/2/avatar.png",
-   "web_url": "https://gitlab.com/john_doe",
-   "requested_at": "2024-10-22T14:13:35Z"
+   "created_at": "2012-10-22T14:13:35Z",
+   "requested_at": "2012-10-22T14:13:35Z"
  }
 ]
 ```
@@ -80,8 +75,8 @@ POST /groups/:id/access_requests
 POST /projects/:id/access_requests
 ```
 
-| Attribute | Type           | Required | Description |
-|-----------|----------------|----------|-------------|
+| Attribute | Type           | Required | Description                                                                             |
+| --------- | -------------- | -------- |-----------------------------------------------------------------------------------------|
 | `id`      | integer/string | yes      | The ID or [URL-encoded path of the group or project](rest/index.md#namespaced-paths) |
 
 Example request:
@@ -114,10 +109,10 @@ PUT /projects/:id/access_requests/:user_id/approve
 ```
 
 | Attribute      | Type           | Required | Description |
-|----------------|----------------|----------|-------------|
+| -------------- | -------------- | -------- | ----------- |
 | `id`           | integer/string | yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths) |
-| `user_id`      | integer        | yes      | The user ID of the access requester |
-| `access_level` | integer        | no       | A valid access level (defaults: `30`, the Developer role) |
+| `user_id`      | integer        | yes      | The user ID of the access requester                                                                             |
+| `access_level` | integer        | no       | A valid access level (defaults: `30`, the Developer role)                                                   |
 
 Example request:
 
@@ -149,9 +144,9 @@ DELETE /projects/:id/access_requests/:user_id
 ```
 
 | Attribute | Type           | Required | Description |
-|-----------|----------------|----------|-------------|
+| --------- | -------------- | -------- | ----------- |
 | `id`      | integer/string | yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths) |
-| `user_id` | integer        | yes      | The user ID of the access requester |
+| `user_id` | integer        | yes      | The user ID of the access requester                                                                             |
 
 Example request:
 

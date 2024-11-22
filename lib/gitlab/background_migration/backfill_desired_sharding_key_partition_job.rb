@@ -2,6 +2,7 @@
 
 module Gitlab
   module BackgroundMigration
+    # rubocop: disable BackgroundMigration/FeatureCategory -- Feature category to be specified by inheriting class
     class BackfillDesiredShardingKeyPartitionJob < BackfillDesiredShardingKeyJob
       job_arguments :backfill_column,
         :backfill_via_table,
@@ -20,5 +21,6 @@ module Gitlab
         SQL
       end
     end
+    # rubocop: enable BackgroundMigration/FeatureCategory
   end
 end

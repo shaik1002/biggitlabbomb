@@ -10,7 +10,7 @@ module Ci
 
     idempotent!
     deduplicate :until_executed, if_deduplicated: :reschedule_once, ttl: 1.minute
-    data_consistency :always
+    data_consistency :always # rubocop:disable SidekiqLoadBalancing/WorkerDataConsistency
 
     urgency :low
 

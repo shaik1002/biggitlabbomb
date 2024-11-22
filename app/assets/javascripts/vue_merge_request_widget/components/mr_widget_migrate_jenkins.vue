@@ -1,8 +1,6 @@
 <script>
 import { GlBadge, GlIcon, GlLink, GlTooltipDirective } from '@gitlab/ui';
-import { reportToSentry } from '~/ci/utils';
 import { s__ } from '~/locale';
-import axios from '~/lib/utils/axios_utils';
 import { InternalEvents } from '~/tracking';
 import { JM_JENKINS_TITLE_ICON_NAME, JM_MIGRATION_LINK, JM_EVENT_NAME } from '../constants';
 
@@ -27,14 +25,6 @@ export default {
       type: String,
       required: true,
     },
-    path: {
-      type: String,
-      required: true,
-    },
-    featureId: {
-      type: String,
-      required: true,
-    },
   },
   i18n: {
     title: s__('mrWidget|Migrate to GitLab CI/CD from Jenkins'),
@@ -46,14 +36,6 @@ export default {
   },
   methods: {
     dismiss() {
-      axios
-        .post(this.path, {
-          feature_name: this.featureId,
-        })
-        .catch((error) => {
-          reportToSentry(this.$options.name, error);
-        });
-
       this.trackEvent(this.$options.JM_EVENT_NAME);
 
       this.$emit('dismiss');
@@ -89,12 +71,12 @@ export default {
               >
               <button
                 :aria-label="__('Close')"
-                class="gl-ml-4 gl-border-0 gl-border-l-2 gl-border-solid gl-bg-transparent gl-p-0 gl-pl-2"
+                class="gl-ml-4 gl-border-0 gl-border-l-2 gl-border-solid gl-border-gray-100 gl-bg-transparent gl-p-0 gl-pl-2"
                 type="button"
                 data-testid="close"
                 @click="dismiss"
               >
-                <gl-icon name="close" />
+                <gl-icon name="close" class="gl-text-gray-500" />
               </button>
             </div>
           </div>

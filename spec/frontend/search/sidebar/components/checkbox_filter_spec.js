@@ -5,8 +5,12 @@ import Vuex from 'vuex';
 import { mockTracking, unmockTracking } from 'helpers/tracking_helper';
 import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
 import { MOCK_QUERY, MOCK_LANGUAGE_AGGREGATIONS_BUCKETS } from 'jest/search/mock_data';
-import CheckboxFilter from '~/search/sidebar/components/language_filter/checkbox_filter.vue';
+import CheckboxFilter, {
+  TRACKING_LABEL_CHECKBOX,
+  TRACKING_LABEL_SET,
+} from '~/search/sidebar/components/language_filter/checkbox_filter.vue';
 
+import { languageFilterData } from '~/search/sidebar/components/language_filter/data';
 import { convertFiltersData } from '~/search/sidebar/utils';
 
 Vue.use(Vuex);
@@ -26,7 +30,6 @@ describe('CheckboxFilter', () => {
   const defaultProps = {
     filtersData: convertFiltersData(MOCK_LANGUAGE_AGGREGATIONS_BUCKETS),
     trackingNamespace: 'testNameSpace',
-    queryParam: 'language',
   };
 
   const createComponent = (Props = defaultProps) => {
@@ -98,17 +101,21 @@ describe('CheckboxFilter', () => {
 
     it('triggers setQuery', () => {
       expect(actionSpies.setQuery).toHaveBeenCalledWith(expect.any(Object), {
-        key: 'language',
+        key: languageFilterData.filterParam,
         value: checkedLanguageName,
       });
     });
 
     it('sends tracking information when setQuery', () => {
       findFormCheckboxGroup().vm.$emit('input', checkedLanguageName);
-      expect(trackingSpy).toHaveBeenCalledWith(defaultProps.trackingNamespace, 'checkbox', {
-        label: 'set',
-        property: checkedLanguageName,
-      });
+      expect(trackingSpy).toHaveBeenCalledWith(
+        defaultProps.trackingNamespace,
+        TRACKING_LABEL_CHECKBOX,
+        {
+          label: TRACKING_LABEL_SET,
+          property: checkedLanguageName,
+        },
+      );
     });
   });
 });

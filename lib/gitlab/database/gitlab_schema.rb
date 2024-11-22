@@ -39,6 +39,7 @@ module Gitlab
         'pg_' => :gitlab_internal
       }.freeze
 
+      # rubocop:disable Metrics/CyclomaticComplexity
       def self.table_schema(name)
         schema_name, table_name = name.split('.', 2) # Strip schema name like: `public.`
 
@@ -75,6 +76,7 @@ module Gitlab
 
         nil
       end
+      # rubocop:enable Metrics/CyclomaticComplexity
 
       def self.table_schema!(name)
         # rubocop:disable Gitlab/DocUrl

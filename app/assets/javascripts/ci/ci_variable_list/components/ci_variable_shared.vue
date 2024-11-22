@@ -99,7 +99,6 @@ export default {
   data() {
     return {
       ciVariables: [],
-      environments: [],
       hasNextPage: false,
       isInitialLoading: true,
       isLoadingMoreItems: false,
@@ -159,6 +158,7 @@ export default {
         }
       },
     },
+    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     environments: {
       query() {
         return this.queryData?.environments?.query || {};
@@ -186,8 +186,7 @@ export default {
       return this.$apollo.queries.environments.loading;
     },
     areHiddenVariablesAvailable() {
-      // group and project variables can be hidden, instance variables cannot
-      return Boolean(this.entity);
+      return Boolean(this.entity && this.glFeatures?.ciHiddenVariables);
     },
     hasEnvScopeQuery() {
       return Boolean(this.queryData?.environments?.query);

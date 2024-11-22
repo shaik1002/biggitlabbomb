@@ -4,12 +4,22 @@ class AddIncidentManagementPendingAlertEscalationsProjectIdTrigger < Gitlab::Dat
   milestone '17.5'
 
   def up
-    # no-op because there was a bug in the original migration, which has been
-    # fixed by https://gitlab.com/gitlab-org/gitlab/-/merge_requests/168212
+    install_sharding_key_assignment_trigger(
+      table: :incident_management_pending_alert_escalations,
+      sharding_key: :project_id,
+      parent_table: :alert_management_alerts,
+      parent_sharding_key: :project_id,
+      foreign_key: :alert_id
+    )
   end
 
   def down
-    # no-op because there was a bug in the original migration, which has been
-    # fixed by https://gitlab.com/gitlab-org/gitlab/-/merge_requests/168212
+    remove_sharding_key_assignment_trigger(
+      table: :incident_management_pending_alert_escalations,
+      sharding_key: :project_id,
+      parent_table: :alert_management_alerts,
+      parent_sharding_key: :project_id,
+      foreign_key: :alert_id
+    )
   end
 end

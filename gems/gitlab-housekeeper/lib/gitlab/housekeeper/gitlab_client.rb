@@ -43,8 +43,18 @@ module Gitlab
           next false unless note["system"]
           next false if note["author"]["id"] == current_user_id
 
-          match = match_system_note(note['body'])
-          changes << match if match
+          case note['body']
+          when /^changed title from/
+            changes << :title
+          when /^changed the description$/
+            changes << :description
+          when /added \d+ commit/
+            changes << :code
+          when /assigned to|unassigned/
+            changes << :assignees
+          when /requested review from|removed review request for/
+            changes << :reviewers
+          end
         end
 
         resource_label_events = get_merge_request_resource_label_events(
@@ -113,23 +123,6 @@ module Gitlab
       end
 
       private
-
-      def match_system_note(note)
-        case note
-        when /^changed title from/
-          :title
-        when /^changed the description$/
-          :description
-        when /added \d+ commit/
-          :code
-        when /assigned to|unassigned/
-          :assignees
-        when /requested review from|removed review request for/
-          :reviewers
-        when /approved this merge request/
-          :approvals
-        end
-      end
 
       def get_merge_request_notes(target_project_id:, iid:)
         request(:get, "/projects/#{target_project_id}/merge_requests/#{iid}/notes", query: { per_page: 100 })

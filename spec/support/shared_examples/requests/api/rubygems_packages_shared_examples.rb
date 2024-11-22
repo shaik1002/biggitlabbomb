@@ -43,41 +43,26 @@ end
 RSpec.shared_examples 'process rubygems upload' do |user_type, status, add_member = true|
   RSpec.shared_examples 'creates rubygems package files' do
     it 'creates package files', :aggregate_failures do
-      expect(::Packages::Rubygems::ExtractionWorker).to receive(:perform_async).with(an_instance_of(Integer)).once
+      expect(::Packages::Rubygems::ExtractionWorker).to receive(:perform_async).once
 
       expect { subject }
           .to change { project.packages.count }.by(1)
           .and change { Packages::PackageFile.count }.by(1)
-
-      package = project.packages.last
-      expect(package).not_to be_nil
-
-      package_file = package.package_files.reload.last
-      expect(package_file).not_to be_nil
-
-      expect(package_file.file_name).to eq('package.gem')
-
       expect(response).to have_gitlab_http_status(status)
+
+      package_file = project.packages.last.package_files.reload.last
+      expect(package_file.file_name).to eq('package.gem')
     end
 
     it 'returns bad request if package creation fails' do
-      error_response = ServiceResponse.error(message: 'Package creation failed', reason: :bad_request)
-      package_file_service_double = instance_double(::Packages::Rubygems::CreatePackageFileService, execute: error_response)
+      file_service = double('file_service', execute: nil)
 
-      expect(::Packages::Rubygems::CreatePackageFileService).to receive(:new).and_return(package_file_service_double)
-
-      subject
-
-      expect(response).to have_gitlab_http_status(:bad_request)
-    end
-
-    it 'does not enqueue a background job if the transaction is rolled back' do
-      expect(::Packages::Rubygems::CreatePackageFileService).to receive(:new).and_raise(ActiveRecord::RecordNotFound)
+      expect(::Packages::CreatePackageFileService).to receive(:new).and_return(file_service)
       expect(::Packages::Rubygems::ExtractionWorker).not_to receive(:perform_async)
 
       subject
 
-      expect(response).to have_gitlab_http_status(:not_found)
+      expect(response).to have_gitlab_http_status(:bad_request)
     end
   end
 
@@ -176,7 +161,7 @@ RSpec.shared_examples 'dependency endpoint success' do |user_type, status, add_m
 
         subject
 
-        expect(response.body).to eq(expected_response)
+        expect(response.body).to eq(expected_response) # rubocop:disable Security/MarshalLoad
         expect(response).to have_gitlab_http_status(status)
       end
 

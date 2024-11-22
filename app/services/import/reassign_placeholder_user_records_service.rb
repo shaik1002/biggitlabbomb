@@ -10,8 +10,7 @@ module Import
 
     def initialize(import_source_user)
       @import_source_user = import_source_user
-      @reassigned_by_user = import_source_user.reassigned_by_user
-      @project_membership_created = false
+      @reassigned_by_user = User.find_by_id(import_source_user.reassigned_by_user_id)
     end
 
     def execute
@@ -24,8 +23,6 @@ module Import
 
       create_memberships
       delete_placeholder_memberships
-
-      UserProjectAccessChangedService.new(import_source_user.reassign_to_user_id).execute if project_membership_created?
 
       import_source_user.complete!
     end
@@ -67,36 +64,40 @@ module Import
 
     def reassign_placeholder_references
       Import::SourceUserPlaceholderReference.model_groups_for_source_user(import_source_user).each do |reference_group|
-        Import::SourceUserPlaceholderReference.model_relations_for_source_user_reference(
-          model: reference_group.model,
-          source_user: import_source_user,
-          user_reference_column: reference_group.user_reference_column,
-          alias_version: reference_group.alias_version
-        ) do |model_relation, placeholder_references|
-          reassign_placeholder_records_batch(model_relation, placeholder_references)
+        model = reference_group.model
+        user_reference_column = reference_group.user_reference_column
 
-          # TODO: Remove with https://gitlab.com/gitlab-org/gitlab/-/issues/493977
-          Kernel.sleep RELATION_BATCH_SLEEP
+        begin
+          Import::SourceUserPlaceholderReference.model_relations_for_source_user_reference(
+            model: model,
+            source_user: import_source_user,
+            user_reference_column: user_reference_column
+          ) do |model_relation, placeholder_references|
+            reassign_placeholder_records_batch(model_relation, placeholder_references, user_reference_column)
+
+            # TODO: Remove with https://gitlab.com/gitlab-org/gitlab/-/issues/493977
+            Kernel.sleep RELATION_BATCH_SLEEP
+          end
+        rescue NameError => e
+          ::Import::Framework::Logger.error(
+            message: "#{model} is not a model, #{user_reference_column} cannot be reassigned.",
+            error: e.message,
+            source_user_id: import_source_user.id
+          )
+
+          next
         end
-      rescue Import::PlaceholderReferences::AliasResolver::MissingAlias => e
-        ::Import::Framework::Logger.error(
-          message: "#{reference_group.model} is not a model, " \
-            "#{reference_group.user_reference_column} cannot be reassigned.",
-          error: e.message,
-          source_user_id: import_source_user.id
-        )
       end
     end
 
-    def reassign_placeholder_records_batch(model_relation, placeholder_references)
-      aliased_user_reference_column = placeholder_references.first.aliased_user_reference_column
+    def reassign_placeholder_records_batch(model_relation, placeholder_references, user_reference_column)
       model_relation.klass.transaction do
-        model_relation.update_all({ aliased_user_reference_column => import_source_user.reassign_to_user_id })
+        model_relation.update_all({ user_reference_column => import_source_user.reassign_to_user_id })
       end
       placeholder_references.delete_all
     rescue ActiveRecord::RecordNotUnique
       placeholder_references.each do |placeholder_reference|
-        reassign_placeholder_record(placeholder_reference, aliased_user_reference_column)
+        reassign_placeholder_record(placeholder_reference, user_reference_column)
       end
     end
 
@@ -156,8 +157,6 @@ module Import
       )
 
       member.save!
-
-      @project_membership_created = true if memberable.is_a?(Project)
     rescue ActiveRecord::ActiveRecordError => exception
       Gitlab::ErrorTracking.track_and_raise_for_dev_exception(
         exception,
@@ -196,10 +195,6 @@ module Import
 
     def placeholder_memberships
       Import::Placeholders::Membership.by_source_user(import_source_user)
-    end
-
-    def project_membership_created?
-      @project_membership_created == true
     end
 
     def log_create_membership_skipped(message, placeholder_membership, existing_membership)

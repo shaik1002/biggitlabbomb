@@ -5,7 +5,7 @@ require_relative '../../code_reuse_helpers'
 module RuboCop
   module Cop
     module Gitlab
-      class RailsLogger < ::RuboCop::Cop::Base
+      class RailsLogger < ::RuboCop::Cop::Cop
         include CodeReuseHelpers
 
         # This cop checks for the Rails.logger log methods in the codebase

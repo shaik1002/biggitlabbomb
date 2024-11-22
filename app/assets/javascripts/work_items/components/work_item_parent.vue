@@ -297,7 +297,7 @@ export default {
             s__(`WorkItem|You don't have the necessary permission to view the ancestor.`)
           }}</span>
         </gl-popover>
-        <gl-icon name="eye-slash" class="gl-mr-2" variant="subtle" />
+        <gl-icon name="eye-slash" class="gl-mr-2 !gl-text-gray-600" />
         <span data-testid="ancestor-not-available">{{
           s__('WorkItem|Ancestor not available')
         }}</span></span

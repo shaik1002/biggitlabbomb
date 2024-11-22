@@ -25,7 +25,7 @@ Experimental features:
 
 - Are not ready for production use.
 - Have [no support available](https://about.gitlab.com/support/statement-of-support/#experiment-beta-features).
-  Issues regarding such features should be opened in the [GitLab issue tracker](https://gitlab.com/gitlab-org/gitlab/-/issues).
+  Issues regarding such features should be opened in the GitLab issue tracker.
 - Might be unstable.
 - Could be removed at any time.
 - Might have a risk of data loss.
@@ -45,7 +45,6 @@ Beta features:
   or with less notice than for generally available features.
 - Have a low risk of data loss.
 - Have a user experience that is complete or near completion.
-- Can be equivalent to partner "Public Preview" status.
 
 ## Generally available (GA)
 

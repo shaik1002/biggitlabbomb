@@ -3,12 +3,10 @@
 module WorkItems
   module DataSync
     class BaseService < ::BaseContainerService
-      include ::Services::ReturnServiceResponses
-
-      attr_reader :work_item, :service_response, :target_namespace
+      attr_reader :work_item, :new_work_item, :target_namespace
 
       # work_item - original work item
-      # target_namespace - ProjectNamespace, Group or Project
+      # target_namespace - ProjectNamespace(not Project) or Group
       # current_user - user performing the move/clone action
       def initialize(work_item:, target_namespace:, current_user: nil, params: {})
         @work_item = work_item
@@ -18,11 +16,13 @@ module WorkItems
       end
 
       def execute
-        verification_response = verify_work_item_action_permission
+        verify_work_item_action_permission!
 
-        return verification_response if verification_response.error?
+        ::ApplicationRecord.transaction do
+          @new_work_item = data_sync_action
+        end
 
-        data_sync_action
+        new_work_item
       end
 
       private

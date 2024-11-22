@@ -9,30 +9,21 @@ class Dashboard::TodosController < Dashboard::ApplicationController
   before_action :authorize_read_group!, only: :index
   before_action :find_todos, only: [:index, :destroy_all]
 
-  feature_category :notifications
+  feature_category :team_planning
   urgency :low
 
   def index
-    push_frontend_feature_flag(:todos_vue_application, current_user)
+    @sort = pagination_params[:sort]
+    @todos = @todos.page(pagination_params[:page])
+    @todos = @todos.with_entity_associations
 
-    # When removing the `todos_vue_application`, also drop the #vue method below
-    if Feature.enabled?(:todos_vue_application, current_user)
-      render :vue
-    else
-      @sort = pagination_params[:sort]
-      @todos = @todos.page(pagination_params[:page])
-      @todos = @todos.with_entity_associations
+    return if redirect_out_of_range(@todos, todos_page_count(@todos))
 
-      return if redirect_out_of_range(@todos, todos_page_count(@todos))
-
-      @allowed_todos = ::Todos::AllowedTargetFilterService.new(@todos, current_user).execute
-    end
+    @allowed_todos = ::Todos::AllowedTargetFilterService.new(@todos, current_user).execute
   end
 
-  # To be removed along with the `todos_vue_application` feature flag.
-  # Also make sure to remove the corresponding route in `config/routes/dashboard.rb`.
   def vue
-    redirect_to(dashboard_todos_path, status: :found)
+    redirect_to(dashboard_todos_path, status: :found) unless Feature.enabled?(:todos_vue_application, current_user)
   end
 
   def destroy
@@ -53,9 +44,7 @@ class Dashboard::TodosController < Dashboard::ApplicationController
     updated_ids = TodoService.new.resolve_todos(@todos, current_user, resolved_by_action: :mark_all_done)
 
     respond_to do |format|
-      format.html do
-        redirect_to dashboard_todos_path, status: :found, notice: _('Everything on your to-do list is marked as done.')
-      end
+      format.html { redirect_to dashboard_todos_path, status: :found, notice: _('Everything on your to-do list is marked as done.') }
       format.js { head :ok }
       format.json { render json: todos_counts.merge(updated_ids: updated_ids) }
     end

@@ -53,7 +53,8 @@ module Impersonation
   end
 
   def impersonator
-    User.find(session[:impersonator_id]) if session[:impersonator_id]
+    strong_memoize(:impersonator) do
+      User.find(session[:impersonator_id]) if session[:impersonator_id]
+    end
   end
-  strong_memoize_attr :impersonator
 end

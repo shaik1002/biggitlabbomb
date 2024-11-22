@@ -5,12 +5,12 @@ require 'spec_helper'
 RSpec.describe 'devise/registrations/new', feature_category: :system_access do
   let(:resource) { Users::RegistrationsBuildService.new(nil, {}).execute }
   let(:tracking_label) { '_some_registration_' }
-  let(:onboarding_status_presenter) { instance_double(::Onboarding::StatusPresenter, registration_omniauth_params: {}) }
+  let(:onboarding_status) { instance_double(::Onboarding::Status, registration_omniauth_params: {}) }
 
   subject { render && rendered }
 
   before do
-    allow(view).to receive(:onboarding_status_presenter).and_return(onboarding_status_presenter)
+    allow(view).to receive(:onboarding_status).and_return(onboarding_status)
     allow(view).to receive(:resource).and_return(resource)
     allow(view).to receive(:resource_name).and_return(:user)
     allow(view).to receive(:preregistration_tracking_label).and_return(tracking_label)
@@ -29,7 +29,7 @@ RSpec.describe 'devise/registrations/new', feature_category: :system_access do
       allow(view).to receive(:providers).and_return([provider_label])
     end
 
-    it { is_expected.to have_tracking(action: tracking_action, label: tracking_label) }
+    it { is_expected.to have_css("[data-track-action='#{tracking_action}'][data-track-label='#{tracking_label}']") }
     it { is_expected.to have_content(_('Continue with:')) }
     it { is_expected.to have_css('form[action="/users/auth/github"]') }
   end

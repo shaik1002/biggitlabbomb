@@ -3,8 +3,9 @@
 class CreateInstanceIntegrationsTable < Gitlab::Database::Migration[2.2]
   milestone '17.4'
 
+  # rubocop:disable Migration/EnsureFactoryForTable -- False Positive
   def up
-    create_table :instance_integrations, id: :bigserial do |t| # rubocop:disable Migration/EnsureFactoryForTable -- https://gitlab.com/gitlab-org/gitlab/-/issues/468630
+    create_table :instance_integrations, id: :bigserial do |t|
       t.timestamps_with_timezone null: false
       t.integer :comment_detail
       t.boolean :active, default: false, null: false
@@ -33,6 +34,7 @@ class CreateInstanceIntegrationsTable < Gitlab::Database::Migration[2.2]
       t.binary :encrypted_properties_iv
     end
   end
+  # rubocop:enable Migration/EnsureFactoryForTable -- False Positive
 
   def down
     drop_table :instance_integrations, if_exists: true

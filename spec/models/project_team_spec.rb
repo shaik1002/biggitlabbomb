@@ -7,7 +7,6 @@ RSpec.describe ProjectTeam, feature_category: :groups_and_projects do
 
   let(:maintainer) { create(:user) }
   let(:reporter) { create(:user) }
-  let(:planner) { create(:user) }
   let(:guest) { create(:user) }
   let(:nonmember) { create(:user) }
 
@@ -16,7 +15,6 @@ RSpec.describe ProjectTeam, feature_category: :groups_and_projects do
 
     before do
       project.add_maintainer(maintainer)
-      project.add_planner(planner)
       project.add_reporter(reporter)
       project.add_guest(guest)
     end
@@ -24,7 +22,6 @@ RSpec.describe ProjectTeam, feature_category: :groups_and_projects do
     describe 'members collection' do
       it { expect(project.team.maintainers).to include(maintainer) }
       it { expect(project.team.maintainers).not_to include(guest) }
-      it { expect(project.team.maintainers).not_to include(planner) }
       it { expect(project.team.maintainers).not_to include(reporter) }
       it { expect(project.team.maintainers).not_to include(nonmember) }
     end
@@ -32,12 +29,10 @@ RSpec.describe ProjectTeam, feature_category: :groups_and_projects do
     describe 'access methods' do
       it { expect(project.team.maintainer?(maintainer)).to be_truthy }
       it { expect(project.team.maintainer?(guest)).to be_falsey }
-      it { expect(project.team.maintainer?(planner)).to be_falsey }
       it { expect(project.team.maintainer?(reporter)).to be_falsey }
       it { expect(project.team.maintainer?(nonmember)).to be_falsey }
       it { expect(project.team.member?(nonmember)).to be_falsey }
       it { expect(project.team.member?(guest)).to be_truthy }
-      it { expect(project.team.member?(planner, Gitlab::Access::PLANNER)).to be_truthy }
       it { expect(project.team.member?(reporter, Gitlab::Access::REPORTER)).to be_truthy }
       it { expect(project.team.member?(guest, Gitlab::Access::REPORTER)).to be_falsey }
       it { expect(project.team.member?(nonmember, Gitlab::Access::GUEST)).to be_falsey }
@@ -51,7 +46,6 @@ RSpec.describe ProjectTeam, feature_category: :groups_and_projects do
     before do
       group.add_maintainer(maintainer)
       group.add_reporter(reporter)
-      group.add_planner(planner)
       group.add_guest(guest)
 
       # If user is a group and a project member - GitLab uses highest permission
@@ -63,17 +57,14 @@ RSpec.describe ProjectTeam, feature_category: :groups_and_projects do
 
     describe 'members collection' do
       it { expect(project.team.reporters).to include(reporter) }
-      it { expect(project.team.planners).to include(planner) }
       it { expect(project.team.maintainers).to include(maintainer) }
       it { expect(project.team.maintainers).to include(guest) }
       it { expect(project.team.maintainers).not_to include(reporter) }
-      it { expect(project.team.maintainers).not_to include(planner) }
       it { expect(project.team.maintainers).not_to include(nonmember) }
     end
 
     describe 'access methods' do
       it { expect(project.team.reporter?(reporter)).to be_truthy }
-      it { expect(project.team.planner?(planner)).to be_truthy }
       it { expect(project.team.maintainer?(maintainer)).to be_truthy }
       it { expect(project.team.maintainer?(guest)).to be_truthy }
       it { expect(project.team.maintainer?(reporter)).to be_falsey }
@@ -253,14 +244,12 @@ RSpec.describe ProjectTeam, feature_category: :groups_and_projects do
       before do
         project.add_maintainer(maintainer)
         project.add_reporter(reporter)
-        project.add_planner(planner)
         project.add_guest(guest)
         project.request_access(requester)
       end
 
       it { expect(project.team.find_member(maintainer.id)).to be_a(ProjectMember) }
       it { expect(project.team.find_member(reporter.id)).to be_a(ProjectMember) }
-      it { expect(project.team.find_member(planner.id)).to be_a(ProjectMember) }
       it { expect(project.team.find_member(guest.id)).to be_a(ProjectMember) }
       it { expect(project.team.find_member(nonmember.id)).to be_nil }
       it { expect(project.team.find_member(requester.id)).to be_nil }
@@ -274,14 +263,12 @@ RSpec.describe ProjectTeam, feature_category: :groups_and_projects do
       before do
         group.add_maintainer(maintainer)
         group.add_reporter(reporter)
-        group.add_planner(planner)
         group.add_guest(guest)
         group.request_access(requester)
       end
 
       it { expect(project.team.find_member(maintainer.id)).to be_a(GroupMember) }
       it { expect(project.team.find_member(reporter.id)).to be_a(GroupMember) }
-      it { expect(project.team.find_member(planner.id)).to be_a(GroupMember) }
       it { expect(project.team.find_member(guest.id)).to be_a(GroupMember) }
       it { expect(project.team.find_member(nonmember.id)).to be_nil }
       it { expect(project.team.find_member(requester.id)).to be_nil }
@@ -424,13 +411,11 @@ RSpec.describe ProjectTeam, feature_category: :groups_and_projects do
       before do
         project.add_maintainer(maintainer)
         project.add_reporter(reporter)
-        project.add_planner(planner)
         project.add_guest(guest)
       end
 
       it { expect(project.team.contributor?(maintainer.id)).to be false }
       it { expect(project.team.contributor?(reporter.id)).to be false }
-      it { expect(project.team.contributor?(planner.id)).to be false }
       it { expect(project.team.contributor?(guest.id)).to be false }
     end
 
@@ -460,14 +445,12 @@ RSpec.describe ProjectTeam, feature_category: :groups_and_projects do
         before do
           project.add_maintainer(maintainer)
           project.add_reporter(reporter)
-          project.add_planner(planner)
           project.add_guest(guest)
           project.request_access(requester)
         end
 
         it { expect(project.team.max_member_access(maintainer.id)).to eq(Gitlab::Access::MAINTAINER) }
         it { expect(project.team.max_member_access(reporter.id)).to eq(Gitlab::Access::REPORTER) }
-        it { expect(project.team.max_member_access(planner.id)).to eq(Gitlab::Access::PLANNER) }
         it { expect(project.team.max_member_access(guest.id)).to eq(Gitlab::Access::GUEST) }
         it { expect(project.team.max_member_access(nonmember.id)).to eq(Gitlab::Access::NO_ACCESS) }
         it { expect(project.team.max_member_access(requester.id)).to eq(Gitlab::Access::NO_ACCESS) }
@@ -482,12 +465,10 @@ RSpec.describe ProjectTeam, feature_category: :groups_and_projects do
 
           group.add_maintainer(maintainer)
           group.add_reporter(reporter)
-          group.add_planner(planner)
         end
 
         it { expect(project.team.max_member_access(maintainer.id)).to eq(Gitlab::Access::DEVELOPER) }
         it { expect(project.team.max_member_access(reporter.id)).to eq(Gitlab::Access::REPORTER) }
-        it { expect(project.team.max_member_access(planner.id)).to eq(Gitlab::Access::PLANNER) }
         it { expect(project.team.max_member_access(nonmember.id)).to eq(Gitlab::Access::NO_ACCESS) }
         it { expect(project.team.max_member_access(requester.id)).to eq(Gitlab::Access::NO_ACCESS) }
 
@@ -498,7 +479,6 @@ RSpec.describe ProjectTeam, feature_category: :groups_and_projects do
 
           it { expect(project.team.max_member_access(maintainer.id)).to eq(Gitlab::Access::NO_ACCESS) }
           it { expect(project.team.max_member_access(reporter.id)).to eq(Gitlab::Access::NO_ACCESS) }
-          it { expect(project.team.max_member_access(planner.id)).to eq(Gitlab::Access::NO_ACCESS) }
         end
       end
     end
@@ -512,14 +492,12 @@ RSpec.describe ProjectTeam, feature_category: :groups_and_projects do
       before do
         group.add_maintainer(maintainer)
         group.add_reporter(reporter)
-        group.add_planner(planner)
         group.add_guest(guest)
         group.request_access(requester)
       end
 
       it { expect(project.team.max_member_access(maintainer.id)).to eq(Gitlab::Access::MAINTAINER) }
       it { expect(project.team.max_member_access(reporter.id)).to eq(Gitlab::Access::REPORTER) }
-      it { expect(project.team.max_member_access(planner.id)).to eq(Gitlab::Access::PLANNER) }
       it { expect(project.team.max_member_access(guest.id)).to eq(Gitlab::Access::GUEST) }
       it { expect(project.team.max_member_access(nonmember.id)).to eq(Gitlab::Access::NO_ACCESS) }
       it { expect(project.team.max_member_access(requester.id)).to eq(Gitlab::Access::NO_ACCESS) }
@@ -666,7 +644,6 @@ RSpec.describe ProjectTeam, feature_category: :groups_and_projects do
 
     let(:maintainer) { create(:user) }
     let(:reporter) { create(:user) }
-    let(:planner) { create(:user) }
     let(:guest) { create(:user) }
 
     let(:promoted_guest) { create(:user) }
@@ -678,17 +655,13 @@ RSpec.describe ProjectTeam, feature_category: :groups_and_projects do
     let(:second_user_without_access) { create(:user) }
 
     let(:users) do
-      [
-        maintainer, reporter, planner, promoted_guest, guest,
-        group_developer, second_developer, user_without_access
-      ].map(&:id)
+      [maintainer, reporter, promoted_guest, guest, group_developer, second_developer, user_without_access].map(&:id)
     end
 
     let(:expected) do
       {
         maintainer.id => Gitlab::Access::MAINTAINER,
         reporter.id => Gitlab::Access::REPORTER,
-        planner.id => Gitlab::Access::PLANNER,
         promoted_guest.id => Gitlab::Access::DEVELOPER,
         guest.id => Gitlab::Access::GUEST,
         group_developer.id => Gitlab::Access::DEVELOPER,
@@ -700,7 +673,6 @@ RSpec.describe ProjectTeam, feature_category: :groups_and_projects do
     before do
       project.add_maintainer(maintainer)
       project.add_reporter(reporter)
-      project.add_planner(planner)
       project.add_guest(promoted_guest)
       project.add_guest(guest)
 

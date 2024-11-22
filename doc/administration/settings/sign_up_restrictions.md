@@ -136,6 +136,52 @@ To remove the user cap:
 1. Remove the number from **User cap**.
 1. Select **Save changes**.
 
+## Turn on restricted access
+
+DETAILS:
+**Tier:** Premium, Ultimate
+**Offering:** GitLab.com
+**Status:** Beta
+
+> -Introduced in GitLab 17.5.
+
+This feature is in [beta](../../policy/experiment-beta-support.md).
+
+Use restricted access to prevent overage fees. Overage fees occur when you exceed the number of seats
+in your subscription, and must be paid at the next [quarterly reconciliation](../../subscriptions/quarterly_reconciliation.md).
+
+When you turn on restricted access, groups cannot add new billable users when there are no seats
+left in the subscription.
+
+Prerequisites:
+
+- You must have the Owner role for the group.
+- The group or one of its subgroups or projects must not be shared externally.
+
+To turn on restricted access:
+
+1. On the left sidebar, select **Settings > General**.
+1. Expand **Permissions and group features**.
+1. Under **Seat controls**, select **Restricted access**.
+
+### Known issues
+
+When you turn on restricted access, the following known issues might occur and result in overages:
+
+- The number of seats can still be exceeded if:
+  - You use SAML or SCIM to add new members, and have exceeded the number of seats in the subscription.
+  - Multiple users with the Owner role add members simultaneously.
+  - New billable members delay accepting an invitation.
+  - You change from using the user cap to restricted access, and have members pending approval
+    from before you changed to restricted access. In this case, those members remain in a pending state. If
+    pending members are approved while using restricted access, you might exceed the number of seats in your subscription.
+- If you renew your subscription through the GitLab Sales Team for less users than your current
+subscription, you will incur an overage fee. To avoid this fee, remove additional users before your
+renewal starts. For example:
+  - You have 20 users.
+  - You renew your subscription for 15 users.
+  - You will be charged overages for the five additional users.
+
 ## Minimum password length limit
 
 You can [change](../../security/password_length_limits.md#modify-minimum-password-length)
@@ -205,7 +251,7 @@ You can limit GitLab access to a subset of the LDAP users on your LDAP server.
 
 See the [documentation on setting up an LDAP user filter](../auth/ldap/index.md#set-up-ldap-user-filter) for more information.
 
-## Turn on administrator approval for role promotions
+## Enable role promotion approval
 
 DETAILS:
 **Tier:** Ultimate
@@ -218,26 +264,16 @@ DETAILS:
 FLAG:
 The availability of this feature is controlled by a feature flag.
 
-To prevent existing users from being promoted into a billable role in a project or group,
-turn on administrator approval for role promotions. You can then approve or reject promotion requests
-that are [pending administrator approval](../moderate_users.md#view-users-pending-role-promotion).
+In the **Ultimate** tier, [non billable roles](../../subscriptions/gitlab_com/index.md#billable-users), can be promoted to a billable role in any Project or Group, resulting in the increase of billable seats, without admins having any control on this promotion.
+To prevent existing users of the subscription from being promoted to a billable role, you can enable role promotion approval.
 
-- If an administrator adds a user to a group or project:
-  - If the new user role is [billable](../../subscriptions/self_managed/index.md#billable-users),
-  all other membership requests for that user are automatically approved.
-  - If the new user role is not billable, other requests for that user remain pending until administrator
-  approval.
+When this setting is enabled, any existing user of the subscription when added to a [group](../../user/group/index.md#add-users-to-a-group) or [project](../../user/project/members/index.md#add-users-to-a-project) on a [billable role](../../subscriptions/gitlab_com/index.md#billable-users) will be [pending administrator approval](../moderate_users.md#view-users-pending-role-promotion).
 
-- If a user who isn't an administrator adds a user to a group or project:
-  - If the user does not have any billable role in any group or project, and is added or promoted to a billable role,
-  their request remains [pending until administrator approval(../moderate_users.md#view-users-pending-role-promotion).
-  - If the user already has a billable role, administrator approval is not required.
+Promotions or updates of user roles for users that already occupy a billable seat do not require administrator approval.
 
-Prerequisites:
+If the user is added to a group or project by an administrator, any membership requests for this user to any other group or project will be approved automatically.
 
-- You must be an administrator.
-
-To turn on approvals for role promotions:
+To enable role promotion approval:
 
 1. On the left sidebar, at the bottom, select **Admin**.
 1. Select **Settings > General**.
@@ -246,9 +282,7 @@ To turn on approvals for role promotions:
 
 ### Known issues
 
-When a user [requests access to a group](../../user/group/index.md), the initial role assigned is Developer.
-If this access is approved by a user with the Owner role for the group and the user becomes a member of the group, the billable count
-increases if this user did not have a billable role previously.
+When you turn on role promotion approval, the billable count can still increase if a user [requests access to a group](../../user/group/index.md) and is approved by the group Owner on a [billable role](../../subscriptions/gitlab_com/index.md#billable-users).
 
 <!-- ## Troubleshooting
 

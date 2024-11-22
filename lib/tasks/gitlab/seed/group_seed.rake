@@ -20,7 +20,6 @@ namespace :gitlab do
     desc 'Seed groups with sub-groups/projects/epics/milestones for Group Import testing'
     task :group_seed, [:subgroups_depth, :username] => :gitlab_environment do |_t, args|
       require 'sidekiq/testing'
-      require_relative '../../../gitlab/faker/internet'
 
       GroupSeeder.new(
         subgroups_depth: args.subgroups_depth,
@@ -124,8 +123,9 @@ class GroupSeeder
   end
 
   def create_user
+    # rubocop:disable Style/SymbolProc -- Incorrect rubocop advice.
     User.create!(
-      username: Gitlab::Faker::Internet.unique_username,
+      username: FFaker::Internet.unique.user_name,
       name: FFaker::Name.name,
       email: FFaker::Internet.unique.email,
       confirmed_at: DateTime.now,
@@ -133,6 +133,7 @@ class GroupSeeder
     ) do |user|
       user.assign_personal_namespace(@organization)
     end
+    # rubocop:enable Style/SymbolProc
   end
 
   def create_member(user_id, group_id)

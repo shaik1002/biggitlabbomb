@@ -2,8 +2,6 @@
     {
         "start_line": 11,
         "start_char": 5,
-        "end_line": 11,
-        "end_char": 12,
         "definition_path": "morestrings/reverse.go#L12",
         "hover": [
             {
@@ -44,8 +42,6 @@
     {
         "start_line": 4,
         "start_char": 11,
-        "end_line": 4,
-        "end_char": 12,
         "definition_path": "morestrings/reverse.go#L5",
         "hover": [
             {
@@ -71,8 +67,6 @@
     {
         "start_line": 11,
         "start_char": 13,
-        "end_line": 11,
-        "end_char": 14,
         "definition_path": "morestrings/reverse.go#L12",
         "hover": [
             {
@@ -98,8 +92,6 @@
     {
         "start_line": 12,
         "start_char": 1,
-        "end_line": 12,
-        "end_char": 2,
         "definition_path": "morestrings/reverse.go#L13",
         "hover": [
             {
@@ -130,8 +122,6 @@
     {
         "start_line": 5,
         "start_char": 1,
-        "end_line": 5,
-        "end_char": 2,
         "definition_path": "morestrings/reverse.go#L6",
         "hover": [
             {
@@ -162,8 +152,6 @@
     {
         "start_line": 14,
         "start_char": 8,
-        "end_line": 14,
-        "end_char": 9,
         "definition_path": "morestrings/reverse.go#L13",
         "hover": [
             {
@@ -194,8 +182,6 @@
     {
         "start_line": 7,
         "start_char": 8,
-        "end_line": 7,
-        "end_char": 9,
         "definition_path": "morestrings/reverse.go#L6",
         "hover": [
             {
@@ -226,8 +212,6 @@
     {
         "start_line": 4,
         "start_char": 5,
-        "end_line": 4,
-        "end_char": 10,
         "definition_path": "morestrings/reverse.go#L5",
         "hover": [
             {

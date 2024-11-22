@@ -3,8 +3,6 @@ data_category: optional
 key_path: counts.templates_microsoft_teams_active
 description: Count of active service templates for Microsoft Teams
 product_group: import_and_integrate
-product_categories:
-- integrations
 value_type: number
 status: removed
 milestone_removed: '14.4'
@@ -13,7 +11,7 @@ data_source: database
 distribution:
 - ce
 - ee
-tiers:
+tier:
 - free
 - premium
 - ultimate

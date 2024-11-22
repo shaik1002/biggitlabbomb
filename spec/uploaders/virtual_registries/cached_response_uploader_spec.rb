@@ -12,29 +12,13 @@ RSpec.describe ::VirtualRegistries::CachedResponseUploader, feature_category: :v
     )
   end
 
-  let(:uploader) { described_class.new(cached_response, :file) }
+  subject(:uploader) { described_class.new(cached_response, :file) }
 
-  describe 'inclusions' do
-    subject { uploader }
-
-    it { is_expected.to include_module(::ObjectStorage::Concern) }
-  end
+  it { is_expected.to include_module(::ObjectStorage::Concern) }
 
   describe '#store_dir' do
-    subject { uploader.store_dir }
-
-    it { is_expected.to eq(object_storage_key) }
-  end
-
-  describe '#check_remote_file_existence_on_upload?' do
-    subject { uploader.check_remote_file_existence_on_upload? }
-
-    it { is_expected.to be(false) }
-  end
-
-  describe '#sync_model_object_store?' do
-    subject { uploader.sync_model_object_store? }
-
-    it { is_expected.to be(true) }
+    it 'uses the object_storage_key' do
+      expect(uploader.store_dir).to eq(object_storage_key)
+    end
   end
 end

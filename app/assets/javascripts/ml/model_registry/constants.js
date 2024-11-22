@@ -12,7 +12,7 @@ export const BASE_SORT_FIELDS = Object.freeze([
   },
   {
     orderBy: LIST_KEY_CREATED_AT,
-    label: s__('MlExperimentTracking|Created'),
+    label: s__('MlExperimentTracking|Created at'),
   },
 ]);
 
@@ -24,6 +24,10 @@ export const MODEL_ENTITIES = {
 };
 
 export const MLFLOW_USAGE_MODAL_ID = 'model-registry-mlflow-usage-modal';
+export const MODEL_VERSION_CREATION_MODAL_ID = 'create-model-version-modal';
+export const MODEL_CREATION_MODAL_ID = 'create-model-modal';
+export const MODEL_EDIT_MODAL_ID = 'edit-model-modal';
+export const MODEL_VERSION_EDIT_MODAL_ID = 'edit-model-version-modal';
 
 export const emptyArtifactFile = {
   file: null,
@@ -37,9 +41,3 @@ export const UPLOAD_STATUS = {
   FAILED: 3,
   SUCCEEDED: 4,
 };
-
-export const TYPENAME_MODEL_VERSION = 'Ml::ModelVersion';
-
-export const ROUTE_DETAILS = 'details';
-export const ROUTE_PERFORMANCE = 'performance';
-export const ROUTE_ARTIFACTS = 'artifacts';

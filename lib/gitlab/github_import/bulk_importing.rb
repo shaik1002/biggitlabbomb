@@ -47,14 +47,11 @@ module Gitlab
 
       # Bulk inserts the given rows into the database.
       def bulk_insert(rows, batch_size: 100)
-        inserted_ids = []
         rows.each_slice(batch_size) do |slice|
-          inserted_ids += ApplicationRecord.legacy_bulk_insert(model.table_name, slice, return_ids: true) # rubocop:disable Gitlab/BulkInsert -- required
+          ApplicationRecord.legacy_bulk_insert(model.table_name, slice) # rubocop:disable Gitlab/BulkInsert
 
           log_and_increment_counter(slice.size, :imported)
         end
-
-        inserted_ids
       end
 
       def object_type

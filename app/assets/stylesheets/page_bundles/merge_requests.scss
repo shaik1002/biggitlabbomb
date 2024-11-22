@@ -1,5 +1,9 @@
 @import 'mixins_and_variables_and_functions';
 
+.compare-versions-container {
+  min-width: 0;
+}
+
 .diff-comment-avatar-holders {
   position: absolute;
   margin-left: -$gl-padding;
@@ -124,11 +128,6 @@
 
   .vue-recycle-scroller__item-wrapper {
     overflow: visible;
-  }
-
-  .diff-file-is-active {
-    outline: 1px solid var(--gl-focus-ring-outer-color);
-    outline-offset: 2px;
   }
 }
 
@@ -310,11 +309,15 @@
   @include media-breakpoint-down(sm) {
     align-items: initial;
     flex-direction: column;
+
+    .dropdown .mini-pipeline-graph-dropdown-menu.dropdown-menu {
+      transform: initial;
+    }
   }
 
   .coverage {
     font-size: 12px;
-    @apply gl-text-subtle;
+    color: var(--gray-500, $gray-500);
     line-height: initial;
   }
 }
@@ -323,7 +326,25 @@
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  justify-content: space-between;
+
+  @include media-breakpoint-up(xs) {
+    flex-wrap: nowrap;
+    white-space: nowrap;
+  }
+
+  @container mr-widget-extension (max-width: 600px) {
+    flex-direction: column;
+    align-items: flex-start;
+
+    .deployment-info {
+      margin-bottom: $gl-padding-8;
+    }
+
+    // stylelint-disable-next-line gitlab/no-gl-class
+    .gl-button {
+      margin-left: 0;
+    }
+  }
 
   > *:not(:last-child) {
     margin-right: 0.3em;
@@ -334,9 +355,19 @@
   }
 
   .deployment-info {
-    white-space: nowrap;display: grid;
+    flex: 1;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    min-width: 100px;
+
+    display: grid;
     grid-template-columns: max-content minmax(0, max-content) max-content;
     grid-gap: $gl-spacing-scale-2;
+
+    @include media-breakpoint-up(xs) {
+      min-width: 0;
+      max-width: 100%;
+    }
   }
 
   .dropdown-menu {
@@ -408,7 +439,9 @@
 }
 
 .mr-section-container {
-  @apply gl-bg-section gl-border gl-border-section gl-rounded-base;
+  border: 1px solid var(--gl-border-color-default);
+  border-radius: $gl-border-radius-base;
+  background: var(--white, $white);
 
   &:not(:first-child) {
     @apply gl-mt-5;
@@ -643,7 +676,8 @@
 }
 
 .mr-widget-extension {
-  @apply gl-bg-subtle gl-border-t gl-border-t-section;
+  border-top: 1px solid var(--gl-border-color-default);
+  background-color: var(--gray-10, $gray-10);
   container-name: mr-widget-extension;
   container-type: inline-size;
   // Adds a fix for the view app dropdown not showing up
@@ -652,7 +686,7 @@
   z-index: 1;
 
   &.clickable:hover {
-    @apply gl-bg-strong;
+    background-color: var(--gray-50, $gray-50);
     cursor: pointer;
   }
 }
@@ -844,29 +878,6 @@
   .gl-toggle-label {
     font-weight: $gl-font-weight-normal;
   }
-}
-
-.mr-widget-status-icon-neutral,
-.mr-widget-status-icon-notice {
-  color: var(--gl-status-neutral-icon-color);
-}
-
-.mr-widget-status-icon-warning {
-  color: var(--gl-status-warning-icon-color);
-}
-
-.mr-widget-status-icon-failed,
-.mr-widget-status-icon-error {
-  color: var(--gl-status-danger-icon-color);
-}
-
-.mr-widget-status-icon-success {
-  color: var(--gl-status-success-icon-color);
-}
-
-.mr-widget-status-icon-info,
-.mr-widget-status-icon-scheduled {
-  color: var(--gl-status-info-icon-color);
 }
 
 .mr-widget-status-icon-level-1::before {

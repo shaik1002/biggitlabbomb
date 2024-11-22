@@ -1,5 +1,5 @@
 ---
-stage: Software Supply Chain Security
+stage: Govern
 group: Compliance
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
@@ -13,14 +13,14 @@ DETAILS:
 You can create a compliance framework that is a label to identify that your project has certain compliance
 requirements or needs additional oversight.
 
-In the Ultimate tier, the compliance framework can optionally enforce
-[compliance pipeline configuration](compliance_pipelines.md) and
-[security policies](../application_security/policies/index.md#scope) to the projects on which it is applied.
+In the Ultimate tier, the compliance framework can optionally enforce [compliance pipeline configuration](compliance_pipelines.md)
+and [security policies](../application_security/policies/scan_execution_policies.md#scope-security-policies)
+to the projects on which it is applied.
 
 Compliance frameworks are created on top-level groups. If a project is moved outside of its existing top-level group,
 its frameworks are removed.
 
-You can apply up to 20 compliance frameworks to each project.
+You can apply multiple compliance frameworks to a project.
 
 ## Prerequisites
 

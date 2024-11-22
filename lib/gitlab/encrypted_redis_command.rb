@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# rubocop:disable Rails/Output
 module Gitlab
   class EncryptedRedisCommand < EncryptedCommandBase
     DISPLAY_NAME = "Redis"
@@ -52,3 +53,4 @@ module Gitlab
     end
   end
 end
+# rubocop:enable Rails/Output

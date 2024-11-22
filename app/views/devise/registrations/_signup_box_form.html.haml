@@ -62,26 +62,36 @@
         data: { testid: 'new-user-email-field', track_action_for_errors: preregistration_tracking_label },
         required: true,
         title: _('Please provide a valid email address.')
-      %p.validation-hint.text-secondary
+      %p.validation-hint.gl-field-hint.text-secondary
         = _('We recommend a work email address.')
       %p.validation-warning.gl-field-error-ignore.text-secondary.hide
         = _('This email address does not look right, are you sure you typed it correctly?')
       -# This is used for providing entry to Jihu on email verification
       = render_if_exists 'devise/shared/signup_email_additional_info'
   .form-group.gl-mb-5
-    = render 'devise/registrations/password_input', form: f, form_resource_name: form_resource_name
+    = f.label :password, _('Password')
+    %input.form-control.gl-form-input.js-password{ data: { id: "#{form_resource_name}_password",
+      title: safe_format(s_('SignUp|Minimum length is %{minimum_password_length} characters.'),
+             minimum_password_length: @minimum_password_length),
+      minimum_password_length: @minimum_password_length,
+      testid: 'new-user-password-field',
+      track_action_for_errors: preregistration_tracking_label,
+      autocomplete: 'new-password',
+      name: "#{form_resource_name}[password]" } }
+    %p.gl-field-hint-valid.text-secondary
+      = safe_format(s_('SignUp|Minimum length is %{minimum_password_length} characters.'),
+        minimum_password_length: @minimum_password_length)
     = render_if_exists 'shared/password_requirements_list', show_basic_requirements: true
   -# This is used for providing entry to Jihu phone verification
   = render_if_exists 'devise/shared/phone_verification', form: f
 
   .form-group
-    - if arkose_labs_enabled?(user: nil)
+    - if arkose_labs_enabled?
       = render_if_exists 'devise/registrations/arkose_labs'
     - elsif show_recaptcha_sign_up?
       = recaptcha_tags nonce: content_security_policy_nonce
 
-  = render_if_exists 'devise/registrations/opt_in_to_email', f: f
-  = render 'devise/shared/terms_of_service_notice', button_text: button_text, css_class: 'gl-mt-2'
+  = render 'devise/shared/terms_of_service_notice', button_text: button_text
 
   = render Pajamas::ButtonComponent.new(type: :submit, variant: :confirm, block: true,
     button_options: { class: "#{button_class} gl-mt-4",

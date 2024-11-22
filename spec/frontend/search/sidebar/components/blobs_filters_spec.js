@@ -7,6 +7,11 @@ import BlobsFilters from '~/search/sidebar/components/blobs_filters.vue';
 import LanguageFilter from '~/search/sidebar/components/language_filter/index.vue';
 import ArchivedFilter from '~/search/sidebar/components/archived_filter/index.vue';
 import ForksFilter from '~/search/sidebar/components/forks_filter/index.vue';
+import {
+  SEARCH_TYPE_ZOEKT,
+  SEARCH_TYPE_ADVANCED,
+  SEARCH_TYPE_BASIC,
+} from '~/search/sidebar/constants';
 
 Vue.use(Vuex);
 
@@ -18,7 +23,7 @@ describe('GlobalSearch BlobsFilters', () => {
     hasMissingProjectContext: () => true,
   };
 
-  const createComponent = (initialState = { searchType: 'advanced' }) => {
+  const createComponent = (initialState = { searchType: SEARCH_TYPE_ADVANCED }) => {
     const store = new Vuex.Store({
       state: {
         urlQuery: MOCK_QUERY,
@@ -41,10 +46,10 @@ describe('GlobalSearch BlobsFilters', () => {
   });
 
   describe.each`
-    searchType    | isShown
-    ${'basic'}    | ${false}
-    ${'advanced'} | ${true}
-    ${'zoekt'}    | ${false}
+    searchType              | isShown
+    ${SEARCH_TYPE_BASIC}    | ${false}
+    ${SEARCH_TYPE_ADVANCED} | ${true}
+    ${SEARCH_TYPE_ZOEKT}    | ${false}
   `('sidebar blobs language filter:', ({ searchType, isShown }) => {
     beforeEach(() => {
       createComponent({ searchType });
@@ -56,13 +61,13 @@ describe('GlobalSearch BlobsFilters', () => {
   });
 
   describe.each`
-    searchType    | hasProjectContent | isShown
-    ${'basic'}    | ${true}           | ${false}
-    ${'basic'}    | ${false}          | ${false}
-    ${'advanced'} | ${true}           | ${false}
-    ${'advanced'} | ${false}          | ${false}
-    ${'zoekt'}    | ${true}           | ${true}
-    ${'zoekt'}    | ${false}          | ${false}
+    searchType              | hasProjectContent | isShown
+    ${SEARCH_TYPE_BASIC}    | ${true}           | ${false}
+    ${SEARCH_TYPE_BASIC}    | ${false}          | ${false}
+    ${SEARCH_TYPE_ADVANCED} | ${true}           | ${false}
+    ${SEARCH_TYPE_ADVANCED} | ${false}          | ${false}
+    ${SEARCH_TYPE_ZOEKT}    | ${true}           | ${true}
+    ${SEARCH_TYPE_ZOEKT}    | ${false}          | ${false}
   `('sidebar blobs fork filter:', ({ searchType, hasProjectContent, isShown }) => {
     beforeEach(() => {
       defaultGetters.hasMissingProjectContext = () => hasProjectContent;
@@ -75,13 +80,13 @@ describe('GlobalSearch BlobsFilters', () => {
   });
 
   describe.each`
-    searchType    | hasProjectContent | isShown
-    ${'basic'}    | ${true}           | ${true}
-    ${'basic'}    | ${false}          | ${false}
-    ${'advanced'} | ${true}           | ${true}
-    ${'advanced'} | ${false}          | ${false}
-    ${'zoekt'}    | ${true}           | ${true}
-    ${'zoekt'}    | ${false}          | ${false}
+    searchType              | hasProjectContent | isShown
+    ${SEARCH_TYPE_BASIC}    | ${true}           | ${true}
+    ${SEARCH_TYPE_BASIC}    | ${false}          | ${false}
+    ${SEARCH_TYPE_ADVANCED} | ${true}           | ${true}
+    ${SEARCH_TYPE_ADVANCED} | ${false}          | ${false}
+    ${SEARCH_TYPE_ZOEKT}    | ${true}           | ${true}
+    ${SEARCH_TYPE_ZOEKT}    | ${false}          | ${false}
   `('sidebar blobs archived filter:', ({ searchType, hasProjectContent, isShown }) => {
     beforeEach(() => {
       defaultGetters.hasMissingProjectContext = () => hasProjectContent;

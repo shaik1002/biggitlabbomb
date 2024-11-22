@@ -18,7 +18,6 @@ import {
 import getPackagesQuery from '~/packages_and_registries/package_registry/graphql/queries/get_packages.query.graphql';
 import getGroupPackageSettings from '~/packages_and_registries/package_registry/graphql/queries/get_group_package_settings.query.graphql';
 import DeletePackages from '~/packages_and_registries/package_registry/components/functional/delete_packages.vue';
-import PackageErrorsCount from '~/packages_and_registries/package_registry/components/list/package_errors_count.vue';
 import PackageTitle from '~/packages_and_registries/package_registry/components/list/package_title.vue';
 import PackageSearch from '~/packages_and_registries/package_registry/components/list/package_search.vue';
 import PackageList from '~/packages_and_registries/package_registry/components/list/packages_list.vue';
@@ -35,7 +34,6 @@ export default {
     GlEmptyState,
     GlLink,
     GlSprintf,
-    PackageErrorsCount,
     PackageList,
     PackageTitle,
     PackageSearch,
@@ -147,9 +145,8 @@ export default {
     isLoading() {
       return this.$apollo.queries.packagesResource.loading || this.isDeleteInProgress;
     },
-    showPackageErrorsCount() {
-      const packageStatus = this.filters?.packageStatus?.toUpperCase();
-      return this.packagesCount > 0 && packageStatus !== PACKAGE_ERROR_STATUS;
+    isFilteredByErrorStatus() {
+      return this.filters?.packageStatus?.toUpperCase() === PACKAGE_ERROR_STATUS;
     },
     refetchQueriesData() {
       return [
@@ -213,6 +210,7 @@ export default {
         />
       </template>
     </package-title>
+    <package-search @update="handleSearchUpdate" />
 
     <delete-packages
       :refetch-queries="refetchQueriesData"
@@ -221,35 +219,32 @@ export default {
       @end="isDeleteInProgress = false"
     >
       <template #default="{ deletePackages }">
-        <div>
-          <package-errors-count v-if="showPackageErrorsCount" @confirm-delete="deletePackages" />
-          <package-search @update="handleSearchUpdate" />
-          <package-list
-            :group-settings="groupSettings"
-            :list="packages.nodes"
-            :is-loading="isLoading"
-            @delete="deletePackages"
-          >
-            <template #empty-state>
-              <gl-empty-state
-                :title="emptyStateTitle"
-                :svg-path="emptyListIllustration"
-                :svg-height="150"
-              >
-                <template #description>
-                  <gl-sprintf v-if="hasFilters" :message="$options.i18n.widenFilters" />
-                  <gl-sprintf v-else :message="$options.i18n.noResultsText">
-                    <template #noPackagesLink="{ content }">
-                      <gl-link :href="$options.links.EMPTY_LIST_HELP_URL" target="_blank">{{
-                        content
-                      }}</gl-link>
-                    </template>
-                  </gl-sprintf>
-                </template>
-              </gl-empty-state>
-            </template>
-          </package-list>
-        </div>
+        <package-list
+          :hide-error-alert="isFilteredByErrorStatus"
+          :group-settings="groupSettings"
+          :list="packages.nodes"
+          :is-loading="isLoading"
+          @delete="deletePackages"
+        >
+          <template #empty-state>
+            <gl-empty-state
+              :title="emptyStateTitle"
+              :svg-path="emptyListIllustration"
+              :svg-height="150"
+            >
+              <template #description>
+                <gl-sprintf v-if="hasFilters" :message="$options.i18n.widenFilters" />
+                <gl-sprintf v-else :message="$options.i18n.noResultsText">
+                  <template #noPackagesLink="{ content }">
+                    <gl-link :href="$options.links.EMPTY_LIST_HELP_URL" target="_blank">{{
+                      content
+                    }}</gl-link>
+                  </template>
+                </gl-sprintf>
+              </template>
+            </gl-empty-state>
+          </template>
+        </package-list>
       </template>
     </delete-packages>
     <div v-if="!isDeleteInProgress" class="gl-flex gl-justify-center">

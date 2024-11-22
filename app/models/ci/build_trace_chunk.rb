@@ -275,7 +275,9 @@ module Ci
     def unsafe_append_data!(value, offset)
       new_size = value.bytesize + offset
 
-      raise ArgumentError, 'New data size exceeds chunk size' if new_size > CHUNK_SIZE
+      if new_size > CHUNK_SIZE
+        raise ArgumentError, 'New data size exceeds chunk size'
+      end
 
       current_store.append_data(self, value, offset).then do |stored|
         metrics.increment_trace_operation(operation: :appended)

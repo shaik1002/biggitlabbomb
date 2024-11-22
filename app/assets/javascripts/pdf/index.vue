@@ -1,15 +1,13 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script>
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import { getDocument, GlobalWorkerOptions } from 'pdfjs-dist/legacy/build/pdf';
+
 import Page from './page/index.vue';
 
-let pdfjs;
-let getDocument;
-let GlobalWorkerOptions;
+GlobalWorkerOptions.workerSrc = process.env.PDF_JS_WORKER_PUBLIC_PATH;
 
 export default {
   components: { Page },
-  mixins: [glFeatureFlagsMixin()],
   props: {
     pdf: {
       type: [String, Uint8Array],
@@ -37,26 +35,13 @@ export default {
     if (this.hasPDF) this.load();
   },
   methods: {
-    async loadPDFJS() {
-      pdfjs = this.glFeatures.upgradePdfjs
-        ? // eslint-disable-next-line import/extensions
-          await import('pdfjs-dist-v4/legacy/build/pdf.mjs')
-        : await import('pdfjs-dist-v3/legacy/build/pdf');
-      ({ getDocument, GlobalWorkerOptions } = pdfjs);
-      GlobalWorkerOptions.workerSrc = this.glFeatures.upgradePdfjs
-        ? process.env.PDF_JS_WORKER_V4_PUBLIC_PATH
-        : process.env.PDF_JS_WORKER_V3_PUBLIC_PATH;
-    },
-    async load() {
-      await this.loadPDFJS();
+    load() {
       this.pages = [];
       return getDocument({
         url: this.document,
-        cMapUrl: this.glFeatures.upgradePdfjs
-          ? process.env.PDF_JS_CMAPS_V4_PUBLIC_PATH
-          : process.env.PDF_JS_CMAPS_V3_PUBLIC_PATH,
+        cMapUrl: '/assets/webpack/pdfjs/cmaps/',
         cMapPacked: true,
-        isEvalSupported: this.glFeatures.upgradePdfjs,
+        isEvalSupported: false,
       })
         .promise.then(this.renderPages)
         .then((pages) => {

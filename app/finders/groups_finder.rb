@@ -74,12 +74,10 @@ class GroupsFinder < UnionFinder
 
   # rubocop: disable CodeReuse/ActiveRecord
   def groups_with_min_access_level
-    inner_query = current_user
+    current_user
       .groups
       .where('members.access_level >= ?', params[:min_access_level])
       .self_and_descendants
-    cte = Gitlab::SQL::CTE.new(:groups_with_min_access_level_cte, inner_query)
-    cte.apply_to(Group.where({}))
   end
   # rubocop: enable CodeReuse/ActiveRecord
 
@@ -108,15 +106,7 @@ class GroupsFinder < UnionFinder
     groups = filter_group_ids(groups)
     groups = exclude_group_ids(groups)
     groups = by_visibility(groups)
-    groups = by_ids(groups)
-    groups = top_level_only(groups)
     by_search(groups)
-  end
-
-  def by_ids(items)
-    ids = params[:ids]
-    items = items.id_in(ids) if ids
-    items
   end
 
   def by_organization(groups)
@@ -134,10 +124,6 @@ class GroupsFinder < UnionFinder
     else
       by_parent_children(groups, params[:parent])
     end
-  end
-
-  def top_level_only(groups)
-    params[:top_level_only].present? ? groups.by_parent(nil) : groups
   end
 
   def by_parent_descendants(groups, parent)

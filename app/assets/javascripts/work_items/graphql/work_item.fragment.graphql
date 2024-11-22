@@ -34,7 +34,6 @@ fragment WorkItem on WorkItem {
     setWorkItemMetadata
     createNote
     adminWorkItemLink
-    markNoteAsInternal
   }
   widgets {
     ...WorkItemWidgets

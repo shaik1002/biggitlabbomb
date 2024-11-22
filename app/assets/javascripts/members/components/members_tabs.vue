@@ -115,6 +115,7 @@ export default {
         v-if="shouldShowExportButton"
         data-event-tracking="click_export_group_members_as_csv"
         class="gl-ml-auto gl-self-center"
+        icon="export"
         :href="exportCsvPath"
       >
         {{ __('Export as CSV') }}

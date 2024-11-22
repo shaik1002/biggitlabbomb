@@ -3,8 +3,6 @@ data_category: optional
 key_path: counts.merge_request_comment
 description: Count of the number of merge request comments
 product_group: code_review
-product_categories:
-- code_review_workflow
 value_type: number
 status: active
 time_frame: all
@@ -14,7 +12,7 @@ events:
 distribution:
 - ce
 - ee
-tiers:
+tier:
 - free
 - premium
 - ultimate

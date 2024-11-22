@@ -1,5 +1,5 @@
 ---
-stage: Application Security Testing
+stage: Secure
 group: Static Analysis
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
@@ -186,7 +186,7 @@ In the following example `sast-ruleset.toml` file, rules are matched by the `typ
 ### Offline configuration
 
 DETAILS:
-**Tier:** Premium, Ultimate
+**Tier:** PREMIUM
 **Offering:** Self-managed
 
 An offline environment has limited, restricted, or intermittent access to external resources through
