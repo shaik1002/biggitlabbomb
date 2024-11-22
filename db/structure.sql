@@ -5853,6 +5853,60 @@ CREATE SEQUENCE ai_code_suggestion_events_id_seq
 
 ALTER SEQUENCE ai_code_suggestion_events_id_seq OWNED BY ai_code_suggestion_events.id;
 
+CREATE TABLE ai_conversation_messages (
+    id bigint NOT NULL,
+    thread_id bigint NOT NULL,
+    agent_version_id bigint,
+    organization_id bigint NOT NULL,
+    thread_last_updated_at timestamp with time zone NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    role smallint NOT NULL,
+    has_feedback boolean DEFAULT false,
+    extras jsonb DEFAULT '{}'::jsonb NOT NULL,
+    error_details jsonb DEFAULT '{}'::jsonb NOT NULL,
+    content text NOT NULL,
+    request_xid text,
+    message_xid text,
+    referer_url text,
+    "timestamp" text,
+    CONSTRAINT check_0fe78937e4 CHECK ((char_length(content) <= 524288)),
+    CONSTRAINT check_82eb4f5a8d CHECK ((char_length("timestamp") <= 255)),
+    CONSTRAINT check_8daec62ec9 CHECK ((char_length(request_xid) <= 255)),
+    CONSTRAINT check_b14b137e02 CHECK ((char_length(message_xid) <= 255)),
+    CONSTRAINT check_f36c73d1d9 CHECK ((char_length(referer_url) <= 255))
+)
+PARTITION BY RANGE (created_at);
+
+CREATE SEQUENCE ai_conversation_messages_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE ai_conversation_messages_id_seq OWNED BY ai_conversation_messages.id;
+
+CREATE TABLE ai_conversation_threads (
+    id bigint NOT NULL,
+    user_id bigint NOT NULL,
+    organization_id bigint NOT NULL,
+    last_updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    conversation_type smallint NOT NULL
+)
+PARTITION BY RANGE (last_updated_at);
+
+CREATE SEQUENCE ai_conversation_threads_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE ai_conversation_threads_id_seq OWNED BY ai_conversation_threads.id;
+
 CREATE TABLE ai_feature_settings (
     id bigint NOT NULL,
     created_at timestamp with time zone NOT NULL,
@@ -22751,6 +22805,10 @@ ALTER TABLE ONLY ai_agents ALTER COLUMN id SET DEFAULT nextval('ai_agents_id_seq
 
 ALTER TABLE ONLY ai_code_suggestion_events ALTER COLUMN id SET DEFAULT nextval('ai_code_suggestion_events_id_seq'::regclass);
 
+ALTER TABLE ONLY ai_conversation_messages ALTER COLUMN id SET DEFAULT nextval('ai_conversation_messages_id_seq'::regclass);
+
+ALTER TABLE ONLY ai_conversation_threads ALTER COLUMN id SET DEFAULT nextval('ai_conversation_threads_id_seq'::regclass);
+
 ALTER TABLE ONLY ai_feature_settings ALTER COLUMN id SET DEFAULT nextval('ai_feature_settings_id_seq'::regclass);
 
 ALTER TABLE ONLY ai_self_hosted_models ALTER COLUMN id SET DEFAULT nextval('ai_self_hosted_models_id_seq'::regclass);
@@ -24574,6 +24632,12 @@ ALTER TABLE ONLY ai_agents
 
 ALTER TABLE ONLY ai_code_suggestion_events
     ADD CONSTRAINT ai_code_suggestion_events_pkey PRIMARY KEY (id, "timestamp");
+
+ALTER TABLE ONLY ai_conversation_messages
+    ADD CONSTRAINT ai_conversation_messages_pkey PRIMARY KEY (id, created_at);
+
+ALTER TABLE ONLY ai_conversation_threads
+    ADD CONSTRAINT ai_conversation_threads_pkey PRIMARY KEY (id, last_updated_at);
 
 ALTER TABLE ONLY ai_feature_settings
     ADD CONSTRAINT ai_feature_settings_pkey PRIMARY KEY (id);
@@ -28273,6 +28337,8 @@ CREATE INDEX idx_abuse_reports_user_id_status_and_category ON abuse_reports USIN
 
 CREATE INDEX idx_addon_purchases_on_last_refreshed_at_desc_nulls_last ON subscription_add_on_purchases USING btree (last_assigned_users_refreshed_at DESC NULLS LAST);
 
+CREATE UNIQUE INDEX idx_ai_convo_msgs_on_thread_id_last_updated_at_and_created_at ON ONLY ai_conversation_messages USING btree (thread_id, thread_last_updated_at, created_at);
+
 CREATE INDEX idx_alert_management_alerts_on_created_at_project_id_with_issue ON alert_management_alerts USING btree (created_at, project_id) WHERE (issue_id IS NOT NULL);
 
 CREATE INDEX idx_analytics_devops_adoption_segments_on_namespace_id ON analytics_devops_adoption_segments USING btree (namespace_id);
@@ -28756,6 +28822,20 @@ CREATE UNIQUE INDEX index_ai_agents_on_project_id_and_name ON ai_agents USING bt
 CREATE INDEX index_ai_code_suggestion_events_on_organization_id ON ONLY ai_code_suggestion_events USING btree (organization_id);
 
 CREATE INDEX index_ai_code_suggestion_events_on_user_id ON ONLY ai_code_suggestion_events USING btree (user_id);
+
+CREATE INDEX index_ai_conversation_messages_on_agent_version_id ON ONLY ai_conversation_messages USING btree (agent_version_id);
+
+CREATE INDEX index_ai_conversation_messages_on_message_xid ON ONLY ai_conversation_messages USING btree (message_xid);
+
+CREATE INDEX index_ai_conversation_messages_on_organization_id ON ONLY ai_conversation_messages USING btree (organization_id);
+
+CREATE INDEX index_ai_conversation_messages_on_thread_id_and_created_at ON ONLY ai_conversation_messages USING btree (thread_id, created_at);
+
+CREATE INDEX index_ai_conversation_threads_on_last_updated_at ON ONLY ai_conversation_threads USING btree (last_updated_at);
+
+CREATE INDEX index_ai_conversation_threads_on_organization_id ON ONLY ai_conversation_threads USING btree (organization_id);
+
+CREATE INDEX index_ai_conversation_threads_on_user_id ON ONLY ai_conversation_threads USING btree (user_id);
 
 CREATE INDEX index_ai_feature_settings_on_ai_self_hosted_model_id ON ai_feature_settings USING btree (ai_self_hosted_model_id);
 
@@ -32621,6 +32701,8 @@ CREATE INDEX index_vulnerability_historical_statistics_on_date_and_id ON vulnera
 
 CREATE UNIQUE INDEX index_vulnerability_identifiers_on_project_id_and_fingerprint ON vulnerability_identifiers USING btree (project_id, fingerprint);
 
+CREATE INDEX index_vulnerability_identifiers_on_project_id_and_name ON vulnerability_identifiers USING btree (project_id, name);
+
 CREATE INDEX index_vulnerability_issue_links_on_issue_id ON vulnerability_issue_links USING btree (issue_id);
 
 CREATE INDEX index_vulnerability_issue_links_on_project_id ON vulnerability_issue_links USING btree (project_id);
@@ -36381,6 +36463,21 @@ ALTER TABLE ONLY ml_experiments
 
 ALTER TABLE ONLY merge_request_metrics
     ADD CONSTRAINT fk_ae440388cc FOREIGN KEY (latest_closed_by_id) REFERENCES users(id) ON DELETE SET NULL;
+
+ALTER TABLE ai_conversation_messages
+    ADD CONSTRAINT fk_ai_messages_to_agent_versions FOREIGN KEY (agent_version_id) REFERENCES ai_agent_versions(id) ON DELETE CASCADE;
+
+ALTER TABLE ai_conversation_messages
+    ADD CONSTRAINT fk_ai_messages_to_organizations FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE;
+
+ALTER TABLE ai_conversation_messages
+    ADD CONSTRAINT fk_ai_messages_to_threads FOREIGN KEY (thread_id, thread_last_updated_at) REFERENCES ai_conversation_threads(id, last_updated_at) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ai_conversation_threads
+    ADD CONSTRAINT fk_ai_threads_to_organizations FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE;
+
+ALTER TABLE ai_conversation_threads
+    ADD CONSTRAINT fk_ai_threads_to_users FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY analytics_cycle_analytics_group_stages
     ADD CONSTRAINT fk_analytics_cycle_analytics_group_stages_group_value_stream_id FOREIGN KEY (group_value_stream_id) REFERENCES analytics_cycle_analytics_group_value_streams(id) ON DELETE CASCADE;
