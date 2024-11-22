@@ -45,7 +45,7 @@ function formatTooltipText({ date, count }) {
   if (count > 0) {
     contribText = n__('%d contribution', '%d contributions', count);
   }
-  return `${contribText}<br /><span class="gl-text-subtle">${dateDayName} ${dateText}</span>`;
+  return `${contribText}<br /><span class="gl-opacity-7">${dateDayName} ${dateText}</span>`;
 }
 
 // Return the contribution level from the number of contributions
