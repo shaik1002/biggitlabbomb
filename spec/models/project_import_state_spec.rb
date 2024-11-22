@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe ProjectImportState, type: :model, feature_category: :importers do
+  using RSpec::Parameterized::TableSyntax
+
   let_it_be(:correlation_id) { 'cid' }
   let_it_be(:import_state, refind: true) { create(:import_state, correlation_id_value: correlation_id) }
 
@@ -260,6 +262,31 @@ RSpec.describe ProjectImportState, type: :model, feature_category: :importers do
 
           expect(project.import_state.checksums).to eq(expected_checksums)
         end
+      end
+    end
+  end
+
+  describe 'completion notification trigger', :aggregate_failures do
+    let_it_be(:project) { create(:project) }
+
+    subject(:import_state) { create(:import_state, status: initial_status, project: project) }
+
+    where(:event, :total_completed_emails_sent, :initial_status) do
+      :schedule | 0 | :none
+      :force_start | 0 | :none
+      :start | 0 | :scheduled
+      :finish | 1 | :started
+      :cancel | 0 | :started
+      :fail_op | 1 | :started
+    end
+
+    with_them do
+      it 'sends completion email on completing events' do
+        expect(Notify).to receive(:project_import_complete)
+          .exactly(total_completed_emails_sent).times
+          .and_call_original
+
+        import_state.send(:"#{event}!")
       end
     end
   end

@@ -90,6 +90,12 @@ class ProjectImportState < ApplicationRecord
         end
       end
     end
+
+    after_transition any => [:finished, :failed] do |state, _|
+      state.run_after_commit do
+        Notify.project_import_complete(state.project_id).deliver_later
+      end
+    end
   end
 
   def expire_etag_cache

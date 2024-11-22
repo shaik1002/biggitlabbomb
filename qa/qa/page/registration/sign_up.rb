@@ -8,11 +8,8 @@ module QA
           element 'new-user-first-name-field'
           element 'new-user-last-name-field'
           element 'new-user-email-field'
-          element 'new-user-register-button'
-        end
-
-        view 'app/views/devise/registrations/_password_input.html.haml' do
           element 'new-user-password-field'
+          element 'new-user-register-button'
         end
 
         view 'app/helpers/registrations_helper.rb' do

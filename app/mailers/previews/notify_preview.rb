@@ -372,6 +372,12 @@ class NotifyPreview < ActionMailer::Preview
     ).message
   end
 
+  def project_import_complete
+    project_id = ProjectImportState.last.project_id
+
+    Notify.project_import_complete(project_id)
+  end
+
   def bulk_import_complete
     bulk_import = BulkImport.last
 

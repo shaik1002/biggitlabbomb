@@ -12,12 +12,28 @@ module Emails
       )
     end
 
+    def project_import_complete(project_id)
+      @project = Project.find(project_id)
+      user = User.find(@project.creator_id)
+      @hostname = @project.import_url
+
+      title = safe_format(
+        s_('Import|Import from %{hostname} completed'),
+        hostname: @hostname
+      )
+
+      email_with_layout(
+        to: user.notification_email_or_default,
+        subject: subject(title)
+      )
+    end
+
     def bulk_import_complete(user_id, bulk_import_id)
       user = User.find(user_id)
       @bulk_import = BulkImport.find(bulk_import_id)
       @hostname = @bulk_import.configuration.url
       title = safe_format(
-        s_('BulkImport|Import from %{hostname} completed'),
+        s_('Import|Import from %{hostname} completed'),
         hostname: @hostname
       )
 

@@ -95,11 +95,9 @@ its parent's objective.
 
 ## Edit title and description
 
-> - [Changed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/169256) the minimum user role from Reporter to Planner in GitLab 17.7.
-
 Prerequisites:
 
-- You must have at least the Planner role for the project.
+- You must have at least the Reporter role for the project.
 
 To edit an OKR:
 
@@ -116,11 +114,10 @@ To edit an OKR:
 > - Changing activity sort order [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/378949) in GitLab 15.8.
 > - Filtering activity [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/389971) in GitLab 15.10.
 > - [Enabled on GitLab.com and self-managed](https://gitlab.com/gitlab-org/gitlab/-/issues/334812) in GitLab 15.10.
-> - [Changed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/169256) the minimum user role from Reporter to Planner in GitLab 17.7.
 
 Prerequisites:
 
-- You must have at least the Planner role for the project.
+- You must have at least the Reporter role for the project.
 
 You can view all the [system notes](project/system_notes.md) related to the OKR. By default they are sorted by **Oldest first**.
 You can always change the sorting order to **Newest first**, which is remembered across sessions.
@@ -131,8 +128,6 @@ You can add [comments](discussions/index.md) and reply to threads in OKRs.
 
 ## Assign users
 
-> - [Changed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/169256) the minimum user role from Reporter to Planner in GitLab 17.7.
-
 To show who is responsible for an OKR, you can assign users to it.
 
 Users on GitLab Free can assign one user per OKR.
@@ -141,7 +136,7 @@ See also [multiple assignees for issues](project/issues/multiple_assignees_for_i
 
 Prerequisites:
 
-- You must have at least the Planner role for the project.
+- You must have at least the Reporter role for the project.
 
 To change the assignee on an OKR:
 
@@ -152,11 +147,9 @@ To change the assignee on an OKR:
 
 ## Assign labels
 
-> - [Changed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/169256) the minimum user role from Reporter to Planner in GitLab 17.7.
-
 Prerequisites:
 
-- You must have at least the Planner role for the project.
+- You must have at least the Reporter role for the project.
 
 Use [labels](project/labels.md) to organize OKRs among teams.
 
@@ -170,14 +163,13 @@ To add labels to an OKR:
 ## Add an objective to a milestone
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/367463) in GitLab 15.7.
-> - [Changed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/169256) the minimum user role from Reporter to Planner in GitLab 17.7.
 
 You can add an objective to a [milestone](project/milestones/index.md).
 You can see the milestone title when you view an objective.
 
 Prerequisites:
 
-- You must have at least the Planner role for the project.
+- You must have at least the Reporter role for the project.
 
 To add an objective to a milestone:
 
@@ -189,7 +181,6 @@ To add an objective to a milestone:
 ## Set progress
 
 > - Setting progress for key results [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/382433) in GitLab 15.8.
-> - [Changed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/169256) the minimum user role from Reporter to Planner in GitLab 17.7.
 
 Show how much of the work needed to achieve an objective is finished.
 
@@ -202,7 +193,7 @@ value is updated, the automation updates all parents again to show the average.
 
 Prerequisites:
 
-- You must have at least the Planner role for the project.
+- You must have at least the Reporter role for the project.
 
 To set progress of an objective or key result:
 
@@ -216,7 +207,6 @@ To set progress of an objective or key result:
 ## Set health status
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/381899) in GitLab 15.7.
-> - [Changed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/169256) the minimum user role from Reporter to Planner in GitLab 17.7.
 
 To better track the risk in meeting your goals, you can assign a [health status](project/issues/managing_issues.md#health-status)
 to each objective and key result.
@@ -225,7 +215,7 @@ as planned or need attention to stay on schedule.
 
 Prerequisites:
 
-- You must have at least the Planner role for the project.
+- You must have at least the Reporter role for the project.
 
 To set health status of an OKR:
 
@@ -236,11 +226,10 @@ To set health status of an OKR:
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/386877) in GitLab 16.0.
 > - Quick action `/promote_to` [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/412534) in GitLab 16.1.
-> - [Changed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/169256) the minimum user role from Reporter to Planner in GitLab 17.7.
 
 Prerequisites:
 
-- You must have at least the Planner role for the project.
+- You must have at least the Reporter role for the project.
 
 To promote a key result:
 
@@ -285,14 +274,12 @@ To copy the objective's or key result's email address:
 
 ## Close an OKR
 
-> - [Changed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/169256) the minimum user role from Reporter to Planner in GitLab 17.7.
-
 When an OKR is achieved, you can close it.
 The OKR is marked as closed but is not deleted.
 
 Prerequisites:
 
-- You must have at least the Planner role for the project.
+- You must have at least the Reporter role for the project.
 
 To close an OKR:
 
@@ -367,11 +354,10 @@ To add an existing key result to an objective:
 ### Reorder objective and key result children
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/385887) in GitLab 16.0.
-> - [Changed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/169256) the minimum user role from Reporter to Planner in GitLab 17.7.
 
 Prerequisites:
 
-- You must have at least the Planner role for the project.
+- You must have at least the Reporter role for the project.
 
 By default, child OKRs are ordered by creation date.
 To reorder them, drag them around.
@@ -379,7 +365,6 @@ To reorder them, drag them around.
 ### Schedule OKR check-in reminders
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/422761) in GitLab 16.4 [with a flag](../administration/feature_flags.md) named `okr_checkin_reminders`. Disabled by default.
-> - [Changed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/169256) the minimum user role from Reporter to Planner in GitLab 17.7.
 
 FLAG:
 On self-managed GitLab, by default this feature is not available. To make it available, an administrator can [enable the feature flag](../administration/feature_flags.md) named `okr_checkin_reminders`.
@@ -395,7 +380,7 @@ Reminders are sent on Tuesdays.
 
 Prerequisites:
 
-- You must have at least the Planner role for the project.
+- You must have at least the Reporter role for the project.
 - There must be at least one objective with at least one key result in the project.
 - You can schedule reminders only for top-level objectives.
   Scheduling a check-in reminder for child objectives has no effect.
@@ -425,11 +410,10 @@ To turn off a check-in reminder, enter:
 ## Set an objective as a parent
 
 > - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/11198) in GitLab 16.6.
-> - [Changed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/169256) the minimum user role from Reporter to Planner in GitLab 17.7.
 
 Prerequisites:
 
-- You must have at least the Planner role for the project.
+- You must have at least the Reporter role for the project.
 - The parent objective and child OKR must belong to the same project.
 
 To set an objective as a parent of an OKR:
@@ -452,8 +436,6 @@ leaking out.
 
 ### Make an OKR confidential
 
-> - [Changed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/169256) the minimum user role from Reporter to Planner in GitLab 17.7.
-
 By default, OKRs are public.
 You can make an OKR confidential when you create or edit it.
 
@@ -468,7 +450,7 @@ Select that checkbox and then select **Create objective** or **Create key result
 
 Prerequisites:
 
-- You must have at least the Planner role for the project.
+- You must have at least the Reporter role for the project.
 - A **confidential objective** can have only confidential
   [child objectives or key results](#child-objectives-and-key-results):
   - To make an objective confidential: If it has any child objectives or key results, you must first
@@ -486,9 +468,7 @@ To change the confidentiality of an existing OKR:
 
 ### Who can see confidential OKRs
 
-> - [Changed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/169256) the minimum user role from Reporter to Planner in GitLab 17.7.
-
-When an OKR is made confidential, only users with at least the Planner role for the project have
+When an OKR is made confidential, only users with at least the Reporter role for the project have
 access to the OKR.
 Users with Guest or [Minimal](permissions.md#users-with-minimal-access) roles can't access
 the OKR even if they were actively participating before the change.
@@ -522,7 +502,6 @@ system note in the OKR's comments, for example:
 ## Lock discussion
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/398649) in GitLab 16.9 [with a flag](../administration/feature_flags.md) named `work_items_beta`. Disabled by default.
-> - [Changed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/169256) the minimum user role from Reporter to Planner in GitLab 17.7.
 
 FLAG:
 On self-managed GitLab, by default this feature is not available. To make it available, an administrator can [enable the feature flag](../administration/feature_flags.md) named `work_items_beta`.
@@ -534,7 +513,7 @@ When you do, only project members can add and edit comments.
 
 Prerequisites:
 
-- You must have at least the Planner role.
+- You must have at least the Reporter role.
 
 To lock an OKR:
 

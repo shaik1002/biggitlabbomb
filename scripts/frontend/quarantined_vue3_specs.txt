@@ -37,6 +37,7 @@ ee/spec/frontend/boards/components/epic_board_content_sidebar_spec.js
 ee/spec/frontend/boards/components/epics_swimlanes_spec.js
 ee/spec/frontend/ci/pipeline_details/header/pipeline_header_spec.js
 ee/spec/frontend/ci/runner/components/runner_details_spec.js
+ee/spec/frontend/ci/runner/components/runner_form_fields_spec.js
 ee/spec/frontend/ci/runner/components/runner_header_spec.js
 ee/spec/frontend/ci/runner/components/stat/runner_upgrade_status_stats_spec.js
 ee/spec/frontend/ci/runner/group_runners_dashboard/group_runners_wait_times_spec.js
@@ -122,6 +123,9 @@ ee/spec/frontend/sidebar/components/sidebar_dropdown_widget_spec.js
 ee/spec/frontend/status_checks/components/modal_create_spec.js
 ee/spec/frontend/status_checks/mount_spec.js
 ee/spec/frontend/subscriptions/buy_addons_shared/components/checkout/addon_purchase_details_spec.js
+ee/spec/frontend/subscriptions/new/components/checkout/billing_address_spec.js
+ee/spec/frontend/subscriptions/new/components/checkout/order_summary_spec.js
+ee/spec/frontend/subscriptions/new/components/checkout/subscription_details_spec.js
 ee/spec/frontend/subscriptions/shared/privacy_and_terms_confirm_spec.js
 ee/spec/frontend/tracing/details/tracing_details_spec.js
 ee/spec/frontend/tracing/details/tracing_span_chart_spec.js
@@ -393,6 +397,7 @@ spec/frontend/vue_shared/components/page_heading_spec.js
 spec/frontend/vue_shared/components/project_selector/project_selector_spec.js
 spec/frontend/vue_shared/components/runner_instructions/runner_instructions_modal_spec.js
 spec/frontend/vue_shared/components/smart_virtual_list_spec.js
+spec/frontend/vue_shared/components/source_viewer/components/chunk_spec.js
 spec/frontend/vue_shared/components/tooltip_on_truncate_spec.js
 spec/frontend/vue_shared/components/upload_dropzone/upload_dropzone_spec.js
 spec/frontend/vue_shared/directives/tooltip_on_truncate_spec.js

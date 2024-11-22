@@ -41,7 +41,6 @@ If any of the following cases are true, use [pipeline execution policies](pipeli
 
 - You can assign a maximum of five rules to each policy.
 - You can assign a maximum of five scan execution policies to each security policy project.
-- Scan execution policies may be [overridden](pipeline_execution_policies.md#interaction-with-scan-execution-policies) by pipeline execution policies when you use `override_ci` strategy.
 
 ## Jobs
 
@@ -240,7 +239,7 @@ The keys for a schedule rule are:
 
 If both the `scan_execution_pipeline_worker` and `scan_execution_pipeline_concurrency_control` feature flags are enabled, concurrency control is applied.
 Concurrency control limits the number of pipeline jobs created by the scan execution policy that can be active for each top-level group on an instance. For GitLab.com, the limit is managed by GitLab administrators.
-The active pipeline job statuses are:
+The active pipeline job statuses are: 
 
 - `preparing`
 - `pending`

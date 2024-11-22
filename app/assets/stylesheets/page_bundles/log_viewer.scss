@@ -36,13 +36,13 @@
     }
 
     a {
-      @apply gl-text-subtle;
+      color: $gray-500;
 
       &:hover,
       &:active,
       &:visited {
         text-decoration: underline;
-        @apply gl-text-subtle;
+        color: $gray-500;
       }
     }
   }
@@ -50,7 +50,7 @@
   // line timestamp
   .log-line time {
     flex-shrink: 0;
-    @apply gl-text-subtle;
+    color: $gray-500;
     user-select: none;
   }
 

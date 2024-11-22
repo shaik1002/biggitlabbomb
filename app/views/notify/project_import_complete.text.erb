@@ -1,0 +1,5 @@
+<%= s_('Import|Import completed') %>
+
+<%= safe_format(s_('Import|The import you started on %{start_date} from %{strong_open}%{hostname}%{strong_close} has completed. You can now review your import results.'), strong_open: '', strong_close: '', hostname: @hostname, start_date: l(@project.created_at.to_date, format: :long)) %>
+
+<%= s_('Import|View import results') %>: <%= import_history_index_url %>

@@ -273,6 +273,7 @@
 .filtered-search-history-dropdown-toggle-button.gl-button {
   border-radius: $gl-border-radius-base-inner 0 0 $gl-border-radius-base-inner;
   margin: -1px 0 -1px -1px;
+  box-shadow: inset 0 0 0 1px var(--gl-control-border-color-default);
   flex: 1;
   transition: color 0.1s linear;
   width: auto;
@@ -365,6 +366,15 @@
     // does not overflow.
 
     min-width: 0;
+  }
+
+  .sort-dropdown-container {
+    // This property is set to have borders
+    // around sort dropdown match with filter
+    // input field.
+    .gl-button {
+      box-shadow: inset 0 0 0 1px var(--gl-control-border-color-default);
+    }
   }
 
   @include media-breakpoint-up(md) {
