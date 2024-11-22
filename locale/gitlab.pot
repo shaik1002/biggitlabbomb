@@ -13744,6 +13744,9 @@ msgstr ""
 msgid "Comma-separated list of branches to be automatically inspected. Leave blank to include all branches."
 msgstr ""
 
+msgid "Comma-separated list of channels or email addresses."
+msgstr ""
+
 msgid "Comma-separated list of email addresses."
 msgstr ""
 
@@ -30093,10 +30096,10 @@ msgstr ""
 msgid "IrkerService|irker (IRC gateway)"
 msgstr ""
 
-msgid "IrkerService|irker daemon hostname (defaults to localhost)."
+msgid "IrkerService|irker daemon hostname. The default value is `localhost`."
 msgstr ""
 
-msgid "IrkerService|irker daemon port (defaults to 6659)."
+msgid "IrkerService|irker daemon port. The default value is `6659`."
 msgstr ""
 
 msgid "Is blocked by"
@@ -33785,6 +33788,9 @@ msgid "MemberRole|The None role is assigned to the invited group users of a shar
 msgstr ""
 
 msgid "MemberRole|The Owner role is normally assigned to the individual or team responsible for managing and maintaining the group or creating the project. This role has the highest level of administrative control, and can manage all aspects of the group or project, including managing other Owners."
+msgstr ""
+
+msgid "MemberRole|The Planner role is suitable for team members who need to manage projects and track work items but do not need to contribute code, such as project managers and scrum masters."
 msgstr ""
 
 msgid "MemberRole|The Reporter role is suitable for team members who need to stay informed about a project or group but do not actively contribute code."
@@ -41324,6 +41330,9 @@ msgid "Plan"
 msgstr ""
 
 msgid "Plan:"
+msgstr ""
+
+msgid "Planner"
 msgstr ""
 
 msgid "PlantUML"
@@ -55301,6 +55310,9 @@ msgstr ""
 msgid "The Mattermost token."
 msgstr ""
 
+msgid "The Planner role is suitable for team members who need to manage projects and track work items but do not need to contribute code."
+msgstr ""
+
 msgid "The Slack notifications integration is deprecated and will be removed in a future release. To continue to receive notifications from Slack, use the GitLab for Slack app instead. %{learn_more_link_start}Learn more%{link_end}."
 msgstr ""
 
@@ -58818,6 +58830,9 @@ msgid "Type to search"
 msgstr ""
 
 msgid "Type:"
+msgstr ""
+
+msgid "URI to add before each recipient. The default value is `irc://irc.network.net:6697/`."
 msgstr ""
 
 msgid "URL"
@@ -62429,25 +62444,7 @@ msgstr ""
 msgid "WikiClone|Clone Wiki repository"
 msgstr ""
 
-msgid "WikiClone|Clone repository"
-msgstr ""
-
 msgid "WikiClone|Git Access"
-msgstr ""
-
-msgid "WikiClone|Go to directory"
-msgstr ""
-
-msgid "WikiClone|Install Gollum"
-msgstr ""
-
-msgid "WikiClone|Start Gollum and edit locally"
-msgstr ""
-
-msgid "WikiClone|Step 1: Clone repository"
-msgstr ""
-
-msgid "WikiClone|Step 2: Install and start Gollum"
 msgstr ""
 
 msgid "WikiEdit|There is already a page with the same title in that path."
