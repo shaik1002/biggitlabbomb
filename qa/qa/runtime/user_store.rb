@@ -188,6 +188,14 @@ module QA
         #
         # @return [QA::Resource::User]
         def create_new_user
+          if ldap_user_configured?
+            return Resource::User.init do |user|
+              user.username = Env.ldap_username
+              user.password = Env.ldap_password
+              user.ldap_user = true
+            end
+          end
+
           Resource::User.fabricate_via_api! do |user|
             user.with_personal_access_token = true
             user.api_client = admin_api_client
@@ -279,6 +287,13 @@ module QA
         # @return [Boolean]
         def status_ok?(resp)
           resp.code == Support::API::HTTP_STATUS_OK
+        end
+
+        # Check if environment has ldap user set
+        #
+        # @return [Boolean]
+        def ldap_user_configured?
+          Runtime::Env.ldap_username.present? && Runtime::Env.ldap_password.present?
         end
       end
     end
