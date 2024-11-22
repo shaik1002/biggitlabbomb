@@ -114,6 +114,7 @@ export default {
       findAndReplace: {
         find: '',
         replace: '',
+        isCurrentlySelected: false,
       },
       modifierKey,
       shiftKey: modifierKey === '⌘' ? '⇧' : 'Shift+',
@@ -232,6 +233,41 @@ export default {
         });
       }
     },
+    highlightMatchingText(text) {
+      const textArea = this.$el.closest('.md-area')?.querySelector('textarea');
+
+      if (textArea) {
+        this.selectionStartIndex = textArea.value.indexOf(text);
+
+        if (this.selectionStartIndex > -1) {
+          textArea.focus();
+          textArea.setSelectionRange(
+            this.selectionStartIndex,
+            this.selectionStartIndex + text.length,
+          );
+          textArea.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+          this.findAndReplace.isCurrentlySelected = true;
+          const keydown = (e) => {
+            if (e.key === 'Enter') {
+              this.selectionStartIndex = textArea.value.indexOf(text, this.selectionStartIndex + 1);
+
+              textArea.setSelectionRange(
+                this.selectionStartIndex,
+                this.selectionStartIndex + text.length,
+              );
+              // Move forward with selection
+              e.preventDefault();
+            }
+          };
+
+          textArea.addEventListener('keydown', keydown);
+          textArea.addEventListener('blur', () => {
+            textArea.removeEventListener('keydown', keydown);
+          });
+        }
+      }
+    },
     replaceTextarea(text) {
       const { description, descriptionForSha } = this.$options.i18n;
       const headSha = document.getElementById('merge_request_diff_head_sha').value;
@@ -265,15 +301,16 @@ export default {
       if (!this.isValid(form)) return;
 
       this.shouldShowFindAndReplaceBar = true;
+      this.$refs.findInput?.$el.focus();
     },
     handleKeyDown(e) {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        return;
-      }
-
       if (e.key === 'Escape') {
         this.shouldShowFindAndReplaceBar = false;
+      }
+
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        this.highlightMatchingText(e.target.value);
       }
     },
   },
@@ -595,6 +632,7 @@ export default {
       data-testid="find-and-replace"
     >
       <gl-form-input
+        ref="findInput"
         v-model="findAndReplace.find"
         :placeholder="__('Find')"
         autofocus
