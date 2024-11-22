@@ -82,7 +82,7 @@ describe('ScopeSidebarNavigation', () => {
 
     it('has correct active item', () => {
       expect(findNavItemActive().exists()).toBe(true);
-      expect(findNavItemActiveLabel().text()).toBe('Issues');
+      expect(findNavItemActiveLabel().text()).toBe('Work items');
     });
   });
 });
