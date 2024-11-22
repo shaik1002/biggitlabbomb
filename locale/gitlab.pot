@@ -1447,9 +1447,6 @@ msgstr ""
 msgid "%{time_ago}"
 msgstr ""
 
-msgid "%{timeago} in pipeline %{pipeline}"
-msgstr ""
-
 msgid "%{timebox_type} does not support burnup charts"
 msgstr ""
 
@@ -3932,9 +3929,6 @@ msgstr ""
 msgid "AdminSelfHostedModels|Model family"
 msgstr ""
 
-msgid "AdminSelfHostedModels|Model identifier"
-msgstr ""
-
 msgid "AdminSelfHostedModels|Model identifier (optional)"
 msgstr ""
 
@@ -4376,13 +4370,7 @@ msgstr ""
 msgid "AdminSettings|Setting must be greater than 0."
 msgstr ""
 
-msgid "AdminSettings|Show a banner on merge requests in projects with Jenkins pipelines to prompt migration to GitLab CI/CD instead."
-msgstr ""
-
 msgid "AdminSettings|Show a redirect page that warns you about user-generated content in GitLab Pages."
-msgstr ""
-
-msgid "AdminSettings|Show the migrate from Jenkins banner"
 msgstr ""
 
 msgid "AdminSettings|Silent exports by admins %{silent_admin_exports_link_start}%{icon}%{silent_admin_exports_link_end}"
@@ -14169,9 +14157,6 @@ msgstr ""
 msgid "Compliance frameworks"
 msgstr ""
 
-msgid "Compliance requirement successfully deleted"
-msgstr ""
-
 msgid "ComplianceChainOfCustody| Chain of custody export"
 msgstr ""
 
@@ -20718,9 +20703,6 @@ msgstr ""
 msgid "DuoProTrial|Start your free GitLab Duo Pro trial"
 msgstr ""
 
-msgid "DuoProTrial|Start your free GitLab Duo Pro trial on %{group_name}"
-msgstr ""
-
 msgid "DuoProTrial|Test Generation"
 msgstr ""
 
@@ -23147,9 +23129,6 @@ msgid "Failed to delete custom emoji. Please try again."
 msgstr ""
 
 msgid "Failed to deploy to"
-msgstr ""
-
-msgid "Failed to destroy compliance requirement"
 msgstr ""
 
 msgid "Failed to enqueue the rebase operation, possibly due to a long-lived transaction. Try again later."
@@ -29914,7 +29893,7 @@ msgstr ""
 msgid "InviteMembersModal|Manage members"
 msgstr ""
 
-msgid "InviteMembersModal|Members were successfully added."
+msgid "InviteMembersModal|Members were successfully added"
 msgstr ""
 
 msgid "InviteMembersModal|Please add members to invite"
@@ -29944,7 +29923,7 @@ msgstr ""
 msgid "InviteMembersModal|Show more (%{count})"
 msgstr ""
 
-msgid "InviteMembersModal|Some invitations have been queued for administrator approval."
+msgid "InviteMembersModal|Some requests have been sent for administrator approval"
 msgstr ""
 
 msgid "InviteMembersModal|Something went wrong"
@@ -35345,6 +35324,9 @@ msgstr ""
 msgid "Model experiments"
 msgstr ""
 
+msgid "Model identifier"
+msgstr ""
+
 msgid "Model registry"
 msgstr ""
 
@@ -36813,9 +36795,6 @@ msgid "Not found."
 msgstr ""
 
 msgid "Not permitted to destroy framework"
-msgstr ""
-
-msgid "Not permitted to destroy requirement"
 msgstr ""
 
 msgid "Not permitted to reset user feed token"
@@ -39878,9 +39857,6 @@ msgid "Password|To be satisfied"
 msgstr ""
 
 msgid "Password|cannot use common phrases (e.g. \"password\")"
-msgstr ""
-
-msgid "Password|must be between 8-128 characters"
 msgstr ""
 
 msgid "Password|requires at least one lowercase letter"
@@ -48589,9 +48565,6 @@ msgstr ""
 msgid "ScanResultPolicy|%{count} licenses"
 msgstr ""
 
-msgid "ScanResultPolicy|%{listType} according to the %{buttonType}"
-msgstr ""
-
 msgid "ScanResultPolicy|Add new criteria"
 msgstr ""
 
@@ -48602,12 +48575,6 @@ msgid "ScanResultPolicy|Age is:"
 msgstr ""
 
 msgid "ScanResultPolicy|Allow the merge request to proceed, even if not all criteria are met"
-msgstr ""
-
-msgid "ScanResultPolicy|Allowed"
-msgstr ""
-
-msgid "ScanResultPolicy|Allowlist or Denylist"
 msgstr ""
 
 msgid "ScanResultPolicy|Attribute is:"
@@ -48632,9 +48599,6 @@ msgid "ScanResultPolicy|Clear all"
 msgstr ""
 
 msgid "ScanResultPolicy|Customized CI Variables"
-msgstr ""
-
-msgid "ScanResultPolicy|Denied"
 msgstr ""
 
 msgid "ScanResultPolicy|Don't show me this again"
@@ -48695,9 +48659,6 @@ msgid "ScanResultPolicy|License is:"
 msgstr ""
 
 msgid "ScanResultPolicy|License scanning allows only one criteria: Status"
-msgstr ""
-
-msgid "ScanResultPolicy|License status"
 msgstr ""
 
 msgid "ScanResultPolicy|Make approval rules optional using scan execution policies"
@@ -48790,9 +48751,6 @@ msgstr ""
 msgid "ScanResultPolicy|Select licenses"
 msgstr ""
 
-msgid "ScanResultPolicy|Select list type"
-msgstr ""
-
 msgid "ScanResultPolicy|Severity is:"
 msgstr ""
 
@@ -48841,22 +48799,13 @@ msgstr ""
 msgid "ScanResultPolicy|When this policy's criteria %{strongStart}cannot be met:%{strongEnd}"
 msgstr ""
 
-msgid "ScanResultPolicy|You can have only one of the two: deny list or allow list."
-msgstr ""
-
 msgid "ScanResultPolicy|You have selected all protected branches in this policy's rules. To better protect your project, you should leave this setting enabled. %{linkStart}What are the risks of allowing pushing and force pushing?%{linkEnd}"
-msgstr ""
-
-msgid "ScanResultPolicy|allowlist (%{licenceCount} %{licences})"
 msgstr ""
 
 msgid "ScanResultPolicy|any commits"
 msgstr ""
 
 msgid "ScanResultPolicy|any unsigned commits"
-msgstr ""
-
-msgid "ScanResultPolicy|denylist (%{licenceCount} %{licences})"
 msgstr ""
 
 msgid "ScanResultPolicy|license status"
@@ -50155,9 +50104,6 @@ msgid "SecurityOrchestration|Merge request approval"
 msgstr ""
 
 msgid "SecurityOrchestration|Merge request approval policies allow a maximum 1 bot message action."
-msgstr ""
-
-msgid "SecurityOrchestration|Merge request approval policies allow a maximum of 1 approver action."
 msgstr ""
 
 msgid "SecurityOrchestration|Merge request approval policies allow a maximum of 5 approver actions."
@@ -53525,6 +53471,9 @@ msgid "Start thread"
 msgstr ""
 
 msgid "Start time"
+msgstr ""
+
+msgid "Start your Free Ultimate and GitLab Duo Enterprise Trial"
 msgstr ""
 
 msgid "Start your free trial"
@@ -58635,12 +58584,6 @@ msgid "Trial|Select state or province"
 msgstr ""
 
 msgid "Trial|Start free Ultimate + GitLab Duo Enterprise trial"
-msgstr ""
-
-msgid "Trial|Start your free Ultimate and GitLab Duo Enterprise trial"
-msgstr ""
-
-msgid "Trial|Start your free Ultimate and GitLab Duo Enterprise trial on %{group_name}"
 msgstr ""
 
 msgid "Trial|State or province"
@@ -65010,6 +64953,9 @@ msgstr ""
 msgid "before"
 msgstr ""
 
+msgid "beta"
+msgstr ""
+
 msgid "blocks"
 msgstr ""
 
@@ -66062,11 +66008,6 @@ msgstr ""
 
 msgid "lfs objects"
 msgstr ""
-
-msgid "licence"
-msgid_plural "licenses"
-msgstr[0] ""
-msgstr[1] ""
 
 msgid "limit of %{project_limit} reached"
 msgstr ""
