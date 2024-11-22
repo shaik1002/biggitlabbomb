@@ -26,6 +26,8 @@ export default {
     RefSelector,
     Breadcrumbs,
     BlobControls,
+    LockDirectoryButton: () =>
+      import('ee_component/repository/components/lock_directory_button.vue'),
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -75,6 +77,9 @@ export default {
   computed: {
     isTreeView() {
       return this.$route.name !== 'blobPathDecoded';
+    },
+    isRoot() {
+      return !this.currentPath || this.currentPath === '/';
     },
     historyPath() {
       const url = generateHistoryUrl(
@@ -159,6 +164,15 @@ export default {
     <!-- Tree controls -->
     <div v-if="isTreeView" class="tree-controls gl-mb-3 gl-flex gl-flex-wrap gl-gap-3 sm:gl-mb-0">
       <!-- EE: = render_if_exists 'projects/tree/lock_link' -->
+      <lock-directory-button
+        v-if="!isRoot"
+        :project-path="projectPath"
+        path="currentPath"
+        :can-push-code="canPushCode"
+        :path-lock="{ example: true }"
+        :is-feature-available="true"
+        :current-user="{ example: true }"
+      />
       <gl-button
         v-if="comparePath"
         data-testid="tree-compare-control"
