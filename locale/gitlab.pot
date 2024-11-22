@@ -7401,6 +7401,9 @@ msgstr ""
 msgid "Are you sure you want to attempt to merge?"
 msgstr ""
 
+msgid "Are you sure you want to cancel %{actionText} this comment?"
+msgstr ""
+
 msgid "Are you sure you want to cancel editing this %{commentType}?"
 msgstr ""
 
@@ -11330,9 +11333,6 @@ msgstr ""
 msgid "Checking username availability..."
 msgstr ""
 
-msgid "Checkout|$%{pricePerUserPerYear} per user per year"
-msgstr ""
-
 msgid "Checkout|$%{selectedPlanPrice} per 10 GB storage pack per year"
 msgstr ""
 
@@ -11345,9 +11345,6 @@ msgstr[0] ""
 msgstr[1] ""
 
 msgid "Checkout|%{cardType} ending in %{lastFourDigits}"
-msgstr ""
-
-msgid "Checkout|%{name}'s GitLab subscription"
 msgstr ""
 
 msgid "Checkout|%{name}'s compute minutes"
@@ -11367,22 +11364,13 @@ msgid_plural "Checkout|%{quantity} storage packs"
 msgstr[0] ""
 msgstr[1] ""
 
-msgid "Checkout|%{selectedPlanText}"
-msgstr ""
-
 msgid "Checkout|%{startDate} - %{endDate}"
 msgstr ""
 
 msgid "Checkout|(may be %{linkStart}charged upon purchase%{linkEnd})"
 msgstr ""
 
-msgid "Checkout|(x%{numberOfUsers})"
-msgstr ""
-
 msgid "Checkout|(x%{quantity})"
-msgstr ""
-
-msgid "Checkout|Add active users before adding a coupon."
 msgstr ""
 
 msgid "Checkout|An unknown error has occurred. Please try again by refreshing this page."
@@ -11392,9 +11380,6 @@ msgid "Checkout|Billing address"
 msgstr ""
 
 msgid "Checkout|Billing contact"
-msgstr ""
-
-msgid "Checkout|Calculating your subscription..."
 msgstr ""
 
 msgid "Checkout|Checkout"
@@ -11430,24 +11415,6 @@ msgstr ""
 msgid "Checkout|Country"
 msgstr ""
 
-msgid "Checkout|Coupon code (optional)"
-msgstr ""
-
-msgid "Checkout|Coupon has been applied and by continuing with your purchase, you accept and agree to the %{linkStart}Coupon Terms%{linkEnd}."
-msgstr ""
-
-msgid "Checkout|Create a new group"
-msgstr ""
-
-msgid "Checkout|Credit card form failed to load. Please try again."
-msgstr ""
-
-msgid "Checkout|Credit card form failed to load: %{message}"
-msgstr ""
-
-msgid "Checkout|Discount"
-msgstr ""
-
 msgid "Checkout|Edit"
 msgstr ""
 
@@ -11466,70 +11433,25 @@ msgstr ""
 msgid "Checkout|Failed to load the payment form. Refresh the page and try again."
 msgstr ""
 
-msgid "Checkout|Failed to register credit card. Please try again."
-msgstr ""
-
 msgid "Checkout|GB"
-msgstr ""
-
-msgid "Checkout|GitLab group"
-msgstr ""
-
-msgid "Checkout|GitLab plan"
-msgstr ""
-
-msgid "Checkout|Group"
-msgstr ""
-
-msgid "Checkout|Invalid coupon code. Enter a valid coupon code."
 msgstr ""
 
 msgid "Checkout|Manage the subscription and billing contacts for your billing account in the %{customersPortalLinkStart}Customers Portal%{customersPortalLinkEnd}. Learn more about %{manageContactsLinkStart}how to manage your contacts%{manageContactsLinkEnd}."
 msgstr ""
 
-msgid "Checkout|Must be %{minimumNumberOfUsers} (your seats in use) or more."
-msgstr ""
-
-msgid "Checkout|Must be %{minimumNumberOfUsers} (your seats in use, plus all over limit members) or more. To buy fewer seats, remove members from the group."
-msgstr ""
-
 msgid "Checkout|Must be 1 or more. Cannot be a decimal."
-msgstr ""
-
-msgid "Checkout|Name of company or organization using GitLab"
-msgstr ""
-
-msgid "Checkout|Name: %{errorMessage}"
-msgstr ""
-
-msgid "Checkout|Need more users? Purchase GitLab for your %{company}."
-msgstr ""
-
-msgid "Checkout|Network Error: %{message}"
-msgstr ""
-
-msgid "Checkout|Number of users"
 msgstr ""
 
 msgid "Checkout|Payment method"
 msgstr ""
 
-msgid "Checkout|Pricing reflective of %{linkStart}limited-time offer%{linkEnd}."
-msgstr ""
-
 msgid "Checkout|Purchase details"
-msgstr ""
-
-msgid "Checkout|Select"
 msgstr ""
 
 msgid "Checkout|Select a country"
 msgstr ""
 
 msgid "Checkout|Select a state"
-msgstr ""
-
-msgid "Checkout|Something went wrong while loading price details."
 msgstr ""
 
 msgid "Checkout|State"
@@ -11544,22 +11466,13 @@ msgstr ""
 msgid "Checkout|Subscription contact"
 msgstr ""
 
-msgid "Checkout|Subscription details"
-msgstr ""
-
 msgid "Checkout|Subtotal"
-msgstr ""
-
-msgid "Checkout|Success: subscription"
 msgstr ""
 
 msgid "Checkout|Tax"
 msgstr ""
 
 msgid "Checkout|Tax ID"
-msgstr ""
-
-msgid "Checkout|The maximum amount of seats available to buy is %{maximumSeatLimit}. %{maxSeatLinkStart}Learn more.%{maxSeatLinkEnd}"
 msgstr ""
 
 msgid "Checkout|Total"
@@ -11571,21 +11484,6 @@ msgstr ""
 msgid "Checkout|Total storage: %{quantity} GB"
 msgstr ""
 
-msgid "Checkout|Users"
-msgstr ""
-
-msgid "Checkout|You can only buy a maximum of %{seatLimit} seats."
-msgstr ""
-
-msgid "Checkout|You must buy a minimum of %{seatLimit} seat."
-msgstr ""
-
-msgid "Checkout|You'll create your new group after checkout"
-msgstr ""
-
-msgid "Checkout|Your organization"
-msgstr ""
-
 msgid "Checkout|Your storage subscription has the same term as your main subscription, and the price is prorated accordingly."
 msgstr ""
 
@@ -11593,9 +11491,6 @@ msgid "Checkout|Your subscription will be applied to this group"
 msgstr ""
 
 msgid "Checkout|Zip code"
-msgstr ""
-
-msgid "Checkout|company or team"
 msgstr ""
 
 msgid "Checkout|compute minutes"
@@ -20012,6 +19907,9 @@ msgid "Disabled mirrors can only be enabled by instance owners. It is recommende
 msgstr ""
 
 msgid "Discard"
+msgstr ""
+
+msgid "Discard Changes"
 msgstr ""
 
 msgid "Discard all changes"
@@ -41347,6 +41245,9 @@ msgstr ""
 msgid "Please %{link_to_register} or %{link_to_sign_in} to comment"
 msgstr ""
 
+msgid "Please %{registerLinkStart}register%{registerLinkEnd} or %{signInLinkStart}sign in%{signInLinkEnd} to add a comment."
+msgstr ""
+
 msgid "Please %{registerLinkStart}register%{registerLinkEnd} or %{signInLinkStart}sign in%{signInLinkEnd} to reply."
 msgstr ""
 
@@ -52970,6 +52871,9 @@ msgstr ""
 msgid "Something went wrong while fetching branches"
 msgstr ""
 
+msgid "Something went wrong while fetching comments. Please refresh the page."
+msgstr ""
+
 msgid "Something went wrong while fetching comments. Please try again."
 msgstr ""
 
@@ -55370,6 +55274,9 @@ msgstr ""
 msgid "The comment you are editing has been changed by another user. Would you like to keep your changes and overwrite the new description or discard your changes?"
 msgstr ""
 
+msgid "The comments for this wiki page failed to render."
+msgstr ""
+
 msgid "The commit does not exist"
 msgstr ""
 
@@ -55464,6 +55371,9 @@ msgid "The discussion in this %{issuable} is locked. Only project members can co
 msgstr ""
 
 msgid "The discussion in this %{noteableTypeText} is locked."
+msgstr ""
+
+msgid "The discussion in this Wiki is locked. Only project members can comment."
 msgstr ""
 
 msgid "The discussion in this merge request is locked."
@@ -56569,6 +56479,9 @@ msgid "This group cannot be invited to a project inside a group with enforced SS
 msgstr ""
 
 msgid "This group does not have any group runners yet."
+msgstr ""
+
+msgid "This group has been scheduled for deletion and cannot be commented on."
 msgstr ""
 
 msgid "This group has no active access tokens."
@@ -62429,6 +62342,9 @@ msgstr ""
 msgid "Wiki"
 msgstr ""
 
+msgid "Wiki comment form"
+msgstr ""
+
 msgid "Wiki page"
 msgstr ""
 
@@ -63568,6 +63484,9 @@ msgstr ""
 msgid "Write"
 msgstr ""
 
+msgid "Write a comment or drag your files here..."
+msgstr ""
+
 msgid "Write a comment or drag your files here…"
 msgstr ""
 
@@ -63688,9 +63607,6 @@ msgid "You are attempting to update a file that has changed since you started ed
 msgstr ""
 
 msgid "You are being redirected away from GitLab"
-msgstr ""
-
-msgid "You are billed if you exceed this number. %{qsrOverageLinkStart}How does billing work?%{qsrOverageLinkEnd}"
 msgstr ""
 
 msgid "You are currently offline, or the GitLab instance is not reachable."
@@ -65530,6 +65446,9 @@ msgstr ""
 msgid "contains invalid URLs (%{urls})"
 msgstr ""
 
+msgid "continue %{actionText}"
+msgstr ""
+
 msgid "contribute to this project."
 msgstr ""
 
@@ -66928,6 +66847,9 @@ msgstr[0] ""
 msgstr[1] ""
 
 msgid "security policy bot users cannot be added to other projects"
+msgstr ""
+
+msgid "seems to be an error on our end, please refresh the page and try again"
 msgstr ""
 
 msgid "selective_code_owner_removals can only be enabled when retain_approvals_on_push is enabled"

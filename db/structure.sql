@@ -20622,7 +20622,7 @@ CREATE TABLE user_details (
     enterprise_group_associated_at timestamp with time zone,
     email_reset_offered_at timestamp with time zone,
     mastodon text DEFAULT ''::text NOT NULL,
-    project_authorizations_recalculated_at timestamp with time zone DEFAULT '2010-01-01 00:00:00+00'::timestamp with time zone NOT NULL,
+    project_authorizations_recalculated_at timestamp with time zone DEFAULT '2010-01-01 01:00:00+01'::timestamp with time zone NOT NULL,
     onboarding_status jsonb DEFAULT '{}'::jsonb NOT NULL,
     bluesky text DEFAULT ''::text NOT NULL,
     bot_namespace_id bigint,
@@ -30127,7 +30127,7 @@ CREATE INDEX index_events_on_author_id_and_created_at ON events USING btree (aut
 
 CREATE INDEX index_events_on_author_id_and_id ON events USING btree (author_id, id);
 
-CREATE INDEX index_events_on_created_at_and_id ON events USING btree (created_at, id) WHERE (created_at > '2021-08-27 00:00:00+00'::timestamp with time zone);
+CREATE INDEX index_events_on_created_at_and_id ON events USING btree (created_at, id) WHERE (created_at > '2021-08-27 01:00:00+01'::timestamp with time zone);
 
 CREATE INDEX index_events_on_group_id_and_id ON events USING btree (group_id, id) WHERE (group_id IS NOT NULL);
 
