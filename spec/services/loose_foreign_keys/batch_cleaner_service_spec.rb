@@ -23,6 +23,11 @@ RSpec.describe LooseForeignKeys::BatchCleanerService, feature_category: :databas
       t.integer :status, limit: 2
     end
 
+    migration.create_table :_test_loose_fk_child_table_4 do |t|
+      t.bigint :parent_id
+      t.string :association_type
+    end
+
     migration.track_record_deletions(:_test_loose_fk_parent_table)
   end
 
@@ -56,6 +61,21 @@ RSpec.describe LooseForeignKeys::BatchCleanerService, feature_category: :databas
           target_column: 'status',
           target_value: 4
         }
+      ),
+      ActiveRecord::ConnectionAdapters::ForeignKeyDefinition.new(
+        '_test_loose_fk_child_table_4',
+        '_test_loose_fk_parent_table',
+        {
+          column: 'parent_id',
+          on_delete: :async_delete,
+          gitlab_schema: :gitlab_main,
+          conditions: [
+            {
+              column: 'association_type',
+              value: 'association_type_x'
+            }
+          ]
+        }
       )
     ]
   end
@@ -64,6 +84,7 @@ RSpec.describe LooseForeignKeys::BatchCleanerService, feature_category: :databas
   let(:loose_fk_child_table_1) { table(:_test_loose_fk_child_table_1) }
   let(:loose_fk_child_table_2) { table(:_test_loose_fk_child_table_2) }
   let(:loose_fk_child_table_3) { table(:_test_loose_fk_child_table_3) }
+  let(:loose_fk_child_table_4) { table(:_test_loose_fk_child_table_4) }
   let(:parent_record_1) { loose_fk_parent_table.create! }
   let(:other_parent_record) { loose_fk_parent_table.create! }
 
@@ -94,6 +115,14 @@ RSpec.describe LooseForeignKeys::BatchCleanerService, feature_category: :databas
     # these will not be updated
     loose_fk_child_table_3.create!(parent_id: other_parent_record.id, status: 1)
     loose_fk_child_table_3.create!(parent_id: other_parent_record.id, status: 1)
+
+    # these will be deleted
+    loose_fk_child_table_4.create!(parent_id: parent_record_1.id, association_type: 'association_type_x')
+    loose_fk_child_table_4.create!(parent_id: parent_record_1.id, association_type: 'association_type_x')
+
+    # these will not be deleted
+    loose_fk_child_table_4.create!(parent_id: parent_record_1.id, association_type: 'association_type_y')
+    loose_fk_child_table_4.create!(parent_id: parent_record_1.id, association_type: 'association_type_y')
   end
 
   after(:all) do
@@ -102,6 +131,7 @@ RSpec.describe LooseForeignKeys::BatchCleanerService, feature_category: :databas
     migration.drop_table :_test_loose_fk_child_table_1
     migration.drop_table :_test_loose_fk_child_table_2
     migration.drop_table :_test_loose_fk_child_table_3
+    migration.drop_table :_test_loose_fk_child_table_4
   end
 
   context 'when parent records are deleted' do
@@ -112,6 +142,7 @@ RSpec.describe LooseForeignKeys::BatchCleanerService, feature_category: :databas
 
       expect(loose_fk_child_table_1.count).to eq(4)
       expect(loose_fk_child_table_2.count).to eq(4)
+      expect(loose_fk_child_table_4.count).to eq(4)
 
       described_class.new(
         parent_table: '_test_loose_fk_parent_table',
@@ -124,6 +155,7 @@ RSpec.describe LooseForeignKeys::BatchCleanerService, feature_category: :databas
     it 'cleans up the child records' do
       expect(loose_fk_child_table_1.where(parent_id: parent_record_1.id)).to be_empty
       expect(loose_fk_child_table_2.where(parent_id_with_different_column: nil).count).to eq(2)
+      expect(loose_fk_child_table_4.where(parent_id: parent_record_1.id, association_type: 'association_type_x')).to be_empty
     end
 
     it 'updates the child records' do
@@ -144,6 +176,7 @@ RSpec.describe LooseForeignKeys::BatchCleanerService, feature_category: :databas
     it 'does not delete unrelated records' do
       expect(loose_fk_child_table_1.where(parent_id: other_parent_record.id).count).to eq(2)
       expect(loose_fk_child_table_2.where(parent_id_with_different_column: other_parent_record.id).count).to eq(2)
+      expect(loose_fk_child_table_4.where(parent_id: parent_record_1.id, association_type: 'association_type_y').count).to eq(2)
     end
 
     it 'does not update unrelated records' do
