@@ -9,6 +9,8 @@
 module Ci
   module JobToken
     class Authorization < Ci::ApplicationRecord
+      include Gitlab::InternalEventsTracking
+
       self.table_name = 'ci_job_token_authorizations'
 
       belongs_to :origin_project, class_name: 'Project' # where the job token came from
@@ -22,9 +24,27 @@ module Ci
 
       # Record in SafeRequestStore a cross-project access attempt
       def self.capture(origin_project:, accessed_project:)
-        # Skip self-referential accesses as they are always allowed and don't need
-        # to be logged neither added to the allowlist.
-        return if origin_project == accessed_project
+        if origin_project == accessed_project
+          track_internal_event(
+            'authorize_job_token_with_disabled_scope',
+            project: accessed_project,
+            additional_properties: {
+              label: 'same-project'
+            }
+          )
+
+          # Skip self-referential accesses as they are always allowed and don't need
+          # to be logged neither added to the allowlist.
+          return
+        else
+          track_internal_event(
+            'authorize_job_token_with_disabled_scope',
+            project: accessed_project,
+            additional_properties: {
+              label: 'cross-project'
+            }
+          )
+        end
 
         # We are tracking an attempt of cross-project utilization but we
         # are not yet persisting this log until a request successfully
