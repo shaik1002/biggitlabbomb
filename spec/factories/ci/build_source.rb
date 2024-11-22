@@ -5,5 +5,6 @@ FactoryBot.define do
     build factory: :ci_build, scheduling_type: :dag
     project_id { build.project_id }
     source { :scan_execution_policy }
+    pipeline_source { :push }
   end
 end

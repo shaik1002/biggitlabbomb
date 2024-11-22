@@ -31998,6 +31998,7 @@ four standard [pagination arguments](#pagination-arguments):
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | <a id="projectjobsname"></a>`name` **{warning-solid}** | [`String`](#string) | **Introduced** in GitLab 17.1. **Status**: Experiment. Filter jobs by name. |
+| <a id="projectjobssources"></a>`sources` | [`[CiJobSource!]`](#cijobsource) | Filter jobs by source. |
 | <a id="projectjobsstatuses"></a>`statuses` | [`[CiJobStatus!]`](#cijobstatus) | Filter jobs by status. |
 | <a id="projectjobswithartifacts"></a>`withArtifacts` | [`Boolean`](#boolean) | Filter by artifacts presence. |
 
@@ -37869,6 +37870,31 @@ Values for sorting inherited variables.
 | ----- | ----------- |
 | <a id="cijobkindbridge"></a>`BRIDGE` | Bridge CI job connecting a parent and child pipeline. |
 | <a id="cijobkindbuild"></a>`BUILD` | Standard CI job. |
+
+### `CiJobSource`
+
+| Value | Description |
+| ----- | ----------- |
+| <a id="cijobsourceapi"></a>`API` | A job from a pipeline initiated by api. |
+| <a id="cijobsourcechat"></a>`CHAT` | A job from a pipeline initiated by chat. |
+| <a id="cijobsourcecontainer_registry_push"></a>`CONTAINER_REGISTRY_PUSH` | A job from a pipeline initiated by container registry push. |
+| <a id="cijobsourceduo_workflow"></a>`DUO_WORKFLOW` | A job from a pipeline initiated by duo workflow. |
+| <a id="cijobsourceexternal"></a>`EXTERNAL` | A job from a pipeline initiated by external. |
+| <a id="cijobsourceexternal_pull_request_event"></a>`EXTERNAL_PULL_REQUEST_EVENT` | A job from a pipeline initiated by external pull request event. |
+| <a id="cijobsourcemerge_request_event"></a>`MERGE_REQUEST_EVENT` | A job from a pipeline initiated by merge request event. |
+| <a id="cijobsourceondemand_dast_scan"></a>`ONDEMAND_DAST_SCAN` | A job from a pipeline initiated by ondemand dast scan. |
+| <a id="cijobsourceondemand_dast_validation"></a>`ONDEMAND_DAST_VALIDATION` | A job from a pipeline initiated by ondemand dast validation. |
+| <a id="cijobsourceparent_pipeline"></a>`PARENT_PIPELINE` | A job from a pipeline initiated by parent pipeline. |
+| <a id="cijobsourcepipeline"></a>`PIPELINE` | A job from a pipeline initiated by pipeline. |
+| <a id="cijobsourcepipeline_execution_policy"></a>`PIPELINE_EXECUTION_POLICY` | A job initiated by pipeline execution policy. |
+| <a id="cijobsourcepush"></a>`PUSH` | A job from a pipeline initiated by push. |
+| <a id="cijobsourcescan_execution_policy"></a>`SCAN_EXECUTION_POLICY` | A job initiated by scan execution policy. |
+| <a id="cijobsourceschedule"></a>`SCHEDULE` | A job from a pipeline initiated by schedule. |
+| <a id="cijobsourcesecurity_orchestration_policy"></a>`SECURITY_ORCHESTRATION_POLICY` | A job from a pipeline initiated by security orchestration policy. |
+| <a id="cijobsourcetrigger"></a>`TRIGGER` | A job from a pipeline initiated by trigger. |
+| <a id="cijobsourceunknown"></a>`UNKNOWN` | A job from a pipeline initiated by unknown. |
+| <a id="cijobsourceweb"></a>`WEB` | A job from a pipeline initiated by web. |
+| <a id="cijobsourcewebide"></a>`WEBIDE` | A job from a pipeline initiated by webide. |
 
 ### `CiJobStatus`
 

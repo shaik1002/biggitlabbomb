@@ -23,12 +23,17 @@ module Resolvers
       experiment: { milestone: '17.1' },
       description: 'Filter jobs by name.'
 
+    argument :sources, [::Types::Ci::JobSourceEnum],
+      required: false,
+      description: 'Filter jobs by source.'
+
     alias_method :project, :object
 
     def resolve_with_lookahead(**args)
       jobs = ::Ci::JobsFinder.new(
         current_user: current_user, project: project, params: {
-          scope: args[:statuses], with_artifacts: args[:with_artifacts]
+          scope: args[:statuses], with_artifacts: args[:with_artifacts],
+          sources: args[:sources]
         }
       ).execute
 
@@ -36,6 +41,18 @@ module Resolvers
         jobs = ::Ci::BuildNameFinder.new(
           relation: jobs,
           name: args[:name],
+          project: project,
+          params: {
+            before: decode_cursor(args[:before]), after: decode_cursor(args[:after]),
+            asc: args[:last].present?, invert_ordering: true
+          }
+        ).execute
+      end
+
+      if Feature.enabled?(:populate_and_use_build_source_table, project)
+        jobs = ::Ci::BuildSourceFinder.new(
+          relation: jobs,
+          sources: args[:sources],
           project: project,
           params: {
             before: decode_cursor(args[:before]), after: decode_cursor(args[:after]),
@@ -61,7 +78,8 @@ module Resolvers
       {
         previous_stage_jobs_or_needs: [:needs, :pipeline],
         artifacts: [:job_artifacts],
-        pipeline: [:user]
+        pipeline: [:user],
+        build_source: [:source, :pipeline_source]
       }
     end
   end

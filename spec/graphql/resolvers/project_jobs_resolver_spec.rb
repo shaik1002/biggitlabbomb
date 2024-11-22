@@ -39,6 +39,56 @@ RSpec.describe Resolvers::ProjectJobsResolver, feature_category: :continuous_int
         it { is_expected.to contain_exactly(successful_build, successful_build_two, failed_build, pending_build) }
       end
 
+      context 'when filtering by source' do
+        let_it_be(:successful_build_source) { create(:ci_build_source, build: successful_build, source: 'scan_execution_policy') }
+        let_it_be(:pending_build_source) { create(:ci_build_source, build: pending_build, source: 'scan_execution_policy') }
+        let(:args) { { sources: %w[scan_execution_policy] } }
+
+        it { is_expected.to contain_exactly(successful_build, pending_build) }
+
+        context 'when FF is disabled' do
+          before do
+            stub_feature_flags(populate_and_use_build_source_table: false)
+          end
+
+          it 'does not filter by source' do
+            is_expected.to contain_exactly(successful_build, successful_build_two, failed_build, pending_build)
+          end
+        end
+
+        context 'when given pagination params' do
+          let(:cursor) { Base64.strict_encode64({ id: failed_build.id.to_s }.to_json) }
+          let(:query) do
+            <<~QUERY
+            {
+              project(fullPath: "#{project.full_path}") {
+                jobs(sources: [SCAN_EXECUTION_POLICY], last: 1, before: "#{cursor}") {
+                  nodes { id }
+                }
+              }
+            }
+            QUERY
+          end
+
+          it "returns the paginated build" do
+            graphq_response = GitlabSchema.execute(query, context: { current_user: current_user })
+            parsed_response = graphql_dig_at(graphq_response, 'data', 'project', 'jobs', 'nodes')
+            expect(parsed_response).to match_array([a_graphql_entity_for(pending_build)])
+          end
+
+          context 'with bad pagination params' do
+            let(:cursor) { "ABCDEFGH" }
+
+            it 'returns a pagination error' do
+              graphq_response = GitlabSchema.execute(query, context: { current_user: current_user })
+              parsed_response = graphql_dig_at(graphq_response, 'errors', 'message')
+
+              expect(parsed_response).to include('Please provide a valid cursor')
+            end
+          end
+        end
+      end
+
       context 'when filtering by build name' do
         let(:args) { { name: 'Three' } }
 

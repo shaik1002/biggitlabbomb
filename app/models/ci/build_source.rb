@@ -12,7 +12,7 @@ module Ci
       pipeline_execution_policy: 2
     }
 
-    enum pipeline_source: Enums::Ci::Pipeline.sources
+    enum pipeline_source: ::Enums::Ci::Pipeline.sources
 
     query_constraints :build_id, :partition_id
     partitionable scope: :build, partitioned: true
