@@ -48,8 +48,7 @@ RSpec.describe 'InternalEventsCli::Flows::MetricDefiner', :aggregate_failures, f
         " ", # Multi-select: __event2
         "\n", # Submit selections
         "\n", # Select: Weekly/Monthly count of unique users
-        "aggregate metric description\n", # Submit description
-        "\n" # Accept description for weekly
+        "aggregate metric description\n" # Submit description
       ])
 
       # Filter down to "dev" options
@@ -81,8 +80,7 @@ RSpec.describe 'InternalEventsCli::Flows::MetricDefiner', :aggregate_failures, f
         " ", # Multi-select: __event3
         "\n", # Submit selections
         "\n", # Select: Weekly/Monthly count of unique users
-        "aggregate metric description\n", # Submit description
-        "\n" # Accept description for weekly
+        "aggregate metric description\n" # Submit description
       ])
 
       # Filter down to "dev:create" options
@@ -118,7 +116,6 @@ RSpec.describe 'InternalEventsCli::Flows::MetricDefiner', :aggregate_failures, f
         "\n", # Select: 00__event1
         "\n", # Select: Weekly/Monthly count of unique users
         "aggregate metric description\n", # Submit description
-        "\n", # Accept description for weekly
         "2\n" # Modify attributes
       ])
 
@@ -220,14 +217,9 @@ RSpec.describe 'InternalEventsCli::Flows::MetricDefiner', :aggregate_failures, f
 
       # existing metrics which use both events
       File.write(
-        'config/metrics/counts_7d/' \
-          'count_distinct_project_id_from_internal_events_cli_closed_and_internal_events_cli_used_weekly.yml',
-        File.read('spec/fixtures/scripts/internal_events/metrics/project_id_7d_multiple_events.yml')
-      )
-      File.write(
-        'config/metrics/counts_28d/' \
-          'count_distinct_project_id_from_internal_events_cli_closed_and_internal_events_cli_used_monthly.yml',
-        File.read('spec/fixtures/scripts/internal_events/metrics/project_id_28d_multiple_events.yml')
+        'config/metrics/counts_all/' \
+          'count_distinct_project_id_from_internal_events_cli_closed_and_internal_events_cli_used.yml',
+        File.read('spec/fixtures/scripts/internal_events/metrics/project_id_multiple_events.yml')
       )
 
       # Non-conflicting metric which uses only one of the events
