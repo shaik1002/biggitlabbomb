@@ -12,7 +12,7 @@ module Members
 
     def execute
       return error('Must be a root namespace') unless root_namespace.root?
-      return error('User not authorized') unless can?(scheduled_by, :admin_group_member, root_namespace)
+      return error('User not authorized') unless user_authorized?
 
       schedule_deletion
     end
@@ -31,6 +31,10 @@ module Members
       return error(schedule.errors.full_messages) unless schedule.save
 
       success(deletion_schedule: schedule)
+    end
+
+    def user_authorized?
+      scheduled_by.admin_bot? || can?(scheduled_by, :admin_group_member, root_namespace)
     end
   end
 end
