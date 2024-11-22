@@ -20313,9 +20313,6 @@ msgstr ""
 msgid "DuoChat|Ask a question about GitLab"
 msgstr ""
 
-msgid "DuoChat|Delete all messages in this conversation."
-msgstr ""
-
 msgid "DuoChat|For example, %{linkStart}what is a fork%{linkEnd}?"
 msgstr ""
 
@@ -20331,13 +20328,7 @@ msgstr ""
 msgid "DuoChat|Included references"
 msgstr ""
 
-msgid "DuoChat|Learn what Duo Chat can do."
-msgstr ""
-
 msgid "DuoChat|No results found"
-msgstr ""
-
-msgid "DuoChat|Reset conversation and ignore the previous messages."
 msgstr ""
 
 msgid "DuoChat|Search %{categoryLabel}..."
@@ -21694,6 +21685,9 @@ msgid "Environments|Select Flux resource"
 msgstr ""
 
 msgid "Environments|Select Flux resource (optional)"
+msgstr ""
+
+msgid "Environments|Select a namespace to see available Flux resources."
 msgstr ""
 
 msgid "Environments|Select agent"
@@ -25823,7 +25817,7 @@ msgstr ""
 msgid "Go to wiki"
 msgstr ""
 
-msgid "Go to your To-Do list"
+msgid "Go to your To-Do List"
 msgstr ""
 
 msgid "Go to your fork"
@@ -57576,9 +57570,6 @@ msgid "To widen your search, change or remove filters above."
 msgstr ""
 
 msgid "To-Do List"
-msgstr ""
-
-msgid "To-Do list"
 msgstr ""
 
 msgid "To-do item successfully marked as done."
