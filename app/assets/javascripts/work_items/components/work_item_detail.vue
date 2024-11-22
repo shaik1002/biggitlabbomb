@@ -4,15 +4,13 @@ import { GlAlert, GlButton, GlTooltipDirective, GlEmptyState } from '@gitlab/ui'
 import noAccessSvg from '@gitlab/svgs/dist/illustrations/empty-state/empty-search-md.svg';
 import * as Sentry from '~/sentry/sentry_browser_wrapper';
 import { s__ } from '~/locale';
-import { getParameterByName, updateHistory, setUrlParams } from '~/lib/utils/url_utility';
 import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import { convertToGraphQLId, getIdFromGraphQLId } from '~/graphql_shared/utils';
-import { TYPENAME_GROUP, TYPENAME_WORK_ITEM } from '~/graphql_shared/constants';
+import { getIdFromGraphQLId } from '~/graphql_shared/utils';
+import { TYPENAME_GROUP } from '~/graphql_shared/constants';
 import { isLoggedIn } from '~/lib/utils/common_utils';
 import { WORKSPACE_PROJECT } from '~/issues/constants';
 import {
   i18n,
-  DETAIL_VIEW_QUERY_PARAM_NAME,
   WIDGET_TYPE_ASSIGNEES,
   WIDGET_TYPE_NOTIFICATIONS,
   WIDGET_TYPE_CURRENT_USER_TODOS,
@@ -58,7 +56,6 @@ import WorkItemAttributesWrapper from './work_item_attributes_wrapper.vue';
 import WorkItemCreatedUpdated from './work_item_created_updated.vue';
 import WorkItemDescription from './work_item_description.vue';
 import WorkItemNotes from './work_item_notes.vue';
-import WorkItemDetailModal from './work_item_detail_modal.vue';
 import WorkItemAwardEmoji from './work_item_award_emoji.vue';
 import WorkItemRelationships from './work_item_relationships/work_item_relationships.vue';
 import WorkItemStickyHeader from './work_item_sticky_header.vue';
@@ -66,6 +63,7 @@ import WorkItemAncestors from './work_item_ancestors/work_item_ancestors.vue';
 import WorkItemTitle from './work_item_title.vue';
 import WorkItemLoading from './work_item_loading.vue';
 import WorkItemAbuseModal from './work_item_abuse_modal.vue';
+import WorkItemDrawer from './work_item_drawer.vue';
 import DesignWidget from './design_management/design_management_widget.vue';
 import DesignUploadButton from './design_management/upload_button.vue';
 
@@ -95,13 +93,13 @@ export default {
     WorkItemAttributesWrapper,
     WorkItemTree,
     WorkItemNotes,
-    WorkItemDetailModal,
     WorkItemRelationships,
     WorkItemStickyHeader,
     WorkItemAncestors,
     WorkItemTitle,
     WorkItemLoading,
     WorkItemAbuseModal,
+    WorkItemDrawer,
   },
   mixins: [glFeatureFlagMixin()],
   inject: [
@@ -112,11 +110,6 @@ export default {
     'hasLinkedItemsEpicsFeature',
   ],
   props: {
-    isModal: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
     workItemId: {
       type: String,
       required: false,
@@ -144,20 +137,11 @@ export default {
     },
   },
   data() {
-    let modalWorkItemId = getParameterByName(DETAIL_VIEW_QUERY_PARAM_NAME);
-
-    if (modalWorkItemId) {
-      modalWorkItemId = convertToGraphQLId(TYPENAME_WORK_ITEM, modalWorkItemId);
-    }
-
     return {
       error: undefined,
       updateError: undefined,
       workItem: {},
       updateInProgress: false,
-      modalWorkItemId,
-      modalWorkItemIid: getParameterByName('work_item_iid'),
-      modalWorkItemNamespaceFullPath: '',
       isReportModalOpen: false,
       reportedUrl: '',
       reportedUserId: 0,
@@ -169,6 +153,7 @@ export default {
       allowedChildTypes: [],
       designUploadError: null,
       workspacePermissions: defaultWorkspacePermissions,
+      activeChildItem: null,
     };
   },
   apollo: {
@@ -211,7 +196,7 @@ export default {
         if (isEmpty(this.workItem)) {
           this.setEmptyState();
         }
-        if (!(this.isModal || this.isDrawer) && this.workItem.namespace) {
+        if (!this.isDrawer && this.workItem.namespace) {
           const path = this.workItem.namespace.fullPath
             ? ` · ${this.workItem.namespace.fullPath}`
             : '';
@@ -373,11 +358,11 @@ export default {
     },
     workItemBodyClass() {
       return {
-        'gl-pt-5': !this.updateError && !this.isModal,
+        'gl-pt-5': !this.updateError && !this.isDrawer,
       };
     },
     showIntersectionObserver() {
-      return !this.isModal && !this.editMode && !this.isDrawer;
+      return !this.editMode && !this.isDrawer;
     },
     workItemLinkedItems() {
       return this.workItemType === WORK_ITEM_TYPE_VALUE_EPIC
@@ -405,12 +390,6 @@ export default {
     shouldShowEditButton() {
       return !this.editMode && this.canUpdate;
     },
-    modalCloseButtonClass() {
-      return {
-        'sm:gl-hidden': !this.error,
-        'gl-flex': true,
-      };
-    },
     workItemPresent() {
       return !isEmpty(this.workItem);
     },
@@ -429,14 +408,12 @@ export default {
     iid() {
       return this.workItemIid || this.workItem.iid;
     },
-  },
-  mounted() {
-    if (this.modalWorkItemId) {
-      this.openInModal({
-        event: undefined,
-        modalWorkItem: { id: this.modalWorkItemId },
-      });
-    }
+    isItemSelected() {
+      return !isEmpty(this.activeChildItem);
+    },
+    activeChildItemType() {
+      return this.activeChildItem?.workItemType?.name;
+    },
   },
   methods: {
     handleWorkItemCreated() {
@@ -487,40 +464,19 @@ export default {
       this.error = this.$options.i18n.fetchError;
       document.title = s__('404|Not found');
     },
-    updateUrl(modalWorkItem) {
-      updateHistory({
-        url: setUrlParams({
-          [DETAIL_VIEW_QUERY_PARAM_NAME]: getIdFromGraphQLId(modalWorkItem?.id),
-        }),
-        replace: true,
-      });
-    },
-    openInModal({ event, modalWorkItem, context }) {
+    openContextualView({ event, modalWorkItem, context }) {
       if (!this.workItemsAlphaEnabled || context === LINKED_ITEMS_ANCHOR || this.isDrawer) {
         return;
       }
 
       if (event) {
         event.preventDefault();
-
-        this.updateUrl(modalWorkItem);
       }
 
-      if (this.isModal) {
-        this.$emit('update-modal', event, modalWorkItem);
-        return;
-      }
-
-      this.modalWorkItemId = modalWorkItem.id;
-      this.modalWorkItemIid = modalWorkItem.iid;
-      this.modalWorkItemNamespaceFullPath = modalWorkItem?.reference?.replace(
-        `#${modalWorkItem.iid}`,
-        '',
-      );
-      this.$refs.modal.show();
+      this.activeChildItem = modalWorkItem;
     },
     openReportAbuseModal(reply) {
-      if (this.isModal) {
+      if (this.isDrawer) {
         this.$emit('openReportAbuse', reply);
       } else {
         this.toggleReportAbuseModal(true, reply);
@@ -651,6 +607,19 @@ export default {
         iid: this.iid,
       });
     },
+    async deleteChildItem({ id }) {
+      this.activeChildItem = null;
+      await this.$nextTick();
+
+      const { cache } = this.$apollo.provider.clients.defaultClient;
+      cache.evict({
+        id: cache.identify({
+          __typename: 'WorkItem',
+          id,
+        }),
+      });
+      cache.gc();
+    },
   },
   WORK_ITEM_TYPE_VALUE_OBJECTIVE,
   WORKSPACE_PROJECT,
@@ -667,7 +636,6 @@ export default {
       :parent-work-item-confidentiality="parentWorkItemConfidentiality"
       :update-in-progress="updateInProgress"
       :full-path="workItemFullPath"
-      :is-modal="isModal"
       :work-item="workItem"
       :is-sticky-header-showing="isStickyHeaderShowing"
       :work-item-notifications-subscribed="workItemNotificationsSubscribed"
@@ -690,17 +658,6 @@ export default {
         </gl-alert>
       </section>
       <section :class="workItemBodyClass">
-        <div :class="modalCloseButtonClass">
-          <gl-button
-            v-if="isModal"
-            class="gl-ml-auto"
-            category="tertiary"
-            data-testid="work-item-close"
-            icon="close"
-            :aria-label="__('Close')"
-            @click="$emit('close')"
-          />
-        </div>
         <work-item-loading v-if="workItemLoading" />
         <gl-empty-state
           v-else-if="error"
@@ -764,7 +721,6 @@ export default {
                 :is-parent-confidential="parentWorkItemConfidentiality"
                 :work-item-reference="workItem.reference"
                 :work-item-create-note-email="workItem.createNoteEmail"
-                :is-modal="isModal"
                 :work-item-state="workItem.state"
                 :has-children="hasChildren"
                 :work-item-author-id="workItemAuthorId"
@@ -778,15 +734,6 @@ export default {
                 @workItemCreated="handleWorkItemCreated"
               />
             </div>
-            <gl-button
-              v-if="isModal"
-              class="gl-hidden sm:!gl-block"
-              category="tertiary"
-              data-testid="work-item-close"
-              icon="close"
-              :aria-label="__('Close')"
-              @click="$emit('close')"
-            />
           </div>
           <div :class="{ 'gl-mt-3': !editMode }">
             <work-item-title
@@ -842,7 +789,6 @@ export default {
             <aside
               data-testid="work-item-overview-right-sidebar"
               class="work-item-overview-right-sidebar"
-              :class="{ 'is-modal': isModal }"
             >
               <work-item-attributes-wrapper
                 :class="{ 'gl-top-11': isDrawer }"
@@ -877,7 +823,7 @@ export default {
               :confidential="workItem.confidential"
               :allowed-child-types="allowedChildTypes"
               :is-drawer="isDrawer"
-              @show-modal="openInModal"
+              @show-modal="openContextualView"
               @addChild="$emit('addChild')"
               @childrenLoaded="hasChildren = $event"
             />
@@ -889,7 +835,7 @@ export default {
               :work-item-full-path="workItemFullPath"
               :work-item-type="workItem.workItemType.name"
               :can-admin-work-item-link="canAdminWorkItemLink"
-              @showModal="openInModal"
+              @showModal="openContextualView"
             />
             <work-item-notes
               v-if="workItemNotes"
@@ -897,14 +843,12 @@ export default {
               :work-item-id="workItem.id"
               :work-item-iid="workItem.iid"
               :work-item-type="workItemType"
-              :is-modal="isModal"
               :assignees="workItemAssignees && workItemAssignees.assignees.nodes"
               :can-set-work-item-metadata="canAssignUnassignUser"
               :report-abuse-path="reportAbusePath"
               :is-discussion-locked="isDiscussionLocked"
               :is-work-item-confidential="workItem.confidential"
               class="gl-pt-5"
-              :use-h2="!isModal"
               @error="updateError = $event"
               @openReportAbuse="openReportAbuseModal"
             />
@@ -912,16 +856,14 @@ export default {
         </div>
       </section>
     </section>
-    <work-item-detail-modal
-      v-if="!isModal && !isDrawer"
-      ref="modal"
-      :parent-id="workItem.id"
-      :work-item-id="modalWorkItemId"
-      :work-item-iid="modalWorkItemIid"
-      :work-item-full-path="modalWorkItemNamespaceFullPath"
-      :show="true"
-      @close="updateUrl"
-      @openReportAbuse="toggleReportAbuseModal(true, $event)"
+    <work-item-drawer
+      v-if="workItemsAlphaEnabled && !isDrawer"
+      :active-item="activeChildItem"
+      :open="isItemSelected"
+      :issuable-type="activeChildItemType"
+      click-outside-exclude-selector=".issuable-list"
+      @close="activeChildItem = null"
+      @workItemDeleted="deleteChildItem"
     />
     <work-item-abuse-modal
       v-if="isReportModalOpen"
