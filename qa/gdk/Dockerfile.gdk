@@ -50,8 +50,8 @@ RUN set -eux; \
     cd gitaly \
     && go clean -cache -modcache -r \
     && rm -rf _build/cache \
-              _build/deps \
-              _build/intermediate
+    _build/deps \
+    _build/intermediate
 
 # Install gitlab gem dependencies
 #
@@ -104,9 +104,8 @@ RUN set -eux; \
     # will always invalidate cache on 'COPY --chown=gdk:gdk ./ ./gitlab/' step and some gdk setup steps require gitlab
     # to be an actual git repository
     (cd gitlab && git init . && git add --all && git commit --quiet -m "Init repository") &> /dev/null; \
-    gdk config set gitaly.skip_setup true \
-    && gdk config set workhorse.skip_setup true \
-    && gdk config set gitlab_shell.skip_setup true \
+    gdk config set vite.enabled true \
+    && gdk config set webpack.enabled false \
     && cp .ruby-version ./gitlab/ \
     && cp .tool-versions ./gitlab/ \
     && make redis/redis.conf all \
