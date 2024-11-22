@@ -678,7 +678,6 @@ RSpec/FeatureCategory:
     - 'ee/spec/lib/gitlab/usage/metrics/instrumentations/count_event_streaming_destinations_metric_spec.rb'
     - 'ee/spec/lib/gitlab/usage/metrics/instrumentations/count_external_status_checks_metric_spec.rb'
     - 'ee/spec/lib/gitlab/usage/metrics/instrumentations/count_groups_with_assigned_security_policy_project_metric_spec.rb'
-    - 'ee/spec/lib/gitlab/usage/metrics/instrumentations/count_groups_with_event_streaming_destinations_metric_spec.rb'
     - 'ee/spec/lib/gitlab/usage/metrics/instrumentations/count_merge_requests_with_applied_scan_result_policies_metric_spec.rb'
     - 'ee/spec/lib/gitlab/usage/metrics/instrumentations/count_projects_with_applied_scan_result_policies_metric_spec.rb'
     - 'ee/spec/lib/gitlab/usage/metrics/instrumentations/count_projects_with_assigned_security_policy_project_metric_spec.rb'

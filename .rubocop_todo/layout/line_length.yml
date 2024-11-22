@@ -1388,7 +1388,6 @@ Layout/LineLength:
     - 'ee/spec/lib/gitlab/usage/metrics/instrumentations/count_ci_builds_metric_spec.rb'
     - 'ee/spec/lib/gitlab/usage/metrics/instrumentations/count_distinct_merged_merge_requests_using_approval_rules_metric_spec.rb'
     - 'ee/spec/lib/gitlab/usage/metrics/instrumentations/count_event_streaming_destinations_metric_spec.rb'
-    - 'ee/spec/lib/gitlab/usage/metrics/instrumentations/count_groups_with_event_streaming_destinations_metric_spec.rb'
     - 'ee/spec/lib/gitlab/usage/metrics/instrumentations/count_projects_with_external_status_checks_metric_spec.rb'
     - 'ee/spec/lib/gitlab/usage/metrics/instrumentations/count_security_scans_metric_spec.rb'
     - 'ee/spec/lib/gitlab/usage/metrics/instrumentations/count_users_associating_group_milestones_to_releases_metric_spec.rb'
