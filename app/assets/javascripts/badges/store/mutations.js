@@ -11,9 +11,10 @@ const reorderBadges = (badges) =>
   });
 
 export default {
-  [types.RECEIVE_NEW_BADGE](state) {
+  [types.RECEIVE_NEW_BADGE](state, newBadge) {
     Object.assign(state, {
       badgeInAddForm: {},
+      badges: reorderBadges(state.badges.concat(newBadge)),
       isSaving: false,
       renderedBadge: null,
     });
@@ -66,13 +67,20 @@ export default {
       isLoading: false,
     });
   },
-
-  [types.REQUEST_LOAD_BADGES](state) {
+  [types.REQUEST_LOAD_BADGES](state, data) {
     Object.assign(state, {
+      kind: data.kind, // project or group
+      apiEndpointUrl: data.apiEndpointUrl,
       isLoading: true,
     });
   },
 
+  [types.RECEIVE_DELETE_BADGE](state, badgeId) {
+    const badges = state.badges.filter((badge) => badge.id !== badgeId);
+    Object.assign(state, {
+      badges,
+    });
+  },
   [types.RECEIVE_DELETE_BADGE_ERROR](state, badgeId) {
     const badges = state.badges.map((badge) => {
       if (badge.id === badgeId) {
@@ -112,12 +120,6 @@ export default {
   },
   [types.REQUEST_RENDERED_BADGE](state) {
     Object.assign(state, { isRendering: true });
-  },
-
-  [types.RECEIVE_PAGINATION](state, pagination) {
-    Object.assign(state, {
-      pagination,
-    });
   },
 
   [types.START_EDITING](state, badge) {

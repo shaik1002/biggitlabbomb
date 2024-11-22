@@ -6,7 +6,6 @@ NO_SPECS_LABELS = [
   'maintenance::pipelines',
   'maintenance::refactor',
   'maintenance::workflow',
-  'maintenance::performance',
   'documentation',
   'QA'
 ].freeze

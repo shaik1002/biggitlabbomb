@@ -71,8 +71,7 @@ module Gitlab
       # Returns an instance of SecretDetection::Response by following below structure:
       # {
       #     status: One of the SecretDetection::Status values
-      #     results: [SecretDetection::Finding],
-      #     applied_exclusions: [Security::ProjectSecurityExclusion]
+      #     results: [SecretDetection::Finding]
       # }
       #
       def secrets_scan(
@@ -89,20 +88,15 @@ module Gitlab
 
           next SecretDetection::Response.new(SecretDetection::Status::NOT_FOUND) if matched_blobs.empty?
 
-          scan_result =
-            if subprocess
-              run_scan_within_subprocess(matched_blobs, blob_timeout, exclusions)
-            else
-              run_scan(matched_blobs, blob_timeout, exclusions)
-            end
+          secrets = if subprocess
+                      run_scan_within_subprocess(matched_blobs, blob_timeout, exclusions)
+                    else
+                      run_scan(matched_blobs, blob_timeout, exclusions)
+                    end
 
-          scan_status = overall_scan_status(scan_result[:secrets])
+          scan_status = overall_scan_status(secrets)
 
-          SecretDetection::Response.new(
-            scan_status,
-            scan_result[:secrets],
-            scan_result[:applied_exclusions]
-          )
+          SecretDetection::Response.new(scan_status, secrets)
         end
       rescue Timeout::Error => e
         logger.error "Secret detection operation timed out: #{e}"
@@ -165,69 +159,46 @@ module Gitlab
       end
 
       def run_scan(blobs, blob_timeout, exclusions)
-        results = blobs.flat_map do |blob|
+        blobs.flat_map do |blob|
           Timeout.timeout(blob_timeout) do
             find_secrets(blob, exclusions)
           end
         rescue Timeout::Error => e
           logger.error "Secret Detection scan timed out on the blob(id:#{blob.id}): #{e}"
-
-          # This mimics the structure returned from `find_secrets(...)`.
-          {
-            secrets: [SecretDetection::Finding.new(blob.id, SecretDetection::Status::PAYLOAD_TIMEOUT)],
-            applied_exclusions: []
-          }
+          SecretDetection::Finding.new(blob.id,
+            SecretDetection::Status::PAYLOAD_TIMEOUT)
         end
-
-        {
-          secrets: results.flat_map { |result| result[:secrets] },
-          applied_exclusions: results.flat_map { |result| result[:applied_exclusions] }
-        }
       end
 
       def run_scan_within_subprocess(blobs, blob_timeout, exclusions)
         blob_sizes = blobs.map(&:size)
-
         grouped_blob_indicies = group_by_chunk_size(blob_sizes)
+
         grouped_blobs = grouped_blob_indicies.map { |idx_arr| idx_arr.map { |i| blobs[i] } }
 
-        results = Parallel.flat_map(
+        Parallel.flat_map(
           grouped_blobs,
           in_processes: MAX_PROCS_PER_REQUEST,
           isolation: true # do not reuse sub-processes
         ) do |grouped_blob|
-          grouped_blob.map do |blob|
+          grouped_blob.flat_map do |blob|
             Timeout.timeout(blob_timeout) do
               find_secrets(blob, exclusions)
             end
           rescue Timeout::Error => e
             logger.error "Secret Detection scan timed out on the blob(id:#{blob.id}): #{e}"
-
-            # This mimics the structure returned from `find_secrets(...)`.
-            {
-              secrets: [SecretDetection::Finding.new(blob.id, SecretDetection::Status::PAYLOAD_TIMEOUT)],
-              applied_exclusions: []
-            }
+            SecretDetection::Finding.new(blob.id,
+              SecretDetection::Status::PAYLOAD_TIMEOUT)
           end
         end
-
-        {
-          secrets: results.flat_map { |result| result[:secrets] },
-          applied_exclusions: results.flat_map { |result| result[:applied_exclusions] }
-        }
       end
 
       # finds secrets in the given blob with a timeout circuit breaker
       def find_secrets(blob, exclusions)
         secrets = []
-        applied_exclusions = []
 
         blob.data.each_line.with_index do |line, index|
           exclusions[:raw_value]&.each do |exclusion|
-            next unless line.include?(exclusion.value)
-
-            applied_exclusions << exclusion
-
             line.gsub!(exclusion.value, '') # remove excluded raw value from the line.
           end
 
@@ -238,13 +209,12 @@ module Gitlab
           next unless patterns.any?
 
           line_number = index + 1
-
           patterns.each do |pattern|
             type = rules[pattern]["id"]
-            description = rules[pattern]["description"]
 
-            # Check if rule type is excluded and if so, skip this rule and count this as an applied exclusion
-            next if applied_rule_exclusion?(type, exclusions[:rule], applied_exclusions)
+            next if exclusions[:rule]&.any? { |exclusion| exclusion.value == type }
+
+            description = rules[pattern]["description"]
 
             secrets << SecretDetection::Finding.new(
               blob.id,
@@ -256,19 +226,11 @@ module Gitlab
           end
         end
 
-        { secrets:, applied_exclusions: }
+        secrets
       rescue StandardError => e
         logger.error "Secret Detection scan failed on the blob(id:#{blob.id}): #{e}"
 
-        {
-          secrets: [SecretDetection::Finding.new(blob.id, SecretDetection::Status::SCAN_ERROR)],
-          applied_exclusions: []
-        }
-      end
-
-      def applied_rule_exclusion?(type, rule_exclusions, applied_exclusions)
-        applied_exclusion = rule_exclusions&.find { |rule_exclusion| rule_exclusion.value == type }
-        applied_exclusion && (applied_exclusions << applied_exclusion)
+        SecretDetection::Finding.new(blob.id, SecretDetection::Status::SCAN_ERROR)
       end
 
       def validate_scan_input(blobs)

@@ -60,7 +60,9 @@ module WebpackHelper
       route.pop
     end
 
-    chunks = webpack_entrypoint_paths("default", extension: 'js') if chunks.empty?
+    if chunks.empty?
+      chunks = webpack_entrypoint_paths("default", extension: 'js')
+    end
 
     javascript_include_tag(*chunks)
   end
@@ -69,10 +71,14 @@ module WebpackHelper
     return "" unless source.present?
 
     paths = Gitlab::Webpack::Manifest.entrypoint_paths(source)
-    paths.select! { |p| p.ends_with? ".#{extension}" } if extension
+    if extension
+      paths.select! { |p| p.ends_with? ".#{extension}" }
+    end
 
     force_host = webpack_public_host
-    paths.map! { |p| "#{force_host}#{p}" } if force_host
+    if force_host
+      paths.map! { |p| "#{force_host}#{p}" }
+    end
 
     if exclude_duplicates
       @used_paths ||= []

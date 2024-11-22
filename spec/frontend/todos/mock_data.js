@@ -83,12 +83,20 @@ export const todosResponse = {
   },
 };
 
-export const getPendingTodosCountResponse = {
+export const todosCountsResponse = {
   data: {
     currentUser: {
       id: 'gid://gitlab/User/1',
-      todos: {
+      pending: {
         count: 9,
+        __typename: 'TodoConnection',
+      },
+      done: {
+        count: 5,
+        __typename: 'TodoConnection',
+      },
+      all: {
+        count: 14,
         __typename: 'TodoConnection',
       },
       __typename: 'CurrentUser',

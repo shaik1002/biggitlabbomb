@@ -73,8 +73,7 @@ instance:
     - .qa
   variables:
     QA_SCENARIO: Test::Instance::Image
-    QA_RUN_IN_PARALLEL: true
-    QA_PARALLEL_PROCESSES: 6
+    QA_RUN_IN_PARALLEL: false
   rules:
     - !reference [.rules:test:smoke-for-omnibus-mr, rules]
     - !reference [.rules:test:feature-flags-set, rules]  # always run instance to validate ff change
@@ -156,8 +155,6 @@ gitaly-transactions:
     QA_CAN_TEST_PRAEFECT: "true"
     KNAPSACK_TEST_FILE_PATTERN: "qa/specs/features/**/3_create/**/*_spec.rb"
     QA_GITALY_TRANSACTIONS_ENABLED: "true"
-    QA_RUN_IN_PARALLEL: true
-    QA_PARALLEL_PROCESSES: 6
   rules:
     - !reference [.rules:test:qa-parallel, rules]
     - if: $QA_SUITES =~ /Test::Instance::All/
@@ -274,6 +271,7 @@ group-saml:
 oauth:
   extends:
     - .qa
+    - .failure-videos
   variables:
     QA_SCENARIO: Test::Instance::Image
     QA_GITLAB_HOSTNAME: "gitlab"
@@ -297,6 +295,7 @@ instance-saml:
 jira:
   extends:
     - .qa
+    - .failure-videos
   variables:
     QA_SCENARIO: Test::Integration::Jira
   rules:
@@ -322,8 +321,7 @@ ldap-no-server:
     - if: $QA_SUITES =~ /Test::Integration::LDAPNoServer/
     - !reference [.rules:test:manual, rules]
 
-# TODO: re-enable after gitlab-org/quality/quality-engineering/team-tasks#3153 is resolved
-.ldap-tls:
+ldap-tls:
   extends: .qa
   variables:
     QA_SCENARIO: Test::Integration::LDAPTLS
@@ -332,8 +330,7 @@ ldap-no-server:
     - if: $QA_SUITES =~ /Test::Integration::LDAPTLS/
     - !reference [.rules:test:manual, rules]
 
-# TODO: re-enable after gitlab-org/quality/quality-engineering/team-tasks#3153 is resolved
-.ldap-no-tls:
+ldap-no-tls:
   extends: .qa
   variables:
     QA_SCENARIO: Test::Integration::LDAPNoTLS
@@ -354,6 +351,7 @@ mtls:
 mattermost:
   extends:
     - .qa
+    - .failure-videos
   variables:
     QA_SCENARIO: Test::Integration::Mattermost
   rules:
@@ -364,6 +362,7 @@ mattermost:
 registry:
   extends:
     - .qa
+    - .failure-videos
   variables:
     QA_SCENARIO: Test::Integration::Registry
   rules:
@@ -375,6 +374,7 @@ registry:
 repository-storage:
   extends:
     - .qa
+    - .failure-videos
   variables:
     QA_SCENARIO: Test::Instance::RepositoryStorage
   rules:
@@ -396,6 +396,7 @@ service-ping-disabled:
 smtp:
   extends:
     - .qa
+    - .failure-videos
   variables:
     QA_SCENARIO: Test::Integration::SMTP
   rules:
@@ -406,6 +407,7 @@ smtp:
 cloud-activation:
   extends:
     - .qa
+    - .failure-videos
   variables:
     QA_SCENARIO: Test::Instance::Image
     QA_RSPEC_TAGS: --tag cloud_activation
@@ -417,6 +419,7 @@ cloud-activation:
 large-setup:
   extends:
     - .qa
+    - .failure-videos
   variables:
     QA_SCENARIO: Test::Instance::Image
     QA_RSPEC_TAGS: --tag can_use_large_setup
@@ -434,8 +437,7 @@ metrics:
     - if: $QA_SUITES =~ /Test::Instance::Metrics/
     - !reference [.rules:test:manual, rules]
 
-# TODO: re-enable after gitlab-org/quality/quality-engineering/team-tasks#3153 is resolved
-.elasticsearch:
+elasticsearch:
   extends: .qa
   variables:
     QA_SCENARIO: "Test::Integration::Elasticsearch"
@@ -450,6 +452,7 @@ metrics:
 importers:
   extends:
     - .qa
+    - .failure-videos
   variables:
     QA_SCENARIO: Test::Integration::Import
     QA_MOCK_GITHUB: "true"
@@ -463,6 +466,7 @@ importers:
 .ai-gateway-base:
   extends:
     - .qa
+    - .failure-videos
 
 ai-gateway:
   extends:
@@ -515,6 +519,7 @@ ai-gateway-no-license:
 continuous-vulnerabiity-scanning:
   extends:
     - .qa
+    - .failure-videos
   variables:
     QA_SCENARIO: Test::Integration::ContinuousVulnerabilityScanning
     QA_MOCK_GITHUB: "true"
@@ -573,7 +578,6 @@ e2e-test-report:
 upload-knapsack-report:
   extends:
     - .upload-knapsack-report
-    - .rules:report:upload-knapsack-report
 
 export-test-metrics:
   extends:

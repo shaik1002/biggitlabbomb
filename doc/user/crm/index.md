@@ -11,28 +11,26 @@ DETAILS:
 **Offering:** GitLab.com, Self-managed, GitLab Dedicated
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/2256) in GitLab 14.6 [with a flag](../../administration/feature_flags.md) named `customer_relations`. Disabled by default.
-> - In GitLab 14.8 and later, you can [create contacts and organizations only in top-level groups](https://gitlab.com/gitlab-org/gitlab/-/issues/350634).
+> - In GitLab 14.8 and later, you can [create contacts and organizations only in root groups](https://gitlab.com/gitlab-org/gitlab/-/issues/350634).
 > - [Enabled on GitLab.com and self-managed](https://gitlab.com/gitlab-org/gitlab/-/issues/346082) in GitLab 15.0.
 > - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/346082) in GitLab 15.1.
-> - [Changed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/169256) the minimum user role from Reporter to Planner in GitLab 17.7.
 
 With customer relations management (CRM) you can create a record of contacts
 (individuals) and organizations (companies) and relate them to issues.
 
-By default, contacts and organizations can only be created for top-level groups.
-To create contacts and organizations in other groups, [assign the group as a contact source](#configure-the-contact-source).
+Contacts and organizations can only be created for root groups.
 
 You can use contacts and organizations to tie work to customers for billing and reporting purposes.
 For more information about what is planned for the future, see [issue 2256](https://gitlab.com/gitlab-org/gitlab/-/issues/2256).
 
 ## Permissions
 
-| Permission                         | Guest | Planner | Group Reporter | Group Developer, Maintainer, and Owner |
-|------------------------------------|-------|---------|----------------|----------------------------------------|
-| View contacts/organizations        |       | ✓       | ✓              | ✓                                      |
-| View issue contacts                |       | ✓       | ✓              | ✓                                      |
-| Add/remove issue contacts          |       | ✓       | ✓              | ✓                                      |
-| Create/edit contacts/organizations |       |         |                | ✓                                      |
+| Permission | Guest            | Group Reporter | Group Developer, Maintainer, and Owner |
+| ---------- | ---------------- | -------------- | -------------------------------------- |
+| View contacts/organizations | | ✓              | ✓ |
+| View issue contacts |         | ✓              | ✓ |
+| Add/remove issue contacts |   | ✓              | ✓ |
+| Create/edit contacts/organizations | |         | ✓ |
 
 ## Enable customer relations management (CRM)
 
@@ -50,31 +48,13 @@ To enable customer relations management in a group or subgroup:
 1. Select **Customer relations is enabled**.
 1. Select **Save changes**.
 
-## Configure the contact source
-
-> - [Available](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/167475) in GitLab 17.6.
-
-By default, contacts are sourced from an issue's top-level group.
-
-The contact source for a group will apply to all subgroups,
-unless they have a contact source configured.
-
-To configure the contact source for a group or subgroup:
-
-1. On the left sidebar, select **Search or go to** and find your group or subgroup.
-1. Select **Settings > General**.
-1. Expand the **Permissions and group features** section.
-1. Select **Contact source > Search for a group**.
-1. Select the group from which you wish to source contacts.
-1. Select **Save changes**.
-
 ## Contacts
 
 ### View contacts linked to a group
 
 Prerequisites:
 
-- You must have at least the Planner role for the group.
+- You must have at least the Reporter role for the group.
 
 To view a group's contacts:
 
@@ -138,7 +118,7 @@ To change the state of a contact:
 
 Prerequisites:
 
-- You must have at least the Planner role for the group.
+- You must have at least the Reporter role for the group.
 
 To view a group's organizations:
 
@@ -193,7 +173,7 @@ issues are linked to contacts matching the email addresses in the sender and CC 
 
 Prerequisites:
 
-- You must have at least the Planner role for the group.
+- You must have at least the Reporter role for the group.
 
 To view a contact's issues, select a contact from the issue sidebar, or:
 
@@ -205,7 +185,7 @@ To view a contact's issues, select a contact from the issue sidebar, or:
 
 Prerequisites:
 
-- You must have at least the Planner role for the group.
+- You must have at least the Reporter role for the group.
 
 To view an organization's issues:
 
@@ -218,7 +198,7 @@ To view an organization's issues:
 
 Prerequisites:
 
-- You must have at least the Planner role for the group.
+- You must have at least the Reporter role for the group.
 
 You can view contacts associated with an issue in the right sidebar.
 
@@ -234,7 +214,7 @@ API.
 
 Prerequisites:
 
-- You must have at least the Planner role for the group.
+- You must have at least the Reporter role for the group.
 
 To add [active](#change-the-state-of-a-contact) contacts to an issue use the `/add_contacts [contact:address@example.com]`
 [quick action](../project/quick_actions.md).
@@ -247,7 +227,7 @@ API.
 
 Prerequisites:
 
-- You must have at least the Planner role for the group.
+- You must have at least the Reporter role for the group.
 
 To remove contacts from an issue use the `/remove_contacts [contact:address@example.com]`
 [quick action](../project/quick_actions.md).
@@ -276,22 +256,20 @@ When you use the `/remove_contacts` quick action, follow it with `[contact:` and
 
 ## Moving objects with CRM entries
 
-When you move an issue or project and the **parent group contact source matches**,
+The root group is the topmost group in the group hierarchy.
+
+When you move an issue, project, or group **in the same group hierarchy**,
 issues retain their contacts.
 
-When you move an issue or project and the **parent group contact source changes**,
+When you move an issue or project and the **root group changes**,
 issues lose their contacts.
 
-When you move a group with a [contact source configured](#configure-the-contact-source)
-or it's **contact source remains unchanged**,
-issues retain their contacts.
+When you move a group and its **root group changes**:
 
-When you move a group and its **contact source changes**:
-
-- All unique contacts and organizations are migrated to the new top-level group.
+- All unique contacts and organizations are migrated to the new root group.
 - Contacts that already exist (by email address) are deemed duplicates and deleted.
 - Organizations that already exist (by name) are deemed duplicates and deleted.
 - All issues retain their contacts or are updated to point at contacts with the same email address.
 
 If you do not have permission to create contacts and organizations in the new
-top-level group, the group transfer fails.
+root group, the group transfer fails.

@@ -60,7 +60,10 @@ export default {
       </div>
     </div>
 
-    <gl-collapse :visible="contentIsVisible" class="gl-border-t gl-border-t-section gl-bg-subtle">
+    <gl-collapse
+      :visible="contentIsVisible"
+      class="gl-border-1 gl-border-gray-100 gl-bg-gray-10 gl-border-t-solid"
+    >
       <slot name="content"></slot>
     </gl-collapse>
   </div>

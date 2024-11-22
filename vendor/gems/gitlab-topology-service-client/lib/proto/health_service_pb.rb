@@ -4,7 +4,6 @@
 require 'google/protobuf'
 
 require 'google/api/annotations_pb'
-
 Google::Protobuf::DescriptorPool.generated_pool.build do
   add_file("proto/health_service.proto", :syntax => :proto3) do
     add_message "gitlab.cells.topology_service.ReadinessProbeRequest" do

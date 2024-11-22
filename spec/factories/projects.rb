@@ -76,7 +76,6 @@ FactoryBot.define do
 
       # rubocop:disable Lint/EmptyBlock -- block is required by factorybot
       guests {}
-      planners {}
       reporters {}
       developers {}
       maintainers {}
@@ -166,7 +165,6 @@ FactoryBot.define do
       project.create_ci_project_mirror!(namespace_id: project.namespace_id) unless project.ci_project_mirror
 
       project.add_members(Array.wrap(evaluator.guests), :guest)
-      project.add_members(Array.wrap(evaluator.planners), :planner)
       project.add_members(Array.wrap(evaluator.reporters), :reporter)
       project.add_members(Array.wrap(evaluator.developers), :developer)
       project.add_members(Array.wrap(evaluator.maintainers), :maintainer)
@@ -618,10 +616,6 @@ FactoryBot.define do
     empty_repo
   end
 
-  factory :project_with_repo, parent: :project do
-    repository
-  end
-
   factory :forked_project_with_submodules, parent: :project do
     path { 'forked-gitlabhq' }
 
@@ -659,12 +653,6 @@ FactoryBot.define do
     after :create do |project|
       create(:namespace_settings, namespace: project.namespace) unless project.namespace.namespace_settings
       project.namespace.namespace_settings.update!(allow_runner_registration_token: true)
-    end
-  end
-
-  trait :import_user_mapping_enabled do
-    import_data_attributes do
-      { data: { user_contribution_mapping_enabled: true } }
     end
   end
 end

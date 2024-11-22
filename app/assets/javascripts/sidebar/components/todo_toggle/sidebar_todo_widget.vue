@@ -95,7 +95,9 @@ export default {
           };
         },
         skip() {
-          return !todoQueries[this.issuableType].subscription;
+          return (
+            !this.glFeatures.realtimeIssuableTodo || !todoQueries[this.issuableType].subscription
+          );
         },
       },
     },
@@ -231,7 +233,6 @@ export default {
       category="tertiary"
       type="reset"
       class="sidebar-collapsed-icon sidebar-collapsed-container !gl-rounded-none !gl-shadow-none"
-      :class="{ '!gl-text-blue-500': hasTodo }"
       @click.stop.prevent="toggleTodo"
     >
       <gl-animated-todo-icon :is-on="hasTodo" />

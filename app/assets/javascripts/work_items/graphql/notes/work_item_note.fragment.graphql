@@ -13,7 +13,6 @@ fragment WorkItemNote on Note {
   url
   authorIsContributor
   maxAccessLevelOfAuthor
-  externalAuthor
   lastEditedBy {
     ...User
     webPath

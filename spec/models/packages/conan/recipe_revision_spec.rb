@@ -4,20 +4,15 @@ require 'spec_helper'
 
 RSpec.describe Packages::Conan::RecipeRevision, type: :model, feature_category: :package_registry do
   describe 'associations' do
-    it 'belongs to package' do
+    it do
       is_expected.to belong_to(:package).class_name('Packages::Conan::Package').inverse_of(:conan_recipe_revisions)
     end
 
     it { is_expected.to belong_to(:project) }
 
-    it 'has many conan_package_references' do
+    it do
       is_expected.to have_many(:conan_package_references).inverse_of(:recipe_revision)
         .class_name('Packages::Conan::PackageReference')
-    end
-
-    it 'has many file_metadata' do
-      is_expected.to have_many(:file_metadata).inverse_of(:recipe_revision)
-        .class_name('Packages::Conan::FileMetadatum')
     end
   end
 
@@ -28,7 +23,7 @@ RSpec.describe Packages::Conan::RecipeRevision, type: :model, feature_category: 
     it { is_expected.to validate_presence_of(:project) }
     it { is_expected.to validate_presence_of(:revision) }
 
-    it 'has unique revision scoped to package_id' do
+    it do
       # ignore case, same revision string with different case are converted to same hexa binary
       is_expected.to validate_uniqueness_of(:revision).scoped_to(:package_id).case_insensitive
     end

@@ -3,20 +3,12 @@ import { GlButton, GlFormCheckbox, GlIcon, GlTooltipDirective } from '@gitlab/ui
 import { helpPagePath } from '~/helpers/help_page_helper';
 import { s__, __ } from '~/locale';
 import { capitalizeFirstCharacter } from '~/lib/utils/text_utility';
-import {
-  STATE_OPEN,
-  WORK_ITEM_TYPE_VALUE_TASK,
-  WIDGET_TYPE_EMAIL_PARTICIPANTS,
-  i18n,
-} from '~/work_items/constants';
+import { STATE_OPEN, WORK_ITEM_TYPE_VALUE_TASK } from '~/work_items/constants';
 import { getDraft, clearDraft, updateDraft } from '~/lib/utils/autosave';
-import { findWidget } from '~/issues/list/utils';
 import { confirmAction } from '~/lib/utils/confirm_via_gl_modal/confirm_via_gl_modal';
 import MarkdownEditor from '~/vue_shared/components/markdown/markdown_editor.vue';
 import WorkItemStateToggle from '~/work_items/components/work_item_state_toggle.vue';
 import CommentFieldLayout from '~/notes/components/comment_field_layout.vue';
-import workItemByIidQuery from '../../graphql/work_item_by_iid.query.graphql';
-import workItemEmailParticipantsByIidQuery from '../../graphql/notes/work_item_email_participants_by_iid.query.graphql';
 
 const DOCS_WORK_ITEM_LOCKED_TASKS_PATH = helpPagePath('user/tasks.html', {
   anchor: 'lock-discussion',
@@ -35,7 +27,7 @@ export default {
   i18n: {
     internal: s__('Notes|Make this an internal note'),
     internalVisibility: s__(
-      'Notes|Internal notes are only visible to members with the role of Planner or higher',
+      'Notes|Internal notes are only visible to members with the role of Reporter or higher',
     ),
     addInternalNote: __('Add internal note'),
     cancelButtonText: __('Cancel'),
@@ -129,11 +121,6 @@ export default {
       required: false,
       default: null,
     },
-    isDiscussionInternal: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
     isDiscussionResolved: {
       type: Boolean,
       required: false,
@@ -149,11 +136,6 @@ export default {
       required: false,
       default: false,
     },
-    hasEmailParticipantsWidget: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
   },
   data() {
     return {
@@ -161,8 +143,6 @@ export default {
       updateInProgress: false,
       isNoteInternal: false,
       toggleResolveChecked: this.isDiscussionResolved,
-      emailParticipants: [],
-      workItem: {},
     };
   },
   computed: {
@@ -192,7 +172,6 @@ export default {
       return {
         confidential: this.isWorkItemConfidential,
         discussion_locked: this.isDiscussionLocked,
-        issue_email_participants: this.emailParticipants,
         ...this.docsLinks,
       };
     },
@@ -204,54 +183,6 @@ export default {
     },
     resolveCheckboxLabel() {
       return this.isDiscussionResolved ? __('Unresolve thread') : __('Resolve thread');
-    },
-    canMarkNoteAsInternal() {
-      return this.workItem?.userPermissions?.markNoteAsInternal;
-    },
-    showInternalNoteCheckbox() {
-      return this.canMarkNoteAsInternal && this.isNewDiscussion;
-    },
-  },
-  apollo: {
-    emailParticipants: {
-      query: workItemEmailParticipantsByIidQuery,
-      variables() {
-        return {
-          fullPath: this.fullPath,
-          iid: this.workItemIid,
-        };
-      },
-      skip() {
-        // Don't request email participants if the widget is not available
-        return !this.workItemIid || !this.hasEmailParticipantsWidget;
-      },
-      error() {
-        this.$emit('error', i18n.fetchError);
-      },
-      update(data) {
-        return (
-          findWidget(WIDGET_TYPE_EMAIL_PARTICIPANTS, data?.workspace?.workItem)?.emailParticipants
-            ?.nodes || []
-        );
-      },
-    },
-    workItem: {
-      query: workItemByIidQuery,
-      variables() {
-        return {
-          fullPath: this.fullPath,
-          iid: this.workItemIid,
-        };
-      },
-      update(data) {
-        return data.workspace.workItem ?? {};
-      },
-      skip() {
-        return !this.workItemIid;
-      },
-      error() {
-        this.$emit('error', i18n.fetchError);
-      },
     },
   },
   methods: {
@@ -307,8 +238,6 @@ export default {
       <form class="common-note-form gfm-form js-main-target-form new-note gl-grow">
         <comment-field-layout
           :with-alert-container="isWorkItemConfidential"
-          :is-internal-note="isDiscussionInternal || isNoteInternal"
-          :note="commentText"
           :noteable-data="getWorkItemData"
           :noteable-type="workItemTypeKey"
         >
@@ -340,7 +269,7 @@ export default {
             </label>
           </div>
           <gl-form-checkbox
-            v-if="showInternalNoteCheckbox"
+            v-if="isNewDiscussion"
             v-model="isNoteInternal"
             class="gl-mb-2"
             data-testid="internal-note-checkbox"

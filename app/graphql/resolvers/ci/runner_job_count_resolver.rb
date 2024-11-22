@@ -13,7 +13,7 @@ module Resolvers
       argument :statuses, [::Types::Ci::JobStatusEnum],
         required: false,
         description: 'Filter jobs by status.',
-        experiment: { milestone: '16.2' }
+        alpha: { milestone: '16.2' }
 
       alias_method :runner, :object
 

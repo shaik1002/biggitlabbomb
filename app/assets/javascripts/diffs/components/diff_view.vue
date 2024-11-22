@@ -8,7 +8,6 @@ import draftCommentsMixin from '~/diffs/mixins/draft_comments';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { getCommentedLines } from '~/notes/components/multiline_comment_utils';
 import { hide } from '~/tooltips';
-import { countLinesInBetween } from '~/diffs/utils/diff_file';
 import { pickDirection } from '../utils/diff_line';
 import DiffCommentCell from './diff_comment_cell.vue';
 import DiffExpansionCell from './diff_expansion_cell.vue';
@@ -166,7 +165,17 @@ export default {
       }
     },
     getCountBetweenIndex(index) {
-      return countLinesInBetween(this.diffLines, index);
+      if (index === 0) {
+        return -1;
+      }
+      if (!this.diffLines[index + 1]) {
+        return -1;
+      }
+
+      return (
+        Number(this.diffLines[index + 1].left.new_line) -
+        Number(this.diffLines[index - 1].left.new_line)
+      );
     },
     getCodeQualityLine(line) {
       return (
@@ -225,7 +234,7 @@ export default {
       </div>
       <diff-row
         v-if="!line.isMatchLineLeft && !line.isMatchLineRight"
-        :key="line.lineCode"
+        :key="line.line_code"
         :file-hash="diffFile.file_hash"
         :file-path="diffFile.file_path"
         :line="line"
@@ -252,7 +261,7 @@ export default {
       />
       <div
         v-if="line.renderCommentRow"
-        :key="`dcr-${line.lineCode}`"
+        :key="`dcr-${line.line_code || index}`"
         :class="line.commentRowClasses"
         class="diff-grid-comments diff-tr notes_holder"
       >
@@ -288,7 +297,7 @@ export default {
       </div>
       <div
         v-if="shouldRenderParallelDraftRow(diffFile.file_hash, line)"
-        :key="`drafts-${line.lineCode}`"
+        :key="`drafts-${index}`"
         :class="line.draftRowClasses"
         class="diff-grid-drafts diff-tr notes_holder"
       >

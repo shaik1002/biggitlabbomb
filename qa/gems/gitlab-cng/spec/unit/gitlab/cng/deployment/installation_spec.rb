@@ -41,12 +41,6 @@ RSpec.describe Gitlab::Cng::Deployment::Installation, :aggregate_failures do
       )
     end
 
-    let(:resources_values) do
-      Gitlab::Cng::Deployment::ResourcePresets.resource_values(
-        ci ? Gitlab::Cng::Deployment::ResourcePresets::HIGH : Gitlab::Cng::Deployment::ResourcePresets::DEFAULT
-      )
-    end
-
     let(:expected_values_yml) do
       {
         global: {
@@ -61,7 +55,7 @@ RSpec.describe Gitlab::Cng::Deployment::Installation, :aggregate_failures do
           license: { secret: "gitlab-license" }
         },
         **config_values
-      }.deep_merge(resources_values).deep_stringify_keys.to_yaml
+      }.deep_stringify_keys.to_yaml
     end
 
     before do
@@ -135,16 +129,7 @@ RSpec.describe Gitlab::Cng::Deployment::Installation, :aggregate_failures do
 
         it "retries deployment" do
           expect { expect { installation.create }.to raise_error(SystemExit) }.to output.to_stdout
-          expect(helmclient).to have_received(:upgrade).with(
-            "gitlab",
-            chart_reference,
-            hash_including(args: ["--atomic"])
-          )
-          expect(helmclient).to have_received(:upgrade).with(
-            "gitlab",
-            chart_reference,
-            hash_including(args: [])
-          )
+          expect(helmclient).to have_received(:upgrade).twice
         end
       end
     end

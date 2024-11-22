@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::UsageDataCounters::GitLabCliActivityUniqueCounter, :clean_gitlab_redis_shared_state do # rubocop:disable RSpec/SpecFilePathFormat
+RSpec.describe Gitlab::UsageDataCounters::GitLabCliActivityUniqueCounter, :clean_gitlab_redis_shared_state do # rubocop:disable RSpec/FilePath
   let(:user1) { build(:user, id: 1) }
   let(:user2) { build(:user, id: 2) }
   let(:time) { Time.current }

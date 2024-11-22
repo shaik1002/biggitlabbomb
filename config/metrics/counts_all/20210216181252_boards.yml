@@ -11,7 +11,7 @@ instrumentation_class: CountBoardsMetric
 distribution:
 - ce
 - ee
-tiers:
+tier:
 - free
 - premium
 - ultimate

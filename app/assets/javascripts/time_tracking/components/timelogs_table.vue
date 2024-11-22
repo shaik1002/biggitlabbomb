@@ -1,9 +1,11 @@
 <script>
 import { GlTable } from '@gitlab/ui';
-import { formatTimeSpent, localeDateFormat, newDate } from '~/lib/utils/datetime_utility';
+import { formatDate, formatTimeSpent } from '~/lib/utils/datetime_utility';
 import UserAvatarLink from '~/vue_shared/components/user_avatar/user_avatar_link.vue';
 import { s__ } from '~/locale';
 import TimelogSourceCell from './timelog_source_cell.vue';
+
+const TIME_DATE_FORMAT = 'mmmm d, yyyy, HH:MM ("UTC:" o)';
 
 export default {
   components: {
@@ -53,7 +55,7 @@ export default {
   },
   methods: {
     formatDate(date) {
-      return localeDateFormat.asDateTimeFull.format(newDate(date));
+      return formatDate(date, TIME_DATE_FORMAT);
     },
     formatTimeSpent(seconds) {
       return formatTimeSpent(seconds, this.limitToHours);

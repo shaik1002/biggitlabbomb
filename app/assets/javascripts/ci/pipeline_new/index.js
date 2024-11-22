@@ -22,7 +22,6 @@ const mountPipelineNewForm = (el) => {
     refParam,
     settingsLink,
     varParam,
-    isMaintainer,
   } = el.dataset;
 
   const variableParams = JSON.parse(varParam);
@@ -60,7 +59,6 @@ const mountPipelineNewForm = (el) => {
           refParam,
           settingsLink,
           variableParams,
-          isMaintainer,
         },
       });
     },

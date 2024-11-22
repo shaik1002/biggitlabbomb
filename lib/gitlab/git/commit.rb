@@ -105,6 +105,7 @@ module Gitlab
         #   Commit.last_for_path(repo, 'master', 'Gemfile')
         #
         def last_for_path(repo, ref, path = nil, literal_pathspec: false)
+          # rubocop: disable Rails/FindBy
           # This is not where..first from ActiveRecord
           where(
             repo: repo,
@@ -113,6 +114,7 @@ module Gitlab
             limit: 1,
             literal_pathspec: literal_pathspec
           ).first
+          # rubocop: enable Rails/FindBy
         end
 
         # Get commits between two revspecs
@@ -270,9 +272,7 @@ module Gitlab
       def parent_ids
         return @parent_ids unless @lazy_load_parents
 
-        @parent_ids = @repository.commit(id).parent_ids if @parent_ids.nil? || @parent_ids.empty?
-
-        @parent_ids
+        @parent_ids ||= @repository.commit(id).parent_ids
       end
 
       def parent_id

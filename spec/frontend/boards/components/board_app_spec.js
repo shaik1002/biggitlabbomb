@@ -29,7 +29,6 @@ describe('BoardApp', () => {
     issue = rawIssue,
     handler = boardListQueryHandler,
     workItemDrawerEnabled = true,
-    isIssueBoard = true,
   } = {}) => {
     mockApollo = createMockApollo([[boardListsQuery, handler]]);
     mockApollo.clients.defaultClient.cache.writeQuery({
@@ -45,13 +44,12 @@ describe('BoardApp', () => {
         fullPath: 'gitlab-org',
         initialBoardId: 'gid://gitlab/Board/1',
         initialFilterParams: {},
-        issuableType: isIssueBoard ? 'issue' : 'epic',
-        boardType: isIssueBoard ? 'project' : 'group',
-        isIssueBoard,
+        issuableType: 'issue',
+        boardType: 'project',
+        isIssueBoard: true,
         isGroupBoard: false,
         glFeatures: {
           issuesListDrawer: workItemDrawerEnabled,
-          epicsListDrawer: !workItemDrawerEnabled,
         },
       },
     });
@@ -99,27 +97,5 @@ describe('BoardApp', () => {
     await waitForPromises();
 
     expect(cacheUpdates.setError).toHaveBeenCalled();
-  });
-
-  describe('when on issue board', () => {
-    describe('when `issuesListDrawer` feature is disabled', () => {
-      beforeEach(() => {
-        createComponent({ workItemDrawerEnabled: false });
-      });
-
-      it('passes `useWorkItemDrawer` as false', () => {
-        expect(findBoardContent().props('useWorkItemDrawer')).toBe(false);
-      });
-    });
-
-    describe('when `issuesListDrawer` feature is enabled', () => {
-      beforeEach(() => {
-        createComponent({ workItemDrawerEnabled: true });
-      });
-
-      it('passes `useWorkItemDrawer` as true', () => {
-        expect(findBoardContent().props('useWorkItemDrawer')).toBe(true);
-      });
-    });
   });
 });

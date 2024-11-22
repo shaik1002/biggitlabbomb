@@ -2,7 +2,7 @@
 data_category: optional
 key_path: counts.projects_inheriting_prometheus_active
 description: Count of active projects inheriting integrations for Prometheus
-product_group: platform_insights
+product_group: respond
 value_type: number
 status: active
 time_frame: all
@@ -10,7 +10,7 @@ data_source: database
 distribution:
 - ce
 - ee
-tiers:
+tier:
 - free
 - premium
 - ultimate

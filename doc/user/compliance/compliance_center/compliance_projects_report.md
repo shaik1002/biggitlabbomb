@@ -1,5 +1,5 @@
 ---
-stage: Software Supply Chain Security
+stage: Govern
 group: Compliance
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
@@ -22,15 +22,15 @@ Each row of the report shows:
 
 The default framework for the group has a **default** badge.
 
-## View the compliance projects report
+## View the compliance projects report for a group
 
 Prerequisites:
 
-- You must be an administrator or have the Owner role for the project or group.
+- You must be an administrator or have the Owner role for the group.
 
 To view the compliance projects report:
 
-1. On the left sidebar, select **Search or go to** and find your project or group.
+1. On the left sidebar, select **Search or go to** and find your group.
 1. Select **Secure > Compliance center**.
 1. On the page, select the **Projects** tab.
 

@@ -648,13 +648,13 @@ export default {
       role="gridcell"
       data-testid="environment-deployment-id-cell"
     >
-      <span v-if="shouldRenderDeploymentID" class="gl-break-all">
+      <span v-if="shouldRenderDeploymentID" class="text-break-word">
         {{ deploymentInternalId }}
       </span>
 
       <span
         v-if="!isFolder && deploymentHasUser"
-        class="gl-inline-flex gl-items-center gl-break-all"
+        class="text-break-word gl-inline-flex gl-items-center"
       >
         <gl-sprintf :message="s__('Environments|by %{avatar}')">
           <template #avatar>
@@ -683,8 +683,12 @@ export default {
       role="gridcell"
       data-testid="environment-build-cell"
     >
-      <a v-if="shouldRenderBuildName" :href="buildPath" class="build-link gl-text-default">
-        <tooltip-on-truncate :title="buildName" truncate-target="child" class="gl-flex">
+      <a v-if="shouldRenderBuildName" :href="buildPath" class="build-link gl-text-primary">
+        <tooltip-on-truncate
+          :title="buildName"
+          truncate-target="child"
+          class="flex-truncate-parent"
+        >
           <span class="flex-truncate-child">
             {{ buildName }}
           </span>
@@ -716,7 +720,7 @@ export default {
         v-if="canShowDeploymentDate"
         v-gl-tooltip
         :title="deployedDate.tooltip"
-        class="environment-created-date-timeago table-mobile-content gl-flex"
+        class="environment-created-date-timeago table-mobile-content flex-truncate-parent"
       >
         <span class="flex-truncate-child">
           {{ deployedDate.formatted }}
@@ -753,7 +757,7 @@ export default {
         </div>
         <span
           v-if="upcomingDeployment.user"
-          class="gl-mt-2 gl-inline-flex gl-items-center gl-break-all"
+          class="text-break-word gl-mt-2 gl-inline-flex gl-items-center"
         >
           <gl-sprintf :message="s__('Environments|by %{avatar}')">
             <template #avatar>
@@ -780,7 +784,7 @@ export default {
         v-if="canShowAutoStopDate"
         v-gl-tooltip
         :title="autoStopDate.tooltip"
-        class="table-mobile-content gl-flex"
+        class="table-mobile-content flex-truncate-parent"
       >
         <span class="flex-truncate-child js-auto-stop">{{ autoStopDate.formatted }}</span>
       </span>

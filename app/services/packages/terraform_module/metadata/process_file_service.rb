@@ -21,8 +21,6 @@ module Packages
             e,
             class: self.class.name
           )
-
-          ServiceResponse.error(message: "Error processing #{file_name}")
         end
 
         private

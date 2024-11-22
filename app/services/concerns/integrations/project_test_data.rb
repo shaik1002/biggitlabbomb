@@ -87,7 +87,7 @@ module Integrations
 
       award_emoji = AwardEmoji.new(
         id: 1,
-        name: AwardEmoji::THUMBS_UP,
+        name: 'thumbsup',
         user: current_user,
         awardable: project.notes.last,
         created_at: Time.zone.now,
@@ -114,10 +114,6 @@ module Integrations
       {
         current_user: current_user
       }
-    end
-
-    def project_events_data
-      Gitlab::HookData::ProjectBuilder.new(project).build(:create)
     end
   end
 end

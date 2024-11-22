@@ -42,6 +42,7 @@ export default () => {
     connectionError,
     invalidPathError,
     securityConfigurationPath,
+    containerScanningForRegistryDocsPath,
     vulnerabilityReportPath,
     ...config
   } = el.dataset;
@@ -79,6 +80,7 @@ export default () => {
             invalidPathError: parseBoolean(invalidPathError),
             isMetadataDatabaseEnabled: parseBoolean(isMetadataDatabaseEnabled),
             securityConfigurationPath,
+            containerScanningForRegistryDocsPath,
             vulnerabilityReportPath,
           },
           /* eslint-disable @gitlab/require-i18n-strings */

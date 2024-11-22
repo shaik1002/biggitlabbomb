@@ -18,7 +18,7 @@ export default {
   i18n: {
     pipelineMiniGraphFetchError: __('There was a problem fetching the pipeline mini graph.'),
   },
-  arrowStyles: ['arrow-icon gl-inline-block gl-mx-1 gl-text-subtle !gl-align-middle'],
+  arrowStyles: ['arrow-icon gl-inline-block gl-mx-1 gl-text-gray-500 !gl-align-middle'],
   directives: {
     GlTooltip: GlTooltipDirective,
   },
@@ -53,7 +53,6 @@ export default {
       default: PIPELINE_MINI_GRAPH_POLL_INTERVAL,
     },
   },
-  emits: ['miniGraphStageClick'],
   data() {
     return {
       pipeline: {},
@@ -128,10 +127,10 @@ export default {
         :class="$options.arrowStyles"
         name="arrow-right"
         data-testid="upstream-arrow-icon"
-        variant="subtle"
       />
       <pipeline-stages
         :is-merge-train="isMergeTrain"
+        :pipeline-etag="pipelineEtag"
         :stages="pipelineStages"
         @miniGraphStageClick="$emit('miniGraphStageClick')"
       />
@@ -140,7 +139,6 @@ export default {
         :class="$options.arrowStyles"
         name="arrow-right"
         data-testid="downstream-arrow-icon"
-        variant="subtle"
       />
       <downstream-pipelines
         v-if="hasDownstreamPipelines"

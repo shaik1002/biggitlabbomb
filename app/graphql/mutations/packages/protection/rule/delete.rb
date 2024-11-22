@@ -6,7 +6,8 @@ module Mutations
       module Rule
         class Delete < ::Mutations::BaseMutation
           graphql_name 'DeletePackagesProtectionRule'
-          description 'Deletes a protection rule for packages.'
+          description 'Deletes a protection rule for packages. ' \
+            'Available only when feature flag `packages_protected_packages` is enabled.'
 
           authorize :admin_package
 
@@ -18,11 +19,15 @@ module Mutations
           field :package_protection_rule,
             Types::Packages::Protection::RuleType,
             null: true,
-            experiment: { milestone: '16.6' },
+            alpha: { milestone: '16.6' },
             description: 'Packages protection rule that was deleted successfully.'
 
           def resolve(id:, **_kwargs)
             package_protection_rule = authorized_find!(id: id)
+
+            if Feature.disabled?(:packages_protected_packages, package_protection_rule.project)
+              raise_resource_not_available_error!("'packages_protected_packages' feature flag is disabled")
+            end
 
             response = ::Packages::Protection::DeleteRuleService.new(package_protection_rule,
               current_user: current_user).execute

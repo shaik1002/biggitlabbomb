@@ -181,9 +181,6 @@ export default {
     hasActions() {
       return !this.disabled && this.list.listType !== ListType.closed;
     },
-    workItemDrawerEnabled() {
-      return this.isEpicBoard ? this.glFeatures.epicsListDrawer : this.glFeatures.issuesListDrawer;
-    },
   },
   methods: {
     setError,
@@ -266,10 +263,10 @@ export default {
           :title="item.title"
           :class="{
             '!gl-text-gray-400': isLoading,
-            'js-no-trigger': !workItemDrawerEnabled,
-            'js-no-trigger-title': workItemDrawerEnabled,
+            'js-no-trigger': !glFeatures.issuesListDrawer,
+            'js-no-trigger-title': glFeatures.issuesListDrawer,
           }"
-          class="gl-text-default hover:gl-text-default"
+          class="gl-text-primary hover:gl-text-gray-900"
           data-testid="board-card-title-link"
           @mousemove.stop
           >{{ item.title }}</a

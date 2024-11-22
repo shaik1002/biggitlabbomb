@@ -6,7 +6,7 @@ module Packages
       include ApplicationWorker
       include CronjobQueue # rubocop:disable Scalability/CronWorkerContext
 
-      data_consistency :sticky
+      data_consistency :always
 
       deduplicate :until_executed
       idempotent!

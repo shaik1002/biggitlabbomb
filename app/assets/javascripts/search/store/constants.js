@@ -1,14 +1,14 @@
+import { statusFilterData } from '~/search/sidebar/components/status_filter/data';
+import { confidentialFilterData } from '~/search/sidebar/components/confidentiality_filter/data';
+import { languageFilterData } from '~/search/sidebar/components/language_filter/data';
+import { LABEL_FILTER_PARAM } from '~/search/sidebar/components/label_filter/data';
+import { archivedFilterData } from '~/search/sidebar/components/archived_filter/data';
+import { INCLUDE_FORKED_FILTER_PARAM } from '~/search/sidebar/components/forks_filter/index.vue';
 import { s__ } from '~/locale';
 import {
-  CONFIDENTAL_FILTER_PARAM,
-  INCLUDE_ARCHIVED_FILTER_PARAM,
-  LABEL_FILTER_PARAM,
-  INCLUDE_FORKED_FILTER_PARAM,
-  LANGUAGE_FILTER_PARAM,
   SOURCE_BRANCH_PARAM,
   NOT_SOURCE_BRANCH_PARAM,
-  STATE_FILTER_PARAM,
-} from '~/search/sidebar/constants';
+} from '~/search/sidebar/components/source_branch_filter/index.vue';
 
 export const MAX_FREQUENT_ITEMS = 5;
 
@@ -19,11 +19,11 @@ export const GROUPS_LOCAL_STORAGE_KEY = 'global-search-frequent-groups';
 export const PROJECTS_LOCAL_STORAGE_KEY = 'global-search-frequent-projects';
 
 export const SIDEBAR_PARAMS = [
-  STATE_FILTER_PARAM,
-  CONFIDENTAL_FILTER_PARAM,
-  LANGUAGE_FILTER_PARAM,
+  statusFilterData.filterParam,
+  confidentialFilterData.filterParam,
+  languageFilterData.filterParam,
   LABEL_FILTER_PARAM,
-  INCLUDE_ARCHIVED_FILTER_PARAM,
+  archivedFilterData.filterParam,
   INCLUDE_FORKED_FILTER_PARAM,
   SOURCE_BRANCH_PARAM,
   NOT_SOURCE_BRANCH_PARAM,
@@ -35,7 +35,7 @@ export const NUMBER_FORMATING_OPTIONS = { notation: 'compact', compactDisplay: '
 
 export const ICON_MAP = {
   blobs: 'code',
-  issues: window.gon?.features?.workItemScopeFrontend ? 'work' : 'issues',
+  issues: 'issues',
   epics: 'epic',
   merge_requests: 'merge-request',
   commits: 'commit',
@@ -49,9 +49,7 @@ export const ICON_MAP = {
 
 export const SCOPE_NAVIGATION_MAP = {
   blobs: s__(`GlobalSearch|Code`),
-  issues: window.gon?.features?.workItemScopeFrontend
-    ? s__(`GlobalSearch|Work items`)
-    : s__(`GlobalSearch|Issues`),
+  issues: s__(`GlobalSearch|Issues`),
   epics: s__(`GlobalSearch|'Epics`),
   merge_requests: s__(`GlobalSearch|Merge request`),
   commits: s__(`GlobalSearch|Commits`),

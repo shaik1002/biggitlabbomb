@@ -9,7 +9,6 @@ RSpec.describe BulkImports::CreateService, :clean_gitlab_redis_shared_state, fea
   let(:credentials) { { url: 'http://gitlab.example', access_token: 'token' } }
   let(:destination_group) { create(:group, path: 'destination1') }
   let(:migrate_projects) { true }
-  let(:migrate_memberships) { true }
   let_it_be(:parent_group) { create(:group, path: 'parent-group') }
   # note: destination_name and destination_slug are currently interchangable so we need to test for both possibilities
   let(:params) do
@@ -19,24 +18,21 @@ RSpec.describe BulkImports::CreateService, :clean_gitlab_redis_shared_state, fea
         source_full_path: 'full/path/to/group1',
         destination_slug: 'destination-group-1',
         destination_namespace: 'parent-group',
-        migrate_projects: migrate_projects,
-        migrate_memberships: migrate_memberships
+        migrate_projects: migrate_projects
       },
       {
         source_type: 'group_entity',
         source_full_path: 'full/path/to/group2',
         destination_name: 'destination-group-2',
         destination_namespace: 'parent-group',
-        migrate_projects: migrate_projects,
-        migrate_memberships: migrate_memberships
+        migrate_projects: migrate_projects
       },
       {
         source_type: 'project_entity',
         source_full_path: 'full/path/to/project1',
         destination_slug: 'destination-project-1',
         destination_namespace: 'parent-group',
-        migrate_projects: migrate_projects,
-        migrate_memberships: migrate_memberships
+        migrate_projects: migrate_projects
       }
     ]
   end
@@ -294,40 +290,6 @@ RSpec.describe BulkImports::CreateService, :clean_gitlab_redis_shared_state, fea
               subject.execute
 
               expect(import.entities.pluck(:migrate_projects)).to contain_exactly(true, true, true)
-            end
-          end
-        end
-
-        describe 'memberships migration flag' do
-          let(:import) { BulkImport.last }
-
-          context 'when false' do
-            let(:migrate_memberships) { false }
-
-            it 'sets false' do
-              subject.execute
-
-              expect(import.entities.pluck(:migrate_memberships)).to contain_exactly(false, false, false)
-            end
-          end
-
-          context 'when true' do
-            let(:migrate_memberships) { true }
-
-            it 'sets true' do
-              subject.execute
-
-              expect(import.entities.pluck(:migrate_memberships)).to contain_exactly(true, true, true)
-            end
-          end
-
-          context 'when nil' do
-            let(:migrate_memberships) { nil }
-
-            it 'sets true' do
-              subject.execute
-
-              expect(import.entities.pluck(:migrate_memberships)).to contain_exactly(true, true, true)
             end
           end
         end
@@ -708,8 +670,7 @@ RSpec.describe BulkImports::CreateService, :clean_gitlab_redis_shared_state, fea
                 source_full_path: 'full/path/to/source',
                 destination_slug: 'destination-slug',
                 destination_namespace: 'destination-namespace',
-                migrate_projects: migrate_projects,
-                migrate_memberships: migrate_memberships
+                migrate_projects: migrate_projects
               }
             ]
           end
@@ -733,8 +694,7 @@ RSpec.describe BulkImports::CreateService, :clean_gitlab_redis_shared_state, fea
                 source_full_path: 'full/path/to/source',
                 destination_slug: 'destination-slug',
                 destination_namespace: parent_group.path,
-                migrate_projects: migrate_projects,
-                migrate_memberships: migrate_memberships
+                migrate_projects: migrate_projects
               }
             ]
           end
@@ -760,8 +720,7 @@ RSpec.describe BulkImports::CreateService, :clean_gitlab_redis_shared_state, fea
                 source_full_path: 'full/path/to/source',
                 destination_slug: 'destination-slug',
                 destination_namespace: parent_group.path,
-                migrate_projects: migrate_projects,
-                migrate_memberships: migrate_memberships
+                migrate_projects: migrate_projects
               }
             ]
           end
@@ -789,8 +748,7 @@ RSpec.describe BulkImports::CreateService, :clean_gitlab_redis_shared_state, fea
                 source_full_path: 'full/path/to/source',
                 destination_slug: 'destin-*-ation-slug',
                 destination_namespace: parent_group.path,
-                migrate_projects: migrate_projects,
-                migrate_memberships: migrate_memberships
+                migrate_projects: migrate_projects
               }
             ]
           end
@@ -826,8 +784,7 @@ RSpec.describe BulkImports::CreateService, :clean_gitlab_redis_shared_state, fea
                   source_full_path: 'full/path/to/source',
                   destination_slug: existing_subgroup.path,
                   destination_namespace: parent_group.path,
-                  migrate_projects: migrate_projects,
-                  migrate_memberships: migrate_memberships
+                  migrate_projects: migrate_projects
                 }
               ]
             end
@@ -854,8 +811,7 @@ RSpec.describe BulkImports::CreateService, :clean_gitlab_redis_shared_state, fea
                   source_full_path: 'full/path/to/source',
                   destination_slug: existing_top_level_group.path,
                   destination_namespace: '',
-                  migrate_projects: migrate_projects,
-                  migrate_memberships: migrate_memberships
+                  migrate_projects: migrate_projects
                 }
               ]
             end
@@ -881,8 +837,7 @@ RSpec.describe BulkImports::CreateService, :clean_gitlab_redis_shared_state, fea
                   source_full_path: 'full/path/to/source',
                   destination_slug: 'new-group',
                   destination_namespace: parent_group.path,
-                  migrate_projects: migrate_projects,
-                  migrate_memberships: migrate_memberships
+                  migrate_projects: migrate_projects
                 }
               ]
             end
@@ -907,8 +862,7 @@ RSpec.describe BulkImports::CreateService, :clean_gitlab_redis_shared_state, fea
                   source_full_path: 'full/path/to/source',
                   destination_slug: existing_project.path,
                   destination_namespace: existing_group.path,
-                  migrate_projects: migrate_projects,
-                  migrate_memberships: migrate_memberships
+                  migrate_projects: migrate_projects
                 }
               ]
             end
@@ -937,8 +891,7 @@ RSpec.describe BulkImports::CreateService, :clean_gitlab_redis_shared_state, fea
                   source_full_path: 'full/path/to/source',
                   destination_slug: 'new-project',
                   destination_namespace: 'existing-group',
-                  migrate_projects: migrate_projects,
-                  migrate_memberships: migrate_memberships
+                  migrate_projects: migrate_projects
                 }
               ]
             end

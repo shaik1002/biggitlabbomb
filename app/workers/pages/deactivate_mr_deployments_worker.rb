@@ -5,7 +5,7 @@ module Pages
     include ApplicationWorker
 
     idempotent!
-    data_consistency :always
+    data_consistency :always # rubocop: disable SidekiqLoadBalancing/WorkerDataConsistency -- performing writes only
     urgency :low
 
     feature_category :pages

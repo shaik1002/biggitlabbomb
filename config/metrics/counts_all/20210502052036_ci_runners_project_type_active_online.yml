@@ -13,7 +13,7 @@ instrumentation_class: CountCiRunnersProjectTypeActiveOnlineMetric
 distribution:
 - ce
 - ee
-tiers:
+tier:
 - free
 - premium
 - ultimate

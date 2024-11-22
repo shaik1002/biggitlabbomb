@@ -14,13 +14,11 @@ After you create an issue, you can start working with it.
 
 ## Edit an issue
 
-> - Minimum role to edit an issue [changed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/169256) from Reporter to Planner in GitLab 17.7.
-
 You can edit an issue's title and description.
 
 Prerequisites:
 
-- You must have at least the Planner role for the project, be the author of the issue, or be assigned to the issue.
+- You must have at least the Reporter role for the project, be the author of the issue, or be assigned to the issue.
 
 To edit an issue:
 
@@ -33,23 +31,19 @@ To edit an issue:
 ### Populate an issue with Issue Description Generation
 
 DETAILS:
-**Tier:** Ultimate with GitLab Duo Enterprise - [Start a trial](https://about.gitlab.com/solutions/gitlab-duo-pro/sales/?type=free-trial)
+**Tier:** For a limited time, Ultimate. On October 17, 2024, Ultimate with [GitLab Duo Enterprise](https://about.gitlab.com/gitlab-duo/#pricing).
 **Offering:** GitLab.com
 **Status:** Experiment
 
 > - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/10762) in GitLab 16.3 as an [experiment](../../../policy/experiment-beta-support.md#experiment).
-> - Changed to require GitLab Duo add-on in GitLab 17.6 and later.
 
 Generate a detailed description for an issue based on a short summary you provide.
 
 Prerequisites:
 
 - You must belong to at least one group with the [experiment and beta features setting](../../gitlab_duo/turn_on_off.md#turn-on-beta-and-experimental-features) enabled.
-- You must have permission to create an issue.
+- You must have permission to view the issue.
 - Only available for the plain text editor.
-- Only available when creating a new issue.
-  For a proposal to add support for generating descriptions when editing existing issues, see
-  [issue 474141](https://gitlab.com/gitlab-org/gitlab/-/issues/474141).
 
 To generate an issue description:
 
@@ -64,15 +58,29 @@ Provide feedback on this experimental feature in [issue 409844](https://gitlab.c
 **Data usage**: When you use this feature, the text you enter is sent to
 the [large language model listed on the GitLab Duo page](../../gitlab_duo/index.md#issue-description-generation).
 
-## Bulk edit issues from a project
+### Remove a task list item
 
-> - Minimum role to bulk edit issues from a project [changed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/169256) from Reporter to Planner in GitLab 17.7.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/377307) in GitLab 15.9.
+
+Prerequisites:
+
+- You must have at least the Reporter role for the project, or be the author or assignee of the issue.
+
+In an issue description with task list items:
+
+1. Hover over a task list item and select the options menu (**{ellipsis_v}**).
+1. Select **Delete**.
+
+The task list item is removed from the issue description.
+Any nested task list items are moved up a nested level.
+
+## Bulk edit issues from a project
 
 You can edit multiple issues at a time when you're in a project.
 
 Prerequisites:
 
-- You must have at least the Planner role for the project.
+- You must have at least the Reporter role for the project.
 
 To edit multiple issues at the same time:
 
@@ -97,13 +105,15 @@ When bulk editing issues in a project, you can edit the following attributes:
 
 ### Bulk edit issues from a group
 
-> - Minimum role to bulk edit issues from a group [changed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/169256) from Reporter to Planner in GitLab 17.7.
+DETAILS:
+**Tier:** Premium, Ultimate
+**Offering:** GitLab.com, Self-managed, GitLab Dedicated
 
 You can edit multiple issues across multiple projects when you're in a group.
 
 Prerequisites:
 
-- You must have at least the Planner role for a group.
+- You must have at least the Reporter role for a group.
 
 To edit multiple issues at the same time:
 
@@ -124,8 +134,6 @@ When bulk editing issues in a group, you can edit the following attributes:
 
 ## Move an issue
 
-> - Minimum role to move an issue [changed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/169256) from Reporter to Planner in GitLab 17.7.
-
 When you move an issue, it's closed and copied to the target project.
 The original issue is not deleted. A [system note](../system_notes.md), which indicates
 where it came from and went to, is added to both issues.
@@ -134,7 +142,7 @@ Be careful when moving an issue to a project with different access rules. Before
 
 Prerequisites:
 
-- You must have at least the Planner role for the project.
+- You must have at least the Reporter role for the project.
 
 To move an issue:
 
@@ -144,16 +152,14 @@ To move an issue:
 1. Search for a project to move the issue to.
 1. Select **Move**.
 
-You can also use the `/move` [quick action](../quick_actions.md) in a comment or description.
-
 ### Moving tasks when the parent issue is moved
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/371252) in GitLab 16.9 [with a flag](../../../administration/feature_flags.md) named `move_issue_children`. Disabled by default.
 > - [Enabled on GitLab.com and self-managed](https://gitlab.com/gitlab-org/gitlab/-/issues/371252) in GitLab 16.11.
 > - [Generally available](https://gitlab.com/gitlab-org/gitlab/-/issues/371252) in GitLab 17.3. Feature flag `move_issue_children` removed.
 
-When you move an issue to another project, all its child tasks are also moved to the target project
-and remain as child tasks of the moved issue.
+When you move an issue to another project, all its child tasks are also
+moved to the target project and remain associated as child tasks on the moved issue.
 Each task is moved the same way as the parent, that is, it's closed in the original project and
 copied to the target project.
 
@@ -162,8 +168,6 @@ copied to the target project.
 DETAILS:
 **Tier:** Free, Premium, Ultimate
 **Offering:** Self-managed, GitLab Dedicated
-
-> - Minimum role to bulk move issues [changed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/169256) from Reporter to Planner in GitLab 17.7.
 
 #### From the Issues page
 
@@ -174,7 +178,7 @@ You can't move tasks or test cases.
 
 Prerequisites:
 
-- You must have at least the Planner role for the project.
+- You must have at least the Reporter role for the project.
 
 To move multiple issues at the same time:
 
@@ -219,40 +223,15 @@ To do it:
 
 1. To exit the Rails console, enter `quit`.
 
-## Description lists and task lists
-
-When you use ordered lists, unordered lists, or task lists in issue descriptions, you can:
-
-- Reorder list items with drag and drop
-- Delete list items
-- [Convert task list items to GitLab Tasks](../../tasks.md#from-a-task-list-item)
-
-### Delete a task list item
-
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/377307) in GitLab 15.9.
-
-Prerequisites:
-
-- You must have at least the Reporter role for the project, or be the author or assignee of the issue.
-
-In an issue description with task list items:
-
-1. Hover over a task list item and select the options menu (**{ellipsis_v}**).
-1. Select **Delete**.
-
-The task list item is removed from the issue description.
-Any nested task list items are moved up a nested level.
-
-### Reorder list items in the issue description
+## Reorder list items in the issue description
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/15260) in GitLab 15.0.
-> - Minimum role to reorder list items in the issue description [changed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/169256) from Reporter to Planner in GitLab 17.7.
 
 When you view an issue that has a list in the description, you can also reorder the list items.
 
 Prerequisites:
 
-- You must have at least the Planner role for the project, be the author of the issue, or be
+- You must have at least the Reporter role for the project, be the author of the issue, or be
   assigned to the issue.
 - The issue's description must have an [ordered, unordered](../../markdown.md#lists), or
   [task](../../markdown.md#task-lists) list.
@@ -266,14 +245,12 @@ To reorder list items, when viewing an issue:
 
 ## Close an issue
 
-> - Minimum role to close an issue [changed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/169256) from Reporter to Planner in GitLab 17.7.
-
 When you decide that an issue is resolved or no longer needed, you can close it.
 The issue is marked as closed but is not deleted.
 
 Prerequisites:
 
-- You must have at least the Planner role for the project, be the author of the issue, or be assigned to the issue.
+- You must have at least the Reporter role for the project, be the author of the issue, or be assigned to the issue.
 
 To close an issue, you can either:
 
@@ -283,20 +260,14 @@ To close an issue, you can either:
   1. Select **Plan > Issues**, then select your issue to view it.
   1. In the upper-right corner, select **Issue actions** (**{ellipsis_v}**) and then **Close issue**.
 
-You can also use the `/close` [quick action](../quick_actions.md) in a comment or description.
-
 ### Reopen a closed issue
-
-> - Minimum role to reopen a closed issue [changed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/169256) from Reporter to Planner in GitLab 17.7.
 
 Prerequisites:
 
-- You must have at least the Planner role for the project, be the author of the issue, or be assigned to the issue.
+- You must have at least the Reporter role for the project, be the author of the issue, or be assigned to the issue.
 
 To reopen a closed issue, in the upper-right corner, select **Issue actions** (**{ellipsis_v}**) and then **Reopen issue**.
 A reopened issue is no different from any other open issue.
-
-You can also use the `/reopen` [quick action](../quick_actions.md) in a comment or description.
 
 ### Closing issues automatically
 
@@ -335,9 +306,6 @@ When you merge a merge request, GitLab checks that you have permission to close 
 In public repositories, this check is important, because external users can create both merge requests
 and commits that contain closing patterns. When you are the user who merges, it's important
 that you are aware of the effects the merge has on both the code and issues in your project.
-
-When [auto-merge](../merge_requests/auto_merge.md) is enabled for a merge request, no further changes can be made to
-the list of issues that will be automatically closed.
 
 #### Default closing pattern
 
@@ -425,11 +393,9 @@ of your installation.
 
 ## Change the issue type
 
-> - Minimum role to change the issue type [changed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/169256) from Reporter to Planner in GitLab 17.7.
-
 Prerequisites:
 
-- You must be the issue author or have at least the Planner role for the project, be the author of the issue, or be assigned to the issue.
+- You must be the issue author or have at least the Reporter role for the project, be the author of the issue, or be assigned to the issue.
 
 To change issue type:
 
@@ -445,11 +411,9 @@ To change issue type:
 
 ## Delete an issue
 
-> - Required role to delete an issue [changed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/169256) from Owner to Owner or Planner in GitLab 17.7.
-
 Prerequisites:
 
-- You must have the Planner or Owner role for a project.
+- You must have the Owner role for a project.
 
 To delete an issue:
 
@@ -471,16 +435,15 @@ DETAILS:
 **Tier:** Premium, Ultimate
 **Offering:** GitLab.com, Self-managed, GitLab Dedicated
 
-> - Minimum role to promote an issue to an epic [changed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/169256) from Reporter to Planner in GitLab 17.7.
-
 You can promote an issue to an [epic](../../group/epics/index.md) in the immediate parent group.
 
-Promoting a confidential issue to an epic creates a
-[confidential epic](../../group/epics/manage_epics.md#make-an-epic-confidential), retaining
-confidentiality.
+NOTE:
+Promoting a confidential issue to an epic makes all information
+related to the issue public, as epics are public to group members.
 
 When an issue is promoted to an epic:
 
+- If the issue was confidential, an additional warning is displayed first.
 - An epic is created in the same group as the project of the issue.
 - Subscribers of the issue are notified that the epic was created.
 
@@ -495,9 +458,9 @@ The following issue metadata is copied to the epic:
 Prerequisites:
 
 - The project to which the issue belongs must be in a group.
-- You must have at least the Planner role the project's immediate parent group.
+- You must have at least the Reporter role the project's immediate parent group.
 - You must either:
-  - Have at least the Planner role for the project.
+  - Have at least the Reporter role for the project.
   - Be the author of the issue.
   - Be assigned to the issue.
 
@@ -530,11 +493,7 @@ To add an issue to an [iteration](../../group/iterations/index.md):
 1. From the dropdown list, select the iteration to add this issue to.
 1. Select any area outside the dropdown list.
 
-To add an issue to an iteration, you can also:
-
-- Use the `/iteration` [quick action](../quick_actions.md#issues-merge-requests-and-epics)
-- Drag an issue into an iteration list in a board
-- Bulk edit issues from the issues list
+Alternatively, you can use the `/iteration` [quick action](../quick_actions.md#issues-merge-requests-and-epics).
 
 ## View all issues assigned to you
 
@@ -597,7 +556,8 @@ To filter the list issues for text in a title or description:
 1. On the left sidebar, select **Search or go to** and find your project.
 1. Select **Plan > Issues**.
 1. Above the list of issues, in the **Search or filter results** text box, enter the searched phrase.
-1. In the dropdown list that appears, select **Search within**, and then either **Titles** or **Descriptions**.
+1. In the dropdown list that appears, select **Search for this text**.
+1. Select the text box again, and in the dropdown list that appears, select **Search Within**, and then either **Titles** or **Descriptions**.
 1. Press <kbd>Enter</kbd> or select the search icon (**{search}**).
 
 Filtering issues uses [PostgreSQL full text search](https://www.postgresql.org/docs/current/textsearch-intro.html)
@@ -606,7 +566,7 @@ to match meaningful and significant words to answer a query.
 For example, if you search for `I am securing information for M&A`,
 GitLab can return results with `securing`, `secured`,
 or `information` in the title or description.
-However, GitLab doesn't match the sentence or the words `I`, `am` or `M&A` exactly,
+However, GitLab won't match the sentence or the words `I`, `am` or `M&A` exactly,
 as they aren't deemed lexically meaningful or significant.
 It's a limitation of PostgreSQL full text search.
 
@@ -630,7 +590,7 @@ You can use the OR operator (**is one of: `||`**) when you [filter the list of i
 
 1. On the left sidebar, select **Search or go to** and find your project.
 1. Select **Plan > Issues**.
-1. In the **Search** box, type `#` followed by the issue ID. For example, enter filter `#10` to return only issue 10.
+1. In the **Search** box, type the issue ID. For example, enter filter `#10` to return only issue 10.
 
 ![filter issues by specific ID](img/issue_search_by_id_v15_0.png)
 
@@ -700,11 +660,9 @@ themselves or another project member assigns them.
 
 ### Change assignee on an issue
 
-> - Minimum role to change assignee [changed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/169256) from Reporter to Planner in GitLab 17.7.
-
 Prerequisites:
 
-- You must have at least the Planner role for the project.
+- You must have at least the Reporter role for the project.
 
 To change the assignee on an issue:
 
@@ -720,6 +678,10 @@ The assignee is changed without having to refresh the page.
 
 To prevent duplication of issues on the same topic, GitLab searches for similar issues
 when you create a new issue.
+
+Prerequisites:
+
+- [GraphQL](../../../api/graphql/index.md) must be enabled.
 
 As you type in the title text box of the **New issue** page, GitLab searches titles and descriptions
 across all issues in the current project. Only issues you have access to are returned.
@@ -741,11 +703,9 @@ Incorporate a review of issue health status into your daily stand-up, project st
 
 ### Change health status of an issue
 
-> - Minimum role to change health status [changed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/169256) from Reporter to Planner in GitLab 17.7.
-
 Prerequisites:
 
-- You must have at least the Planner role for the project.
+- You must have at least the Reporter role for the project.
 
 To edit health status of an issue:
 

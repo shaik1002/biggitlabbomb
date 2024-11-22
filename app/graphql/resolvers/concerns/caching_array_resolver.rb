@@ -124,7 +124,7 @@ module CachingArrayResolver
   end
 
   def limit(query)
-    query.limit(query_limit)
+    query.limit(query_limit) # rubocop: disable CodeReuse/ActiveRecord
   end
 
   def all_fields

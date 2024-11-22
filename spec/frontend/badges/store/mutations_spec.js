@@ -1,17 +1,39 @@
 import { GROUP_BADGE, PROJECT_BADGE } from '~/badges/constants';
-import createStore from '~/badges/store';
+import store from '~/badges/store';
 import types from '~/badges/store/mutation_types';
 import createState from '~/badges/store/state';
 import { createDummyBadge } from '../dummy_badge';
-import { MOCK_PAGINATION } from '../mock_data';
 
 describe('Badges store mutations', () => {
   let dummyBadge;
-  const store = createStore();
 
   beforeEach(() => {
     dummyBadge = createDummyBadge();
     store.replaceState(createState());
+  });
+
+  describe('RECEIVE_DELETE_BADGE', () => {
+    beforeEach(() => {
+      const badges = [
+        { ...dummyBadge, id: dummyBadge.id - 1 },
+        dummyBadge,
+        { ...dummyBadge, id: dummyBadge.id + 1 },
+      ];
+
+      store.replaceState({
+        ...store.state,
+        badges,
+      });
+    });
+
+    it('removes deleted badge', () => {
+      const badgeCount = store.state.badges.length;
+
+      store.commit(types.RECEIVE_DELETE_BADGE, dummyBadge.id);
+
+      expect(store.state.badges.length).toBe(badgeCount - 1);
+      expect(store.state.badges.indexOf(dummyBadge)).toBe(-1);
+    });
   });
 
   describe('RECEIVE_DELETE_BADGE_ERROR', () => {
@@ -90,11 +112,31 @@ describe('Badges store mutations', () => {
     });
 
     it('resets the add form', () => {
-      store.commit(types.RECEIVE_NEW_BADGE);
+      store.commit(types.RECEIVE_NEW_BADGE, dummyBadge);
 
       expect(store.state.badgeInAddForm).toEqual({});
       expect(store.state.isSaving).toBe(false);
       expect(store.state.renderedBadge).toBe(null);
+    });
+
+    it('inserts group badge at correct position', () => {
+      const badgeCount = store.state.badges.length;
+      dummyBadge = { ...dummyBadge, kind: GROUP_BADGE };
+
+      store.commit(types.RECEIVE_NEW_BADGE, dummyBadge);
+
+      expect(store.state.badges.length).toBe(badgeCount + 1);
+      expect(store.state.badges.indexOf(dummyBadge)).toBe(1);
+    });
+
+    it('inserts project badge at correct position', () => {
+      const badgeCount = store.state.badges.length;
+      dummyBadge = { ...dummyBadge, kind: PROJECT_BADGE };
+
+      store.commit(types.RECEIVE_NEW_BADGE, dummyBadge);
+
+      expect(store.state.badges.length).toBe(badgeCount + 1);
+      expect(store.state.badges.indexOf(dummyBadge)).toBe(3);
     });
   });
 
@@ -227,29 +269,23 @@ describe('Badges store mutations', () => {
     beforeEach(() => {
       store.replaceState({
         ...store.state,
-        isLoading: false,
+        apiEndpointUrl: 'some endpoint',
+        isLoading: 'dummy value',
+        kind: 'some kind',
       });
     });
 
-    it('sets isLoading to true', () => {
-      store.commit(types.REQUEST_LOAD_BADGES);
+    it('sets isLoading to true and initializes the store', () => {
+      const dummyData = {
+        apiEndpointUrl: 'dummy endpoint',
+        kind: 'dummy kind',
+      };
+
+      store.commit(types.REQUEST_LOAD_BADGES, dummyData);
 
       expect(store.state.isLoading).toBe(true);
-    });
-  });
-
-  describe('RECEIVE_PAGINATION', () => {
-    beforeEach(() => {
-      store.replaceState({
-        ...store.state,
-        pagination: {},
-      });
-    });
-
-    it('sets the pagination object', () => {
-      store.commit(types.RECEIVE_PAGINATION, MOCK_PAGINATION);
-
-      expect(store.state.pagination).toStrictEqual(MOCK_PAGINATION);
+      expect(store.state.apiEndpointUrl).toBe(dummyData.apiEndpointUrl);
+      expect(store.state.kind).toBe(dummyData.kind);
     });
   });
 

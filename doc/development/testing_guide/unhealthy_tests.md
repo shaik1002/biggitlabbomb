@@ -166,31 +166,12 @@ usually a good idea.
 - [Example 1](https://gitlab.com/gitlab-org/gitlab/-/issues/363214): The runner is under heavy load at this time.
 - [Example 2](https://gitlab.com/gitlab-org/gitlab/-/issues/360559): The runner is having networking issues, making a job failing early
 
-#### Improper Synchronization
-
-**Label:** `flaky-test::improper synchronization`
-
-**Description:** A flaky test issue caused by failing to account for delays, eventual consistency,
-asynchronous operations, or race conditions, leading to tests that assume an immediate state or experience
-unpredictable behavior due to the timing or order of events.
-
-**Difficulty to reproduce:** Moderate. It can be reproduced, for example, in feature tests by attempting to reference an
-element on a page that is not yet rendered, or in unit tests by failing to wait for an asynchronous operation to complete.
-
-**Resolution:** In the end-to-end test suite, using [an eventually matcher](end_to_end/best_practices/index.md#use-eventually_-matchers-for-expectations-that-require-waiting).
-
-**Examples:**
-
-- [Example 1](https://gitlab.com/gitlab-org/gitlab/-/issues/502844): Text was not appearing on a page in time.
-- [Example 2](https://gitlab.com/gitlab-org/gitlab/-/issues/496393): Text was not appearing on a page in time.
-
 ### How to reproduce a flaky test locally?
 
 1. Reproduce the failure locally
    - Find RSpec `seed` from the CI job log
    - OR Run `while :; do bin/rspec <spec> || break; done` in a loop to find a `seed`
-1. Reduce the examples by bisecting the spec failure with
-   `bin/rspec --seed <previously found> --require ./config/initializers/macos.rb --bisect <spec>`
+1. Reduce the examples by bisecting the spec failure with `bin/rspec --seed <previously found> --bisect <spec>`
 1. Look at the remaining examples and watch for state leakage
    - e.g. Updating records created with `let_it_be` is a common source of problems
 1. Once fixed, rerun the specs with `seed`
@@ -353,14 +334,11 @@ once per day, for monitoring with the
 
 #### Order-dependent flaky tests
 
-To identify ordering issues in a single file read about
-[how to reproduce a flaky test locally](#how-to-reproduce-a-flaky-test-locally).
-
-Some flaky tests can fail depending on the order they run with other tests. For example:
+These flaky tests can fail depending on the order they run with other tests. For example:
 
 - <https://gitlab.com/gitlab-org/gitlab/-/issues/327668>
 
-To identify the ordering issues across different files, you can use `scripts/rspec_bisect_flaky`,
+To identify the tests that lead to such failure, we can use `scripts/rspec_bisect_flaky`,
 which would give us the minimal test combination to reproduce the failure:
 
 1. First obtain the list of specs that ran before the flaky test. You can search
@@ -485,13 +463,6 @@ For tests that are slow for a legitimate reason and to skip issue creation, add 
 | :-: | :-: | :-: | :-: | :-: | :-: |
 | 2023-02-15 | 67.42 seconds | 44.66 seconds | - | 76.86 seconds | Top slow test eliminating the maximum |
 | 2023-06-15 | 50.13 seconds | 19.20 seconds | 27.12 | 45.40 seconds | Avg for top 100 slow tests|
-
-## Handling issues for flaky or slow tests
-
-The process around these issues is very lightweight. Feel free to close them or not, they're [managed automatically](https://gitlab.com/gitlab-org/ruby/gems/gitlab_quality-test_tooling/-/blob/main/lib/gitlab_quality/test_tooling/report/flaky_test_issue.rb):
-
-- If a flaky or slow test is fixed and the associated `[Test]` issue isn't closed manually, it will be closed automatically after [30 days of inactivity](https://gitlab.com/gitlab-org/quality/triage-ops/-/blob/master/policies/stages/hygiene/close-stale-unhealthy-test-issues.yml).
-- If the problem reoccurs, the closed issue is reopened automatically. This means, it is also okay to close an issue when you think you fixed it.
 
 ---
 

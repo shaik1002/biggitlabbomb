@@ -4,6 +4,7 @@ class PartitionCiBuildTraceMetadata3 < Gitlab::Database::Migration[2.2]
   milestone '17.5'
   disable_ddl_transaction!
 
+  # rubocop:disable Migration/SchemaAdditionMethodsNoPost -- recreates the table in the same transaction
   def up
     return if already_partitioned?
 
@@ -74,6 +75,7 @@ class PartitionCiBuildTraceMetadata3 < Gitlab::Database::Migration[2.2]
       name: :fk_21d25cac1a_p
     )
   end
+  # rubocop:enable Migration/SchemaAdditionMethodsNoPost
 
   private
 

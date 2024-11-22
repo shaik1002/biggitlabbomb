@@ -47,13 +47,13 @@ export default {
       const start = newDate(startDate);
 
       if (dueDate && isInPast(due)) {
-        return __('past due');
+        return __('Past due');
       }
       if (dueDate && isToday(due)) {
-        return __('today');
+        return __('Today');
       }
       if (startDate && isInFuture(start)) {
-        return __('upcoming');
+        return __('Upcoming');
       }
       if (dueDate) {
         return getTimeRemainingInWords(due);
@@ -71,7 +71,7 @@ export default {
       v-gl-tooltip
       :href="milestoneLink"
       :title="milestoneDate"
-      class="gl-text-sm !gl-text-subtle"
+      class="gl-text-sm !gl-text-gray-500"
       @click.stop
     >
       <gl-icon name="milestone" :size="12" class="gl-mr-2" />{{ milestone.title }}

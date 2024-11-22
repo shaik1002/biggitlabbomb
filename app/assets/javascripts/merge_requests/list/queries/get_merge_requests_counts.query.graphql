@@ -1,20 +1,9 @@
 query getMergeRequestsCount(
   $fullPath: ID!
-  $approvedBy: [String!]
-  $assigneeUsernames: String
   $assigneeWildcardId: AssigneeWildcardId
-  $reviewerUsername: String
-  $reviewerWildcardId: ReviewerWildcardId
-  $authorUsername: String
-  $draft: Boolean
-  $labelName: [String!]
-  $releaseTag: String
-  $mergeUser: String
+  $assigneeUsernames: String
   $milestoneTitle: String
   $milestoneWildcardId: MilestoneWildcardId
-  $myReactionEmoji: String
-  $sourceBranches: [String!]
-  $targetBranches: [String!]
   $deployedBefore: Time
   $deployedAfter: Time
   $environmentName: String
@@ -24,21 +13,10 @@ query getMergeRequestsCount(
     id
     openedMergeRequests: mergeRequests(
       state: opened
-      approvedBy: $approvedBy
       assigneeUsername: $assigneeUsernames
       assigneeWildcardId: $assigneeWildcardId
-      reviewerUsername: $reviewerUsername
-      reviewerWildcardId: $reviewerWildcardId
-      authorUsername: $authorUsername
-      draft: $draft
-      labelName: $labelName
-      releaseTag: $releaseTag
-      mergedBy: $mergeUser
       milestoneTitle: $milestoneTitle
       milestoneWildcardId: $milestoneWildcardId
-      myReactionEmoji: $myReactionEmoji
-      sourceBranches: $sourceBranches
-      targetBranches: $targetBranches
       deployedBefore: $deployedBefore
       deployedAfter: $deployedAfter
       environmentName: $environmentName
@@ -48,21 +26,10 @@ query getMergeRequestsCount(
     }
     mergedMergeRequests: mergeRequests(
       state: merged
-      approvedBy: $approvedBy
       assigneeUsername: $assigneeUsernames
       assigneeWildcardId: $assigneeWildcardId
-      reviewerUsername: $reviewerUsername
-      reviewerWildcardId: $reviewerWildcardId
-      authorUsername: $authorUsername
-      draft: $draft
-      labelName: $labelName
-      releaseTag: $releaseTag
-      mergedBy: $mergeUser
       milestoneTitle: $milestoneTitle
       milestoneWildcardId: $milestoneWildcardId
-      myReactionEmoji: $myReactionEmoji
-      sourceBranches: $sourceBranches
-      targetBranches: $targetBranches
       deployedBefore: $deployedBefore
       deployedAfter: $deployedAfter
       environmentName: $environmentName
@@ -72,21 +39,10 @@ query getMergeRequestsCount(
     }
     closedMergeRequests: mergeRequests(
       state: closed
-      approvedBy: $approvedBy
       assigneeUsername: $assigneeUsernames
       assigneeWildcardId: $assigneeWildcardId
-      reviewerUsername: $reviewerUsername
-      reviewerWildcardId: $reviewerWildcardId
-      authorUsername: $authorUsername
-      draft: $draft
-      labelName: $labelName
-      releaseTag: $releaseTag
-      mergedBy: $mergeUser
       milestoneTitle: $milestoneTitle
       milestoneWildcardId: $milestoneWildcardId
-      myReactionEmoji: $myReactionEmoji
-      sourceBranches: $sourceBranches
-      targetBranches: $targetBranches
       deployedBefore: $deployedBefore
       deployedAfter: $deployedAfter
       environmentName: $environmentName
@@ -96,21 +52,10 @@ query getMergeRequestsCount(
     }
     allMergeRequests: mergeRequests(
       state: all
-      approvedBy: $approvedBy
       assigneeUsername: $assigneeUsernames
       assigneeWildcardId: $assigneeWildcardId
-      reviewerUsername: $reviewerUsername
-      reviewerWildcardId: $reviewerWildcardId
-      authorUsername: $authorUsername
-      draft: $draft
-      labelName: $labelName
-      releaseTag: $releaseTag
-      mergedBy: $mergeUser
       milestoneTitle: $milestoneTitle
       milestoneWildcardId: $milestoneWildcardId
-      myReactionEmoji: $myReactionEmoji
-      sourceBranches: $sourceBranches
-      targetBranches: $targetBranches
       deployedBefore: $deployedBefore
       deployedAfter: $deployedAfter
       environmentName: $environmentName

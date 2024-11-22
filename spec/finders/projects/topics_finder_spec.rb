@@ -2,13 +2,12 @@
 
 require 'spec_helper'
 
-RSpec.describe Projects::TopicsFinder, :with_current_organization do
-  let_it_be(:namespace) { create(:namespace, organization: current_organization) }
-  let_it_be(:user) { create(:user, namespace: namespace) }
+RSpec.describe Projects::TopicsFinder do
+  let_it_be(:user) { create(:user) }
 
-  let_it_be(:topic1) { create(:topic, name: 'topicB', organization: current_organization) }
-  let_it_be(:topic2) { create(:topic, name: 'topicC', organization: current_organization) }
-  let_it_be(:topic3) { create(:topic, name: 'topicA', organization: current_organization) }
+  let_it_be(:topic1) { create(:topic, name: 'topicB', organization: user.namespace.organization) }
+  let_it_be(:topic2) { create(:topic, name: 'topicC', organization: user.namespace.organization) }
+  let_it_be(:topic3) { create(:topic, name: 'topicA', organization: user.namespace.organization) }
 
   let_it_be(:project1) { create(:project, :public, namespace: user.namespace, topic_list: 'topicC, topicA, topicB') }
   let_it_be(:project2) { create(:project, :public, namespace: user.namespace, topic_list: 'topicC, topicA') }
@@ -16,7 +15,7 @@ RSpec.describe Projects::TopicsFinder, :with_current_organization do
 
   describe '#execute' do
     it 'returns topics' do
-      topics = described_class.new(organization_id: current_organization.id).execute
+      topics = described_class.new.execute
 
       expect(topics).to eq([topic2, topic3, topic1])
     end
@@ -36,7 +35,7 @@ RSpec.describe Projects::TopicsFinder, :with_current_organization do
 
       with_them do
         it 'returns filtered topics' do
-          topics = described_class.new(params: { search: search }, organization_id: current_organization.id).execute
+          topics = described_class.new(params: { search: search }).execute
 
           expect(topics.map(&:name)).to eq(result)
         end
@@ -44,20 +43,16 @@ RSpec.describe Projects::TopicsFinder, :with_current_organization do
     end
 
     context 'filter by without_projects' do
-      let_it_be(:topic4) { create(:topic, name: 'unassigned topic', organization: current_organization) }
+      let_it_be(:topic4) { create(:topic, name: 'unassigned topic') }
 
       it 'returns topics without assigned projects' do
-        topics = described_class.new(
-          params: { without_projects: true }, organization_id: current_organization.id
-        ).execute
+        topics = described_class.new(params: { without_projects: true }).execute
 
         expect(topics).to contain_exactly(topic4)
       end
 
       it 'returns topics without assigned projects' do
-        topics = described_class.new(
-          params: { without_projects: false }, organization_id: current_organization.id
-        ).execute
+        topics = described_class.new(params: { without_projects: false }).execute
 
         expect(topics).to contain_exactly(topic1, topic2, topic3, topic4)
       end

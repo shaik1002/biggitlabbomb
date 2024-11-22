@@ -542,8 +542,11 @@ RSpec.describe GroupsHelper, feature_category: :groups_and_projects do
           show_schema_markup: 'true',
           new_subgroup_path: including("groups/new?parent_id=#{group.id}#create-group-pane"),
           new_project_path: including("/projects/new?namespace_id=#{group.id}"),
+          new_subgroup_illustration: including('illustrations/subgroup-create-new-sm'),
+          new_project_illustration: including('illustrations/project-create-new-sm'),
           empty_projects_illustration: including('illustrations/empty-state/empty-projects-md'),
-          empty_subgroup_illustration: including('illustrations/empty-state/empty-projects-md'),
+          empty_subgroup_illustration: including('illustrations/empty-state/empty-subgroup-md'),
+          empty_search_illustration: including('illustrations/empty-state/empty-search-md'),
           render_empty_state: 'true',
           can_create_subgroups: 'true',
           can_create_projects: 'true'
@@ -667,7 +670,6 @@ RSpec.describe GroupsHelper, feature_category: :groups_and_projects do
           expect(subject).to eq(
             {
               'Guest' => 10,
-              'Planner' => 15,
               'Reporter' => 20,
               'Developer' => 30
             }
@@ -684,7 +686,6 @@ RSpec.describe GroupsHelper, feature_category: :groups_and_projects do
           expect(subject).to eq(
             {
               'Guest' => 10,
-              'Planner' => 15,
               'Reporter' => 20,
               'Developer' => 30,
               'Maintainer' => 40,
@@ -716,7 +717,6 @@ RSpec.describe GroupsHelper, feature_category: :groups_and_projects do
           expect(helper.access_level_roles_user_can_assign(grand_parent, group.access_level_roles)).to be_empty
           expect(helper.access_level_roles_user_can_assign(parent, group.access_level_roles)).to eq({
             'Guest' => ::Gitlab::Access::GUEST,
-            'Planner' => ::Gitlab::Access::PLANNER,
             'Reporter' => ::Gitlab::Access::REPORTER,
             'Developer' => ::Gitlab::Access::DEVELOPER
           })

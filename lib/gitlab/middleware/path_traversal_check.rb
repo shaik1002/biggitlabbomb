@@ -34,8 +34,8 @@ module Gitlab
       def call(env)
         return @app.call(env) unless Feature.enabled?(:check_path_traversal_middleware, Feature.current_request)
 
-        request = ::Rack::Request.new(env.dup)
         log_params = {}
+        request = ::Rack::Request.new(env.dup)
 
         return @app.call(env) unless path_traversal_attempt?(request, log_params)
 
@@ -55,26 +55,18 @@ module Gitlab
       private
 
       def path_traversal_attempt?(request, log_params)
-        with_duration_metric do |metric_labels|
-          original_fullpath = request.fullpath
-          exclude_query_parameters(request)
+        original_fullpath = request.fullpath
+        exclude_query_parameters(request)
 
-          decoded_fullpath = CGI.unescape(request.fullpath)
+        decoded_fullpath = CGI.unescape(request.fullpath)
 
-          if Gitlab::PathTraversal.path_traversal?(decoded_fullpath, match_new_line: false)
-            metric_labels[:path_traversal_attempt_rejected] =
-              Feature.enabled?(:check_path_traversal_middleware_reject_requests, Feature.current_request)
+        return false unless Gitlab::PathTraversal.path_traversal?(decoded_fullpath, match_new_line: false)
 
-            log_params[:method] = request.request_method
-            log_params[:fullpath] = original_fullpath
-            log_params[:message] = PATH_TRAVERSAL_MESSAGE
+        log_params[:method] = request.request_method
+        log_params[:fullpath] = original_fullpath
+        log_params[:message] = PATH_TRAVERSAL_MESSAGE
 
-            true
-          else
-            metric_labels[:path_traversal_attempt_rejected] = false
-            false
-          end
-        end
+        true
       end
 
       def exclude_query_parameters(request)
@@ -94,22 +86,9 @@ module Gitlab
       end
 
       def log(payload)
-        ::Gitlab::InstrumentationHelper.add_instrumentation_data(payload)
-        Gitlab::AppLogger.warn(payload.merge(class_name: self.class.name))
-      end
-
-      def with_duration_metric
-        result = nil
-        labels = {}
-
-        duration = Benchmark.realtime do
-          result = yield(labels)
-        end
-
-        ::Gitlab::Instrumentation::Middleware::PathTraversalCheck.duration = duration
-        ::Gitlab::Metrics::Middleware::PathTraversalCheck.increment(labels: labels, duration: duration)
-
-        result
+        Gitlab::AppLogger.warn(
+          payload.merge(class_name: self.class.name)
+        )
       end
     end
   end

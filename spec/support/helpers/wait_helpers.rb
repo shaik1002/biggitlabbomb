@@ -8,7 +8,7 @@ module WaitHelpers
     wait_until = Time.now + max_wait_time.seconds
     loop do
       result = yield
-      break result if result
+      break if result
 
       page.refresh if reload
 

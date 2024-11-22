@@ -4,7 +4,7 @@
 
 require 'spec_helper'
 
-RSpec.describe 'Dashboard > User filters todos', :js, feature_category: :notifications do
+RSpec.describe 'Dashboard > User filters todos', :js, feature_category: :team_planning do
   let(:user_1)    { create(:user, username: 'user_1', name: 'user_1') }
   let(:user_2)    { create(:user, username: 'user_2', name: 'user_2') }
 
@@ -21,8 +21,6 @@ RSpec.describe 'Dashboard > User filters todos', :js, feature_category: :notific
   let!(:merge_request) { create(:merge_request, source_project: project_2, title: 'merge_request') }
 
   before do
-    stub_feature_flags(todos_vue_application: false)
-
     create(:todo, user: user_1, author: user_2, project: project_1, target: issue1, action: 1)
     create(:todo, user: user_1, author: user_2, project: project_3, target: issue2, action: 1)
     create(:todo, user: user_1, author: user_1, project: project_2, target: merge_request, action: 2)

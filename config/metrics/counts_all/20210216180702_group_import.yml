@@ -3,8 +3,6 @@ data_category: optional
 key_path: usage_activity_by_stage.manage.group_imports.group_import
 description: Count of groups imported using Group Import/Export
 product_group: import_and_integrate
-product_categories:
-- importers
 value_type: number
 status: active
 time_frame: all
@@ -12,7 +10,7 @@ data_source: database
 distribution:
 - ce
 - ee
-tiers:
+tier:
 - free
 - premium
 - ultimate

@@ -14,17 +14,8 @@ RSpec.describe Gitlab::Cng::Deployment::Configurations::Kind do
   end
 
   let(:kubeclient) { instance_double(Gitlab::Cng::Kubectl::Client, create_resource: "", execute: "") }
-  let(:port_mappings) do
-    {
-      80 => 32080,
-      22 => 32222
-    }
-  end
 
   before do
-    allow(Gitlab::Cng::Kind::Cluster).to receive(:host_port_mapping).and_return(port_mappings[22])
-    allow(Gitlab::Cng::Kind::Cluster).to receive(:host_port_mapping).with(80).and_return(port_mappings[80])
-
     allow(Gitlab::Cng::Kubectl::Client).to receive(:new).and_return(kubeclient)
   end
 
@@ -106,8 +97,8 @@ RSpec.describe Gitlab::Cng::Deployment::Configurations::Kind do
           service: {
             type: "NodePort",
             nodePorts: {
-              "gitlab-shell": port_mappings[22],
-              http: port_mappings[80]
+              "gitlab-shell": 32022,
+              http: 32080
             }
           }
         }

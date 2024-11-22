@@ -3,8 +3,6 @@ data_category: optional
 key_path: usage_activity_by_stage_monthly.manage.bulk_imports.gitlab
 description: REMOVED - Count of projects imported using bulk imports
 product_group: import_and_integrate
-product_categories:
-- importers
 value_type: number
 status: removed
 time_frame: 28d
@@ -12,7 +10,7 @@ data_source: database
 distribution:
 - ce
 - ee
-tiers:
+tier:
 - free
 - premium
 - ultimate

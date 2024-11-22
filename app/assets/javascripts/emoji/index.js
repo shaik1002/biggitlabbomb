@@ -20,7 +20,7 @@ export const state = Vue.observable({
 export const FALLBACK_EMOJI_KEY = 'grey_question';
 
 // Keep the version in sync with `lib/gitlab/emoji.rb`
-export const EMOJI_VERSION = '4';
+export const EMOJI_VERSION = '3';
 
 const isLocalStorageAvailable = AccessorUtilities.canUseLocalStorage();
 
@@ -331,9 +331,3 @@ export function glEmojiTag(inputName, options) {
     name,
   )}"></gl-emoji>`;
 }
-
-export const getEmojisForCategory = async (category) => {
-  await initEmojiMap.promise;
-
-  return Object.values(emojiMap).filter((e) => e.c === category);
-};

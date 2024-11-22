@@ -2,9 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::BackgroundMigration::BackfillIssuesCorrectWorkItemTypeId,
-  feature_category: :team_planning,
-  schema: 20241030165330 do
+RSpec.describe Gitlab::BackgroundMigration::BackfillIssuesCorrectWorkItemTypeId, feature_category: :team_planning do
   let(:batch_column) { 'id' }
   let(:sub_batch_size) { 2 }
   let(:pause_ms) { 0 }

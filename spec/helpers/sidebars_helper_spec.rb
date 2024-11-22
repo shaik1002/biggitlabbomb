@@ -187,7 +187,7 @@ RSpec.describe SidebarsHelper, feature_category: :navigation do
         can_sign_out: helper.current_user_menu?(:sign_out),
         sign_out_link: destroy_user_session_path,
         issues_dashboard_path: issues_dashboard_path(assignee_username: user.username),
-        todos_dashboard_path: dashboard_todos_path,
+        todos_dashboard_path: vue_dashboard_todos_path,
         projects_path: dashboard_projects_path,
         groups_path: dashboard_groups_path,
         gitlab_com_but_not_canary: Gitlab.com_but_not_canary?,
@@ -483,7 +483,6 @@ RSpec.describe SidebarsHelper, feature_category: :navigation do
               avatarUrl: project.avatar_url,
               name: project.name,
               namespace: project.full_name,
-              fullPath: project.full_path,
               webUrl: project_path(project)
             }
           })
@@ -507,7 +506,6 @@ RSpec.describe SidebarsHelper, feature_category: :navigation do
               avatarUrl: group.avatar_url,
               name: group.name,
               namespace: group.full_name,
-              fullPath: group.full_path,
               webUrl: group_path(group)
             }
           })

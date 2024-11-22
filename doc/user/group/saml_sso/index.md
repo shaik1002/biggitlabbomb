@@ -1,5 +1,5 @@
 ---
-stage: Software Supply Chain Security
+stage: Govern
 group: Authentication
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
@@ -586,7 +586,7 @@ For example:
 - [SAML SSO for self-managed GitLab instances](../../../integration/saml.md)
 - [Glossary](../../../integration/saml.md#glossary)
 - [Blog post: The ultimate guide to enabling SAML and SSO on GitLab.com](https://about.gitlab.com/blog/2023/09/14/the-ultimate-guide-to-enabling-saml/)
-- [Authentication comparison between SaaS and self-managed](../../../administration/auth/index.md#gitlabcom-compared-to-self-managed)
+- [Authentication comparison between SaaS and self-managed](../../../administration/auth/index.md#saas-vs-self-managed-comparison)
 - [Passwords for users created through integrated authentication](../../../security/passwords_for_integrated_authentication_methods.md)
 - [SAML Group Sync](group_sync.md)
 

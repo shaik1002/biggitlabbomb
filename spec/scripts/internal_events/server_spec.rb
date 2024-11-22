@@ -4,8 +4,6 @@ require 'spec_helper'
 require_relative '../../../scripts/internal_events/server'
 
 RSpec.describe Server, feature_category: :service_ping do
-  include WaitHelpers
-
   let(:server) { described_class.new }
   let(:port) { Gitlab::Tracking::Destinations::SnowplowMicro.new.uri.port }
   let(:events) { server.events }
@@ -26,7 +24,7 @@ RSpec.describe Server, feature_category: :service_ping do
   # rubocop:enable RSpec/ExpectOutput
 
   describe 'GET /i -> trigger a single event provided through query params (backend)' do
-    subject(:response) { await { Net::HTTP.get_response url_for("/i?#{query_params}") } }
+    subject(:response) { with_retry { Net::HTTP.get_response url_for("/i?#{query_params}") } }
 
     context 'with an internal event' do
       let(:query_params) { internal_event_fixture('snowplow_events/internal_event_query_params') }
@@ -37,16 +35,16 @@ RSpec.describe Server, feature_category: :service_ping do
             se_category: 'InternalEventTracking',
             se_action: 'g_project_management_issue_created',
             collector_tstamp: '1727475117074',
-            se_label: nil,
-            se_property: nil,
-            se_value: nil,
+            label: nil,
+            property: nil,
+            value: nil,
             contexts: Gitlab::Json.parse(context)
           },
           rawEvent: { parameters: Rack::Utils.parse_query(query_params) }
         }
       end
 
-      it 'successfully parses event', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/498775' do
+      it 'successfully parses event' do
         expect(response.code).to eq('200')
         expect(events).to contain_exactly(expected_event)
       end
@@ -62,16 +60,16 @@ RSpec.describe Server, feature_category: :service_ping do
             se_category: 'category',
             se_action: 'super_action_thing',
             collector_tstamp: '1727476712646',
-            se_label: nil,
-            se_property: nil,
-            se_value: nil,
+            label: nil,
+            property: nil,
+            value: nil,
             contexts: nil
           },
           rawEvent: { parameters: Rack::Utils.parse_query(query_params) }
         }
       end
 
-      it 'successfully parses event', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/498776' do
+      it 'successfully parses event' do
         expect(response.code).to eq('200')
         expect(events).to contain_exactly(expected_event)
       end
@@ -79,7 +77,7 @@ RSpec.describe Server, feature_category: :service_ping do
   end
 
   describe 'POST /com.snowplowanalytics.snowplow/tp2 -> trigger events provided through request body (frontend)' do
-    subject(:response) { await { Net::HTTP.post url_for('/com.snowplowanalytics.snowplow/tp2'), body } }
+    subject(:response) { with_retry { Net::HTTP.post url_for('/com.snowplowanalytics.snowplow/tp2'), body } }
 
     context 'when triggered on-click' do
       let(:body) { internal_event_fixture('snowplow_events/internal_event_on_click.json') }
@@ -90,16 +88,16 @@ RSpec.describe Server, feature_category: :service_ping do
             se_category: 'projects:blob:show',
             se_action: 'click_blame_control_on_blob_page',
             collector_tstamp: '1727474524024',
-            se_label: nil,
-            se_property: nil,
-            se_value: nil,
+            label: nil,
+            property: nil,
+            value: nil,
             contexts: Gitlab::Json.parse(context)
           },
           rawEvent: { parameters: Gitlab::Json.parse(body)['data'].first }
         }
       end
 
-      it 'successfully parses event', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/499957' do
+      it 'successfully parses event' do
         expect(response.code).to eq('200')
         expect(events).to contain_exactly(expected_event)
       end
@@ -116,9 +114,9 @@ RSpec.describe Server, feature_category: :service_ping do
               se_category: 'admin:dashboard:index',
               se_action: 'view_admin_dashboard_pageload',
               collector_tstamp: '1727473513835',
-              se_label: nil,
-              se_property: nil,
-              se_value: nil,
+              label: nil,
+              property: nil,
+              value: nil,
               contexts: Gitlab::Json.parse(context_1)
             },
             rawEvent: { parameters: Gitlab::Json.parse(body)['data'].first }
@@ -128,9 +126,9 @@ RSpec.describe Server, feature_category: :service_ping do
               se_category: 'admin:dashboard:index',
               se_action: 'render',
               collector_tstamp: '1727473513837',
-              se_label: 'version_badge',
-              se_property: 'Up to date',
-              se_value: nil,
+              label: 'version_badge',
+              property: 'Up to date',
+              value: nil,
               contexts: Gitlab::Json.parse(context_2)
             },
             rawEvent: { parameters: Gitlab::Json.parse(body)['data'].last }
@@ -138,7 +136,7 @@ RSpec.describe Server, feature_category: :service_ping do
         ]
       end
 
-      it 'successfully parses event', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/498772' do
+      it 'successfully parses event' do
         expect(response.code).to eq('200')
         expect(events).to match_array(expected_events)
       end
@@ -153,16 +151,16 @@ RSpec.describe Server, feature_category: :service_ping do
             se_category: 'admin:dashboard:index',
             se_action: 'render',
             collector_tstamp: '1727473512782',
-            se_label: 'version_badge',
-            se_property: 'Up to date',
-            se_value: nil,
+            label: 'version_badge',
+            property: 'Up to date',
+            value: nil,
             contexts: Gitlab::Json.parse(context)
           },
           rawEvent: { parameters: Gitlab::Json.parse(body)['data'].first }
         }
       end
 
-      it 'successfully parses event', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/498773' do
+      it 'successfully parses event' do
         expect(response.code).to eq('200')
         expect(events).to contain_exactly(expected_event)
       end
@@ -171,7 +169,7 @@ RSpec.describe Server, feature_category: :service_ping do
     context 'with a non-structured event or an internal event' do
       let(:body) { internal_event_fixture('snowplow_events/non_internal_event_structured.json') }
 
-      it 'ignores the event', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/498774' do
+      it 'ignores the event' do
         expect(response.code).to eq('200')
         expect(events).to be_empty
       end
@@ -180,10 +178,10 @@ RSpec.describe Server, feature_category: :service_ping do
 
   describe 'OPTIONS /com.snowplowanalytics.snowplow/tp2' do
     subject(:response) do
-      await { Net::HTTP.new('localhost', port).options('/com.snowplowanalytics.snowplow/tp2') }
+      with_retry { Net::HTTP.new('localhost', port).options('/com.snowplowanalytics.snowplow/tp2') }
     end
 
-    it 'applies the correct headers', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/498779' do
+    it 'applies the correct headers' do
       expect(response.code).to eq('200')
       expect(response.header['Access-Control-Allow-Credentials']).to eq('true')
       expect(response.header['Access-Control-Allow-Headers']).to eq('Content-Type')
@@ -192,9 +190,9 @@ RSpec.describe Server, feature_category: :service_ping do
   end
 
   describe 'GET /micro/good -> list tracked structured events' do
-    subject(:response) { await { Net::HTTP.get_response url_for("/micro/good") } }
+    subject(:response) { with_retry { Net::HTTP.get_response url_for("/micro/good") } }
 
-    it 'successfully returns tracked events', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/498777' do
+    it 'successfully returns tracked events' do
       expect(response.code).to eq('200')
       expect(response.body).to eq("[]")
     end
@@ -203,19 +201,19 @@ RSpec.describe Server, feature_category: :service_ping do
       let(:query_params) { internal_event_fixture('snowplow_events/non_internal_event_without_context') }
 
       before do
-        await { Net::HTTP.get url_for("/i?#{query_params}") }
+        with_retry { Net::HTTP.get url_for("/i?#{query_params}") }
       end
 
-      it 'successfully returns tracked events', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/498778' do
+      it 'successfully returns tracked events' do
         expect(response.code).to eq('200')
         expect(response.body).to eq([{
           event: {
             se_category: 'category',
             se_action: 'super_action_thing',
             collector_tstamp: '1727476712646',
-            se_label: nil,
-            se_property: nil,
-            se_value: nil,
+            label: nil,
+            property: nil,
+            value: nil,
             contexts: nil
           },
           rawEvent: { parameters: Rack::Utils.parse_query(query_params) }
@@ -226,12 +224,14 @@ RSpec.describe Server, feature_category: :service_ping do
 
   private
 
-  def await
-    wait_for('server response to be available', max_wait_time: 2.seconds) do
-      yield
-    rescue Errno::ECONNREFUSED, Errno::EADDRNOTAVAIL
-      nil
-    end
+  def with_retry(retried: false)
+    yield
+  rescue Errno::ECONNREFUSED, Errno::EADDRNOTAVAIL
+    return if retried
+
+    retried = true
+
+    retry
   end
 
   def url_for(path)

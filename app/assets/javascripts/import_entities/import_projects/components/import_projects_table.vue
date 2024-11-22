@@ -65,7 +65,7 @@ export default {
   },
 
   computed: {
-    ...mapState(['filter', 'repositories', 'pageInfo', 'isLoadingRepos']),
+    ...mapState(['filter', 'repositories', 'defaultTargetNamespace', 'pageInfo', 'isLoadingRepos']),
     ...mapGetters([
       'isImportingAnyRepo',
       'importingRepoCount',
@@ -204,6 +204,7 @@ export default {
             <provider-repo-table-row
               :key="repo.importSource.providerLink"
               :repo="repo"
+              :user-namespace="defaultTargetNamespace"
               :optional-stages="optionalStagesSelection"
               :cancelable="cancelable"
             />

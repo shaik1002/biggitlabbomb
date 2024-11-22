@@ -11,7 +11,6 @@ module Banzai
       prepend Concerns::PipelineTimingCheck
 
       IGNORED_ANCESTOR_TAGS = %w[pre code tt].to_set
-      IGNORE_UNICODE_EMOJIS = %w[™ © ®].freeze
 
       def call
         @emoji_count = 0
@@ -22,8 +21,10 @@ module Banzai
 
           content = node.to_html
 
+          next unless content.include?(':') || emoji_unicode_pattern_untrusted.match?(content)
+
           html = emoji_unicode_element_unicode_filter(content)
-          html = emoji_name_element_unicode_filter(html) if content.include?(':')
+          html = emoji_name_element_unicode_filter(html)
 
           next if html == content
 
@@ -42,8 +43,9 @@ module Banzai
         Gitlab::Utils::Gsub
           .gsub_with_limit(text, emoji_pattern, limit: Banzai::Filter::FILTER_ITEM_LIMIT) do |match_data|
           emoji = TanukiEmoji.find_by_alpha_code(match_data[0])
+          @emoji_count += 1 if emoji
 
-          process_emoji_tag(emoji, match_data[0])
+          Gitlab::Emoji.gl_emoji_tag(emoji) if emoji
         end
       end
 
@@ -53,27 +55,12 @@ module Banzai
       #
       # Returns a String with unicode emoji replaced with gl-emoji unicode.
       def emoji_unicode_element_unicode_filter(text)
-        Gitlab::Utils::Gsub
-          .gsub_with_limit(text, emoji_unicode_pattern, limit: Banzai::Filter::FILTER_ITEM_LIMIT) do |match_data|
-          if ignore_emoji?(match_data[0])
-            match_data[0]
-          else
-            emoji = TanukiEmoji.find_by_codepoints(match_data[0])
+        emoji_unicode_pattern_untrusted.replace_gsub(text, limit: Banzai::Filter::FILTER_ITEM_LIMIT) do |match|
+          emoji = TanukiEmoji.find_by_codepoints(match[1])
+          @emoji_count += 1 if emoji
 
-            process_emoji_tag(emoji, match_data[0])
-          end
+          Gitlab::Emoji.gl_emoji_tag(emoji) if emoji
         end
-      end
-
-      def process_emoji_tag(emoji, fallback)
-        return fallback unless emoji
-
-        @emoji_count += 1
-        Gitlab::Emoji.gl_emoji_tag(emoji)
-      end
-
-      def ignore_emoji?(text)
-        IGNORE_UNICODE_EMOJIS.include?(text)
       end
 
       # Build a regexp that matches all valid :emoji: names.
@@ -81,10 +68,12 @@ module Banzai
         @emoji_pattern ||= TanukiEmoji.index.alpha_code_pattern
       end
 
-      def self.emoji_unicode_pattern
-        # Use regex from unicode-emoji gem. This is faster than the built-in TanukiEmoji
-        # regex for large documents.
-        Unicode::Emoji::REGEX_VALID_INCLUDE_TEXT
+      # Build an unstrusted regexp that matches all valid unicode emojis names.
+      def self.emoji_unicode_pattern_untrusted
+        return @emoji_unicode_pattern_untrusted if @emoji_unicode_pattern_untrusted
+
+        source = TanukiEmoji.index.codepoints_pattern.source
+        @emoji_unicode_pattern_untrusted = Gitlab::UntrustedRegexp.new(source)
       end
 
       private
@@ -93,8 +82,8 @@ module Banzai
         self.class.emoji_pattern
       end
 
-      def emoji_unicode_pattern
-        self.class.emoji_unicode_pattern
+      def emoji_unicode_pattern_untrusted
+        self.class.emoji_unicode_pattern_untrusted
       end
     end
   end

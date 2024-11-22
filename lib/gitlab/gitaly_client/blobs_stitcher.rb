@@ -5,9 +5,8 @@ module Gitlab
     class BlobsStitcher
       include Enumerable
 
-      def initialize(rpc_response, filter_function: nil)
+      def initialize(rpc_response)
         @rpc_response = rpc_response
-        @filter_function = filter_function
       end
 
       def each
@@ -15,10 +14,6 @@ module Gitlab
 
         @rpc_response.each do |msg|
           if msg.oid.blank? && msg.data.blank?
-            next
-          # rubocop: disable Lint/DuplicateBranch -- No duplication, filter can be supplied
-          elsif removed_by_filter(msg)
-            # rubocop: enable Lint/DuplicateBranch
             next
           elsif msg.oid.present?
             yield new_blob(current_blob_data) if current_blob_data
@@ -34,12 +29,6 @@ module Gitlab
       end
 
       private
-
-      def removed_by_filter(msg)
-        return unless @filter_function
-
-        !@filter_function.call(msg)
-      end
 
       def new_blob(blob_data)
         data = blob_data[:data_parts].join

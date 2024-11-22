@@ -10,6 +10,7 @@ $profile-grid-flex: 1fr;
   }
 
   @include media-breakpoint-down(sm) {
+    .input-md,
     .input-lg {
       max-width: 100%;
     }
@@ -71,7 +72,7 @@ $profile-grid-flex: 1fr;
 
 .user-contrib-text {
   font-size: 11px;
-  fill: var(--gl-text-color-subtle);
+  fill: $calendar-user-contrib-text;
 }
 
 .user-profile {

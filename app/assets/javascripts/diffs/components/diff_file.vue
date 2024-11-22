@@ -10,9 +10,7 @@ import { createAlert } from '~/alert';
 import { hasDiff } from '~/helpers/diffs_helper';
 import { helpPagePath } from '~/helpers/help_page_helper';
 import { diffViewerErrors } from '~/ide/constants';
-import { clearDraft } from '~/lib/utils/autosave';
 import { scrollToElement, isElementStuck } from '~/lib/utils/common_utils';
-import { capitalizeFirstCharacter } from '~/lib/utils/text_utility';
 import { sprintf } from '~/locale';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import notesEventHub from '~/notes/event_hub';
@@ -106,11 +104,6 @@ export default {
       required: false,
       default: null,
     },
-    isDiffViewActive: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
   },
   idState() {
     return {
@@ -126,27 +119,8 @@ export default {
   },
   computed: {
     ...mapState('diffs', ['currentDiffFileId', 'conflictResolutionPath', 'canMerge']),
-    ...mapGetters(['isLoggedIn', 'isNotesFetched', 'getNoteableData', 'noteableType']),
+    ...mapGetters(['isNotesFetched', 'getNoteableData', 'noteableType']),
     ...mapGetters('diffs', ['getDiffFileDiscussions', 'isVirtualScrollingEnabled', 'linkedFile']),
-    autosaveKey() {
-      if (!this.isLoggedIn) return '';
-
-      const {
-        id,
-        noteable_type: noteableTypeUnderscored,
-        noteableType,
-        diff_head_sha: diffHeadSha,
-      } = this.noteableData;
-
-      return [
-        'Autosave|Note', // eslint-disable-line @gitlab/require-i18n-strings
-        capitalizeFirstCharacter(noteableTypeUnderscored || noteableType),
-        id,
-        diffHeadSha,
-        FILE_DIFF_POSITION_TYPE,
-        this.file.id,
-      ].join('/');
-    },
     isLinkedFile() {
       return this.file === this.linkedFile;
     },
@@ -304,11 +278,6 @@ export default {
       'toggleFileCommentForm',
       'toggleFileDiscussion',
     ]),
-    handleFileCommentCancel() {
-      this.toggleFileCommentForm(this.file.file_path);
-
-      clearDraft(this.autosaveKey);
-    },
     manageViewedEffects() {
       if (
         !this.idState.hasToggled &&
@@ -429,16 +398,6 @@ export default {
       this.fileDiscussions.forEach((d) => this.toggleFileDiscussion(d));
     },
   },
-  warningClasses: [
-    'collapsed-file-warning',
-    'gl-rounded-b-base',
-    'gl-px-5',
-    'gl-py-4',
-    'gl-flex',
-    'gl-flex-col',
-    'sm:gl-items-start',
-    'gl-gap-3',
-  ],
   CONFLICT_TEXT,
   FILE_DIFF_POSITION_TYPE,
   generatedDiffFileDocsPath: helpPagePath('user/project/merge_requests/changes.html', {
@@ -456,10 +415,9 @@ export default {
       'has-body': showBody,
       'is-virtual-scrolling': isVirtualScrollingEnabled,
       'linked-file': isLinkedFile,
-      'diff-file-is-active': isDiffViewActive,
     }"
     :data-path="file.new_path"
-    class="diff-file file-holder"
+    class="diff-file file-holder gl-mb-5"
   >
     <gl-alert
       v-if="!showLoadingIcon && file.conflict_type"
@@ -527,7 +485,7 @@ export default {
 
     <div
       v-if="idState.forkMessageVisible"
-      class="js-file-fork-suggestion-section file-fork-suggestion gl-border-1 gl-border-t-0 gl-border-solid gl-border-default"
+      class="js-file-fork-suggestion-section file-fork-suggestion gl-border-1 gl-border-t-0 gl-border-solid gl-border-gray-100"
     >
       <span v-safe-html="forkMessage" class="file-fork-suggestion-note"></span>
       <gl-button
@@ -582,13 +540,12 @@ export default {
               v-if="file.hasCommentForm"
               :save-button-title="__('Comment')"
               :diff-file="file"
-              :autosave-key="autosaveKey"
               autofocus
               class="gl-px-5 gl-py-3"
               data-testid="file-note-form"
               @handleFormUpdate="handleSaveNote"
               @handleFormUpdateAddToReview="handleSaveDraftNote"
-              @cancelForm="handleFileCommentCancel"
+              @cancelForm="toggleFileCommentForm(file.file_path)"
             />
           </div>
         </div>
@@ -599,8 +556,11 @@ export default {
           data-testid="loader-icon"
         />
         <div v-else-if="errorMessage" class="diff-viewer">
-          <div v-if="isFileTooLarge" :class="$options.warningClasses">
-            <p class="!gl-mb-0">
+          <div
+            v-if="isFileTooLarge"
+            class="collapsed-file-warning gl-rounded-bl-base gl-rounded-br-base gl-bg-orange-50 gl-p-7 gl-text-center"
+          >
+            <p class="gl-mb-5">
               {{ $options.i18n.tooLarge }}
             </p>
             <gl-button data-testid="blob-button" category="secondary" :href="viewBlobHref">
@@ -612,8 +572,11 @@ export default {
           <div v-else v-safe-html="errorMessage" class="nothing-here-block"></div>
         </div>
         <template v-else>
-          <div v-if="showWarning" :class="$options.warningClasses">
-            <p class="!gl-mb-0">
+          <div
+            v-if="showWarning"
+            class="collapsed-file-warning gl-rounded-bl-base gl-rounded-br-base gl-bg-orange-50 gl-p-7 gl-text-center"
+          >
+            <p class="gl-mb-5">
               <gl-sprintf :message="expandableWarning">
                 <template #tag="{ content }">
                   <code>{{ content }}</code>

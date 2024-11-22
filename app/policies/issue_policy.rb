@@ -13,12 +13,10 @@ class IssuePolicy < IssuablePolicy
     false
   end
 
-  # rubocop:disable Cop/UserAdmin -- specifically check the admin attribute
   desc "User can read confidential issues"
   condition(:can_read_confidential) do
-    @user && (@user.admin? || planner_or_reporter_access? || assignee_or_author?)
+    @user && (@user.admin? || can?(:reporter_access) || assignee_or_author?) # rubocop:disable Cop/UserAdmin
   end
-  # rubocop:enable Cop/UserAdmin
 
   desc "Project belongs to a group, crm is enabled and user can read contacts in source group"
   condition(:can_read_crm_contacts, scope: :subject) do
@@ -47,11 +45,13 @@ class IssuePolicy < IssuablePolicy
     end
   end
 
+  # rubocop:disable Gitlab/FeatureFlagWithoutActor -- this is a on/off toggle
   # group level issues license for now is equivalent to epics license. We'll have to migrate epics license to
   # work items context once epics are fully migrated to work items.
   condition(:group_level_issues_license_available) do
     epics_license_available?
   end
+  # rubocop:enable Gitlab/FeatureFlagWithoutActor
 
   rule { group_issue & can?(:read_group) }.policy do
     enable :create_note
@@ -60,7 +60,6 @@ class IssuePolicy < IssuablePolicy
   rule { ~notes_widget_enabled }.policy do
     prevent :create_note
     prevent :read_note
-    prevent :admin_note
     prevent :read_internal_note
     prevent :set_note_created_at
     prevent :mark_note_as_internal
@@ -83,8 +82,6 @@ class IssuePolicy < IssuablePolicy
   rule { can?(:read_issue) & notes_widget_enabled }.policy do
     enable :read_note
   end
-
-  rule { can?(:maintainer_access) }.enable :admin_note
 
   rule { ~can?(:read_issue) }.policy do
     prevent :create_note
@@ -145,7 +142,7 @@ class IssuePolicy < IssuablePolicy
     enable :set_issue_crm_contacts
   end
 
-  rule { planner_or_reporter_access }.policy do
+  rule { can?(:reporter_access) }.policy do
     enable :mark_note_as_internal
   end
 

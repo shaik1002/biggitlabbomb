@@ -23,12 +23,7 @@
     "AbuseReportNote",
     "Note"
   ],
-  "CiJobTokenScopeTarget": [
-    "Group",
-    "Project"
-  ],
   "CiRunnerCloudProvisioning": [
-    "CiRunnerGkeProvisioning",
     "CiRunnerGoogleCloudProvisioning"
   ],
   "CiVariable": [
@@ -67,16 +62,6 @@
   "Eventable": [
     "BoardEpic",
     "Epic"
-  ],
-  "ExpressionInterface": [
-    "BooleanExpression",
-    "IntegerExpression",
-    "StringExpression"
-  ],
-  "ExpressionValue": [
-    "BooleanExpression",
-    "IntegerExpression",
-    "StringExpression"
   ],
   "ExternalAuditEventDestinationInterface": [
     "ExternalAuditEventDestination",
@@ -121,8 +106,7 @@
     "Issue",
     "MergeRequest",
     "Snippet",
-    "Vulnerability",
-    "WikiPage"
+    "Vulnerability"
   ],
   "NoteableType": [
     "Design",
@@ -175,10 +159,6 @@
     "AbuseReportNote",
     "Discussion",
     "Note"
-  ],
-  "RoleInterface": [
-    "MemberRole",
-    "StandardRole"
   ],
   "SecurityPolicySource": [
     "GroupSecurityPolicySource",

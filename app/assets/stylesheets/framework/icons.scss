@@ -43,7 +43,7 @@
 }
 
 a.ci-icon:focus {
-  @apply gl-focus;
+  @include gl-focus;
 }
 
 .ci-icon {
@@ -200,4 +200,5 @@ a.ci-icon:focus {
   display: flex;
   align-items: center;
   justify-content: center;
+  color: $gray-500;
 }

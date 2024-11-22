@@ -5,12 +5,13 @@ module RenderAccessTokens
 
   def active_access_tokens
     tokens = finder(state: 'active', sort: 'expires_at_asc_id_desc').execute.preload_users
-    size = tokens.size
 
-    tokens = tokens.page(page)
-    add_pagination_headers(tokens)
+    if Feature.enabled?('access_token_pagination')
+      tokens = tokens.page(page)
+      add_pagination_headers(tokens)
+    end
 
-    [represent(tokens), size]
+    represent(tokens)
   end
 
   def inactive_access_tokens

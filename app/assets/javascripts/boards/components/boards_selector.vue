@@ -7,7 +7,7 @@ import BoardForm from 'ee_else_ce/boards/components/board_form.vue';
 
 import { formType } from '~/boards/constants';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
-import { isModifierKey } from '~/lib/utils/common_utils';
+import { isMetaKey } from '~/lib/utils/common_utils';
 import { visitUrl } from '~/lib/utils/url_utility';
 import { DEFAULT_DEBOUNCE_AND_THROTTLE_MS } from '~/lib/utils/constants';
 import { s__, __ } from '~/locale';
@@ -126,8 +126,8 @@ export default {
     showCreate() {
       return this.multipleIssueBoardsAvailable;
     },
-    isLastBoard() {
-      return this.boards.length === 1;
+    showDelete() {
+      return this.boards.length > 1;
     },
     showDropdown() {
       return this.showCreate || this.hasMissingBoards;
@@ -241,7 +241,7 @@ export default {
       this.filterTerm = value;
     },
     async switchBoardKeyEvent(boardId, e) {
-      if (isModifierKey(e)) {
+      if (isMetaKey(e)) {
         e.stopPropagation();
         visitUrl(`${this.boardBaseUrl}/${boardId}`, true);
       }
@@ -311,8 +311,7 @@ export default {
         :weights="weights"
         :current-board="board"
         :current-page="boardModalForm"
-        :is-last-board="isLastBoard"
-        :parent-type="parentType"
+        :show-delete="showDelete"
         @addBoard="addBoard"
         @updateBoard="$emit('updateBoard', $event)"
         @showBoardModal="$emit('showBoardModal', $event)"

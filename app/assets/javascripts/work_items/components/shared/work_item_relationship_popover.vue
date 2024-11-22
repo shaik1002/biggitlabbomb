@@ -93,12 +93,12 @@ export default {
           <work-item-type-icon
             :show-tooltip-on-hover="true"
             class="gl-mr-1 gl-cursor-help"
-            icon-variant="subtle"
+            color-class="gl-text-secondary"
             :work-item-type="workItem.workItemType.name"
           />
           <gl-link
             :href="workItem.webUrl"
-            class="gl-link gl-hyphens-auto gl-break-words gl-text-base gl-font-semibold gl-text-default hover:gl-text-gray-900"
+            class="gl-link gl-hyphens-auto gl-break-words gl-text-base gl-font-semibold gl-text-primary hover:gl-text-gray-900"
             @click.exact="$emit('click', $event)"
             @mouseover="$emit('mouseover')"
             @mouseout="$emit('mouseout')"

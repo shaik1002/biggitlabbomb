@@ -75,16 +75,6 @@ export const MAX_DATE_RANGE_TEXT = (maxDateRange) => {
   );
 };
 
-// Limits the number of decimals we round values to
-export const MAX_METRIC_PRECISION = 4;
-
-export const UNITS = {
-  COUNT: 'COUNT',
-  DAYS: 'DAYS',
-  PER_DAY: 'PER_DAY',
-  PERCENT: 'PERCENT',
-};
-
 export const NUMBER_OF_DAYS_SELECTED = (numDays) => {
   return n__('1 day selected', '%d days selected', numDays);
 };
@@ -92,10 +82,6 @@ export const NUMBER_OF_DAYS_SELECTED = (numDays) => {
 export const METRIC_POPOVER_LABEL = s__('ValueStreamAnalytics|View details');
 
 export const ISSUES_COMPLETED_TYPE = 'issues_completed';
-
-export const ALL_METRICS_QUERY_TYPE = 'ALL_METRICS_QUERY_TYPE';
-export const DORA_METRICS_QUERY_TYPE = 'DORA_METRICS_QUERY_TYPE';
-export const FLOW_METRICS_QUERY_TYPE = 'FLOW_METRICS_QUERY_TYPE';
 
 export const FLOW_METRICS = {
   LEAD_TIME: 'lead_time',
@@ -114,19 +100,13 @@ export const DORA_METRICS = {
   CHANGE_FAILURE_RATE: 'change_failure_rate',
 };
 
-export const VSA_METRICS_GROUPS = [
-  {
-    key: 'lifecycle_metrics',
-    title: s__('ValueStreamAnalytics|Lifecycle metrics'),
-    keys: [
-      FLOW_METRICS.LEAD_TIME,
-      FLOW_METRICS.CYCLE_TIME,
-      FLOW_METRICS.ISSUES,
-      FLOW_METRICS.COMMITS,
-      FLOW_METRICS.DEPLOYS,
-    ],
-  },
-];
+const VSA_FLOW_METRICS_GROUP = {
+  key: 'lifecycle_metrics',
+  title: s__('ValueStreamAnalytics|Lifecycle metrics'),
+  keys: Object.values(FLOW_METRICS),
+};
+
+export const VSA_METRICS_GROUPS = [VSA_FLOW_METRICS_GROUP];
 
 export const VULNERABILITY_CRITICAL_TYPE = 'vulnerability_critical';
 export const VULNERABILITY_HIGH_TYPE = 'vulnerability_high';
@@ -154,20 +134,8 @@ export const AI_METRICS = {
   DUO_CHAT_USAGE_RATE: 'duo_chat_usage_rate',
 };
 
-export const VALUE_STREAM_METRIC_DISPLAY_UNITS = {
-  [UNITS.COUNT]: '',
-  [UNITS.DAYS]: __('days'),
-  [UNITS.PER_DAY]: __('/day'),
-  [UNITS.PERCENT]: '%',
-};
-
-// NOTE: ideally we would return these fields in the metrics queries
-//       the flow metrics query returns some but not all fields we need
-//        while the DORA query do not return any.
-export const VALUE_STREAM_METRIC_TILE_METADATA = {
+export const METRIC_TOOLTIPS = {
   [DORA_METRICS.DEPLOYMENT_FREQUENCY]: {
-    label: s__('DORA4Metrics|Deployment frequency'),
-    unit: UNITS.PER_DAY,
     description: s__(
       'ValueStreamAnalytics|Average number of deployments to production per day. This metric measures how often value is delivered to end users.',
     ),
@@ -176,8 +144,6 @@ export const VALUE_STREAM_METRIC_TILE_METADATA = {
     docsLink: helpPagePath('user/analytics/dora_metrics', { anchor: 'deployment-frequency' }),
   },
   [DORA_METRICS.LEAD_TIME_FOR_CHANGES]: {
-    label: s__('DORA4Metrics|Lead time for changes'),
-    unit: UNITS.DAYS,
     description: s__(
       'ValueStreamAnalytics|The time to successfully deliver a commit into production. This metric reflects the efficiency of CI/CD pipelines.',
     ),
@@ -186,8 +152,6 @@ export const VALUE_STREAM_METRIC_TILE_METADATA = {
     docsLink: helpPagePath('user/analytics/dora_metrics', { anchor: 'lead-time-for-changes' }),
   },
   [DORA_METRICS.TIME_TO_RESTORE_SERVICE]: {
-    label: s__('DORA4Metrics|Time to restore service'),
-    unit: UNITS.DAYS,
     description: s__(
       'ValueStreamAnalytics|The time it takes an organization to recover from a failure in production.',
     ),
@@ -196,27 +160,22 @@ export const VALUE_STREAM_METRIC_TILE_METADATA = {
     docsLink: helpPagePath('user/analytics/dora_metrics', { anchor: 'time-to-restore-service' }),
   },
   [DORA_METRICS.CHANGE_FAILURE_RATE]: {
-    label: s__('DORA4Metrics|Change failure rate'),
     description: s__(
       'ValueStreamAnalytics|Percentage of deployments that cause an incident in production.',
     ),
     groupLink: '-/analytics/ci_cd?tab=change-failure-rate',
     projectLink: '-/pipelines/charts?chart=change-failure-rate',
     docsLink: helpPagePath('user/analytics/dora_metrics', { anchor: 'change-failure-rate' }),
-    unit: UNITS.PERCENT,
   },
   [FLOW_METRICS.LEAD_TIME]: {
-    label: s__('DORA4Metrics|Lead time'),
     description: s__('ValueStreamAnalytics|Median time from issue created to issue closed.'),
     groupLink: '-/analytics/value_stream_analytics',
     projectLink: '-/value_stream_analytics',
     docsLink: helpPagePath('user/group/value_stream_analytics/index', {
       anchor: 'lifecycle-metrics',
     }),
-    unit: UNITS.DAYS,
   },
   [FLOW_METRICS.CYCLE_TIME]: {
-    label: s__('DORA4Metrics|Cycle time'),
     description: s__(
       "ValueStreamAnalytics|Median time from the earliest commit of a linked issue's merge request to when that issue is closed.",
     ),
@@ -225,38 +184,24 @@ export const VALUE_STREAM_METRIC_TILE_METADATA = {
     docsLink: helpPagePath('user/group/value_stream_analytics/index', {
       anchor: 'lifecycle-metrics',
     }),
-    unit: UNITS.DAYS,
   },
   [FLOW_METRICS.ISSUES]: {
-    label: s__('DORA4Metrics|New issues'),
-    unit: UNITS.COUNT,
     description: s__('ValueStreamAnalytics|Number of new issues created.'),
     groupLink: '-/issues_analytics',
     projectLink: '-/analytics/issues_analytics',
     docsLink: helpPagePath('user/group/issues_analytics/index'),
   },
-  [FLOW_METRICS.COMMITS]: {
-    label: s__('DORA4Metrics|Commits'),
-    unit: UNITS.COUNT,
-    description: s__('ValueStreamAnalytics|Number of commits pushed to the default branch'),
-  },
-  [FLOW_METRICS.DEPLOYS]: {
-    label: s__('DORA4Metrics|Deploys'),
-    unit: UNITS.COUNT,
-    description: s__('ValueStreamAnalytics|Total number of deploys to production.'),
-    groupLink: '-/analytics/productivity_analytics',
-    projectLink: '-/analytics/merge_request_analytics',
-    docsLink: helpPagePath('user/analytics/merge_request_analytics'),
-  },
-};
-
-export const VALUE_STREAM_METRIC_METADATA = {
-  ...VALUE_STREAM_METRIC_TILE_METADATA,
   [FLOW_METRICS.ISSUES_COMPLETED]: {
     description: s__('ValueStreamAnalytics|Number of issues closed by month.'),
     groupLink: '-/issues_analytics',
     projectLink: '-/analytics/issues_analytics',
     docsLink: helpPagePath('user/group/issues_analytics/index'),
+  },
+  [FLOW_METRICS.DEPLOYS]: {
+    description: s__('ValueStreamAnalytics|Total number of deploys to production.'),
+    groupLink: '-/analytics/productivity_analytics',
+    projectLink: '-/analytics/merge_request_analytics',
+    docsLink: helpPagePath('user/analytics/merge_request_analytics'),
   },
   [CONTRIBUTOR_METRICS.COUNT]: {
     description: s__(
@@ -306,6 +251,42 @@ export const VALUE_STREAM_METRIC_METADATA = {
     groupLink: '',
     projectLink: '',
     docsLink: helpPagePath('user/project/repository/code_suggestions/index'),
+  },
+};
+
+// TODO: Remove this once the migration to METRIC_TOOLTIPS is complete
+// https://gitlab.com/gitlab-org/gitlab/-/issues/388067
+export const METRICS_POPOVER_CONTENT = {
+  lead_time: {
+    description: s__('ValueStreamAnalytics|Median time from issue created to issue closed.'),
+  },
+  cycle_time: {
+    description: s__(
+      "ValueStreamAnalytics|Median time from the earliest commit of a linked issue's merge request to when that issue is closed.",
+    ),
+  },
+  lead_time_for_changes: {
+    description: s__(
+      'ValueStreamAnalytics|Median time between merge request merge and deployment to a production environment for all MRs deployed in the given time period.',
+    ),
+  },
+  issues: { description: s__('ValueStreamAnalytics|Number of new issues created.') },
+  deploys: { description: s__('ValueStreamAnalytics|Total number of deploys to production.') },
+  deployment_frequency: {
+    description: s__('ValueStreamAnalytics|Average number of deployments to production per day.'),
+  },
+  commits: {
+    description: s__('ValueStreamAnalytics|Number of commits pushed to the default branch'),
+  },
+  time_to_restore_service: {
+    description: s__(
+      'ValueStreamAnalytics|Median time an incident was open on a production environment in the given time period.',
+    ),
+  },
+  change_failure_rate: {
+    description: s__(
+      'ValueStreamAnalytics|Percentage of deployments that cause an incident in production.',
+    ),
   },
 };
 

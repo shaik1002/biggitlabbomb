@@ -3,7 +3,7 @@
 $import-bar-height: $gl-spacing-scale-11;
 
 .import-table-bar {
-  min-height: $import-bar-height;
+  height: $import-bar-height;
   top: $calc-application-header-height;
 }
 

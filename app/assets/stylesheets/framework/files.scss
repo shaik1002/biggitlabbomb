@@ -6,7 +6,7 @@
   @apply gl-border gl-rounded-base;
 
   &.file-holder-top-border {
-    @apply gl-border gl-border-section;
+    @apply gl-border;
 
     .file-title {
       // Prevents the top border getting clipped by the background
@@ -20,7 +20,7 @@
 
   .file-title {
     position: relative;
-    @apply gl-bg-subtle gl-border-b gl-border-b-section;
+    @apply gl-bg-subtle gl-border-b;
     margin: 0;
     text-align: left;
     padding: 10px $gl-padding;
@@ -35,14 +35,14 @@
     }
 
     a:not(.btn) {
-      @apply gl-text-default;
+      @apply gl-text-primary;
     }
   }
 
   .file-blame-legend {
     text-align: right;
     padding: 8px $gl-padding;
-    @apply gl-bg-subtle gl-border-b gl-border-b-section;
+    @apply gl-bg-subtle gl-border-b;
 
     @include media-breakpoint-down(xs) {
       text-align: left;
@@ -114,7 +114,7 @@
         margin-left: 40px;
         padding: 10px 0;
         margin-bottom: 0;
-        @apply gl-bg-default gl-border-l gl-border-l-section;
+        @apply gl-bg-default gl-border-l;
 
         li {
           color: $logs-li-color;
@@ -203,7 +203,7 @@ span.idiff {
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    @apply gl-bg-subtle gl-border-b gl-border-b-section;
+    @apply gl-bg-subtle gl-border-b;
     padding: $gl-padding-8 $gl-padding;
     margin: 0;
     min-height: px-to-rem($file-header-height);
@@ -219,7 +219,7 @@ span.idiff {
   }
 
   a {
-    @apply gl-text-default;
+    @apply gl-text-primary;
   }
 }
 
@@ -241,7 +241,7 @@ span.idiff {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  @apply gl-bg-subtle gl-border-b gl-border-b-section;
+  @apply gl-bg-subtle gl-border-b;
   padding: 5px $gl-padding;
 }
 
@@ -286,7 +286,7 @@ span.idiff {
     padding-bottom: $gl-padding;
 
     .discussion-reply-holder {
-      @apply gl-border-b gl-border-b-subtle dark:gl-border-b-section;
+      @apply gl-border-b gl-border-b-subtle;
       border-radius: 0;
     }
   }
@@ -449,7 +449,7 @@ span.idiff {
 
   .tr {
     display: flex;
-    @apply gl-border-b gl-border-b-subtle dark:gl-border-b-section;
+    @apply gl-border-b gl-border-b-subtle;
 
     &.last-row {
       border-bottom: 0;
@@ -503,7 +503,7 @@ span.idiff {
 
 .blame.file-content .td.line-numbers {
   float: none;
-  @apply gl-border-l gl-border-l-section;
+  @apply gl-border-l;
   border-radius: 0;
 
   .file-line-num {
@@ -517,7 +517,7 @@ span.idiff {
 }
 
 .blame-stream-container {
-  @apply gl-border-t gl-border-t-section;
+  @apply gl-border-t;
 }
 
 .blame-stream-loading {

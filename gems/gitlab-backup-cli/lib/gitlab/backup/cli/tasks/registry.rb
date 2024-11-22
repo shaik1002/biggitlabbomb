@@ -13,22 +13,16 @@ module Gitlab
 
           def destination_path = 'registry.tar.gz'
 
-          attr_reader :registry_bucket
-
-          def set_registry_bucket(registry_bucket)
-            @registry_bucket = registry_bucket
-          end
-
           def object_storage?
-            !registry_bucket.nil?
+            !options.container_registry_bucket.nil?
           end
 
           # Registry does not use consolidated object storage config.
           def config
             settings = {
               object_store: {
-                connection: context.gitlab_config('object_store').connection.to_hash,
-                remote_directory: registry_bucket
+                connection: context.config('object_store').connection.to_hash,
+                remote_directory: options.container_registry_bucket
               }
             }
             GitlabSettings::Options.build(settings)
@@ -37,7 +31,7 @@ module Gitlab
           private
 
           def local
-            Gitlab::Backup::Cli::Targets::Files.new(context, storage_path)
+            ::Backup::Targets::Files.new(nil, storage_path, options: options)
           end
 
           def storage_path = context.registry_path

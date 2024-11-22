@@ -44,18 +44,7 @@
                   "type": "number"
                 }
               },
-              "additionalProperties": {
-                "type": [
-                  "string",
-                  "number"
-                ]
-              }
-            },
-            "operator": {
-              "type": "string",
-              "enum": [
-                "sum(value)"
-              ]
+              "additionalProperties": false
             }
           },
           "additionalProperties": false

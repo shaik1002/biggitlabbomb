@@ -72,10 +72,6 @@ describe('AdminUserActions component', () => {
         expect(findActionsDropdown().exists()).toBe(true);
       });
 
-      it('sets actions dropdown autoClose prop to false', () => {
-        expect(findActionsDropdown().props('autoClose')).toBe(false);
-      });
-
       describe('when there are actions that require confirmation', () => {
         beforeEach(() => {
           initComponent({ actions: CONFIRMATION_ACTIONS });

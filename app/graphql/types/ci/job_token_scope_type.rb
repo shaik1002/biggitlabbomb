@@ -3,7 +3,6 @@
 module Types
   # rubocop: disable Graphql/AuthorizeTypes
   # Authorization is in the resolver based on the parent project
-  # TODO: remove once https://gitlab.com/gitlab-org/govern/authorization/team-tasks/-/issues/87 is resolved
   module Ci
     class JobTokenScopeType < BaseObject
       graphql_name 'CiJobTokenScopeType'

@@ -18,7 +18,7 @@ RSpec.describe 'package details', feature_category: :package_registry do
   let(:depth) { 3 }
   let(:excluded) do
     %w[metadata apiFuzzingCiConfiguration pipeline packageFiles
-      runners inboundAllowlistCount groupsAllowlistCount mergeTrains ciJobTokenAuthLogs]
+      runners inboundAllowlistCount groupsAllowlistCount mergeTrains]
   end
 
   let(:metadata) { query_graphql_fragment('ComposerMetadata') }

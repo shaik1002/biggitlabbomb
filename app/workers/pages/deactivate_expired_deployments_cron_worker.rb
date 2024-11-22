@@ -6,7 +6,7 @@ module Pages
     include CronjobQueue # rubocop: disable Scalability/CronWorkerContext -- No relevant metadata
 
     idempotent!
-    data_consistency :always
+    data_consistency :always # rubocop: disable SidekiqLoadBalancing/WorkerDataConsistency -- Job is performing writes
 
     feature_category :pages
 

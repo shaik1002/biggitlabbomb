@@ -12,7 +12,6 @@ module Gitlab
     NO_ACCESS      = 0
     MINIMAL_ACCESS = 5
     GUEST          = 10
-    PLANNER        = 15
     REPORTER       = 20
     DEVELOPER      = 30
     MAINTAINER     = 40
@@ -30,7 +29,6 @@ module Gitlab
     NO_ONE_PROJECT_ACCESS = 0
     MAINTAINER_PROJECT_ACCESS = 1
     DEVELOPER_MAINTAINER_PROJECT_ACCESS = 2
-    ADMINISTRATOR_PROJECT_ACCESS = 3
 
     # Default subgroup creation level
     OWNER_SUBGROUP_ACCESS = 0
@@ -46,7 +44,6 @@ module Gitlab
       def options
         {
           "Guest" => GUEST,
-          "Planner" => PLANNER,
           "Reporter" => REPORTER,
           "Developer" => DEVELOPER,
           "Maintainer" => MAINTAINER
@@ -65,22 +62,9 @@ module Gitlab
         )
       end
 
-      def option_descriptions
-        {
-          NO_ACCESS => s_('MemberRole|The None role is assigned to the invited group users of a shared project when project sharing is disabled in group setting.'),
-          GUEST => s_('MemberRole|The Guest role is for users who need visibility into a project or group but should not have the ability to make changes, such as external stakeholders.'),
-          PLANNER => s_('The Planner role is suitable for team members who need to manage projects and track work items but do not need to contribute code.'),
-          REPORTER => s_('MemberRole|The Reporter role is suitable for team members who need to stay informed about a project or group but do not actively contribute code.'),
-          DEVELOPER => s_('MemberRole|The Developer role gives users access to contribute code while restricting sensitive administrative actions.'),
-          MAINTAINER => s_('MemberRole|The Maintainer role is primarily used for managing code reviews, approvals, and administrative settings for projects. This role can also manage project memberships.'),
-          OWNER => s_('MemberRole|The Owner role is normally assigned to the individual or team responsible for managing and maintaining the group or creating the project. This role has the highest level of administrative control, and can manage all aspects of the group or project, including managing other Owners.')
-        }
-      end
-
       def sym_options
         {
           guest: GUEST,
-          planner: PLANNER,
           reporter: REPORTER,
           developer: DEVELOPER,
           maintainer: MAINTAINER
@@ -148,11 +132,7 @@ module Gitlab
         options_with_owner.key(access)
       end
 
-      def role_description(access)
-        option_descriptions[access]
-      end
-
-      def human_access_with_none(access, _member_role = nil)
+      def human_access_with_none(access)
         options_with_none.key(access)
       end
 
@@ -160,8 +140,7 @@ module Gitlab
         {
           s_('ProjectCreationLevel|No one') => NO_ONE_PROJECT_ACCESS,
           s_('ProjectCreationLevel|Maintainers') => MAINTAINER_PROJECT_ACCESS,
-          s_('ProjectCreationLevel|Developers + Maintainers') => DEVELOPER_MAINTAINER_PROJECT_ACCESS,
-          s_('ProjectCreationLevel|Administrators') => ADMINISTRATOR_PROJECT_ACCESS
+          s_('ProjectCreationLevel|Developers + Maintainers') => DEVELOPER_MAINTAINER_PROJECT_ACCESS
         }
       end
 
@@ -169,8 +148,7 @@ module Gitlab
         {
           'noone' => NO_ONE_PROJECT_ACCESS,
           'maintainer' => MAINTAINER_PROJECT_ACCESS,
-          'developer' => DEVELOPER_MAINTAINER_PROJECT_ACCESS,
-          'administrator' => ADMINISTRATOR_PROJECT_ACCESS
+          'developer' => DEVELOPER_MAINTAINER_PROJECT_ACCESS
         }
       end
 
@@ -211,10 +189,6 @@ module Gitlab
 
     def human_access
       Gitlab::Access.human_access(access_field)
-    end
-
-    def role_description
-      Gitlab::Access.role_description(access_field)
     end
 
     def human_access_with_none

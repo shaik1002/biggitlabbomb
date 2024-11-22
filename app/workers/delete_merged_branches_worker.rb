@@ -3,7 +3,7 @@
 class DeleteMergedBranchesWorker # rubocop:disable Scalability/IdempotentWorker
   include ApplicationWorker
 
-  data_consistency :sticky
+  data_consistency :always
 
   sidekiq_options retry: 3
 

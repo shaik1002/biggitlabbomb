@@ -3,8 +3,6 @@
 require 'spec_helper'
 
 RSpec.describe ProfilesHelper, feature_category: :user_profile do
-  include SafeFormatHelper
-
   describe '#commit_email_select_options' do
     it 'returns an array with private commit email along with all the verified emails' do
       user = create(:user)
@@ -16,7 +14,7 @@ RSpec.describe ProfilesHelper, feature_category: :user_profile do
 
       emails = [
         [s_('Use primary email (%{email})') % { email: user.email }, ''],
-        [safe_format(s_("Profiles|Use a private email - %{email}"), email: private_email), Gitlab::PrivateCommitEmail::TOKEN],
+        [s_("Profiles|Use a private email - %{email}").html_safe % { email: private_email }, Gitlab::PrivateCommitEmail::TOKEN],
         user.email,
         confirmed_email1.email,
         confirmed_email2.email

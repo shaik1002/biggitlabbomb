@@ -14,10 +14,8 @@ module Packages
       ERROR_REASON_PACKAGE_EXISTS = :package_already_exists
       ERROR_REASON_PACKAGE_LEASE_TAKEN = :package_lease_taken
       ERROR_REASON_PACKAGE_PROTECTED = :package_protected
-      ERROR_REASON_UNAUTHORIZED = :unauthorized
 
       def execute
-        return error('Unauthorized', ERROR_REASON_UNAUTHORIZED) unless can_create_package?
         return error('Version is empty.', ERROR_REASON_INVALID_PARAMETER) if version.blank?
         return error('Attachment data is empty.', ERROR_REASON_INVALID_PARAMETER) if attachment['data'].blank?
         return error('Package already exists.', ERROR_REASON_PACKAGE_EXISTS) if current_package_exists?
@@ -67,23 +65,17 @@ module Packages
       end
 
       def current_package_exists?
-        if Feature.enabled?(:npm_extract_npm_package_model, Feature.current_request)
-          ::Packages::Npm::Package.for_projects(project)
-                                  .with_name(name)
-                                  .with_version(version)
-                                  .not_pending_destruction
-                                  .exists?
-        else
-          project.packages
-                 .npm
-                 .with_name(name)
-                 .with_version(version)
-                 .not_pending_destruction
-                 .exists?
-        end
+        project.packages
+               .npm
+               .with_name(name)
+               .with_version(version)
+               .not_pending_destruction
+               .exists?
       end
 
       def current_package_protected?
+        return false if Feature.disabled?(:packages_protected_packages, project)
+
         unless current_user.is_a?(User)
           return project.package_protection_rules.for_package_type(:npm).for_package_name(name).exists?
         end

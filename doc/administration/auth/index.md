@@ -1,5 +1,5 @@
 ---
-stage: Software Supply Chain Security
+stage: Govern
 group: Authentication
 description: Third-party authentication providers.
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
@@ -23,12 +23,12 @@ and the following external authentication and authorization providers:
 NOTE:
 UltraAuth has removed their software which supports OmniAuth integration. We have therefore removed all references to UltraAuth integration.
 
-## GitLab.com compared to self-managed
+## SaaS vs self-managed comparison
 
 The external authentication and authorization providers may support the following capabilities.
 For more information, see the links shown on this page for each external provider.
 
-| Capability                                      | GitLab.com                              | Self-managed                       |
+| Capability                                      | SaaS                                    | Self-managed                       |
 |-------------------------------------------------|-----------------------------------------|------------------------------------|
 | **User Provisioning**                           | SCIM<br>SAML <sup>1</sup> | LDAP <sup>1</sup><br>SAML <sup>1</sup><br>[OmniAuth Providers](../../integration/omniauth.md#supported-providers) <sup>1</sup><br>SCIM  |
 | **User Detail Updating** (not group management) | Not Available                           | LDAP Sync                          |

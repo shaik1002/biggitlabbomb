@@ -1,5 +1,8 @@
 - page_title _('Request details')
-= render ::Layouts::PageHeadingComponent.new(_('Request details'))
+%h2.page-title.gl-text-size-h-display
+  = _("Request details")
+
+%hr
 
 - if @hook_log.oversize?
   - tooltip = _("Request data is too large")

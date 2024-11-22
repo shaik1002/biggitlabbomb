@@ -154,9 +154,10 @@ class Import::GithubController < Import::BaseController
 
   override :provider_url
   def provider_url
-    oauth_config&.dig('url').presence || 'https://github.com'
+    strong_memoize(:provider_url) do
+      oauth_config&.dig('url').presence || 'https://github.com'
+    end
   end
-  strong_memoize_attr :provider_url
 
   private
 

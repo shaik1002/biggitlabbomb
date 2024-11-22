@@ -1,10 +1,10 @@
 ---
-stage: Application Security Testing
+stage: Secure
 group: Static Analysis
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
 
-# GitLab Advanced SAST
+# GitLab Advanced SAST analyzer
 
 DETAILS:
 **Tier:** Ultimate
@@ -84,7 +84,7 @@ On GitLab self-managed, you must also use a GitLab version that supports Advance
   - The latest template includes Advanced SAST in GitLab 17.2 or later. Note that you [should not mix latest and stable templates](../index.md#template-editions) in a single project.
 - At a minimum, GitLab Advanced SAST requires version 17.1 or later.
 
-### Enable Advanced SAST scanning
+### Enabling Advanced SAST scanning
 
 Advanced SAST is included in the standard GitLab SAST CI/CD template, but isn't yet enabled by default.
 To enable it, set the CI/CD variable `GITLAB_ADVANCED_SAST_ENABLED` to `true`.
@@ -142,36 +142,17 @@ Pipelines now include an Advanced SAST job.
 
 ## Vulnerability code flow
 
-FLAG:
-The availability of this feature is controlled by feature flags. For more information, see [Code flow feature availability](#code-flow-feature-availability).
+For some vulnerabilities detected by Advanced SAST, a **Code flow** tab is available in the [Vulnerability Page](../vulnerabilities/index.md).
+A vulnerability's code flow is the path the data takes from the user input (source) to the vulnerable line of code (sink),
+through all assignments, manipulation, and sanitization. This information helps you understand and evaluate the
+vulnerability's context, impact, and risk.
 
-For specific types of vulnerabilities, GitLab Advanced SAST provides code flow information.
-A vulnerability's code flow is the path the data takes from the user input (source) to the vulnerable line of code (sink), through all assignments, manipulation, and sanitization.
-This information helps you understand and evaluate the vulnerability's context, impact, and risk.
-Code flow information is available for vulnerabilities that are detected by tracing input from a source to a sink, including:
-
-- SQL injection
-- Command injection
-- Cross-site scripting (XSS)
-- Path traversal
-
-The code flow information is shown the **Code flow** tab and includes:
+The **Code flow** tab shows:
 
 - The steps from source to sink.
 - The relevant files, including code snippets.
 
-![A code flow of a Python application across two files](../vulnerabilities/img/example_code_flow_of_python_applications_v17_3.png)
-
-### Code flow feature availability
-
-The code flow view is integrated into each view where vulnerability details are shown.
-On GitLab self-managed, you can activate the view by [enabling the required feature flags](../../../administration/feature_flags.md#how-to-enable-and-disable-features-behind-flags) starting in the minimum version shown.
-
-| Location                                                        | Availability on GitLab.com        | Availability on GitLab self-managed                                   | Feature flags required                                                |
-|-----------------------------------------------------------------|-----------------------------------|-----------------------------------------------------------------------|-----------------------------------------------------------------------|
-| [Vulnerability Report](../vulnerability_report/index.md)        | Enabled by default in GitLab 17.3 | Enabled by default in GitLab 17.6. Available in GitLab 17.3 or later. | `vulnerability_code_flow`                                             |
-| [Merge request widget](index.md#merge-request-widget)           | Enabled by default in GitLab 17.6 | Enabled by default in GitLab 17.6. Available in GitLab 17.5 or later. | Both `vulnerability_code_flow` and `pipeline_vulnerability_code_flow` |
-| [Pipeline security report](../vulnerability_report/pipeline.md) | Enabled by default in GitLab 17.6 | Enabled by default in GitLab 17.6. Available in GitLab 17.5 or later. | Both `vulnerability_code_flow` and `pipeline_vulnerability_code_flow` |
+![Vulnerability Code Flow](../vulnerabilities/img/example_code_flow_of_python_applications_v17_3.png)
 
 ## Troubleshooting
 

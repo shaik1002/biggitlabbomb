@@ -1,4 +1,3 @@
-import { escapeRegExp } from 'lodash';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { queryToObject } from '~/lib/utils/url_utility';
 import AccessorUtilities from '~/lib/utils/accessor';
@@ -28,10 +27,8 @@ import {
   WORK_ITEM_TYPE_ENUM_OBJECTIVE,
   WORK_ITEM_TYPE_ENUM_KEY_RESULT,
   WORK_ITEM_TYPE_ENUM_REQUIREMENTS,
-  WORK_ITEM_TYPE_ROUTE_WORK_ITEM,
   NEW_WORK_ITEM_GID,
   DEFAULT_PAGE_SIZE_CHILD_ITEMS,
-  STATE_CLOSED,
 } from './constants';
 
 export const isAssigneesWidget = (widget) => widget.type === WIDGET_TYPE_ASSIGNEES;
@@ -53,9 +50,6 @@ export const findHierarchyWidgets = (widgets) =>
 
 export const findLinkedItemsWidget = (workItem) =>
   workItem.widgets?.find((widget) => widget.type === WIDGET_TYPE_LINKED_ITEMS);
-
-export const findStartAndDueDateWidget = (workItem) =>
-  workItem.widgets?.find((widget) => widget.type === WIDGET_TYPE_START_AND_DUE_DATE);
 
 export const findAwardEmojiWidget = (workItem) =>
   workItem.widgets?.find((widget) => widget.type === WIDGET_TYPE_AWARD_EMOJI);
@@ -160,15 +154,6 @@ export const markdownPreviewPath = ({ fullPath, iid, isGroup = false }) => {
   return `${domain}/${basePath}/-/preview_markdown?target_type=WorkItem&target_id=${iid}`;
 };
 
-// the path for creating a new work item of that type, e.g. /groups/gitlab-org/-/epics/new
-export const newWorkItemPath = ({ fullPath, isGroup = false, workItemTypeName }) => {
-  const domain = gon.relative_url_root || '';
-  const basePath = isGroup ? `groups/${fullPath}` : fullPath;
-  const type =
-    WORK_ITEMS_TYPE_MAP[workItemTypeName]?.routeParamName || WORK_ITEM_TYPE_ROUTE_WORK_ITEM;
-  return `${domain}/${basePath}/-/${type}/new`;
-};
-
 export const getDisplayReference = (workItemFullPath, workitemReference) => {
   // The reference is replaced by work item fullpath in case the project and group are same.
   // e.g., gitlab-org/gitlab-test#45 will be shown as #45
@@ -251,15 +236,15 @@ export const newWorkItemId = (workItemType) => {
   return `${NEW_WORK_ITEM_GID}-${workItemTypeLowercase}`;
 };
 
-export const saveToggleToLocalStorage = (key, value) => {
+export const saveShowLabelsToLocalStorage = (showLabelsLocalStorageKey, value) => {
   if (AccessorUtilities.canUseLocalStorage()) {
-    localStorage.setItem(key, value);
+    localStorage.setItem(showLabelsLocalStorageKey, value);
   }
 };
 
-export const getToggleFromLocalStorage = (key, defaultValue = true) => {
+export const getShowLabelsFromLocalStorage = (showLabelsLocalStorageKey, defaultValue = true) => {
   if (AccessorUtilities.canUseLocalStorage()) {
-    return parseBoolean(localStorage.getItem(key) ?? defaultValue);
+    return parseBoolean(localStorage.getItem(showLabelsLocalStorageKey) ?? defaultValue);
   }
   return null;
 };
@@ -301,25 +286,4 @@ export const makeDrawerUrlParam = (activeItem, fullPath, issuableType = TYPE_ISS
 export const getNewWorkItemAutoSaveKey = (fullPath, workItemType) => {
   if (!workItemType || !fullPath) return '';
   return `new-${fullPath}-${workItemType.toLowerCase()}-draft`;
-};
-
-export const isItemDisplayable = (item, showClosed) => {
-  return item.state !== STATE_CLOSED || (item.state === STATE_CLOSED && showClosed);
-};
-
-export const getItems = (showClosed) => {
-  return (children) => {
-    return children.filter((item) => isItemDisplayable(item, showClosed));
-  };
-};
-
-export const canRouterNav = ({ fullPath, webUrl, isGroup, issueAsWorkItem }) => {
-  const escapedFullPath = escapeRegExp(fullPath);
-  // eslint-disable-next-line no-useless-escape
-  const groupRegex = new RegExp(`groups\/${escapedFullPath}\/-\/(work_items|epics)\/\\d+`);
-  // eslint-disable-next-line no-useless-escape
-  const projectRegex = new RegExp(`${escapedFullPath}\/-\/(work_items|issues)\/\\d+`);
-  const canGroupNavigate = groupRegex.test(webUrl) && isGroup;
-  const canProjectNavigate = projectRegex.test(webUrl) && issueAsWorkItem;
-  return canGroupNavigate || canProjectNavigate;
 };

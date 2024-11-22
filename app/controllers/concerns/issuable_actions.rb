@@ -166,19 +166,20 @@ module IssuableActions
   private
 
   def notes_filter
-    notes_filter_param = params[:notes_filter]&.to_i
+    strong_memoize(:notes_filter) do
+      notes_filter_param = params[:notes_filter]&.to_i
 
-    # GitLab Geo does not expect database UPDATE or INSERT statements to happen
-    # on GET requests.
-    # This is just a fail-safe in case notes_filter is sent via GET request in GitLab Geo.
-    # In some cases, we also force the filter to not be persisted with the `persist_filter` param
-    if Gitlab::Database.read_only? || params[:persist_filter] == 'false'
-      notes_filter_param || current_user&.notes_filter_for(issuable)
-    else
-      current_user&.set_notes_filter(notes_filter_param, issuable) || notes_filter_param
+      # GitLab Geo does not expect database UPDATE or INSERT statements to happen
+      # on GET requests.
+      # This is just a fail-safe in case notes_filter is sent via GET request in GitLab Geo.
+      # In some cases, we also force the filter to not be persisted with the `persist_filter` param
+      if Gitlab::Database.read_only? || params[:persist_filter] == 'false'
+        notes_filter_param || current_user&.notes_filter_for(issuable)
+      else
+        current_user&.set_notes_filter(notes_filter_param, issuable) || notes_filter_param
+      end
     end
   end
-  strong_memoize_attr :notes_filter
 
   def discussion_cache_context
     [current_user&.cache_key, project.team.human_max_access(current_user&.id), 'v2'].join(':')
@@ -279,6 +280,7 @@ module IssuableActions
     @project || @group # rubocop:disable Gitlab/ModuleWithInstanceVariables
   end
 
+  # rubocop:disable Gitlab/ModuleWithInstanceVariables
   def finder_params_for_issuable
     {
       notes_filter: notes_filter,
@@ -286,6 +288,7 @@ module IssuableActions
       per_page: params[:per_page]
     }
   end
+  # rubocop:enable Gitlab/ModuleWithInstanceVariables
 end
 
 IssuableActions.prepend_mod_with('IssuableActions')

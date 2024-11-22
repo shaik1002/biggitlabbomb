@@ -35,7 +35,15 @@ export default {
     SidebarHoverPeekBehavior,
     SidebarPortalTarget,
     ScrollScrim,
-    TrialWidget: () => import('jh_else_ee/contextual_sidebar/components/trial_widget.vue'),
+    TrialWidget: () => import('ee_component/contextual_sidebar/components/trial_widget.vue'),
+    TrialStatusWidget: () =>
+      import('ee_component/contextual_sidebar/components/trial_status_widget.vue'),
+    TrialStatusPopover: () =>
+      import('ee_component/contextual_sidebar/components/trial_status_popover.vue'),
+    DuoProTrialStatusWidget: () =>
+      import('ee_component/contextual_sidebar/components/duo_pro_trial_status_widget.vue'),
+    DuoProTrialStatusPopover: () =>
+      import('ee_component/contextual_sidebar/components/duo_pro_trial_status_popover.vue'),
   },
   mixins: [Tracking.mixin()],
   i18n: {
@@ -43,7 +51,7 @@ export default {
     primaryNavigation: s__('Navigation|Primary navigation'),
     adminArea: s__('Navigation|Admin'),
   },
-  inject: ['showTrialWidget'],
+  inject: ['showTrialStatusWidget', 'showDuoProTrialStatusWidget', 'showTrialWidget'],
   props: {
     sidebarData: {
       type: Object,
@@ -200,7 +208,7 @@ export default {
     <div ref="overlay" class="super-sidebar-overlay" @click="collapseSidebar"></div>
     <gl-button
       v-if="sidebarData.is_logged_in"
-      class="super-sidebar-skip-to gl-sr-only !gl-fixed gl-left-0 gl-m-3 focus:gl-not-sr-only"
+      class="super-sidebar-skip-to gl-sr-only gl-fixed gl-left-0 gl-m-3 focus:gl-not-sr-only"
       data-testid="super-sidebar-skip-to"
       href="#content-body"
       variant="confirm"
@@ -222,6 +230,18 @@ export default {
         {{ $options.i18n.primaryNavigation }}
       </h2>
       <user-bar ref="userBar" :has-collapse-button="!showOverlay" :sidebar-data="sidebarData" />
+      <div v-if="showTrialStatusWidget" class="gl-p-2">
+        <trial-status-widget
+          class="super-sidebar-nav-item gl-relative gl-mb-1 gl-flex gl-items-center gl-rounded-base gl-p-3 gl-leading-normal !gl-text-default !gl-no-underline"
+        />
+        <trial-status-popover />
+      </div>
+      <div v-else-if="showDuoProTrialStatusWidget" class="gl-p-2">
+        <duo-pro-trial-status-widget
+          class="super-sidebar-nav-item gl-relative gl-mb-1 gl-flex gl-items-center gl-rounded-base gl-p-3 gl-leading-normal !gl-text-default !gl-no-underline"
+        />
+        <duo-pro-trial-status-popover />
+      </div>
       <div class="contextual-nav gl-flex gl-grow gl-flex-col gl-overflow-hidden">
         <div
           v-if="sidebarData.current_context_header"

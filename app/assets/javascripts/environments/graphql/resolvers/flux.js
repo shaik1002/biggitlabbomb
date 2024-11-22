@@ -4,7 +4,6 @@ import {
   HELM_RELEASES_RESOURCE_TYPE,
   KUSTOMIZATIONS_RESOURCE_TYPE,
 } from '~/environments/constants';
-import { subscribeToSocket } from '~/kubernetes_dashboard/graphql/helpers/resolver_helpers';
 import { updateConnectionStatus } from '~/environments/graphql/resolvers/kubernetes/k8s_connection_status';
 import { connectionStatus } from '~/environments/graphql/resolvers/kubernetes/constants';
 import { buildKubernetesErrors } from '~/environments/helpers/k8s_integration_helper';
@@ -52,8 +51,8 @@ const mapFluxItems = (fluxItem, resourceType) => {
   return result;
 };
 
-const watchFluxResource = async ({
-  apiVersion,
+const watchFluxResource = ({
+  watchPath,
   resourceName,
   namespace,
   query,
@@ -62,73 +61,51 @@ const watchFluxResource = async ({
   field,
   client,
 }) => {
-  const watchPath = buildFluxResourceWatchPath({ namespace, apiVersion, resourceType });
+  const config = new Configuration(variables.configuration);
+  const watcherApi = new WatchApi(config);
   const fieldSelector = `metadata.name=${decodeURIComponent(resourceName)}`;
 
-  const updateFluxConnection = (status) => {
-    updateConnectionStatus(client, {
-      configuration: variables.configuration,
-      namespace,
-      resourceType,
-      status,
-    });
-  };
+  updateConnectionStatus(client, {
+    configuration: variables.configuration,
+    namespace,
+    resourceType,
+    status: connectionStatus.connecting,
+  });
 
-  const updateQueryCache = (data) => {
-    const result = mapFluxItems(data[0], resourceType);
-    client.writeQuery({
-      query,
-      variables,
-      data: { [field]: result },
-    });
-  };
+  watcherApi
+    .subscribeToStream(watchPath, { watch: true, fieldSelector })
+    .then((watcher) => {
+      let result = [];
 
-  const watchFunction = async () => {
-    const config = new Configuration(variables.configuration);
-    const watcherApi = new WatchApi(config);
-
-    try {
-      const watcher = await watcherApi.subscribeToStream(watchPath, { watch: true, fieldSelector });
       watcher.on(EVENT_DATA, (data) => {
-        updateQueryCache(data);
-        updateFluxConnection(connectionStatus.connected);
+        result = mapFluxItems(data[0], resourceType);
+
+        client.writeQuery({
+          query,
+          variables,
+          data: { [field]: result },
+        });
+
+        updateConnectionStatus(client, {
+          configuration: variables.configuration,
+          namespace,
+          resourceType,
+          status: connectionStatus.connected,
+        });
       });
-      watcher.on(EVENT_TIMEOUT, () => updateFluxConnection(connectionStatus.disconnected));
-    } catch (err) {
-      await handleClusterError(err);
-    }
-  };
 
-  updateFluxConnection(connectionStatus.connecting);
-
-  if (gon?.features?.useWebsocketForK8sWatch) {
-    const watchId = `${resourceType}-${resourceName}`;
-    const [group, version] = apiVersion.split('/');
-    const watchParams = {
-      version,
-      group,
-      resource: resourceType,
-      fieldSelector,
-      namespace,
-    };
-    const cacheParams = {
-      updateQueryCache,
-      updateConnectionStatusFn: updateFluxConnection,
-    };
-
-    try {
-      await subscribeToSocket({
-        watchId,
-        watchParams,
-        configuration: variables.configuration,
-        cacheParams,
+      watcher.on(EVENT_TIMEOUT, () => {
+        updateConnectionStatus(client, {
+          configuration: variables.configuration,
+          namespace,
+          resourceType,
+          status: connectionStatus.disconnected,
+        });
       });
-    } catch {
-      await watchFunction();
-    }
-  } else {
-    await watchFunction();
-  }
+    })
+    .catch((err) => {
+      handleClusterError(err);
+    });
 };
 
 const getFluxResource = ({ query, variables, field, resourceType, client }) => {
@@ -145,8 +122,10 @@ const getFluxResource = ({ query, variables, field, resourceType, client }) => {
       const apiVersion = fluxData?.apiVersion;
 
       if (resourceName) {
+        const watchPath = buildFluxResourceWatchPath({ namespace, apiVersion, resourceType });
+
         watchFluxResource({
-          apiVersion,
+          watchPath,
           resourceName,
           namespace,
           query,

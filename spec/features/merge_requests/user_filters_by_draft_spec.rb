@@ -16,8 +16,16 @@ RSpec.describe 'Merge Requests > User filters by draft', :js, feature_category: 
   end
 
   it 'filters results' do
-    select_tokens 'Draft', 'Yes', submit: true
+    input_filtered_search_keys('draft:=yes')
 
     expect(page).to have_content('Draft: Bugfix')
+  end
+
+  it 'does not allow filtering by is not equal' do
+    find('#filtered-search-merge_requests').click
+
+    click_button 'Draft'
+
+    expect(page).not_to have_content('!=')
   end
 end

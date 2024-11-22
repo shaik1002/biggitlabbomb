@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require './spec/support/sidekiq_middleware'
-require './lib/gitlab/faker/internet'
 
 class Gitlab::Seeder::Users
   include ActionView::Helpers::NumberHelper
@@ -76,7 +75,7 @@ class Gitlab::Seeder::Users
     RANDOM_USERS_COUNT.times do |i|
       begin
         User.create!(
-          username: Gitlab::Faker::Internet.unique_username,
+          username: FFaker::Internet.user_name,
           name: FFaker::Name.name,
           email: FFaker::Internet.email,
           confirmed_at: DateTime.now,

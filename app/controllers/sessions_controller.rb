@@ -80,7 +80,7 @@ class SessionsController < Devise::SessionsController
 
       accept_pending_invitations
 
-      synchronize_broadcast_message_dismissals(current_user)
+      synchronize_broadcast_message_dismissals
 
       log_audit_event(current_user, resource, with: authentication_method)
       log_user_activity(current_user)
@@ -277,12 +277,9 @@ class SessionsController < Devise::SessionsController
   end
 
   def log_audit_event(user, resource, options = {})
-    Gitlab::AppLogger.info(
-      "Successful Login: username=#{resource.username} ip=#{request.remote_ip} " \
-        "method=#{options[:with]} admin=#{resource.admin?}"
-    )
+    Gitlab::AppLogger.info("Successful Login: username=#{resource.username} ip=#{request.remote_ip} method=#{options[:with]} admin=#{resource.admin?}")
     AuditEventService.new(user, user, options)
-                     .for_authentication.security_event
+      .for_authentication.security_event
   end
 
   def log_user_activity(user)

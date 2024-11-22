@@ -115,8 +115,6 @@ namespace :gitlab do
 
       return unless databases_loaded.present? && databases_loaded.all?
 
-      alter_cell_sequences_range
-
       Rake::Task["gitlab:db:lock_writes"].invoke
       Rake::Task['db:seed_fu'].invoke
     end
@@ -141,17 +139,6 @@ namespace :gitlab do
       end
 
       load_database
-    end
-
-    def alter_cell_sequences_range
-      return unless Gitlab.config.topology_service_enabled? && Gitlab.config.has_configured_cell?
-
-      sequence_range = Gitlab::TopologyServiceClient::CellService.new.cell_sequence_range
-
-      return unless sequence_range.present?
-
-      puts "Running gitlab:db:alter_cell_sequences_range rake task with (#{sequence_range.join(', ')})"
-      Rake::Task["gitlab:db:alter_cell_sequences_range"].invoke(*sequence_range)
     end
 
     desc "Clear all connections"
@@ -571,7 +558,6 @@ namespace :gitlab do
             .reject { |c| c.name =~ /^(?:EE::)?Gitlab::(?:BackgroundMigration|DatabaseImporters)::/ }
             .reject { |c| c.name =~ /^HABTM_/ }
             .reject { |c| c < Gitlab::Database::Migration[1.0]::MigrationRecord }
-            .reject { |c| c.name == 'TmpUser' }
             .each { |c| classes[c.table_name] << c.name if classes.has_key?(c.table_name) && c.name.present? }
 
           sources.each do |source_name|
@@ -587,8 +573,7 @@ namespace :gitlab do
               'feature_categories' => [],
               'description' => nil,
               'introduced_by_url' => nil,
-              'milestone' => milestone,
-              'table_size' => 'small'
+              'milestone' => milestone
             }
 
             if File.exist?(file)

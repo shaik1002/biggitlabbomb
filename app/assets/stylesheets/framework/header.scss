@@ -32,6 +32,12 @@
     max-width: unset;
   }
 
+  .no-emoji-placeholder {
+    svg {
+      fill: var(--gray-500, $gray-500);
+    }
+  }
+
   .emoji-menu-toggle-button {
     @include emoji-menu-toggle-button;
     padding: $gl-vert-padding $gl-btn-padding;
@@ -89,7 +95,7 @@
 
   &:focus,
   &:active {
-    @apply gl-focus;
+    @include gl-focus;
   }
 
   &:active {
@@ -144,7 +150,7 @@
 
     &:focus,
     &:active {
-      @apply gl-focus;
+      @include gl-focus;
     }
 
     &:active {

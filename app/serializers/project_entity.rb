@@ -17,8 +17,4 @@ class ProjectEntity < Grape::Entity
   expose :refs_url do |project|
     refs_project_path(project)
   end
-
-  expose :forked, documentation: { type: 'boolean', example: true } do |project|
-    project.forked?
-  end
 end

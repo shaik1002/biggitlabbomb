@@ -2,7 +2,6 @@ import VueApollo from 'vue-apollo';
 import Vue from 'vue';
 import { GlCollapsibleListbox, GlAlert } from '@gitlab/ui';
 import { chunk } from 'lodash';
-import currentUserOrganizationsGraphQlResponse from 'test_fixtures/graphql/organizations/current_user_organizations.query.graphql.json';
 import organizationsGraphQlResponse from 'test_fixtures/graphql/organizations/organizations.query.graphql.json';
 import { mountExtended } from 'helpers/vue_test_utils_helper';
 import OrganizationSelect from '~/vue_shared/components/entity_select/organization_select.vue';
@@ -14,9 +13,8 @@ import {
   FETCH_ORGANIZATIONS_ERROR,
   FETCH_ORGANIZATION_ERROR,
 } from '~/vue_shared/components/entity_select/constants';
-import getCurrentUserOrganizationsQuery from '~/organizations/shared/graphql/queries/current_user_organizations.query.graphql';
+import getCurrentUserOrganizationsQuery from '~/organizations/shared/graphql/queries/organizations.query.graphql';
 import getOrganizationQuery from '~/organizations/shared/graphql/queries/organization.query.graphql';
-import getOrganizationsQuery from '~/organizations/shared/graphql/queries/organizations.query.graphql';
 import { pageInfoMultiplePages, pageInfoEmpty } from 'jest/organizations/mock_data';
 import waitForPromises from 'helpers/wait_for_promises';
 import createMockApollo from 'helpers/mock_apollo_helper';
@@ -32,11 +30,15 @@ describe('OrganizationSelect', () => {
   const {
     data: {
       currentUser: {
-        organizations: { nodes },
+        organizations: { nodes, pageInfo },
       },
     },
-  } = currentUserOrganizationsGraphQlResponse;
+  } = organizationsGraphQlResponse;
   const [organization] = nodes;
+  const organizations = {
+    nodes,
+    pageInfo,
+  };
 
   // Props
   const label = 'label';
@@ -52,9 +54,9 @@ describe('OrganizationSelect', () => {
 
   // Mock handlers
   const handleInput = jest.fn();
-  const getCurrentUserOrganizationsQueryHandler = jest
-    .fn()
-    .mockResolvedValue(currentUserOrganizationsGraphQlResponse);
+  const getCurrentUserOrganizationsQueryHandler = jest.fn().mockResolvedValue({
+    data: { currentUser: { id: 'gid://gitlab/User/1', __typename: 'CurrentUser', organizations } },
+  });
   const getOrganizationQueryHandler = jest.fn().mockResolvedValue({
     data: { organization },
   });
@@ -100,7 +102,6 @@ describe('OrganizationSelect', () => {
       ${'defaultToggleText'} | ${ORGANIZATION_TOGGLE_TEXT}
       ${'headerText'}        | ${ORGANIZATION_HEADER_TEXT}
       ${'toggleClass'}       | ${toggleClass}
-      ${'searchable'}        | ${true}
     `('passes the $prop prop to entity-select', ({ prop, expectedValue }) => {
       expect(findEntitySelect().props(prop)).toBe(expectedValue);
     });
@@ -230,34 +231,5 @@ describe('OrganizationSelect', () => {
     findEntitySelect().vm.$emit('input');
 
     expect(handleInput).toHaveBeenCalledTimes(1);
-  });
-
-  describe('when query and queryPath props are passed', () => {
-    const getOrganizationsQueryHandler = jest.fn().mockResolvedValue(organizationsGraphQlResponse);
-
-    beforeEach(async () => {
-      createComponent({
-        props: {
-          query: getOrganizationsQuery,
-          queryPath: 'organizations',
-        },
-        handlers: [
-          [getOrganizationsQuery, getOrganizationsQueryHandler],
-          [getOrganizationQuery, getOrganizationQueryHandler],
-        ],
-      });
-      openListbox();
-      await waitForPromises();
-    });
-
-    it('uses passed GraphQL query', () => {
-      const expectedItems = organizationsGraphQlResponse.data.organizations.nodes.map((node) => ({
-        ...node,
-        text: node.name,
-        value: getIdFromGraphQLId(node.id),
-      }));
-
-      expect(findListbox().props('items')).toEqual(expectedItems);
-    });
   });
 });

@@ -14,7 +14,7 @@ module Gitlab
           # Validate assumption: The last two columns must match the page order_by
           validate_order!(relation)
 
-          relation.limit(page.per_page)
+          relation.limit(page.per_page) # rubocop: disable CodeReuse/ActiveRecord
         end
 
         def finalize(records)

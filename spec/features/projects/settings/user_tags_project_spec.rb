@@ -5,7 +5,7 @@ require 'spec_helper'
 RSpec.describe 'Projects > Settings > User tags a project', :js, feature_category: :groups_and_projects do
   let(:user) { create(:user) }
   let(:project) { create(:project, namespace: user.namespace) }
-  let!(:topic) { create(:topic, name: 'topic1', organization: project.organization) }
+  let!(:topic) { create(:topic, name: 'topic1') }
 
   before do
     sign_in(user)

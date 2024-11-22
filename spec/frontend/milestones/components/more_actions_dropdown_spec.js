@@ -13,6 +13,7 @@ describe('moreActionsDropdown', () => {
     title: 'Milestone 1',
     isActive: true,
     showDelete: true,
+    canReadMilestone: true,
     milestoneUrl: '/milestone-url',
     editUrl: '/edit-url',
     closeUrl: '/close-url',
@@ -269,6 +270,25 @@ describe('moreActionsDropdown', () => {
       showDropdown();
 
       expect(findMilestoneIdItem().text()).toBe('Copy milestone ID: 22');
+    });
+
+    it('renders if `canReadMilestone` is true', () => {
+      createComponent({
+        provideData: {
+          canReadMilestone: true,
+        },
+      });
+      expect(findMilestoneIdItem().exists()).toBe(true);
+    });
+
+    it('does not render if `canReadMilestone` is false', () => {
+      createComponent({
+        provideData: {
+          canReadMilestone: false,
+        },
+      });
+
+      expect(findMilestoneIdItem().exists()).toBe(false);
     });
   });
 });

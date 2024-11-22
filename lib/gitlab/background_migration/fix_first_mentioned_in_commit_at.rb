@@ -7,6 +7,7 @@ module Gitlab
     class FixFirstMentionedInCommitAt
       SUB_BATCH_SIZE = 500
 
+      # rubocop: disable Style/Documentation
       class TmpIssueMetrics < ActiveRecord::Base
         include EachBatch
 
@@ -24,6 +25,7 @@ module Gitlab
           end
         end
       end
+      # rubocop: enable Style/Documentation
 
       def perform(start_id, end_id)
         scope(start_id, end_id).each_batch(of: SUB_BATCH_SIZE, column: :issue_id) do |sub_batch|

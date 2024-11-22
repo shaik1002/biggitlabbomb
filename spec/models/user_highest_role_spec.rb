@@ -31,7 +31,6 @@ RSpec.describe UserHighestRole, feature_category: :plan_provisioning do
     let(:expected_allowed_values) do
       [
         Gitlab::Access::GUEST,
-        Gitlab::Access::PLANNER,
         Gitlab::Access::REPORTER,
         Gitlab::Access::DEVELOPER,
         Gitlab::Access::MAINTAINER,

@@ -13,9 +13,9 @@ module InternalEventsCli
     :time_frame,
     :data_source,
     :data_category,
-    :product_categories,
+    :product_category,
     :distribution,
-    :tiers,
+    :tier,
     :events
   ].freeze
 

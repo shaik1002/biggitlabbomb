@@ -43,13 +43,11 @@ module Gitlab
       private
 
       def track_session_metrics
-        session = ::Gitlab::Database::LoadBalancing::SessionMap.current(::ApplicationRecord.load_balancer)
-
-        before = session.use_primary?
+        before = ::Gitlab::Database::LoadBalancing::Session.current.use_primary?
 
         yield
 
-        after = session.use_primary?
+        after = ::Gitlab::Database::LoadBalancing::Session.current.use_primary?
 
         increment_attempt_count
 

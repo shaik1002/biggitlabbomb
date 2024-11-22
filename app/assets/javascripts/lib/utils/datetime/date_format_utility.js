@@ -1,7 +1,6 @@
 import { isString, mapValues, reduce, isDate, unescape } from 'lodash';
 import dateFormat from '~/lib/dateformat';
 import { roundToNearestHalf } from '~/lib/utils/common_utils';
-import { localeDateFormat } from '~/lib/utils/datetime/locale_dateformat';
 import { sanitize } from '~/lib/dompurify';
 import { s__, n__, __, sprintf } from '~/locale';
 
@@ -57,6 +56,28 @@ export const monthInWords = (date, abbreviated = false) => {
   }
 
   return getMonthNames(abbreviated)[date.getMonth()];
+};
+
+/**
+ * Formats date to `January 01, 1970`
+ *
+ * @param {Date} [date]
+ * @param {boolean} [abbreviated]
+ * @param {boolean} [hideYear]
+ */
+export const dateInWords = (date, abbreviated = false, hideYear = false) => {
+  if (!date) return date;
+
+  const month = date.getMonth();
+  const year = date.getFullYear();
+
+  const monthName = getMonthNames(abbreviated)[month];
+
+  if (hideYear) {
+    return `${monthName} ${date.getDate()}`;
+  }
+
+  return `${monthName} ${date.getDate()}, ${year}`;
 };
 
 /**
@@ -484,16 +505,26 @@ export const formatTimezone = ({ offset, name }) => `[UTC${formatUtcOffset(offse
  */
 export const humanTimeframe = (startDate, dueDate) => {
   if (startDate && dueDate) {
-    return localeDateFormat.asDate.formatRange(startDate, dueDate);
+    const startDateInWords = dateInWords(
+      startDate,
+      true,
+      startDate.getFullYear() === dueDate.getFullYear(),
+    );
+    const dueDateInWords = dateInWords(dueDate, true);
+
+    return sprintf(__('%{startDate} – %{dueDate}'), {
+      startDate: startDateInWords,
+      dueDate: dueDateInWords,
+    });
   }
   if (startDate && !dueDate) {
     return sprintf(__('%{startDate} – No due date'), {
-      startDate: localeDateFormat.asDate.format(startDate),
+      startDate: dateInWords(startDate, true, false),
     });
   }
   if (!startDate && dueDate) {
     return sprintf(__('No start date – %{dueDate}'), {
-      dueDate: localeDateFormat.asDate.format(dueDate),
+      dueDate: dateInWords(dueDate, true, false),
     });
   }
   return '';

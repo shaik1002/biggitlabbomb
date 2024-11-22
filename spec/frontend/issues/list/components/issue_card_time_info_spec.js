@@ -51,7 +51,6 @@ describe('CE IssueCardTimeInfo component', () => {
 
   const findMilestone = () => wrapper.findComponent(IssuableMilestone);
   const findDueDate = () => wrapper.find('[data-testid="issuable-due-date"]');
-  const findDateIcon = () => findDueDate().findComponent(GlIcon);
 
   const mountComponent = ({ issue = issueObject() } = {}) =>
     shallowMount(IssueCardTimeInfo, { propsData: { issue } });
@@ -79,35 +78,27 @@ describe('CE IssueCardTimeInfo component', () => {
 
           expect(dueDate.text()).toBe('Dec 12, 2020');
           expect(dueDate.attributes('title')).toBe('Due date');
-          expect(findDateIcon().props()).toMatchObject({
-            variant: 'current',
-            name: 'calendar',
-          });
+          expect(dueDate.findComponent(GlIcon).props('name')).toBe('calendar');
+          expect(dueDate.classes()).not.toContain('gl-text-red-500');
         });
       });
 
       describe('when in the past', () => {
         describe('when issue is open', () => {
-          it('renders in red with overdue icon', () => {
+          it('renders in red', () => {
             wrapper = mountComponent({ issue: object({ dueDate: '2020-10-10' }) });
 
-            expect(findDateIcon().props()).toMatchObject({
-              variant: 'danger',
-              name: 'calendar-overdue',
-            });
+            expect(findDueDate().classes()).toContain('gl-text-red-500');
           });
         });
 
         describe('when issue is closed', () => {
-          it('does not render in red with overdue icon', () => {
+          it('does not render in red', () => {
             wrapper = mountComponent({
               issue: object({ dueDate: '2020-10-10', state: STATUS_CLOSED }),
             });
 
-            expect(findDateIcon().props()).toMatchObject({
-              variant: 'current',
-              name: 'calendar',
-            });
+            expect(findDueDate().classes()).not.toContain('gl-text-red-500');
           });
         });
       });
@@ -121,7 +112,7 @@ describe('CE IssueCardTimeInfo component', () => {
           });
           const dueDate = findDueDate();
 
-          expect(dueDate.text()).toBe('Nov 30 – Dec 12, 2020');
+          expect(dueDate.text()).toBe('Nov 30 – Dec 12, 2020');
         });
       });
 

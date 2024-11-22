@@ -47,12 +47,6 @@ module Gitlab
           # No-op, required by the partition manager
         end
 
-        def partition_name(lower_bound)
-          suffix = lower_bound&.strftime('%Y%m') || '000000'
-
-          "#{table_name}_#{suffix}"
-        end
-
         private
 
         def desired_partitions
@@ -103,7 +97,7 @@ module Gitlab
         end
 
         def partition_for(upper_bound:, lower_bound: nil)
-          TimePartition.new(table_name, lower_bound, upper_bound, partition_name: partition_name(lower_bound))
+          TimePartition.new(table_name, lower_bound, upper_bound)
         end
 
         def pruning_old_partitions?

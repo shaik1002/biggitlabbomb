@@ -13,6 +13,8 @@ module RuboCop
     #
     #   # good
     #   class User < ApplicationRecord
+    #     include IgnorableColumns
+    #
     #     ignore_column :name, remove_after: '2023-05-22', remove_with: '16.0'
     #     ignore_column :full_name, remove_after: '2023-05-22', remove_with: '16.0'
     #   end

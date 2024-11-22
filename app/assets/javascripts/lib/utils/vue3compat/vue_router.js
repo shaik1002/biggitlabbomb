@@ -4,7 +4,7 @@ import {
   createMemoryHistory,
   createWebHistory,
   createWebHashHistory,
-} from '@gitlab/vue-router-vue3';
+} from 'vue-router-vue3';
 
 const mode = (value, options) => {
   if (!value) return null;

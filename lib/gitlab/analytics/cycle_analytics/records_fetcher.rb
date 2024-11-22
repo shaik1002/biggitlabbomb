@@ -23,6 +23,7 @@ module Gitlab
           @per_page = MAX_RECORDS
         end
 
+        # rubocop: disable CodeReuse/ActiveRecord
         def serialized_records
           strong_memoize(:serialized_records) do
             records = ordered_and_limited_query.select(*columns, *time_columns)
@@ -50,6 +51,7 @@ module Gitlab
 
           preload_associations(records)
         end
+        # rubocop: enable CodeReuse/ActiveRecord
 
         private
 
@@ -71,6 +73,7 @@ module Gitlab
           end
         end
 
+        # rubocop: disable CodeReuse/ActiveRecord
         def preload_associations(records)
           # using preloader instead of includes to avoid AR generating a large column list
           ActiveRecord::Associations::Preloader.new(
@@ -81,6 +84,7 @@ module Gitlab
           records
         end
 
+        # rubocop: enable CodeReuse/ActiveRecord
         def time_columns
           [
             stage.start_event.timestamp_projection.as('start_event_timestamp'),

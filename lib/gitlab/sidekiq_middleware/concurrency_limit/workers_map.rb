@@ -12,24 +12,22 @@ module Gitlab
             @data[worker] = max_jobs
           end
 
-          # Returns an integer value where:
-          # - positive value is returned to enforce a valid concurrency limit
-          # - 0 value is returned for workers without concurrency limits
-          # - negative value is returned for paused workers
           def limit_for(worker:)
-            return 0 unless data
-            return 0 if Feature.disabled?(:sidekiq_concurrency_limit_middleware, Feature.current_request, type: :ops)
+            return unless data
+            return if Feature.disabled?(:sidekiq_concurrency_limit_middleware, Feature.current_request, type: :ops)
 
             worker_class = worker.is_a?(Class) ? worker : worker.class
-            data[worker_class]&.call.to_i
+            data[worker_class]
           end
 
           def over_the_limit?(worker:)
-            limit = limit_for(worker: worker)
+            limit_proc = limit_for(worker: worker)
+
+            limit = limit_proc&.call.to_i
             return false if limit == 0
             return true if limit < 0
 
-            current = current_count(worker)
+            current = ::Gitlab::SidekiqMiddleware::ConcurrencyLimit::WorkersConcurrency.current_for(worker: worker)
 
             current >= limit
           end
@@ -41,12 +39,6 @@ module Gitlab
           end
 
           private
-
-          def current_count(worker)
-            worker_class = worker.is_a?(Class) ? worker : worker.class
-            worker_name = worker_class.name
-            ::Gitlab::SidekiqMiddleware::ConcurrencyLimit::ConcurrencyLimitService.concurrent_worker_count(worker_name)
-          end
 
           attr_reader :data
         end

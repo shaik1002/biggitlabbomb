@@ -65,7 +65,7 @@ export default function mountImportProjectsTable({
 
   const store = initStoreFromElement(mountElement);
   const props = initPropsFromElement(mountElement);
-  const { detailsPath, userNamespace } = mountElement.dataset;
+  const { detailsPath } = mountElement.dataset;
 
   return new Vue({
     el: mountElement,
@@ -74,7 +74,6 @@ export default function mountImportProjectsTable({
     apolloProvider,
     provide: {
       detailsPath,
-      userNamespace,
       ...extraProvide(mountElement.dataset),
     },
     render(createElement) {

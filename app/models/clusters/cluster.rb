@@ -40,7 +40,7 @@ module Clusters
 
     def self.has_one_cluster_application(name) # rubocop:disable Naming/PredicateName
       application = APPLICATIONS[name.to_s]
-      has_one application.association_name, class_name: application.to_s, inverse_of: :cluster
+      has_one application.association_name, class_name: application.to_s, inverse_of: :cluster # rubocop:disable Rails/ReflectionClassName
     end
 
     has_many :kubernetes_namespaces
@@ -324,7 +324,9 @@ module Clusters
         .where(environment_scope: environment_scope)
         .where.not(id: id)
 
-      errors.add(:environment_scope, 'cannot add duplicated environment scope') if duplicate_management_clusters.any?
+      if duplicate_management_clusters.any?
+        errors.add(:environment_scope, 'cannot add duplicated environment scope')
+      end
     end
 
     def unique_environment_scope
@@ -393,11 +395,15 @@ module Clusters
     end
 
     def no_groups
-      errors.add(:cluster, 'cannot have groups assigned') if groups.any?
+      if groups.any?
+        errors.add(:cluster, 'cannot have groups assigned')
+      end
     end
 
     def no_projects
-      errors.add(:cluster, 'cannot have projects assigned') if projects.any?
+      if projects.any?
+        errors.add(:cluster, 'cannot have projects assigned')
+      end
     end
   end
 end

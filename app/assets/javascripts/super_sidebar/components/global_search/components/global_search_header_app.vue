@@ -40,11 +40,13 @@ export default {
     };
   },
   mounted() {
-    this.isNarrowScreen = isNarrowScreen();
-    isNarrowScreenAddListener(this.handleNarrowScreenChange);
+    if (this.$refs?.buttonRoot) {
+      this.isNarrowScreen = isNarrowScreen(this.$refs.buttonRoot);
+      isNarrowScreenAddListener(this.$refs.buttonRoot, this.handleNarrowScreenChange);
+    }
   },
   beforeDestroy() {
-    isNarrowScreenRemoveListener(this.handleNarrowScreenChange);
+    isNarrowScreenRemoveListener(this.$refs.buttonRoot, this.handleNarrowScreenChange);
   },
   methods: {
     handleNarrowScreenChange({ matches }) {
@@ -63,6 +65,7 @@ export default {
 <template>
   <div
     v-if="glFeatures.searchButtonTopRight"
+    ref="buttonRoot"
     :class="{ 'border-0 gl-w-[300px] gl-rounded-base': !isNarrowScreen }"
   >
     <gl-button

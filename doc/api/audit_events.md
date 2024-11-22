@@ -1,5 +1,5 @@
 ---
-stage: Software Supply Chain Security
+stage: Govern
 group: Compliance
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
@@ -20,7 +20,7 @@ DETAILS:
 
 Use this API to retrieve instance audit events.
 
-To retrieve audit events using the API, you must [authenticate yourself](rest/authentication.md) as an Administrator.
+To retrieve audit events using the API, you must [authenticate yourself](rest/index.md#authentication) as an Administrator.
 
 ### Retrieve all instance audit events
 

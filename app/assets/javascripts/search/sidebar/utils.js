@@ -1,3 +1,5 @@
+import { languageFilterData } from '~/search/sidebar/components/language_filter/data';
+
 export const convertFiltersData = (rawBuckets) =>
   rawBuckets.reduce(
     (acc, bucket) => ({
@@ -11,5 +13,5 @@ export const convertFiltersData = (rawBuckets) =>
         },
       },
     }),
-    { filters: {} },
+    { ...languageFilterData, filters: {} },
   );

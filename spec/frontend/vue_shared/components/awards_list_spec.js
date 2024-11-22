@@ -1,6 +1,5 @@
 import { mount } from '@vue/test-utils';
 import AwardsList from '~/vue_shared/components/awards_list.vue';
-import { EMOJI_THUMBS_UP, EMOJI_THUMBS_DOWN } from '~/emoji/constants';
 
 const createUser = (id, name) => ({ id, name });
 const createAward = (name, user) => ({ name, user });
@@ -24,6 +23,8 @@ const USERS = {
 
 const EMOJI_SMILE = 'smile';
 const EMOJI_OK = 'ok_hand';
+const EMOJI_THUMBSUP = 'thumbsup';
+const EMOJI_THUMBSDOWN = 'thumbsdown';
 const EMOJI_A = 'a';
 const EMOJI_B = 'b';
 const EMOJI_CACTUS = 'cactus';
@@ -33,16 +34,16 @@ const EMOJI_RACEHORSE = 'racehorse';
 const TEST_AWARDS = [
   createAward(EMOJI_SMILE, USERS.ada),
   createAward(EMOJI_OK, USERS.ada),
-  createAward(EMOJI_THUMBS_UP, USERS.ada),
-  createAward(EMOJI_THUMBS_DOWN, USERS.ada),
+  createAward(EMOJI_THUMBSUP, USERS.ada),
+  createAward(EMOJI_THUMBSDOWN, USERS.ada),
   createAward(EMOJI_SMILE, USERS.jane),
   createAward(EMOJI_OK, USERS.jane),
   createAward(EMOJI_OK, USERS.leonardo),
-  createAward(EMOJI_THUMBS_UP, USERS.leonardo),
-  createAward(EMOJI_THUMBS_UP, USERS.marie),
-  createAward(EMOJI_THUMBS_DOWN, USERS.marie),
-  createAward(EMOJI_THUMBS_DOWN, USERS.root),
-  createAward(EMOJI_THUMBS_DOWN, USERS.donatello),
+  createAward(EMOJI_THUMBSUP, USERS.leonardo),
+  createAward(EMOJI_THUMBSUP, USERS.marie),
+  createAward(EMOJI_THUMBSDOWN, USERS.marie),
+  createAward(EMOJI_THUMBSDOWN, USERS.root),
+  createAward(EMOJI_THUMBSDOWN, USERS.donatello),
 
   createAward(EMOJI_OK, USERS.root),
   // Test that emoji list preserves order of occurrence, not alphabetical order
@@ -71,8 +72,8 @@ const TEST_AWARDS = [
 const TEST_AWARDS_LENGTH = [
   EMOJI_SMILE,
   EMOJI_OK,
-  EMOJI_THUMBS_UP,
-  EMOJI_THUMBS_DOWN,
+  EMOJI_THUMBSUP,
+  EMOJI_THUMBSDOWN,
   EMOJI_A,
   EMOJI_B,
   EMOJI_CACTUS,
@@ -124,16 +125,16 @@ describe('vue_shared/components/awards_list', () => {
         {
           classes: expect.arrayContaining(REACTION_CONTROL_CLASSES),
           count: 3,
-          html: matchingEmojiTag(EMOJI_THUMBS_UP),
-          title: `Ada, Leonardo, and Marie reacted with :${EMOJI_THUMBS_UP}:`,
-          emojiName: EMOJI_THUMBS_UP,
+          html: matchingEmojiTag(EMOJI_THUMBSUP),
+          title: `Ada, Leonardo, and Marie reacted with :${EMOJI_THUMBSUP}:`,
+          emojiName: EMOJI_THUMBSUP,
         },
         {
           classes: expect.arrayContaining([...REACTION_CONTROL_CLASSES, 'selected']),
           count: 4,
-          html: matchingEmojiTag(EMOJI_THUMBS_DOWN),
-          title: `Ada, Marie, you, and Donatello reacted with :${EMOJI_THUMBS_DOWN}:`,
-          emojiName: EMOJI_THUMBS_DOWN,
+          html: matchingEmojiTag(EMOJI_THUMBSDOWN),
+          title: `Ada, Marie, you, and Donatello reacted with :${EMOJI_THUMBSDOWN}:`,
+          emojiName: EMOJI_THUMBSDOWN,
         },
         {
           classes: expect.arrayContaining(REACTION_CONTROL_CLASSES),
@@ -260,7 +261,7 @@ describe('vue_shared/components/awards_list', () => {
         canAwardEmoji: true,
         currentUserId: USERS.root.id,
         // Let's assert that it puts thumbsup and thumbsdown in the right order still
-        defaultAwards: [EMOJI_THUMBS_DOWN, EMOJI_100, EMOJI_THUMBS_UP],
+        defaultAwards: [EMOJI_THUMBSDOWN, EMOJI_100, EMOJI_THUMBSUP],
       });
     });
 
@@ -269,16 +270,16 @@ describe('vue_shared/components/awards_list', () => {
         {
           classes: expect.arrayContaining(REACTION_CONTROL_CLASSES),
           count: 0,
-          html: matchingEmojiTag(EMOJI_THUMBS_UP),
+          html: matchingEmojiTag(EMOJI_THUMBSUP),
           title: '',
-          emojiName: EMOJI_THUMBS_UP,
+          emojiName: EMOJI_THUMBSUP,
         },
         {
           classes: expect.arrayContaining(REACTION_CONTROL_CLASSES),
           count: 0,
-          html: matchingEmojiTag(EMOJI_THUMBS_DOWN),
+          html: matchingEmojiTag(EMOJI_THUMBSDOWN),
           title: '',
-          emojiName: EMOJI_THUMBS_DOWN,
+          emojiName: EMOJI_THUMBSDOWN,
         },
         // We expect the EMOJI_100 before the EMOJI_SMILE because it was given as a defaultAward
         {

@@ -5,7 +5,6 @@ import {
   REMOVE_AWARD,
 } from '~/emoji/awards_app/store/mutation_types';
 import mutations from '~/emoji/awards_app/store/mutations';
-import { EMOJI_THUMBS_UP, EMOJI_THUMBS_DOWN } from '~/emoji/constants';
 
 describe('Awards app mutations', () => {
   describe('SET_INITIAL_DATA', () => {
@@ -30,27 +29,27 @@ describe('Awards app mutations', () => {
     it('sets awards', () => {
       const state = { awards: [] };
 
-      mutations[FETCH_AWARDS_SUCCESS](state, [EMOJI_THUMBS_UP]);
+      mutations[FETCH_AWARDS_SUCCESS](state, ['thumbsup']);
 
-      expect(state.awards).toEqual([EMOJI_THUMBS_UP]);
+      expect(state.awards).toEqual(['thumbsup']);
     });
 
     it('does not overwrite previously set awards', () => {
-      const state = { awards: [EMOJI_THUMBS_UP] };
+      const state = { awards: ['thumbsup'] };
 
-      mutations[FETCH_AWARDS_SUCCESS](state, [EMOJI_THUMBS_DOWN]);
+      mutations[FETCH_AWARDS_SUCCESS](state, ['thumbsdown']);
 
-      expect(state.awards).toEqual([EMOJI_THUMBS_UP, EMOJI_THUMBS_DOWN]);
+      expect(state.awards).toEqual(['thumbsup', 'thumbsdown']);
     });
   });
 
   describe('ADD_NEW_AWARD', () => {
     it('adds new award to array', () => {
-      const state = { awards: [EMOJI_THUMBS_UP] };
+      const state = { awards: ['thumbsup'] };
 
-      mutations[ADD_NEW_AWARD](state, EMOJI_THUMBS_DOWN);
+      mutations[ADD_NEW_AWARD](state, 'thumbsdown');
 
-      expect(state.awards).toEqual([EMOJI_THUMBS_UP, EMOJI_THUMBS_DOWN]);
+      expect(state.awards).toEqual(['thumbsup', 'thumbsdown']);
     });
   });
 
