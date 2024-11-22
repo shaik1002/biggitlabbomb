@@ -10,8 +10,7 @@ class IdeController < ApplicationController
   before_action :ensure_web_ide_oauth_application!, only: [:index]
 
   before_action do
-    push_frontend_feature_flag(:build_service_proxy)
-    push_frontend_feature_flag(:reject_unsigned_commits_by_gitlab)
+    push_frontend_flags
   end
 
   feature_category :web_ide
@@ -76,4 +75,12 @@ class IdeController < ApplicationController
   def tracking_project_source
     project
   end
+
+  # method overriden in EE
+  def push_frontend_flags
+    push_frontend_feature_flag(:build_service_proxy)
+    push_frontend_feature_flag(:reject_unsigned_commits_by_gitlab)
+  end
 end
+
+IdeController.prepend_mod_with('IdeController')
