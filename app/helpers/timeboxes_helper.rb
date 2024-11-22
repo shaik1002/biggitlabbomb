@@ -128,9 +128,13 @@ module TimeboxesHelper
 
     content = []
 
-    content << (n_("1 open issue", "%{issues} open issues", opened) % { issues: opened }) if opened > 0
+    if opened > 0
+      content << (n_("1 open issue", "%{issues} open issues", opened) % { issues: opened })
+    end
 
-    content << (n_("1 closed issue", "%{issues} closed issues", closed) % { issues: closed }) if closed > 0
+    if closed > 0
+      content << (n_("1 closed issue", "%{issues} closed issues", closed) % { issues: closed })
+    end
 
     content.join('<br />').html_safe
   end
