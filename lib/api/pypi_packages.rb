@@ -131,6 +131,7 @@ module API
         end
 
         route_setting :authentication, deploy_token_allowed: true, basic_auth_personal_access_token: true, job_token_allowed: :basic_auth
+        route_setting :authorization, permission: :read_package, resource: ::Group.name
         get 'files/:sha256/*file_identifier' do
           group = find_authorized_group!
           authorize_read_package!(group)
@@ -158,6 +159,7 @@ module API
         # An API entry point but returns an HTML file instead of JSON.
         # PyPi simple API returns a list of packages as a simple HTML file.
         route_setting :authentication, deploy_token_allowed: true, basic_auth_personal_access_token: true, job_token_allowed: :basic_auth
+        route_setting :authorization, permission: :tbd, resource: "TBD"
         get 'simple', format: :txt do
           present_simple_index(find_authorized_group!)
         end
@@ -180,6 +182,7 @@ module API
         # An API entry point but returns an HTML file instead of JSON.
         # PyPi simple API returns the package descriptor as a simple HTML file.
         route_setting :authentication, deploy_token_allowed: true, basic_auth_personal_access_token: true, job_token_allowed: :basic_auth
+        route_setting :authorization, permission: :tbd, resource: "TBD"
         get 'simple/*package_name', format: :txt do
           present_simple_package(find_authorized_group!)
         end
@@ -208,6 +211,7 @@ module API
         end
 
         route_setting :authentication, deploy_token_allowed: true, basic_auth_personal_access_token: true, job_token_allowed: :basic_auth
+        route_setting :authorization, permission: :tbd, resource: "TBD"
         get 'files/:sha256/*file_identifier' do
           project = project!
 
@@ -234,6 +238,7 @@ module API
         # An API entry point but returns an HTML file instead of JSON.
         # PyPi simple API returns a list of packages as a simple HTML file.
         route_setting :authentication, deploy_token_allowed: true, basic_auth_personal_access_token: true, job_token_allowed: :basic_auth
+        route_setting :authorization, permission: :tbd, resource: "TBD"
         get 'simple', format: :txt do
           present_simple_index(project!)
         end
@@ -256,6 +261,7 @@ module API
         # An API entry point but returns an HTML file instead of JSON.
         # PyPi simple API returns the package descriptor as a simple HTML file.
         route_setting :authentication, deploy_token_allowed: true, basic_auth_personal_access_token: true, job_token_allowed: :basic_auth
+        route_setting :authorization, permission: :tbd, resource: "TBD"
         get 'simple/*package_name', format: :txt do
           present_simple_package(project!)
         end
@@ -290,6 +296,7 @@ module API
         end
 
         route_setting :authentication, deploy_token_allowed: true, basic_auth_personal_access_token: true, job_token_allowed: :basic_auth
+        route_setting :authorization, permission: :create_package, resource: ::Project.name
         post do
           project = project!(action: :read_project)
           authorize_upload!(project)
@@ -331,6 +338,7 @@ module API
         end
 
         route_setting :authentication, deploy_token_allowed: true, basic_auth_personal_access_token: true, job_token_allowed: :basic_auth
+        route_setting :authorization, permission: :tbd, resource: "TBD"
         post 'authorize' do
           project = project!(action: :read_project)
           authorize_workhorse!(

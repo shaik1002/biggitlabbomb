@@ -54,6 +54,7 @@ module API
           desc: 'Return packages with specified status'
       end
       route_setting :authentication, job_token_allowed: true
+      route_setting :authorization, permission: :tbd, resource: "TBD"
       get ':id/packages' do
         packages = ::Packages::PackagesFinder.new(
           user_project,
@@ -76,6 +77,7 @@ module API
         requires :package_id, type: Integer, desc: 'The ID of a package'
       end
       route_setting :authentication, job_token_allowed: true
+      route_setting :authorization, permission: :tbd, resource: "TBD"
       get ':id/packages/:package_id' do
         render_api_error!('Package not found', 404) unless package.default?
 
@@ -102,6 +104,7 @@ module API
           values: 1..20
       end
       route_setting :authentication, job_token_allowed: true
+      route_setting :authorization, permission: :tbd, resource: "TBD"
       get ':id/packages/:package_id/pipelines' do
         not_found!('Package not found') unless package.default?
 
@@ -129,6 +132,7 @@ module API
         requires :package_id, type: Integer, desc: 'The ID of a package'
       end
       route_setting :authentication, job_token_allowed: true
+      route_setting :authorization, permission: :destroy_package, resource: ::Project.name
       delete ':id/packages/:package_id' do
         authorize_destroy_package!(user_project)
 

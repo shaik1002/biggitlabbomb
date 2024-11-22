@@ -79,6 +79,7 @@ module API
             end
             route_setting :authentication, job_token_allowed: true, deploy_token_allowed: true,
               authenticate_non_public: true
+            route_setting :authorization, permission: :read_package, resource: ::Project.name
             get 'dist-tags', format: false, requirements: ::API::Helpers::Packages::Npm::NPM_ENDPOINT_REQUIREMENTS do
               package_name = params[:package_name]
 
@@ -113,6 +114,7 @@ module API
                 tags %w[npm_packages]
               end
               route_setting :authentication, job_token_allowed: true, deploy_token_allowed: true
+              route_setting :authorization, permission: :create_package, resource: ::Project.name
               put format: false do
                 package_name = params[:package_name]
                 version = env['api.request.body']
@@ -150,6 +152,7 @@ module API
                 tags %w[npm_packages]
               end
               route_setting :authentication, job_token_allowed: true, deploy_token_allowed: true
+              route_setting :authorization, permission: :destroy_package, resource: ::Project.name
               delete format: false do
                 package_name = params[:package_name]
                 tag = params[:tag]
@@ -191,6 +194,7 @@ module API
             tags %w[npm_packages]
           end
           route_setting :authentication, job_token_allowed: true, deploy_token_allowed: true
+          route_setting :authorization, permission: :tbd, resource: "TBD"
           post '-/npm/v1/security/advisories/bulk' do
             redirect_or_present_audit_report
           end
@@ -210,6 +214,7 @@ module API
             tags %w[npm_packages]
           end
           route_setting :authentication, job_token_allowed: true, deploy_token_allowed: true
+          route_setting :authorization, permission: :tbd, resource: "TBD"
           post '-/npm/v1/security/audits/quick' do
             redirect_or_present_audit_report
           end

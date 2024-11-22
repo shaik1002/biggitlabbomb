@@ -38,7 +38,7 @@ module API
           desc: 'List all environments that match a specific state. Accepted values: `available`, `stopping`, or `stopped`. If no state value given, returns all environments'
         mutually_exclusive :name, :search, message: 'cannot be used together'
       end
-      route_setting :authentication, job_token_allowed: true
+      route_setting :authentication, job_token_allowed: true, permission: :read_environment, resource: ::Project.name
       get ':id/environments' do
         authorize! :read_environment, user_project
 
@@ -71,7 +71,7 @@ module API
         optional :flux_resource_path, type: String, desc: 'The Flux resource path to associate with this environment'
         optional :description, type: String, desc: 'The description of the environment'
       end
-      route_setting :authentication, job_token_allowed: true
+      route_setting :authentication, job_token_allowed: true, permission: :create_environment, resource: ::Project.name
       post ':id/environments' do
         authorize! :create_environment, user_project
 
@@ -113,6 +113,7 @@ module API
         optional :description, type: String, desc: 'The description of the environment'
       end
       route_setting :authentication, job_token_allowed: true
+      route_setting :authorization, permission: :update_environment, resource: ::Project.name
       put ':id/environments/:environment_id' do
         authorize! :update_environment, user_project
 
@@ -152,6 +153,7 @@ module API
         optional :dry_run, type: Boolean, desc: "Defaults to true for safety reasons. It performs a dry run where no actual deletion will be performed. Set to false to actually delete the environment", default: true
       end
       route_setting :authentication, job_token_allowed: true
+      route_setting :authorization, permission: :read_environment, resource: ::Project.name
       delete ":id/environments/review_apps" do
         authorize! :read_environment, user_project
 
@@ -183,6 +185,7 @@ module API
         requires :environment_id, type: Integer, desc: 'The ID of the environment'
       end
       route_setting :authentication, job_token_allowed: true
+      route_setting :authorization, permission: :destroy_environment, resource: ::Environment.name
       delete ':id/environments/:environment_id' do
         authorize! :read_environment, user_project
 
@@ -206,6 +209,7 @@ module API
         optional :force, type: Boolean, default: false, desc: 'Force environment to stop without executing `on_stop` actions'
       end
       route_setting :authentication, job_token_allowed: true
+      route_setting :authorization, permission: :tbd, resource: "TBD"
       post ':id/environments/:environment_id/stop' do
         authorize! :read_environment, user_project
 
@@ -231,6 +235,7 @@ module API
           desc: 'Stop all environments that were last modified or deployed to before this date.'
       end
       route_setting :authentication, job_token_allowed: true
+      route_setting :authorization, permission: :stop_environment, resource: ::Project.name
       post ':id/environments/stop_stale' do
         authorize! :stop_environment, user_project
 
@@ -259,6 +264,7 @@ module API
         requires :environment_id, type: Integer, desc: 'The ID of the environment'
       end
       route_setting :authentication, job_token_allowed: true
+      route_setting :authorization, permission: :read_environment, resource: ::Project.name
       get ':id/environments/:environment_id' do
         authorize! :read_environment, user_project
 

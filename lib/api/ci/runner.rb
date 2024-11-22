@@ -386,6 +386,7 @@ module API
           optional :direct_download, default: false, type: Boolean, desc: 'Perform direct download from remote storage instead of proxying artifacts'
         end
         route_setting :authentication, job_token_allowed: true
+        route_setting :authorization, permission: :read_build, resource: ::Ci::Build.name
         get '/:id/artifacts', feature_category: :job_artifacts do
           authenticate_job_via_dependent_job!
 

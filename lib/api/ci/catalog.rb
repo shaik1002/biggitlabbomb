@@ -25,6 +25,7 @@ module API
           requires :metadata, type: Hash, desc: 'The metadata for the release'
         end
         route_setting :authentication, job_token_allowed: true
+        route_setting :authorization, permission: :publish_catalog_version, resource: ::Release.name
         # Note: This endpoint should only be used by `release-cli` and should be authenticated with a job token.
         # For this reason, we should not document the endpoint in the API docs.
         post ':id/catalog/publish' do

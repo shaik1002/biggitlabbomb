@@ -61,6 +61,7 @@ module API
         requires :file_name, type: String, desc: 'Package file name'
       end
       route_setting :authentication, job_token_allowed: true, deploy_token_allowed: true
+      route_setting :authorization, permission: :tbd, resource: "TBD"
       get '*package_name/-/*file_name', format: false do
         authorize_read_package!(project)
 
@@ -93,11 +94,16 @@ module API
         requires :versions, type: Hash, desc: 'Package version info'
       end
       route_setting :authentication, job_token_allowed: true, deploy_token_allowed: true
+      route_setting :authorization, permission: :tbd, resource: "TBD"
       put ':package_name', requirements: ::API::Helpers::Packages::Npm::NPM_ENDPOINT_REQUIREMENTS do
         if headers['Npm-Command'] == 'deprecate'
           authorize_destroy_package!(project)
 
-          ::Packages::Npm::DeprecatePackageService.new(project, declared(params)).execute(async: true)
+          response = ::Packages::Npm::EnqueueDeprecatePackageWorkerService.new(project, nil, declared(params).to_hash).execute
+
+          if response.error? && response.reason == :no_versions_to_deprecate
+            bad_request_missing_attribute!('package versions to deprecate')
+          end
         else
           authorize_create_package!(project)
 
@@ -134,6 +140,7 @@ module API
       end
       route_setting :authentication, job_token_allowed: true, deploy_token_allowed: true,
         authenticate_non_public: true
+      route_setting :authorization, permission: :tbd, resource: "TBD"
       get '*package_name', format: false, requirements: ::API::Helpers::Packages::Npm::NPM_ENDPOINT_REQUIREMENTS do
         package_name = declared_params[:package_name]
         packages = ::Packages::Npm::PackageFinder.new(project: project_or_nil, params: { package_name: package_name }).execute

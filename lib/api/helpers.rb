@@ -537,7 +537,17 @@ module API
     end
 
     def unauthorized!(reason = nil)
-      render_api_error_with_reason!(401, '401 Unauthorized', reason)
+      render_api_error_with_reason!(401, '401 Unauthorized', reason || unauthorized_reason)
+    end
+
+    def unauthorized_reason
+      return unless Feature.enabled?(:include_missing_permission_error, current_user)
+
+      permission = route_authentication_setting[:permission]
+      return if permission.blank?
+
+      resource = route_authentication_setting[:resource]
+      "The `#{permission}` permission is required on the target #{resource}"
     end
 
     def not_allowed!(message = nil)

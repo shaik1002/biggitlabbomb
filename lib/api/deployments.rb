@@ -69,6 +69,7 @@ module API
       end
 
       route_setting :authentication, job_token_allowed: true
+      route_setting :authorization, permission: :read_deployment, resource: ::Project.name
       get ':id/deployments' do
         authorize! :read_deployment, user_project
 
@@ -94,6 +95,7 @@ module API
         requires :deployment_id, type: Integer, desc: 'The ID of the deployment'
       end
       route_setting :authentication, job_token_allowed: true
+      route_setting :authorization, permission: :read_deployment, resource: ::Project.name
       get ':id/deployments/:deployment_id' do
         authorize! :read_deployment, user_project
 
@@ -135,6 +137,7 @@ module API
           values: %w[running success failed canceled]
       end
       route_setting :authentication, job_token_allowed: true
+      route_setting :authorization, permission: [:create_deployment, :create_environment], resource: ::Project.name
       post ':id/deployments' do
         authorize!(:create_deployment, user_project)
         authorize!(:create_environment, user_project)
@@ -181,6 +184,7 @@ module API
           values: %w[running success failed canceled]
       end
       route_setting :authentication, job_token_allowed: true
+      route_setting :authorization, permission: :read_deployment, resource: ::Project.name
       put ':id/deployments/:deployment_id' do
         authorize!(:read_deployment, user_project)
 
@@ -214,6 +218,7 @@ module API
         requires :deployment_id, type: Integer, desc: 'The ID of the deployment'
       end
       route_setting :authentication, job_token_allowed: true
+      route_setting :authorization, permission: :destroy_deployment, resource: ::Deployment.name
       delete ':id/deployments/:deployment_id' do
         deployment = user_project.deployments.find(params[:deployment_id])
 
@@ -248,6 +253,7 @@ module API
         use :merge_requests_base_params
       end
       route_setting :authentication, job_token_allowed: true
+      route_setting :authorization, permission: :read_deployment, resource: ::Project.name
       get ':id/deployments/:deployment_id/merge_requests' do
         authorize! :read_deployment, user_project
 

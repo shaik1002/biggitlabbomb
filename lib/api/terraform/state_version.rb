@@ -52,6 +52,7 @@ module API
             tags %w[terraform_state]
           end
           route_setting :authentication, basic_auth_personal_access_token: true, job_token_allowed: :basic_auth
+          route_setting :authorization, permission: :read_terraform_state, resource: ::Project.name
           get do
             find_version(params[:serial]) do |version|
               env['api.format'] = :binary # Bypass json serialization
@@ -70,6 +71,7 @@ module API
             tags %w[terraform_state]
           end
           route_setting :authentication, basic_auth_personal_access_token: true, job_token_allowed: :basic_auth
+          route_setting :authorization, permission: :admin_terraform_state, resource: ::Project.name
           delete do
             authorize! :admin_terraform_state, user_project
 

@@ -23,6 +23,7 @@ module API
 
     resource :projects, requirements: API::NAMESPACE_OR_PROJECT_REQUIREMENTS do
       route_setting :authentication, job_token_allowed: true, basic_auth_personal_access_token: true, deploy_token_allowed: true
+      route_setting :authorization, permission: :tbd, resource: "TBD"
 
       namespace ':id/packages/generic' do
         namespace ':package_name/*package_version/(*path/):file_name', requirements: GENERIC_PACKAGES_REQUIREMENTS do
@@ -38,6 +39,7 @@ module API
           end
 
           route_setting :authentication, job_token_allowed: true, basic_auth_personal_access_token: true, deploy_token_allowed: true
+          route_setting :authorization, permission: :tbd, resource: "TBD"
 
           params do
             requires :package_name, type: String, desc: 'Package name', regexp: Gitlab::Regex.generic_package_name_regex, file_path: true
@@ -76,6 +78,7 @@ module API
           end
 
           route_setting :authentication, job_token_allowed: true, basic_auth_personal_access_token: true, deploy_token_allowed: true
+          route_setting :authorization, permission: :tbd, resource: "TBD"
 
           put do
             project = authorized_user_project
@@ -124,6 +127,7 @@ module API
           end
 
           route_setting :authentication, job_token_allowed: %i[request basic_auth], basic_auth_personal_access_token: true, deploy_token_allowed: true
+          route_setting :authorization, permission: :read_package, resource: ::Project.name
 
           get do
             project = authorized_user_project(action: :read_package)

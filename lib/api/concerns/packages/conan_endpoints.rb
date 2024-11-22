@@ -61,6 +61,7 @@ module API
           end
 
           route_setting :authentication, job_token_allowed: true, basic_auth_personal_access_token: true
+          route_setting :authorization, permission: :tbd, resource: "TBD"
 
           get 'ping', urgency: :default do
             header 'X-Conan-Server-Capabilities', [].join(',')
@@ -80,6 +81,7 @@ module API
           end
 
           route_setting :authentication, job_token_allowed: true, basic_auth_personal_access_token: true
+          route_setting :authorization, permission: :tbd, resource: "TBD"
 
           get 'conans/search', urgency: :low do
             service = ::Packages::Conan::SearchService.new(search_project, current_user, query: params[:q]).execute
@@ -106,6 +108,7 @@ module API
             end
 
             route_setting :authentication, job_token_allowed: true, basic_auth_personal_access_token: true
+            route_setting :authorization, permission: :tbd, resource: "TBD"
 
             get 'authenticate', urgency: :low do
               unauthorized! unless token
@@ -124,6 +127,7 @@ module API
             end
 
             route_setting :authentication, job_token_allowed: true, basic_auth_personal_access_token: true
+            route_setting :authorization, permission: :tbd, resource: "TBD"
 
             get 'check_credentials', urgency: :default do
               authenticate!
@@ -163,6 +167,7 @@ module API
             end
 
             route_setting :authentication, job_token_allowed: true, basic_auth_personal_access_token: true
+            route_setting :authorization, permission: :read_package, resource: ::Project.name
 
             get 'packages/:conan_package_reference', urgency: :low do
               authorize_read_package!(project)
@@ -189,6 +194,7 @@ module API
             end
 
             route_setting :authentication, job_token_allowed: true, basic_auth_personal_access_token: true
+            route_setting :authorization, permission: :read_package, resource: ::Project.name
 
             get urgency: :low do
               authorize_read_package!(project)
@@ -218,6 +224,7 @@ module API
             end
 
             route_setting :authentication, job_token_allowed: true, basic_auth_personal_access_token: true
+            route_setting :authorization, permission: :tbd, resource: "TBD"
 
             get 'packages/:conan_package_reference/digest', urgency: :low do
               present_package_download_urls
@@ -235,6 +242,7 @@ module API
             end
 
             route_setting :authentication, job_token_allowed: true, basic_auth_personal_access_token: true
+            route_setting :authorization, permission: :tbd, resource: "TBD"
 
             get 'digest', urgency: :low do
               present_recipe_download_urls
@@ -262,6 +270,7 @@ module API
             end
 
             route_setting :authentication, job_token_allowed: true, basic_auth_personal_access_token: true
+            route_setting :authorization, permission: :tbd, resource: "TBD"
 
             get 'packages/:conan_package_reference/download_urls', urgency: :low do
               present_package_download_urls
@@ -279,6 +288,7 @@ module API
             end
 
             route_setting :authentication, job_token_allowed: true, basic_auth_personal_access_token: true
+            route_setting :authorization, permission: :tbd, resource: "TBD"
 
             get 'download_urls', urgency: :low do
               present_recipe_download_urls
@@ -307,6 +317,7 @@ module API
             end
 
             route_setting :authentication, job_token_allowed: true, basic_auth_personal_access_token: true
+            route_setting :authorization, permission: :read_package, resource: ::Project.name
 
             post 'packages/:conan_package_reference/upload_urls', urgency: :low do
               authorize_read_package!(project)
@@ -327,6 +338,7 @@ module API
             end
 
             route_setting :authentication, job_token_allowed: true, basic_auth_personal_access_token: true
+            route_setting :authorization, permission: :read_package, resource: ::Project.name
 
             post 'upload_urls', urgency: :low do
               authorize_read_package!(project)
@@ -347,6 +359,7 @@ module API
             end
 
             route_setting :authentication, job_token_allowed: true, basic_auth_personal_access_token: true
+            route_setting :authorization, permission: :destroy_package, resource: ::Project.name
 
             delete urgency: :low do
               authorize!(:destroy_package, project)
@@ -390,6 +403,7 @@ module API
               end
 
               route_setting :authentication, job_token_allowed: true, basic_auth_personal_access_token: true
+              route_setting :authorization, permission: :tbd, resource: "TBD"
 
               get urgency: :low do
                 download_package_file(:recipe_file)
@@ -412,6 +426,7 @@ module API
               end
 
               route_setting :authentication, job_token_allowed: true, basic_auth_personal_access_token: true
+              route_setting :authorization, permission: :tbd, resource: "TBD"
 
               put urgency: :low do
                 upload_package_file(:recipe_file)
@@ -430,6 +445,7 @@ module API
               end
 
               route_setting :authentication, job_token_allowed: true, basic_auth_personal_access_token: true
+              route_setting :authorization, permission: :tbd, resource: "TBD"
 
               put 'authorize', urgency: :low do
                 authorize_workhorse!(subject: project, maximum_size: project.actual_limits.conan_max_file_size)
@@ -453,6 +469,7 @@ module API
               end
 
               route_setting :authentication, job_token_allowed: true, basic_auth_personal_access_token: true
+              route_setting :authorization, permission: :tbd, resource: "TBD"
 
               get urgency: :low do
                 download_package_file(:package_file)
@@ -471,6 +488,7 @@ module API
               end
 
               route_setting :authentication, job_token_allowed: true, basic_auth_personal_access_token: true
+              route_setting :authorization, permission: :tbd, resource: "TBD"
 
               put 'authorize', urgency: :low do
                 authorize_workhorse!(subject: project, maximum_size: project.actual_limits.conan_max_file_size)
@@ -493,6 +511,7 @@ module API
               end
 
               route_setting :authentication, job_token_allowed: true, basic_auth_personal_access_token: true
+              route_setting :authorization, permission: :tbd, resource: "TBD"
 
               put urgency: :low do
                 upload_package_file(:package_file)

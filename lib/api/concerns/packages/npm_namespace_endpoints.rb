@@ -59,6 +59,7 @@ module API
           end
           route_setting :authentication, job_token_allowed: true, deploy_token_allowed: true,
             authenticate_non_public: true
+          route_setting :authorization, permission: :tbd, resource: "TBD"
           get '*package_name', format: false, requirements: ::API::Helpers::Packages::Npm::NPM_ENDPOINT_REQUIREMENTS do
             package_name = declared_params[:package_name]
             packages =
