@@ -117,7 +117,7 @@ describe('ModelCreate', () => {
       it('renders the create button', () => {
         expect(findPrimaryButton().props()).toMatchObject({
           variant: 'confirm',
-          disabled: true,
+          disabled: false,
         });
       });
 
