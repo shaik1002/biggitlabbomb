@@ -1,0 +1,9 @@
+---
+name: cancel_redundant_pipelines_sequentially
+feature_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/505096
+introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/173049
+rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/505345
+milestone: '17.7'
+group: group::ci platform
+type: gitlab_com_derisk
+default_enabled: false

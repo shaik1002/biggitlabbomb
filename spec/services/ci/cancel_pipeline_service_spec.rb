@@ -55,7 +55,7 @@ RSpec.describe Ci::CancelPipelineService, :aggregate_failures, feature_category:
               pipeline_id: pipeline.id,
               auto_canceled_by_pipeline_id: nil,
               cascade_to_children: true,
-              execute_async: true
+              execute_async: false
             )
           )
       end
@@ -143,7 +143,34 @@ RSpec.describe Ci::CancelPipelineService, :aggregate_failures, feature_category:
           end
         end
 
-        context 'when execute_async: true' do
+        context 'when execute_async: true and the sequential-cancel flag is enabled' do
+          # This is the same behavior as the async: false, copied here while
+          # we have the flag in place to transition.
+
+          let(:execute_async) { true }
+
+          it 'cancels the bridge jobs and child jobs' do
+            expect(response).to be_success
+
+            expect(pipeline.bridges.pluck(:name, :status)).to match_array([
+              %w[bridge1 canceled],
+              %w[bridge2 canceled],
+              %w[bridge3 success],
+              %w[child_pipeline_bridge canceled]
+            ])
+            expect(child_pipeline.bridges.pluck(:name, :status)).to match_array([
+              %w[grandchild_pipeline_bridge canceled]
+            ])
+            expect(child_job.reload).to be_canceled
+            expect(grandchild_job.reload).to be_canceled
+          end
+        end
+
+        context 'when execute_async: true and the sequential-cancel flag is disabled' do
+          before do
+            stub_feature_flags(cancel_redundant_pipelines_sequentially: false)
+          end
+
           it 'schedules the child pipelines for async cancelation' do
             expect(::Ci::CancelPipelineWorker)
               .to receive(:perform_async)

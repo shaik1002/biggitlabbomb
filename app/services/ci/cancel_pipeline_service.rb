@@ -87,7 +87,7 @@ module Ci
     end
 
     def execute_async?
-      @execute_async
+      @execute_async && Feature.disabled?(:cancel_redundant_pipelines_sequentially, pipeline.project)
     end
 
     def cancel_jobs(jobs)

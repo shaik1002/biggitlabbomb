@@ -130,6 +130,7 @@ module Ci
           current_user: nil,
           auto_canceled_by_pipeline: pipeline,
           cascade_to_children: false,
+          execute_async: false,
           safe_cancellation: safe_cancellation
         ).force_execute
       end
