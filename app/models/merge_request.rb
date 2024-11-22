@@ -1375,6 +1375,11 @@ class MergeRequest < ApplicationRecord
     results.success?
   end
 
+  # runs checks excluding skippable and returns full results
+  def mergeability_checks(**params)
+    check_mergeability_states(checks: self.class.all_mergeability_checks, **params)
+  end
+
   def all_mergeability_checks_results
     check_mergeability_states(checks: self.class.all_mergeability_checks, execute_all: true).payload[:results]
   end
