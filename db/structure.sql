@@ -6899,6 +6899,9 @@ CREATE TABLE application_settings (
     elasticsearch_retry_on_failure integer DEFAULT 0 NOT NULL,
     integrations jsonb DEFAULT '{}'::jsonb NOT NULL,
     user_seat_management jsonb DEFAULT '{}'::jsonb NOT NULL,
+    secret_detection_service_url text DEFAULT ''::text NOT NULL,
+    encrypted_secret_detection_service_auth_token bytea,
+    encrypted_secret_detection_service_auth_token_iv bytea,
     resource_usage_limits jsonb DEFAULT '{}'::jsonb NOT NULL,
     show_migrate_from_jenkins_banner boolean DEFAULT true NOT NULL,
     CONSTRAINT app_settings_container_reg_cleanup_tags_max_list_size_positive CHECK ((container_registry_cleanup_tags_service_max_list_size >= 0)),
@@ -6963,6 +6966,7 @@ CREATE TABLE application_settings (
     CONSTRAINT check_application_settings_sign_in_restrictions_is_hash CHECK ((jsonb_typeof(sign_in_restrictions) = 'object'::text)),
     CONSTRAINT check_application_settings_transactional_emails_is_hash CHECK ((jsonb_typeof(transactional_emails) = 'object'::text)),
     CONSTRAINT check_b8c74ea5b3 CHECK ((char_length(deactivation_email_additional_text) <= 1000)),
+    CONSTRAINT check_babd774f3c CHECK ((char_length(secret_detection_service_url) <= 255)),
     CONSTRAINT check_bf5157a366 CHECK ((char_length(required_instance_ci_template) <= 1024)),
     CONSTRAINT check_cdfbd99405 CHECK ((char_length(security_txt_content) <= 2048)),
     CONSTRAINT check_d03919528d CHECK ((char_length(container_registry_vendor) <= 255)),
@@ -7466,6 +7470,7 @@ CREATE TABLE audit_events_group_external_streaming_destinations (
     config jsonb NOT NULL,
     encrypted_secret_token bytea NOT NULL,
     encrypted_secret_token_iv bytea NOT NULL,
+    legacy_destination_ref bigint,
     CONSTRAINT check_97d157fbd0 CHECK ((char_length(name) <= 72))
 );
 
@@ -7561,6 +7566,7 @@ CREATE TABLE audit_events_instance_external_streaming_destinations (
     config jsonb NOT NULL,
     encrypted_secret_token bytea NOT NULL,
     encrypted_secret_token_iv bytea NOT NULL,
+    legacy_destination_ref bigint,
     CONSTRAINT check_219decfb51 CHECK ((char_length(name) <= 72))
 );
 
@@ -28287,8 +28293,6 @@ CREATE INDEX idx_approval_project_rules_on_configuration_id_and_id ON approval_p
 
 CREATE INDEX idx_approval_project_rules_on_scan_result_policy_id ON approval_project_rules USING btree (scan_result_policy_id);
 
-CREATE INDEX idx_audit_events_group_external_destinations_on_group_id ON audit_events_group_external_streaming_destinations USING btree (group_id);
-
 CREATE INDEX idx_audit_events_namespace_event_type_filters_on_group_id ON audit_events_group_streaming_event_type_filters USING btree (namespace_id);
 
 CREATE INDEX idx_audit_events_part_on_entity_id_desc_author_id_created_at ON ONLY audit_events USING btree (entity_id, entity_type, id DESC, author_id, created_at);
@@ -33126,6 +33130,10 @@ CREATE UNIQUE INDEX unique_compliance_framework_security_policies_framework_id O
 CREATE UNIQUE INDEX unique_external_audit_event_destination_namespace_id_and_name ON audit_events_external_audit_event_destinations USING btree (namespace_id, name);
 
 CREATE UNIQUE INDEX unique_google_cloud_logging_configurations_on_namespace_id ON audit_events_google_cloud_logging_configurations USING btree (namespace_id, google_project_id_name, log_id_name);
+
+CREATE UNIQUE INDEX unique_idx_group_destinations_on_name_category_group ON audit_events_group_external_streaming_destinations USING btree (group_id, category, name);
+
+CREATE UNIQUE INDEX unique_idx_instance_destinations_on_name_category ON audit_events_instance_external_streaming_destinations USING btree (category, name);
 
 CREATE UNIQUE INDEX unique_idx_member_approvals_on_pending_status ON member_approvals USING btree (user_id, member_namespace_id) WHERE (status = 0);
 
