@@ -1,5 +1,4 @@
 ---
 # Cop supports --autocorrect.
 Lint/RedundantCopDisableDirective:
-  # Temporarily disabled
-  Enabled: false
+  Details: grace period
