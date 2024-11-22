@@ -70,13 +70,13 @@ module Gitlab
       def create_source_user(source_name:, source_username:, source_user_identifier:)
         in_lock(
           lock_key(source_user_identifier), ttl: LOCK_TTL, sleep_sec: LOCK_SLEEP, retries: LOCK_RETRIES
-        ) do |retried|
-          if retried
-            source_user = find_source_user(source_user_identifier)
-            next source_user if source_user
-          end
-
+        ) do |_retried|
           create_source_user_mapping(source_name, source_username, source_user_identifier)
+        rescue DuplicatedSourceUserError
+          source_user = find_source_user(source_user_identifier)
+          next source_user if source_user
+
+          raise
         end
       end
 

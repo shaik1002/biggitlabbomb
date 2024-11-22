@@ -96,20 +96,11 @@ RSpec.describe Gitlab::Import::SourceUserMapper, :request_store, feature_categor
         end
       end
 
-      context 'when retried and another source user is not created while waiting' do
+      context 'when another source user was made while waiting' do
         before do
           allow_next_instance_of(described_class) do |source_user_mapper|
-            allow(source_user_mapper).to receive(:in_lock).and_yield(true)
-          end
-        end
-
-        it_behaves_like 'creates an import_source_user and a unique placeholder user'
-      end
-
-      context 'when retried and another source user was made while waiting' do
-        before do
-          allow_next_instance_of(described_class) do |source_user_mapper|
-            allow(source_user_mapper).to receive(:in_lock).and_yield(true)
+            allow(source_user_mapper).to receive(:create_source_user_mapping)
+              .and_raise(described_class::DuplicatedSourceUserError)
           end
 
           allow(Import::SourceUser).to receive(:find_source_user).and_return(nil, existing_import_source_user)
@@ -120,6 +111,20 @@ RSpec.describe Gitlab::Import::SourceUserMapper, :request_store, feature_categor
         end
 
         it_behaves_like 'it does not create an import_source_user or placeholder user'
+      end
+
+      context 'when another source user was made while waiting but we fail to find it' do
+        before do
+          allow_next_instance_of(described_class) do |source_user_mapper|
+            allow(source_user_mapper).to receive(:create_source_user_mapping).and_raise(
+              described_class::DuplicatedSourceUserError
+            )
+          end
+        end
+
+        it 'raises an exception' do
+          expect { find_or_create_source_user }.to raise_error(described_class::DuplicatedSourceUserError)
+        end
       end
 
       context 'and an import source user exists for current import source' do
