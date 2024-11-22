@@ -177,6 +177,24 @@ If [Remember me](#turn-remember-me-on-or-off) is enabled, users' sessions can re
 
 For details, see [cookies used for sign-in](../../user/profile/index.md#cookies-used-for-sign-in).
 
+### Set sessions to expire from date of creation
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/395038) in GitLab 16.10.
+
+You can configure sessions to expire based on session duration from the time of session creation, instead of time of last session activity.
+
+When the session duration hits the specified limit, the session ends and users are signed out regardless of:
+
+- User activity during the session or at the time of session expiration.
+- If [remember me](#turn-remember-me-on-or-off) is enabled.
+
+1. On the left sidebar, at the bottom, select **Admin Area**.
+1. Select **Settings > General**.
+1. Expand **Account and limit**.
+1. Select or clear the **Expire session from creation date** checkbox to turn this setting on or off.
+
+When this setting is enabled, a warning is displayed to users just before their session is due to expire, telling them to save their work and sign in again.
+
 ### Turn **Remember me** on or off
 
 > - Ability to turn the **Remember me** setting on and off [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/369133) in GitLab 16.0.
@@ -187,6 +205,9 @@ Users can select the **Remember me** checkbox on sign-in, and their session rema
 1. Select **Settings > General**.
 1. Expand **Account and limit**.
 1. Select or clear the **Remember me** checkbox to turn this setting on or off.
+
+NOTE:
+If you [set sessions to expire from date of creation](#set-sessions-to-expire-from-date-of-creation), that setting supersedes the remember me setting.
 
 ### Customize session duration for Git Operations when 2FA is enabled
 
@@ -245,13 +266,10 @@ When you require expiration dates for new access tokens:
 
 DETAILS:
 **Tier:** Premium, Ultimate
-**Offering:** Self-managed
+**Offering:** Self-managed, GitLab Dedicated
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/163726) in GitLab 17.5 [with a feature flag](../feature_flags.md) named `allow_top_level_group_owners_to_create_service_accounts` for GitLab self-managed. Disabled by default.
-> - [Generally available](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/125835) in GitLab 17.6. Feature flag `allow_top_level_group_owners_to_create_service_accounts` removed.
-
-FLAG:
-On GitLab self-managed, by default this feature is not available. To make it available, an administrator can [enable the feature flag](../feature_flags.md) named `allow_top_level_group_owners_to_create_service_accounts`. On GitLab.com, this feature is available.
+> - [Generally available](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/172502) in GitLab 17.6. Feature flag `allow_top_level_group_owners_to_create_service_accounts` removed.
 
 By default, in GitLab self-managed, top-level group Owners can not create service accounts. GitLab administrators can allow top-level group Owners to create service accounts.
 

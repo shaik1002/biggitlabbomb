@@ -1,0 +1,9 @@
+---
+name: expire_session_from_init
+feature_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/395038
+introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/138572
+rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/471679
+milestone: '17.1'
+group: group::compliance
+type: ops
+default_enabled: false

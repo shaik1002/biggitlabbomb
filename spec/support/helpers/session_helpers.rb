@@ -41,6 +41,10 @@ module SessionHelpers
     Gitlab::Redis::Sessions.with { |redis| redis.ttl(key) }
   end
 
+  def expire(key, ttl)
+    Gitlab::Redis::Sessions.with { |redis| redis.expire(key, ttl) }
+  end
+
   def expire_session
     get_session_keys.each do |key|
       ::Gitlab::Redis::Sessions.with { |redis| redis.expire(key, -1) }

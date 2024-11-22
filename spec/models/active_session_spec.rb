@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe ActiveSession, :clean_gitlab_redis_sessions do
+  include SessionHelpers
+
   let(:lookup_key) { described_class.lookup_key_name(user.id) }
   let(:user) do
     create(:user).tap do |user|
@@ -233,6 +235,24 @@ RSpec.describe ActiveSession, :clean_gitlab_redis_sessions do
           created_at: eq(created_at),
           updated_at: eq(updated_at)
         )
+      end
+    end
+
+    context 'session expires from creation' do
+      before do
+        stub_application_setting(expire_session_from_init: true)
+      end
+
+      it 'sets a new redis entry with the same ttl' do
+        described_class.set(user, request)
+        key = described_class.key_name(user.id, rack_session.private_id)
+        # Sanity check for default ttl
+        expect(get_ttl(key)).to be_within(10).of(7.days.to_i)
+        # Mock passage of time
+        expire(key, 4.days.to_i)
+        described_class.set(user, request)
+        # ensure active session reset did not modify ttl
+        expect(get_ttl(key)).to be_within(20).of(4.days.to_i)
       end
     end
   end

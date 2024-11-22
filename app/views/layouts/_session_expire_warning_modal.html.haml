@@ -1,0 +1,3 @@
+- return unless current_user && Settings.gitlab['session_expire_from_init']
+
+#js-expire-session-warning{ data: { session_timeout: expire_session_time, sign_in_path: sign_out_link } }

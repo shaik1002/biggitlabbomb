@@ -31,7 +31,7 @@ import initUserPopovers from './user_popovers';
 import initBroadcastNotifications from './broadcast_notification';
 import { initCopyCodeButton } from './behaviors/copy_code';
 import initGitlabVersionCheck from './gitlab_version_check';
-
+import { initSessionLogoutWarningModal } from './sessions/timeout';
 import 'ee_else_ce/main_ee';
 import 'jh_else_ce/main_jh';
 
@@ -90,6 +90,7 @@ function deferredInitialisation() {
   initDefaultTrackers();
   initCopyCodeButton();
   initGitlabVersionCheck();
+  initSessionLogoutWarningModal();
 
   addSelectOnFocusBehaviour('.js-select-on-focus');
 

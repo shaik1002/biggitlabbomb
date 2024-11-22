@@ -12,8 +12,20 @@ module SessionsHelper
     Gitlab::Utils::Email.obfuscated_email(email)
   end
 
+  def sign_out_link
+    destroy_user_session_path
+  end
+
+  def expire_session_time
+    session_id = Gitlab::Session.current.id
+    user_id = current_user.id
+    Gitlab::Redis::Sessions.with do |redis|
+      redis.ttl("#{Gitlab::Redis::Sessions::USER_SESSIONS_NAMESPACE}::v2:#{user_id}:#{session_id}")
+    end
+  end
+
   def remember_me_enabled?
-    Gitlab::CurrentSettings.remember_me_enabled?
+    Gitlab::CurrentSettings.remember_me_enabled? && !Settings.gitlab['session_expire_from_init']
   end
 
   def unconfirmed_verification_email?(user)

@@ -15582,6 +15582,9 @@ msgstr ""
 msgid "Continue with:"
 msgstr ""
 
+msgid "Continue working"
+msgstr ""
+
 msgid "Continue…"
 msgstr ""
 
@@ -22831,6 +22834,12 @@ msgid "Expiration date"
 msgstr ""
 
 msgid "Expiration date (optional)"
+msgstr ""
+
+msgid "Expire session from creation date"
+msgstr ""
+
+msgid "Expire session from date of creation rather than last activity"
 msgstr ""
 
 msgid "Expired"
@@ -33787,6 +33796,9 @@ msgstr ""
 msgid "MemberRole|The Owner role is normally assigned to the individual or team responsible for managing and maintaining the group or creating the project. This role has the highest level of administrative control, and can manage all aspects of the group or project, including managing other Owners."
 msgstr ""
 
+msgid "MemberRole|The Planner role is suitable for team members who need to manage projects and track work items but do not need to contribute code, such as project managers and scrum masters."
+msgstr ""
+
 msgid "MemberRole|The Reporter role is suitable for team members who need to stay informed about a project or group but do not actively contribute code."
 msgstr ""
 
@@ -38422,6 +38434,12 @@ msgstr ""
 msgid "Open raw"
 msgstr ""
 
+msgid "Open session expiration banner"
+msgstr ""
+
+msgid "Open session expiration modal"
+msgstr ""
+
 msgid "Open: %{open}"
 msgstr ""
 
@@ -41324,6 +41342,9 @@ msgid "Plan"
 msgstr ""
 
 msgid "Plan:"
+msgstr ""
+
+msgid "Planner"
 msgstr ""
 
 msgid "PlantUML"
@@ -51868,6 +51889,21 @@ msgstr ""
 msgid "Session duration (minutes)"
 msgstr ""
 
+msgid "SessionExpire|Your session expires in %{humanReadableTimeRemaining} because your administrator has enabled %{linkStart}expire session from creation%{linkEnd}. Please sign in again."
+msgstr ""
+
+msgid "SessionExpire|Your session expires in %{humanReadableTimeRemaining} because your administrator has enabled %{linkStart}expire session from creation%{linkEnd}. Save your work and sign in again."
+msgstr ""
+
+msgid "SessionExpire|Your session expires soon"
+msgstr ""
+
+msgid "SessionExpire|Your session has expired"
+msgstr ""
+
+msgid "SessionExpire|Your session has expired because your administrator has enabled %{linkStart}expire session from creation%{linkEnd}. Please sign in again."
+msgstr ""
+
 msgid "Session|There was a error loading the user verification challenge. Refresh to try again."
 msgstr ""
 
@@ -55299,6 +55335,9 @@ msgid "The Matrix access token (for example, `syt-zyx57W2v1u123ew11`)."
 msgstr ""
 
 msgid "The Mattermost token."
+msgstr ""
+
+msgid "The Planner role is suitable for team members who need to manage projects and track work items but do not need to contribute code."
 msgstr ""
 
 msgid "The Slack notifications integration is deprecated and will be removed in a future release. To continue to receive notifications from Slack, use the GitLab for Slack app instead. %{learn_more_link_start}Learn more%{link_end}."
@@ -62429,25 +62468,7 @@ msgstr ""
 msgid "WikiClone|Clone Wiki repository"
 msgstr ""
 
-msgid "WikiClone|Clone repository"
-msgstr ""
-
 msgid "WikiClone|Git Access"
-msgstr ""
-
-msgid "WikiClone|Go to directory"
-msgstr ""
-
-msgid "WikiClone|Install Gollum"
-msgstr ""
-
-msgid "WikiClone|Start Gollum and edit locally"
-msgstr ""
-
-msgid "WikiClone|Step 1: Clone repository"
-msgstr ""
-
-msgid "WikiClone|Step 2: Install and start Gollum"
 msgstr ""
 
 msgid "WikiEdit|There is already a page with the same title in that path."

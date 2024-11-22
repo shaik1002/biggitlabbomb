@@ -133,6 +133,9 @@ class ApplicationSetting < ApplicationRecord
     allow_nil: false,
     qualified_domain_array: true
 
+  validates :session_expire_from_init,
+    inclusion: { in: [true, false], message: N_('must be a boolean value') }
+
   validates :minimum_password_length,
     presence: true,
     numericality: {
