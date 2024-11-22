@@ -1,8 +1,8 @@
-ARG GDK_SHA=4d74dc68619bb2f81fb22216fa9ca5d3b15b67bc
+ARG GDK_SHA=b448cc8576a97144aa7d7c0c4dfd1177ba1a06d1
 # Use tag prefix when running on 'stable' branch to make sure 'protected' image is used which is not deleted by registry cleanup
 ARG GDK_BASE_TAG_PREFIX
 
-FROM registry.gitlab.com/gitlab-org/gitlab-development-kit/asdf-bootstrapped-verify/main:${GDK_BASE_TAG_PREFIX}${GDK_SHA} AS base
+FROM registry.gitlab.com/gitlab-org/gitlab-development-kit/asdf-bootstrapped-verify:add-shell-gitlab-url-config AS base
 
 ENV GITLAB_LICENSE_MODE=test \
     GDK_KILL_CONFIRM=true
@@ -110,7 +110,8 @@ RUN set -eux; \
     && cp .ruby-version ./gitlab/ \
     && cp .tool-versions ./gitlab/ \
     && make redis/redis.conf all \
-    && gdk kill
+    && gdk kill \
+    && gdk config list
 
 ENTRYPOINT [ "/home/gdk/entrypoint" ]
 CMD [ "gdk", "tail" ]

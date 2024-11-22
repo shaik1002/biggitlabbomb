@@ -32,4 +32,6 @@ tracer:
     enabled: false
 # https://gitlab.com/gitlab-org/gitlab/-/issues/471172
 gitlab_http_router:
-  enabled: false
+  enabled: true
+gitlab_shell:
+  gitlab_url: http://gdk.test:3333
