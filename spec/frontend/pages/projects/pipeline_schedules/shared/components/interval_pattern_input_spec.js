@@ -225,12 +225,13 @@ describe('Interval Pattern Input Component', () => {
     it('emits cronValue event with cron value', async () => {
       createWrapper();
 
+      await nextTick();
       findCustomInput().element.value = '0 16 * * *';
       findCustomInput().trigger('input');
 
       await nextTick();
 
-      expect(wrapper.emitted()).toEqual({ cronValue: [['0 16 * * *']] });
+      expect(wrapper.emitted()).toEqual({ cronValue: [['3 4 * * *'], ['0 16 * * *']] });
     });
   });
 });

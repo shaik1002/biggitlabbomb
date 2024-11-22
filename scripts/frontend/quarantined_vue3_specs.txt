@@ -297,7 +297,6 @@ spec/frontend/packages_and_registries/settings/project/settings/components/packa
 spec/frontend/pages/import/bulk_imports/failures/index_spec.js
 spec/frontend/pages/projects/forks/new/components/fork_form_spec.js
 spec/frontend/pages/projects/forks/new/components/project_namespace_spec.js
-spec/frontend/pages/projects/pipeline_schedules/shared/components/interval_pattern_input_spec.js
 spec/frontend/pages/projects/shared/permissions/components/settings_panel_spec.js
 spec/frontend/pages/shared/wikis/components/delete_wiki_modal_spec.js
 spec/frontend/pages/shared/wikis/components/wiki_more_dropdown_spec.js
