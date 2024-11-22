@@ -21696,6 +21696,9 @@ msgstr ""
 msgid "Environments|Select Flux resource (optional)"
 msgstr ""
 
+msgid "Environments|Select a namespace to see available Flux resources."
+msgstr ""
+
 msgid "Environments|Select agent"
 msgstr ""
 
@@ -59769,6 +59772,9 @@ msgid "Use cURL"
 msgstr ""
 
 msgid "Use custom color #FF0000"
+msgstr ""
+
+msgid "Use existing commit message"
 msgstr ""
 
 msgid "Use experiment and beta GitLab Duo features"
