@@ -23,6 +23,19 @@ module ProtectedBranches
         # Refresh all_protected_branches association as it is not automatically updated
         project_or_group.all_protected_branches.reset if project_or_group.is_a?(Project)
       end
+
+      ::Gitlab::EventStore.publish(
+        ::Repositories::ProtectedBranchCreatedEvent.new(data: {
+          protected_branch_id: protected_branch.id,
+          parent_id: project_or_group.id,
+
+          parent_type: if project_or_group.is_a?(Project)
+                         ::Repositories::ProtectedBranchCreatedEvent::PARENT_TYPES[:project]
+                       else
+                         ::Repositories::ProtectedBranchCreatedEvent::PARENT_TYPES[:group]
+                       end
+        })
+      )
     end
 
     def protected_branch
