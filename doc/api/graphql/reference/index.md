@@ -149,7 +149,7 @@ four standard [pagination arguments](#pagination-arguments):
 
 ### `Query.aiSelfHostedModels`
 
-Returns the self-hosted model if an ID is provided, otherwise returns all models.
+List of self-hosted LLM servers.
 
 DETAILS:
 **Introduced** in GitLab 17.1.
@@ -160,12 +160,6 @@ Returns [`AiSelfHostedModelConnection`](#aiselfhostedmodelconnection).
 This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#pagination-arguments):
 `before: String`, `after: String`, `first: Int`, and `last: Int`.
-
-#### Arguments
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="queryaiselfhostedmodelsid"></a>`id` | [`AiSelfHostedModelID`](#aiselfhostedmodelid) | Global ID of a self-hosted model. |
 
 ### `Query.aiSlashCommands`
 
@@ -383,12 +377,6 @@ DETAILS:
 **Status**: Experiment.
 
 Returns [`CloudConnectorStatus`](#cloudconnectorstatus).
-
-### `Query.complianceRequirementControls`
-
-Get the list of all the compliance requirement controls.
-
-Returns [`ComplianceRequirementControl`](#compliancerequirementcontrol).
 
 ### `Query.containerRepository`
 
@@ -4688,28 +4676,6 @@ Input type: `DestroyComplianceFrameworkInput`
 | ---- | ---- | ----------- |
 | <a id="mutationdestroycomplianceframeworkclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | <a id="mutationdestroycomplianceframeworkerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
-
-### `Mutation.destroyComplianceRequirement`
-
-DETAILS:
-**Introduced** in GitLab 17.7.
-**Status**: Experiment.
-
-Input type: `DestroyComplianceRequirementInput`
-
-#### Arguments
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="mutationdestroycompliancerequirementclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
-| <a id="mutationdestroycompliancerequirementid"></a>`id` | [`ComplianceManagementComplianceFrameworkComplianceRequirementID!`](#compliancemanagementcomplianceframeworkcompliancerequirementid) | Global ID of the compliance requirement to destroy. |
-
-#### Fields
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="mutationdestroycompliancerequirementclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
-| <a id="mutationdestroycompliancerequirementerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
 ### `Mutation.destroyContainerRepository`
 
@@ -19657,18 +19623,6 @@ four standard [pagination arguments](#pagination-arguments):
 | ---- | ---- | ----------- |
 | <a id="boardlistissuesfilters"></a>`filters` | [`BoardIssueInput`](#boardissueinput) | Filters applied when selecting issues in the board list. |
 
-### `BooleanExpression`
-
-an expression with a boolean value.
-
-#### Fields
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="booleanexpressionfield"></a>`field` | [`String!`](#string) | Field the expression applies to. |
-| <a id="booleanexpressionoperator"></a>`operator` | [`String!`](#string) | Operator of the expression. |
-| <a id="booleanexpressionvalue"></a>`value` | [`Boolean!`](#boolean) | Boolean value of the expression. |
-
 ### `Branch`
 
 #### Fields
@@ -20981,7 +20935,6 @@ Represents a ComplianceFramework associated with a Project.
 | <a id="complianceframeworkprojects"></a>`projects` | [`ProjectConnection`](#projectconnection) | Projects associated with the compliance framework. (see [Connections](#connections)) |
 | <a id="complianceframeworkscanexecutionpolicies"></a>`scanExecutionPolicies` | [`ScanExecutionPolicyConnection`](#scanexecutionpolicyconnection) | Scan Execution Policies of the compliance framework. (see [Connections](#connections)) |
 | <a id="complianceframeworkscanresultpolicies"></a>`scanResultPolicies` | [`ScanResultPolicyConnection`](#scanresultpolicyconnection) | Scan Result Policies of the compliance framework. (see [Connections](#connections)) |
-| <a id="complianceframeworkvulnerabilitymanagementpolicies"></a>`vulnerabilityManagementPolicies` | [`VulnerabilityManagementPolicyConnection`](#vulnerabilitymanagementpolicyconnection) | Vulnerability Management Policies of the compliance framework. (see [Connections](#connections)) |
 
 ### `ComplianceRequirement`
 
@@ -20996,16 +20949,6 @@ Represents a ComplianceRequirement associated with a ComplianceFramework.
 | <a id="compliancerequirementid"></a>`id` | [`ID!`](#id) | Compliance requirement ID. |
 | <a id="compliancerequirementname"></a>`name` | [`String!`](#string) | Name of the compliance requirement. |
 | <a id="compliancerequirementrequirementtype"></a>`requirementType` | [`String!`](#string) | Type of the compliance requirement. |
-
-### `ComplianceRequirementControl`
-
-Lists down all the possible types of requirement controls.
-
-#### Fields
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="compliancerequirementcontrolcontrolexpressions"></a>`controlExpressions` | [`[ControlExpression!]!`](#controlexpression) | List of requirement controls. |
 
 ### `ComplianceStandardsAdherence`
 
@@ -21163,9 +21106,9 @@ A container repository.
 | <a id="containerrepositoryname"></a>`name` | [`String!`](#string) | Name of the container repository. |
 | <a id="containerrepositorypath"></a>`path` | [`String!`](#string) | Path of the container repository. |
 | <a id="containerrepositoryproject"></a>`project` | [`Project!`](#project) | Project of the container registry. |
-| <a id="containerrepositoryprotectionruleexists"></a>`protectionRuleExists` **{warning-solid}** | [`Boolean!`](#boolean) | **Introduced** in GitLab 17.2. **Status**: Experiment. Whether any matching container protection rule exists for the container. Available only when feature flag `container_registry_protected_containers` is enabled. |
+| <a id="containerrepositoryprotectionruleexists"></a>`protectionRuleExists` **{warning-solid}** | [`Boolean!`](#boolean) | **Introduced** in GitLab 17.2. **Status**: Experiment. Whether any matching container protection rule exists for this container. Available only when feature flag `container_registry_protected_containers` is enabled. |
 | <a id="containerrepositorystatus"></a>`status` | [`ContainerRepositoryStatus`](#containerrepositorystatus) | Status of the container repository. |
-| <a id="containerrepositorytagscount"></a>`tagsCount` | [`Int!`](#int) | Number of tags associated with the image. |
+| <a id="containerrepositorytagscount"></a>`tagsCount` | [`Int!`](#int) | Number of tags associated with this image. |
 | <a id="containerrepositoryupdatedat"></a>`updatedAt` | [`Time!`](#time) | Timestamp when the container repository was updated. |
 | <a id="containerrepositoryuserpermissions"></a>`userPermissions` | [`ContainerRepositoryPermissions!`](#containerrepositorypermissions) | Permissions for the current user on the resource. |
 
@@ -21188,10 +21131,10 @@ Details of a container repository.
 | <a id="containerrepositorydetailsname"></a>`name` | [`String!`](#string) | Name of the container repository. |
 | <a id="containerrepositorydetailspath"></a>`path` | [`String!`](#string) | Path of the container repository. |
 | <a id="containerrepositorydetailsproject"></a>`project` | [`Project!`](#project) | Project of the container registry. |
-| <a id="containerrepositorydetailsprotectionruleexists"></a>`protectionRuleExists` **{warning-solid}** | [`Boolean!`](#boolean) | **Introduced** in GitLab 17.2. **Status**: Experiment. Whether any matching container protection rule exists for the container. Available only when feature flag `container_registry_protected_containers` is enabled. |
+| <a id="containerrepositorydetailsprotectionruleexists"></a>`protectionRuleExists` **{warning-solid}** | [`Boolean!`](#boolean) | **Introduced** in GitLab 17.2. **Status**: Experiment. Whether any matching container protection rule exists for this container. Available only when feature flag `container_registry_protected_containers` is enabled. |
 | <a id="containerrepositorydetailssize"></a>`size` | [`Float`](#float) | Deduplicated size of the image repository in bytes. This is only available on GitLab.com for repositories created after `2021-11-04`. |
 | <a id="containerrepositorydetailsstatus"></a>`status` | [`ContainerRepositoryStatus`](#containerrepositorystatus) | Status of the container repository. |
-| <a id="containerrepositorydetailstagscount"></a>`tagsCount` | [`Int!`](#int) | Number of tags associated with the image. |
+| <a id="containerrepositorydetailstagscount"></a>`tagsCount` | [`Int!`](#int) | Number of tags associated with this image. |
 | <a id="containerrepositorydetailsupdatedat"></a>`updatedAt` | [`Time!`](#time) | Timestamp when the container repository was updated. |
 | <a id="containerrepositorydetailsuserpermissions"></a>`userPermissions` | [`ContainerRepositoryPermissions!`](#containerrepositorypermissions) | Permissions for the current user on the resource. |
 
@@ -21336,18 +21279,6 @@ Represents the contributions of a user.
 | <a id="contributionanalyticscontributionrepopushed"></a>`repoPushed` | [`Int`](#int) | Number of repository pushes the user made. |
 | <a id="contributionanalyticscontributiontotalevents"></a>`totalEvents` | [`Int`](#int) | Total number of events contributed by the user. |
 | <a id="contributionanalyticscontributionuser"></a>`user` | [`UserCore`](#usercore) | Contributor User object. |
-
-### `ControlExpression`
-
-Represents a control expression.
-
-#### Fields
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="controlexpressionexpression"></a>`expression` | [`ExpressionValue!`](#expressionvalue) | Expression details for the control. |
-| <a id="controlexpressionid"></a>`id` | [`ID!`](#id) | ID for the control. |
-| <a id="controlexpressionname"></a>`name` | [`String!`](#string) | Name of the control. |
 
 ### `CoverageFuzzingCorpus`
 
@@ -21996,7 +21927,6 @@ Represents a CVE's Enrichment (EPSS score).
 | ---- | ---- | ----------- |
 | <a id="cveenrichmenttypecve"></a>`cve` | [`String!`](#string) | CVE identifier of relevant vulnerability. |
 | <a id="cveenrichmenttypeepssscore"></a>`epssScore` | [`Float!`](#float) | EPSS score for the CVE. |
-| <a id="cveenrichmenttypeisknownexploit"></a>`isKnownExploit` | [`Boolean!`](#boolean) | Whether the CVE appears in the CISA KEV catalog. |
 
 ### `CvssType`
 
@@ -25673,27 +25603,6 @@ Returns [`[VulnerableProjectsByGrade!]`](#vulnerableprojectsbygrade).
 | <a id="groupvulnerabilitygradesincludesubgroups"></a>`includeSubgroups` | [`Boolean`](#boolean) | Include grades belonging to subgroups. |
 | <a id="groupvulnerabilitygradeslettergrade"></a>`letterGrade` | [`VulnerabilityGrade`](#vulnerabilitygrade) | Filter the response by given letter grade. |
 
-##### `Group.vulnerabilityManagementPolicies`
-
-Vulnerability Management Policies of the project.
-
-DETAILS:
-**Introduced** in GitLab 17.7.
-**Status**: Experiment.
-
-Returns [`VulnerabilityManagementPolicyConnection`](#vulnerabilitymanagementpolicyconnection).
-
-This field returns a [connection](#connections). It accepts the
-four standard [pagination arguments](#pagination-arguments):
-`before: String`, `after: String`, `first: Int`, and `last: Int`.
-
-###### Arguments
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="groupvulnerabilitymanagementpoliciesincludeunscoped"></a>`includeUnscoped` | [`Boolean`](#boolean) | Filter policies that are scoped to the project. |
-| <a id="groupvulnerabilitymanagementpoliciesrelationship"></a>`relationship` | [`SecurityPolicyRelationType`](#securitypolicyrelationtype) | Filter policies by the given policy relationship. |
-
 ##### `Group.vulnerabilitySeveritiesCount`
 
 Counts for each vulnerability severity in the group and its subgroups.
@@ -26436,18 +26345,6 @@ Returns [`VulnerabilitySeveritiesCount`](#vulnerabilityseveritiescount).
 | <a id="instancesecuritydashboardvulnerabilityseveritiescountscannerid"></a>`scannerId` | [`[VulnerabilitiesScannerID!]`](#vulnerabilitiesscannerid) | Filter vulnerabilities by scanner ID. |
 | <a id="instancesecuritydashboardvulnerabilityseveritiescountseverity"></a>`severity` | [`[VulnerabilitySeverity!]`](#vulnerabilityseverity) | Filter vulnerabilities by severity. |
 | <a id="instancesecuritydashboardvulnerabilityseveritiescountstate"></a>`state` | [`[VulnerabilityState!]`](#vulnerabilitystate) | Filter vulnerabilities by state. |
-
-### `IntegerExpression`
-
-An expression with an integer value.
-
-#### Fields
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="integerexpressionfield"></a>`field` | [`String!`](#string) | Field the expression applies to. |
-| <a id="integerexpressionoperator"></a>`operator` | [`String!`](#string) | Operator of the expression. |
-| <a id="integerexpressionvalue"></a>`value` | [`Int!`](#int) | Integer value of the expression. |
 
 ### `IntegrationExclusion`
 
@@ -29522,27 +29419,6 @@ four standard [pagination arguments](#pagination-arguments):
 | <a id="namespacescanresultpoliciesincludeunscoped"></a>`includeUnscoped` **{warning-solid}** | [`Boolean`](#boolean) | **Introduced** in GitLab 17.3. **Status**: Experiment. Filter policies that are scoped to the project. |
 | <a id="namespacescanresultpoliciesrelationship"></a>`relationship` | [`SecurityPolicyRelationType`](#securitypolicyrelationtype) | Filter policies by the given policy relationship. |
 
-##### `Namespace.vulnerabilityManagementPolicies`
-
-Vulnerability Management Policies of the project.
-
-DETAILS:
-**Introduced** in GitLab 17.7.
-**Status**: Experiment.
-
-Returns [`VulnerabilityManagementPolicyConnection`](#vulnerabilitymanagementpolicyconnection).
-
-This field returns a [connection](#connections). It accepts the
-four standard [pagination arguments](#pagination-arguments):
-`before: String`, `after: String`, `first: Int`, and `last: Int`.
-
-###### Arguments
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="namespacevulnerabilitymanagementpoliciesincludeunscoped"></a>`includeUnscoped` | [`Boolean`](#boolean) | Filter policies that are scoped to the project. |
-| <a id="namespacevulnerabilitymanagementpoliciesrelationship"></a>`relationship` | [`SecurityPolicyRelationType`](#securitypolicyrelationtype) | Filter policies by the given policy relationship. |
-
 ##### `Namespace.workItem`
 
 Find a work item by IID directly associated with the namespace(project or group).  Returns `null` for group level work items if the `namespace_level_work_items` feature flag is disabled.
@@ -30906,7 +30782,6 @@ Represents generic policy violation information.
 | ---- | ---- | ----------- |
 | <a id="policyviolationinfoname"></a>`name` | [`String!`](#string) | Represents the name of the violated policy. |
 | <a id="policyviolationinforeporttype"></a>`reportType` | [`ApprovalReportType!`](#approvalreporttype) | Represents the report type. |
-| <a id="policyviolationinfostatus"></a>`status` | [`PolicyViolationStatus`](#policyviolationstatus) | Represents the status of the violated policy. |
 
 ### `PreviewBillableUserChange`
 
@@ -32898,22 +32773,6 @@ four standard [pagination arguments](#pagination-arguments):
 | <a id="projectvulnerabilitiescountbydayenddate"></a>`endDate` | [`ISO8601Date!`](#iso8601date) | Last day for which to fetch vulnerability history. |
 | <a id="projectvulnerabilitiescountbydaystartdate"></a>`startDate` | [`ISO8601Date!`](#iso8601date) | First day for which to fetch vulnerability history. |
 
-##### `Project.vulnerabilityIdentifierSearch`
-
-Search for vulnerabilities by identifier. Feature flag `vulnerability_filtering_by_identifier` has to be enabled for the project.
-
-DETAILS:
-**Introduced** in GitLab 17.7.
-**Status**: Experiment.
-
-Returns [`[String!]`](#string).
-
-###### Arguments
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="projectvulnerabilityidentifiersearchname"></a>`name` | [`String!`](#string) | Search identifier by name. Substring or partial match search is supported and argument should be greater than 3 characters. |
-
 ##### `Project.vulnerabilityManagementPolicies`
 
 Vulnerability Management Policies of the project.
@@ -34711,18 +34570,6 @@ Progress of standards adherence checks.
 | <a id="statusactionpath"></a>`path` | [`String`](#string) | Path for the action. |
 | <a id="statusactiontitle"></a>`title` | [`String`](#string) | Title for the action, for example: Retry. |
 
-### `StringExpression`
-
-an expression with a string value.
-
-#### Fields
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="stringexpressionfield"></a>`field` | [`String!`](#string) | Field the expression applies to. |
-| <a id="stringexpressionoperator"></a>`operator` | [`String!`](#string) | Operator of the expression. |
-| <a id="stringexpressionvalue"></a>`value` | [`String!`](#string) | String value of the expression. |
-
 ### `Submodule`
 
 #### Fields
@@ -35985,7 +35832,7 @@ Represents a vulnerability.
 | <a id="vulnerabilitycommenters"></a>`commenters` | [`UserCoreConnection!`](#usercoreconnection) | All commenters on this noteable. (see [Connections](#connections)) |
 | <a id="vulnerabilityconfirmedat"></a>`confirmedAt` | [`Time`](#time) | Timestamp of when the vulnerability state was changed to confirmed. |
 | <a id="vulnerabilityconfirmedby"></a>`confirmedBy` | [`UserCore`](#usercore) | User that confirmed the vulnerability. |
-| <a id="vulnerabilitycveenrichment"></a>`cveEnrichment` | [`CveEnrichmentType`](#cveenrichmenttype) | Enrichment (EPSS score and KEV) for CVE vulnerabilities. |
+| <a id="vulnerabilitycveenrichment"></a>`cveEnrichment` | [`CveEnrichmentType`](#cveenrichmenttype) | Enrichment (EPSS score) for CVE vulnerabilities. |
 | <a id="vulnerabilitycvss"></a>`cvss` | [`[CvssType!]!`](#cvsstype) | CVSS information for the vulnerability. |
 | <a id="vulnerabilitydescription"></a>`description` | [`String`](#string) | Description of the vulnerability. |
 | <a id="vulnerabilitydescriptionhtml"></a>`descriptionHtml` | [`String`](#string) | GitLab Flavored Markdown rendering of `description`. |
@@ -39911,14 +39758,6 @@ Types of security policy project created status.
 | <a id="policyviolationerrortypescan_removed"></a>`SCAN_REMOVED` | Represents mismatch between the scans of the source and target pipelines. |
 | <a id="policyviolationerrortypeunknown"></a>`UNKNOWN` | Represents unknown error. |
 
-### `PolicyViolationStatus`
-
-| Value | Description |
-| ----- | ----------- |
-| <a id="policyviolationstatusfailed"></a>`FAILED` | Represents a failed policy violation. |
-| <a id="policyviolationstatusrunning"></a>`RUNNING` | Represents a running policy violation. |
-| <a id="policyviolationstatuswarning"></a>`WARNING` | Represents a policy violation warning. |
-
 ### `ProductAnalyticsState`
 
 Current state of the product analytics stack.
@@ -41280,12 +41119,6 @@ Color represented as a hex code or named color.
 
 For example: "#fefefe".
 
-### `ComplianceManagementComplianceFrameworkComplianceRequirementID`
-
-A `ComplianceManagementComplianceFrameworkComplianceRequirementID` is a global ID. It is encoded as a string.
-
-An example `ComplianceManagementComplianceFrameworkComplianceRequirementID` is: `"gid://gitlab/ComplianceManagement::ComplianceFramework::ComplianceRequirement/1"`.
-
 ### `ComplianceManagementFrameworkID`
 
 A `ComplianceManagementFrameworkID` is a global ID. It is encoded as a string.
@@ -42105,16 +41938,6 @@ One of:
 
 - [`NugetDependencyLinkMetadata`](#nugetdependencylinkmetadata)
 
-#### `ExpressionValue`
-
-Represents possible value types for an expression.
-
-One of:
-
-- [`BooleanExpression`](#booleanexpression)
-- [`IntegerExpression`](#integerexpression)
-- [`StringExpression`](#stringexpression)
-
 #### `GoogleCloudArtifactRegistryArtifact`
 
 A base type of Google Artifact Registry artifacts.
@@ -42477,23 +42300,6 @@ Implementations:
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | <a id="eventableevents"></a>`events` | [`EventConnection`](#eventconnection) | List of events associated with the object. (see [Connections](#connections)) |
-
-#### `ExpressionInterface`
-
-Defines the common fields for all expressions.
-
-Implementations:
-
-- [`BooleanExpression`](#booleanexpression)
-- [`IntegerExpression`](#integerexpression)
-- [`StringExpression`](#stringexpression)
-
-##### Fields
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="expressioninterfacefield"></a>`field` | [`String!`](#string) | Field the expression applies to. |
-| <a id="expressioninterfaceoperator"></a>`operator` | [`String!`](#string) | Operator of the expression. |
 
 #### `ExternalAuditEventDestinationInterface`
 

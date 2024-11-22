@@ -516,16 +516,6 @@ class ApplicationSetting < ApplicationRecord
     allow_blank: true,
     public_url: ADDRESSABLE_URL_VALIDATION_OPTIONS
 
-  jsonb_accessor :integrations,
-    jira_connect_additional_audience_url: :string
-
-  validates :jira_connect_additional_audience_url,
-    length: { maximum: 255, message: N_('is too long (maximum is %{count} characters)') },
-    allow_blank: true,
-    public_url: ADDRESSABLE_URL_VALIDATION_OPTIONS
-
-  validates :integrations, json_schema: { filename: "application_setting_integrations" }
-
   with_options(presence: true, if: :slack_app_enabled?) do
     validates :slack_app_id
     validates :slack_app_secret
@@ -629,9 +619,6 @@ class ApplicationSetting < ApplicationRecord
       :user_starred_projects_api_limit,
       :users_get_by_id_limit
   end
-
-  attribute :resource_usage_limits, :ind_jsonb, default: -> { {} }
-  validates :resource_usage_limits, json_schema: { filename: 'resource_usage_limits' }
 
   jsonb_accessor :rate_limits,
     concurrent_bitbucket_import_jobs_limit: [:integer, { default: 100 }],

@@ -7,6 +7,7 @@
   &:focus,
   &:active {
     background-color: $btn-active-gray;
+    box-shadow: none;
   }
 }
 
@@ -133,6 +134,7 @@
   &:active,
   &:focus {
     background-color: transparent;
+    box-shadow: none;
   }
 }
 

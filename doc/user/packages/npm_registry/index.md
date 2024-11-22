@@ -172,7 +172,7 @@ To configure this URL, use one of these methods:
 
 :::TabTitle `.npmrc` file
 
-Create or edit the `.npmrc` file in your project root:
+Create or edit the `.npmrc` file in your project root: 
 
 ```plaintext
 @scope:registry=https://gitlab.example.com/api/v4/projects/<project_id>/packages/npm/ //gitlab.example.com/api/v4/projects/<project_id>/packages/npm/:_authToken="${NPM_TOKEN}"
@@ -204,31 +204,35 @@ Replace `@scope` with your package's scope.
 
 ### For installing packages
 
+When installing packages, you can use project, group, or instance endpoints. The URL structure varies accordingly:
+
+You can configure these URLs using one of the following methods:
+
 When you install packages, you can use project, group, or instance endpoints. The URL structure varies accordingly.
 To configure these URLs, use one of these methods:
 
 ::Tabs
 
-:::TabTitle `.npmrc` file
+:::TabTitle `.npmrc` file 
 
 Create or edit the `.npmrc` file in your project root. Use the appropriate URL based on your needs:
 
 - For a project:
 
   ```shell
-  @scope:registry=https://gitlab.example.com/api/v4/projects/<project_id>/packages/npm/
+  npm config set @scope:registry=https://gitlab.example.com/api/v4/projects/<project_id>/packages/npm/
   ```
 
 - For a group:
 
   ```shell
-  @scope:registry=https://gitlab.example.com/api/v4/groups/<group_id>/-/packages/npm/
+  npm config set @scope:registry=https://gitlab.example.com/api/v4/groups/<group_id>/-/packages/npm/
   ```
 
 - For an instance:
 
   ```shell
-  @scope:registry=https://gitlab.example.com/api/v4/packages/npm/
+  npm config set @scope:registry=https://gitlab.example.com/api/v4/packages/npm/
   ```
 
 :::TabTitle `npm config`

@@ -2,9 +2,7 @@
 data_category: optional
 key_path: settings.gitaly_apdex
 description: Gitaly application performance
-product_group: gitaly
-product_categories:
-- gitaly
+product_group: gitaly_cluster
 value_type: number
 status: active
 milestone: "13.11"

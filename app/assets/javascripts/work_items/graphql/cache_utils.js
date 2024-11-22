@@ -589,7 +589,6 @@ export const setNewWorkItemCache = async (
                 setWorkItemMetadata: true,
                 createNote: true,
                 adminWorkItemLink: true,
-                markNoteAsInternal: true,
                 __typename: 'WorkItemPermissions',
               },
               widgets,

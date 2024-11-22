@@ -4,9 +4,7 @@ module Notes
   class CreateService < ::Notes::BaseService
     include IncidentManagement::UsageData
 
-    def execute(
-      skip_capture_diff_note_position: false, skip_merge_status_trigger: false, executing_user: nil,
-      importing: false)
+    def execute(skip_capture_diff_note_position: false, skip_merge_status_trigger: false, executing_user: nil)
       Gitlab::Database::QueryAnalyzers::PreventCrossDatabaseModification.temporary_ignore_tables_in_transaction(
         %w[
           notes
@@ -31,7 +29,7 @@ module Notes
         execute_quick_actions(note) do |only_commands|
           note.check_for_spam(action: :create, user: current_user) if check_for_spam?(only_commands)
 
-          after_commit(note) unless importing
+          after_commit(note)
 
           note_saved = note.with_transaction_returning_status do
             break false if only_commands
