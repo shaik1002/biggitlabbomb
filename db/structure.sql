@@ -10750,6 +10750,7 @@ CREATE TABLE dast_scanner_profiles (
     scan_type smallint DEFAULT 1 NOT NULL,
     use_ajax_spider boolean DEFAULT false NOT NULL,
     show_debug_messages boolean DEFAULT false NOT NULL,
+    content jsonb DEFAULT '{}'::jsonb NOT NULL,
     CONSTRAINT check_568568fabf CHECK ((char_length(name) <= 255))
 );
 
@@ -10813,6 +10814,7 @@ CREATE TABLE dast_site_profiles (
     scan_method smallint DEFAULT 0 NOT NULL,
     auth_submit_field text,
     scan_file_path text,
+    content jsonb DEFAULT '{}'::jsonb NOT NULL,
     CONSTRAINT check_5203110fee CHECK ((char_length(auth_username_field) <= 255)),
     CONSTRAINT check_6cfab17b48 CHECK ((char_length(name) <= 255)),
     CONSTRAINT check_8d2aa0f66d CHECK ((char_length(scan_file_path) <= 1024)),
