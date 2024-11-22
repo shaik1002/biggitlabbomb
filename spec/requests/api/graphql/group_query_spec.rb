@@ -8,6 +8,13 @@ RSpec.describe 'getting group information', :with_license, feature_category: :gr
   include GraphqlHelpers
   include UploadHelpers
 
+  before_all do
+    # Some spec in this file currently fails when a sec database is configured. We plan to ensure it all functions
+    # and passes prior to the sec db rollout.
+    # Consult https://gitlab.com/gitlab-org/gitlab/-/merge_requests/170283 for more info.
+    skip_if_multiple_databases_are_setup(:sec)
+  end
+
   let_it_be(:user1)         { create(:user, can_create_group: false) }
   let_it_be(:user2)         { create(:user) }
   let_it_be(:admin)         { create(:admin) }

@@ -6,6 +6,13 @@ RSpec.describe 'searching groups', :with_license, feature_category: :groups_and_
   include GraphqlHelpers
   using RSpec::Parameterized::TableSyntax
 
+  before_all do
+    # Some spec in this file currently fails when a sec database is configured. We plan to ensure it all functions
+    # and passes prior to the sec db rollout.
+    # Consult https://gitlab.com/gitlab-org/gitlab/-/merge_requests/170283 for more info.
+    skip_if_multiple_databases_are_setup(:sec)
+  end
+
   let_it_be(:user) { create(:user) }
   let_it_be(:public_group) { create(:group, :public, name: 'Group A') }
   let_it_be(:private_group) { create(:group, :private, name: 'Group B') }

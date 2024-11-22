@@ -6,6 +6,13 @@ RSpec.describe Database::MonitorLockedTablesWorker, feature_category: :cell do
   let(:worker) { described_class.new }
   let(:tables_locker) { instance_double(Gitlab::Database::TablesLocker, lock_writes: nil) }
 
+  before_all do
+    # Some spec in this file currently fails when a sec database is configured. We plan to ensure it all functions
+    # and passes prior to the sec db rollout.
+    # Consult https://gitlab.com/gitlab-org/gitlab/-/merge_requests/170283 for more info.
+    skip_if_multiple_databases_are_setup(:sec)
+  end
+
   describe '#perform' do
     context 'when running with single database' do
       before do

@@ -6,6 +6,13 @@ RSpec.describe LooseForeignKeys::CleanupWorker, feature_category: :cell do
   include MigrationsHelpers
   using RSpec::Parameterized::TableSyntax
 
+  before_all do
+    # Some spec in this file currently fails when a sec database is configured. We plan to ensure it all functions
+    # and passes prior to the sec db rollout.
+    # Consult https://gitlab.com/gitlab-org/gitlab/-/merge_requests/170283 for more info.
+    skip_if_multiple_databases_are_setup(:sec)
+  end
+
   def create_table_structure
     migration = ActiveRecord::Migration.new.extend(Gitlab::Database::MigrationHelpers::LooseForeignKeyHelpers)
 

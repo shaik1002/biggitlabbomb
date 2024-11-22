@@ -9,6 +9,13 @@ RSpec.describe 'getting custom emoji within namespace', feature_category: :share
   let_it_be(:group) { create(:group, :private, developers: current_user) }
   let_it_be(:custom_emoji) { create(:custom_emoji, group: group, file: 'http://example.com/test.png') }
 
+  before_all do
+    # Some spec in this file currently fails when a sec database is configured. We plan to ensure it all functions
+    # and passes prior to the sec db rollout.
+    # Consult https://gitlab.com/gitlab-org/gitlab/-/merge_requests/170283 for more info.
+    skip_if_multiple_databases_are_setup(:sec)
+  end
+
   describe "Query CustomEmoji on Group" do
     def custom_emoji_query(group)
       fields = all_graphql_fields_for('Group')

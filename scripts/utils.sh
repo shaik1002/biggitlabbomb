@@ -157,6 +157,12 @@ function setup_database_yml() {
       echo "Disabling ci connection in config/database.yml"
       sed -i "/ci:$/, /geo:$/ {s|^|#|;s|#  geo:|  geo:|;}" config/database.yml
     fi
+
+    # Don't know if we need this.
+    # if [ "$SEC_CONNECTION_DB" != "true" ]; then
+    #   echo "Disabling sec connection in config/database.yml"
+    #   sed -i "/sec:$/, /geo:$/ {s|^|#|;s|#  geo:|  geo:|;}" config/database.yml
+    # fi
   fi
 
   # Set up Geo database if the job name matches `rspec-ee` or `geo`.

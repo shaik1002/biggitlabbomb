@@ -4,6 +4,13 @@ require 'spec_helper'
 
 RSpec.describe Gitlab::Database::HealthStatus::Indicators::PatroniApdex, :aggregate_failures,
   feature_category: :database do
+  before(:all) do
+    # Some spec in this file currently fails when a sec database is configured. We plan to ensure it all functions
+    # and passes prior to the sec db rollout.
+    # Consult https://gitlab.com/gitlab-org/gitlab/-/merge_requests/170283 for more info.
+    skip_if_multiple_databases_are_setup(:sec)
+  end
+
   it_behaves_like 'Prometheus Alert based health indicator' do
     let(:feature_flag) { :batched_migrations_health_status_patroni_apdex }
     let(:sli_query_main) { 'Apdex query for main' }
