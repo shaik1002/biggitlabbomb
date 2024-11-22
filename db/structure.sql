@@ -7140,6 +7140,7 @@ CREATE TABLE approval_merge_request_rules (
     applicable_post_merge boolean,
     project_id bigint,
     approval_policy_rule_id bigint,
+    approval_policy_action_idx smallint DEFAULT 0 NOT NULL,
     CONSTRAINT check_6fca5928b2 CHECK ((char_length(section) <= 255))
 );
 
@@ -7249,7 +7250,8 @@ CREATE TABLE approval_project_rules (
     applies_to_all_protected_branches boolean DEFAULT false NOT NULL,
     security_orchestration_policy_configuration_id bigint,
     scan_result_policy_id bigint,
-    approval_policy_rule_id bigint
+    approval_policy_rule_id bigint,
+    approval_policy_action_idx smallint DEFAULT 0 NOT NULL
 );
 
 CREATE TABLE approval_project_rules_groups (
@@ -19205,6 +19207,7 @@ CREATE TABLE scan_result_policies (
     send_bot_message jsonb DEFAULT '{}'::jsonb NOT NULL,
     fallback_behavior jsonb DEFAULT '{}'::jsonb NOT NULL,
     policy_tuning jsonb DEFAULT '{}'::jsonb NOT NULL,
+    action_idx smallint DEFAULT 0 NOT NULL,
     CONSTRAINT age_value_null_or_positive CHECK (((age_value IS NULL) OR (age_value >= 0))),
     CONSTRAINT check_scan_result_policies_rule_idx_positive CHECK (((rule_idx IS NULL) OR (rule_idx >= 0)))
 );
