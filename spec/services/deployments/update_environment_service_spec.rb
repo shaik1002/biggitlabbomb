@@ -319,6 +319,35 @@ RSpec.describe Deployments::UpdateEnvironmentService, feature_category: :continu
         end
       end
     end
+
+    context 'when kubernetes namespace is specified' do
+      let(:namespace) { 'my-namespace' }
+
+      context 'when kubernetes agent is specified' do
+        let(:options) { { name: environment_name, kubernetes: { namespace: namespace, agent: 'path/to/project:example-agent' } } }
+
+        it 'assigns the kubernetes namespace to the environment' do
+          expect { subject.execute }.to change { environment.kubernetes_namespace }.from(nil).to(namespace)
+        end
+      end
+
+      context 'when kubernetes agent is not specified' do
+        let(:options) { { name: environment_name, kubernetes: { namespace: namespace, agent: nil } } }
+
+        it 'does not assign the kubernetes namespace to the environment' do
+          expect { subject.execute }.not_to change { environment.kubernetes_namespace }
+        end
+      end
+    end
+
+    context 'when flux resource path is specified' do
+      let(:options) { { name: environment_name, kubernetes: { flux_resource_path: flux_resource_path } } }
+      let(:flux_resource_path) { 'path/to/flux/resource' }
+
+      it 'assigns the flux resource path to the environment' do
+        expect { subject.execute }.to change { environment.flux_resource_path }.from(nil).to(flux_resource_path)
+      end
+    end
   end
 
   describe '#expanded_environment_url' do

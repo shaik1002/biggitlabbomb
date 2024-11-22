@@ -70,5 +70,21 @@ RSpec.describe Gitlab::Ci::Config::Entry::Kubernetes, feature_category: :kuberne
         it { is_expected.not_to be_valid }
       end
     end
+
+    describe 'flux_resource_path' do
+      let(:config) { Hash(flux_resource_path: flux_resource_path) }
+
+      context 'is a string' do
+        let(:flux_resource_path) { 'path/to/flux/resource' }
+
+        it { is_expected.to be_valid }
+      end
+
+      context 'is a hash' do
+        let(:flux_resource_path) { { key: 'flux_resource_path' } }
+
+        it { is_expected.not_to be_valid }
+      end
+    end
   end
 end

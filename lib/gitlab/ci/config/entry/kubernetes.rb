@@ -8,7 +8,7 @@ module Gitlab
           include ::Gitlab::Config::Entry::Validatable
           include ::Gitlab::Config::Entry::Attributable
 
-          ALLOWED_KEYS = %i[namespace agent].freeze
+          ALLOWED_KEYS = %i[namespace agent flux_resource_path].freeze
 
           attributes ALLOWED_KEYS
 
@@ -18,6 +18,7 @@ module Gitlab
 
             validates :namespace, type: String, allow_nil: true
             validates :agent, type: String, allow_nil: true
+            validates :flux_resource_path, type: String, allow_nil: true
           end
         end
       end

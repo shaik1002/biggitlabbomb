@@ -32,6 +32,8 @@ module Deployments
         renew_auto_stop_in
         renew_deployment_tier
         renew_cluster_agent
+        renew_kubernetes_namespace
+        renew_flux_resource_path
         environment.fire_state_event(action)
 
         if environment.save
@@ -90,6 +92,14 @@ module Deployments
       environment_options.dig(:kubernetes, :agent)
     end
 
+    def kubernetes_namespace
+      environment_options.dig(:kubernetes, :namespace)
+    end
+
+    def flux_resource_path
+      environment_options.dig(:kubernetes, :flux_resource_path)
+    end
+
     def renew_external_url
       if (url = expanded_environment_url)
         environment.external_url = url
@@ -129,6 +139,20 @@ module Deployments
 
     def user_access_authorizations_for_project
       Clusters::Agents::Authorizations::UserAccess::Finder.new(deployable.user, project: deployable.project).execute
+    end
+
+    def renew_kubernetes_namespace
+      return unless cluster_agent_path && kubernetes_namespace
+
+      if (namespace = deployable&.expanded_kubernetes_namespace)
+        environment.kubernetes_namespace = namespace
+      end
+    end
+
+    def renew_flux_resource_path
+      return unless flux_resource_path
+
+      environment.flux_resource_path = flux_resource_path
     end
   end
 end
