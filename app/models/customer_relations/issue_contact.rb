@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 class CustomerRelations::IssueContact < ApplicationRecord
-  include EachBatch
-
   self.table_name = "issue_customer_relations_contacts"
 
   belongs_to :issue, optional: false, inverse_of: :customer_relations_contacts

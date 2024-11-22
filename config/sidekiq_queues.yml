@@ -321,6 +321,8 @@
   - 1
 - - elastic_full_index
   - 1
+- - elastic_indexing_control
+  - 1
 - - elastic_namespace_indexer
   - 1
 - - elastic_namespace_rollout
@@ -608,6 +610,8 @@
 - - pages_domain_ssl_renewal
   - 1
 - - pages_domain_verification
+  - 1
+- - pages_reset_pages_default_domain_redirect
   - 1
 - - personal_access_tokens
   - 1

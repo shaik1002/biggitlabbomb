@@ -319,7 +319,6 @@ module ApplicationSettingsHelper
       :jira_connect_application_key,
       :jira_connect_public_key_storage_enabled,
       :jira_connect_proxy_url,
-      :jira_connect_additional_audience_url,
       :math_rendering_limits_enabled,
       :max_artifacts_content_include_size,
       :max_artifacts_size,
@@ -540,11 +539,9 @@ module ApplicationSettingsHelper
       :ai_action_api_rate_limit,
       :code_suggestions_api_rate_limit,
       :require_personal_access_token_expiry,
-      :observability_backend_ssl_verification_enabled,
-      :show_migrate_from_jenkins_banner
+      :observability_backend_ssl_verification_enabled
     ].tap do |settings|
       unless Gitlab.com?
-        settings << :resource_usage_limits
         settings << :deactivate_dormant_users
         settings << :deactivate_dormant_users_period
         settings << :nuget_skip_metadata_url_validation

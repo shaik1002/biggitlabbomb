@@ -701,10 +701,6 @@ and the pipeline is for either:
 
 - If your rules match both branch pipelines (other than the default branch) and merge request pipelines,
   [duplicate pipelines](../jobs/job_rules.md#avoid-duplicate-pipelines) can occur.
-- `start_in`, `allow_failure`, and `needs` are not supported in `workflow:rules`,
-  but do not cause a syntax violation. Though they have no effect, do not use them
-  in `workflow:rules` as it could cause syntax failures in the future. See
-  [issue 436473](https://gitlab.com/gitlab-org/gitlab/-/issues/436473) for more details.
 
 **Related topics**:
 
@@ -2455,16 +2451,18 @@ and is a little more flexible and readable.
 
 ```yaml
 .tests:
+  script: rake test
   stage: test
-  image: ruby:3.0
+  only:
+    refs:
+      - branches
 
 rspec:
   extends: .tests
   script: rake rspec
-
-rubocop:
-  extends: .tests
-  script: bundle exec rubocop
+  only:
+    variables:
+      - $RSPEC
 ```
 
 In this example, the `rspec` job uses the configuration from the `.tests` template job.
@@ -2474,18 +2472,17 @@ When creating the pipeline, GitLab:
 - Merges the `.tests` content with the `rspec` job.
 - Doesn't merge the values of the keys.
 
-The combined configuration is equivalent to these jobs:
+The result is this `rspec` job:
 
 ```yaml
 rspec:
-  stage: test
-  image: ruby:3.0
   script: rake rspec
-
-rubocop:
   stage: test
-  image: ruby:3.0
-  script: bundle exec rubocop
+  only:
+    refs:
+      - branches
+    variables:
+      - $RSPEC
 ```
 
 **Additional details**:

@@ -36,7 +36,7 @@ module Ci
       masked? && !raw?
     end
 
-    def to_hash_variable
+    def to_runner_variable
       super.merge(masked: masked?)
     end
   end

@@ -112,6 +112,7 @@ ul.content-list {
       > .btn-group,
       > .dropdown.inline {
         margin-right: $grid-size;
+        display: inline-block;
 
         &.has-tooltip,
         &:last-child {

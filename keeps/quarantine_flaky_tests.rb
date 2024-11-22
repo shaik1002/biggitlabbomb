@@ -131,7 +131,7 @@ module Keeps
     end
 
     def get(url)
-      http_response = Gitlab::HTTP_V2.get( # rubocop:disable Gitlab/HttpV2 -- Not running inside rails application
+      http_response = Gitlab::HTTP_V2.get(
         url,
         headers: {
           'User-Agent' => "GitLab-Housekeeper/#{self.class.name}",

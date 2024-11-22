@@ -8,7 +8,6 @@ module VirtualRegistries
 
         TIMEOUT = 5
         DIGEST_EXTENSIONS = %w[.sha1 .md5].freeze
-        PERMISSIONS_CACHE_TTL = 5.minutes
 
         ERRORS = {
           path_not_present: ServiceResponse.error(message: 'Path not present', reason: :path_not_present),
@@ -66,8 +65,11 @@ module VirtualRegistries
 
         def cache_response_still_valid?
           return false unless cached_response
-          return true unless cached_response.stale?
 
+          unless cached_response.stale?
+            cached_response.bump_statistics
+            return true
+          end
           # cached response with no etag can't be checked
           return false if cached_response.upstream_etag.blank?
 
@@ -75,7 +77,7 @@ module VirtualRegistries
 
           return false unless cached_response.upstream_etag == response.headers['etag']
 
-          cached_response.update_column(:upstream_checked_at, Time.current)
+          cached_response.bump_statistics(include_upstream_checked_at: true)
           true
         end
 
@@ -116,22 +118,7 @@ module VirtualRegistries
         strong_memoize_attr :digest_request?
 
         def allowed?
-          return false unless current_user # anonymous users can't access virtual registries
-
-          Rails.cache.fetch(permissions_cache_key, expires_in: PERMISSIONS_CACHE_TTL) do
-            can?(current_user, :read_virtual_registry, registry)
-          end
-        end
-
-        def permissions_cache_key
-          [
-            'virtual_registries',
-            current_user.model_name.cache_key,
-            current_user.id,
-            'read_virtual_registry',
-            'maven',
-            registry.id
-          ]
+          can?(current_user, :read_virtual_registry, registry)
         end
 
         def path

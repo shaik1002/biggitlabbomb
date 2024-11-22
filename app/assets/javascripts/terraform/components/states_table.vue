@@ -46,7 +46,7 @@ export default {
   },
   computed: {
     fields() {
-      return [
+      const columns = [
         {
           key: 'name',
           label: this.$options.i18n.name,
@@ -59,13 +59,18 @@ export default {
           key: 'updated',
           label: this.$options.i18n.details,
         },
-        {
+      ];
+
+      if (this.terraformAdmin) {
+        columns.push({
           key: 'actions',
           label: this.$options.i18n.actions,
           thClass: 'gl-w-12',
           tdClass: 'gl-text-right',
-        },
-      ];
+        });
+      }
+
+      return columns;
     },
   },
   i18n: {
@@ -217,8 +222,8 @@ export default {
       </p>
     </template>
 
-    <template #cell(actions)="{ item }">
-      <state-actions :state="item" :terraform-admin="terraformAdmin" />
+    <template v-if="terraformAdmin" #cell(actions)="{ item }">
+      <state-actions :state="item" />
     </template>
 
     <template #row-details="row">

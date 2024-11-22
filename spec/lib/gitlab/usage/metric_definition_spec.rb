@@ -15,6 +15,7 @@ RSpec.describe Gitlab::Usage::MetricDefinition, feature_category: :service_ping 
       time_frame: 'none',
       data_source: 'database',
       distribution: %w[ee ce],
+      tier: %w[free premium ultimate],
       tiers: %w[free premium ultimate],
       data_category: 'standard',
       removed_by_url: 'http://gdk.test'
@@ -65,18 +66,10 @@ RSpec.describe Gitlab::Usage::MetricDefinition, feature_category: :service_ping 
       end
 
       context 'for uniq counter' do
-        let(:attributes) { { key_path: 'metric1', data_source: 'internal_events', events: [{ name: 'a', unique: 'user.id' }] } }
+        let(:attributes) { { key_path: 'metric1', data_source: 'internal_events', events: [{ name: 'a', unique: :id }] } }
 
         it 'returns UniqueCountMetric' do
           expect(definition.instrumentation_class).to eq('UniqueCountMetric')
-        end
-      end
-
-      context 'for sum' do
-        let(:attributes) { { key_path: 'metric1', data_source: 'internal_events', events: [{ name: 'a', operator: 'sum(value)' }] } }
-
-        it 'returns TotalSumMetric' do
-          expect(definition.instrumentation_class).to eq('TotalSumMetric')
         end
       end
     end
@@ -201,7 +194,7 @@ RSpec.describe Gitlab::Usage::MetricDefinition, feature_category: :service_ping 
       :data_source        | nil
       :distribution       | nil
       :distribution       | 'test'
-      :tiers              | %w[test ee]
+      :tier               | %w[test ee]
       :repair_issue_url   | nil
       :removed_by_url     | 1
       :another_attribute  | nil
@@ -549,6 +542,7 @@ RSpec.describe Gitlab::Usage::MetricDefinition, feature_category: :service_ping 
         time_frame: 'none',
         data_source: 'database',
         distribution: %w[ee ce],
+        tier: %w[free starter premium ultimate bronze silver gold],
         tiers: %w[free starter premium ultimate bronze silver gold],
         data_category: 'optional'
       }

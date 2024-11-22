@@ -198,6 +198,10 @@ describe('StatesTable', () => {
     },
   );
 
+  it('displays no actions dropdown', () => {
+    expect(findActions().length).toEqual(0);
+  });
+
   it.each`
     errorMessage                               | lineNumber
     ${defaultProps.states[0].errorMessages[0]} | ${0}
@@ -209,11 +213,16 @@ describe('StatesTable', () => {
     expect(state.text()).toBe(errorMessage);
   });
 
-  it('displays an actions dropdown for each state', () => {
+  describe('when user is a terraform administrator', () => {
     beforeEach(() => {
-      return createComponent();
+      return createComponent({
+        terraformAdmin: true,
+        ...defaultProps,
+      });
     });
 
-    expect(findActions().length).toEqual(defaultProps.states.length);
+    it('displays an actions dropdown for each state', () => {
+      expect(findActions().length).toEqual(defaultProps.states.length);
+    });
   });
 });

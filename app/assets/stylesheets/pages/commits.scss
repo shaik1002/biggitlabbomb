@@ -43,6 +43,7 @@
 .commit-content {
   padding-right: 10px;
   white-space: normal;
+  min-width: 0;
 
   .commit-title {
     display: flex;
@@ -121,6 +122,10 @@
   :first-child {
     border-bottom-left-radius: $gl-border-radius-base;
     border-top-left-radius: $gl-border-radius-base;
+  }
+
+  :not(:first-child) {
+    border-left: 0;
   }
 
   :last-child {

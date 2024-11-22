@@ -11,8 +11,19 @@
     "distribution",
     "data_category",
     "milestone",
-    "introduced_by_url",
-    "tiers"
+    "introduced_by_url"
+  ],
+  "anyOf": [
+    {
+      "required": [
+        "tier"
+      ]
+    },
+    {
+      "required": [
+        "tiers"
+      ]
+    }
   ],
   "additionalProperties": false,
   "properties": {
@@ -131,6 +142,17 @@
           "umau",
           "customer_health_score",
           "devops_report"
+        ]
+      }
+    },
+    "tier": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "free",
+          "premium",
+          "ultimate"
         ]
       }
     },

@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'set' # Ruby 3.1 and earlier needs this. Drop this line after Ruby 3.2+ is only supported.
+
 class Compare
   include Gitlab::Utils::StrongMemoize
   include ActsAsPaginatedDiff

@@ -43,12 +43,18 @@ module API
       params do
         optional :pages_unique_domain_enabled, type: Boolean, desc: 'Whether to use unique domain'
         optional :pages_https_only, type: Boolean, desc: 'Whether to force HTTPS'
+        optional :pages_default_domain_redirect, type: String, desc: 'Set pages default domain redirect'
       end
       patch ':id/pages' do
         authenticated_with_can_read_all_resources!
         authorize! :update_pages, user_project
 
         break not_found! unless user_project.pages_enabled?
+
+        if params[:pages_default_domain_redirect] &&
+            !user_project.pages_domain_present?(params[:pages_default_domain_redirect])
+          bad_request!("pages_default_domain_redirect is invalid")
+        end
 
         response = ::Pages::UpdateService.new(user_project, current_user, params).execute
 

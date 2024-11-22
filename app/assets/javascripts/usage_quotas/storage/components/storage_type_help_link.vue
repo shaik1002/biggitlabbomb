@@ -1,6 +1,7 @@
 <script>
 import { GlLink, GlIcon } from '@gitlab/ui';
-import { sprintf, s__ } from '~/locale';
+import { sprintf } from '~/locale';
+import { HELP_LINK_ARIA_LABEL } from '~/usage_quotas/storage/constants';
 
 export default {
   name: 'StorageTypeHelpLink',
@@ -20,7 +21,7 @@ export default {
   },
   computed: {
     ariaLabel() {
-      return sprintf(s__('UsageQuota|%{linkTitle} help link'), {
+      return sprintf(HELP_LINK_ARIA_LABEL, {
         linkTitle: this.storageType,
       });
     },
