@@ -502,7 +502,6 @@ module ApplicationSettingsHelper
       :pipeline_limit_per_project_user_sha,
       :invitation_flow_enforcement,
       :can_create_group,
-      :can_create_organization,
       :bulk_import_concurrent_pipeline_batch_limit,
       :concurrent_relation_batch_export_limit,
       :bulk_import_enabled,
@@ -541,11 +540,9 @@ module ApplicationSettingsHelper
       :ai_action_api_rate_limit,
       :code_suggestions_api_rate_limit,
       :require_personal_access_token_expiry,
-      :observability_backend_ssl_verification_enabled,
-      :show_migrate_from_jenkins_banner
+      :observability_backend_ssl_verification_enabled
     ].tap do |settings|
       unless Gitlab.com?
-        settings << :resource_usage_limits
         settings << :deactivate_dormant_users
         settings << :deactivate_dormant_users_period
         settings << :nuget_skip_metadata_url_validation

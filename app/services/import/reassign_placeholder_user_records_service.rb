@@ -2,22 +2,35 @@
 
 module Import
   class ReassignPlaceholderUserRecordsService
+    include Gitlab::Database::HealthStatus::Indicators
+
     MEMBER_SELECT_BATCH_SIZE = 100
     MEMBER_DELETE_BATCH_SIZE = 1_000
     GROUP_FINDER_MEMBER_RELATIONS = %i[direct inherited shared_from_groups].freeze
     PROJECT_FINDER_MEMBER_RELATIONS = %i[direct inherited invited_groups shared_into_ancestors].freeze
-    RELATION_BATCH_SLEEP = 5
+    RELATION_BATCH_SLEEP = 5 # TODO: Remove with https://gitlab.com/gitlab-org/gitlab/-/issues/504995
+    DatabaseHealthStatusChecker = Struct.new(:id, :job_class_name)
 
     def initialize(import_source_user)
       @import_source_user = import_source_user
-      @reassigned_by_user = import_source_user.reassigned_by_user
-      @project_membership_created = false
+      @reassigned_by_user = User.find_by_id(import_source_user.reassigned_by_user_id)
     end
 
     def execute
       return unless import_source_user.reassignment_in_progress?
 
+      if Feature.enabled?(:reassignment_throttling, reassigned_by_user)
+        # check database health before processing
+        # TODO: do this every 30 seconds, though I haven't been able to
+        # implement something here that doesn't bork the specs.
+        # Is a loop inside a Thread the way to do this?
+
+        response = check_database_health
+        return response if response&.http_status == :backoff
+      end
+
       warn_about_any_risky_reassignments
+
       reassign_placeholder_references
 
       log_warn('Reassigned by user was not found, this may affect membership checks') unless reassigned_by_user
@@ -25,9 +38,25 @@ module Import
       create_memberships
       delete_placeholder_memberships
 
-      UserProjectAccessChangedService.new(import_source_user.reassign_to_user_id).execute if project_membership_created?
+      # Check all relations are processed
+      # TODO: not sure if `empty?` is the appropriate check. This class looks like once the records are
+      # reassigned, it deletes the placeholder reference records from the database.
+      # But I've seen in the specs that when a placeholder reference is for a nonexistant model, it
+      # does not delete the invalid placeholder reference
+      # if Feature.enabled?(:reassignment_throttling, reassigned_by_user)
+      #   model_groups = Import::SourceUserPlaceholderReference.model_groups_for_source_user(import_source_user)
+
+      #   return reschedule_response unless model_groups.empty?
+      # end
 
       import_source_user.complete!
+
+      return unless Feature.enabled?(:reassignment_throttling, reassigned_by_user)
+
+      ServiceResponse.success(
+        message: s_('Import|Placeholder user record reassignment complete'),
+        payload: import_source_user
+      )
     end
 
     private
@@ -73,10 +102,20 @@ module Import
           user_reference_column: reference_group.user_reference_column,
           alias_version: reference_group.alias_version
         ) do |model_relation, placeholder_references|
+          # check db health before processing each model relation.
+          # return a :backoff response if one occurs then skip to the next model_relation
+          #
+          # if Feature.enabled?(:reassignment_throttling, reassigned_by_user)
+          #   response = check_database_health([model_relation])
+
+          #   yield response if block_given?
+          #   next if response&.http_status == :backoff
+          # end
+
           reassign_placeholder_records_batch(model_relation, placeholder_references)
 
-          # TODO: Remove with https://gitlab.com/gitlab-org/gitlab/-/issues/493977
-          Kernel.sleep RELATION_BATCH_SLEEP
+          # TODO: Remove with https://gitlab.com/gitlab-org/gitlab/-/issues/504995
+          Kernel.sleep RELATION_BATCH_SLEEP unless Feature.enabled?(:reassignment_throttling, reassigned_by_user)
         end
       rescue Import::PlaceholderReferences::AliasResolver::MissingAlias => e
         ::Import::Framework::Logger.error(
@@ -156,8 +195,6 @@ module Import
       )
 
       member.save!
-
-      @project_membership_created = true if memberable.is_a?(Project)
     rescue ActiveRecord::ActiveRecordError => exception
       Gitlab::ErrorTracking.track_and_raise_for_dev_exception(
         exception,
@@ -198,8 +235,35 @@ module Import
       Import::Placeholders::Membership.by_source_user(import_source_user)
     end
 
-    def project_membership_created?
-      @project_membership_created == true
+    def check_database_health(table = nil)
+      health_context = Gitlab::Database::HealthStatus::Context.new(
+        DatabaseHealthStatusChecker.new(import_source_user.id, nil),
+        Gitlab::Database.database_base_models[:main].connection,
+        table,
+        :main
+      )
+
+      signals = Gitlab::Database::HealthStatus.evaluate(health_context)
+
+      return ServiceResponse.success unless signals.any?(&:stop?)
+
+      backoff_response
+    end
+
+    def backoff_response
+      ServiceResponse.success(
+        http_status: :backoff, # rubocop:disable Gitlab/ServiceResponse -- :http_status is still used
+        message: s_('Import|Rescheduling placeholder user records reassignment: database health'),
+        payload: import_source_user
+      )
+    end
+
+    def reschedule_response
+      ServiceResponse.success(
+        http_status: :backoff, # rubocop:disable Gitlab/ServiceResponse -- :http_status is still used
+        message: s_('Import|Rescheduling placeholder user records reassignment: reassignment incomplete'),
+        payload: import_source_user
+      )
     end
 
     def log_create_membership_skipped(message, placeholder_membership, existing_membership)

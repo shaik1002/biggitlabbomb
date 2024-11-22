@@ -60,6 +60,34 @@ RSpec.describe Import::ReassignPlaceholderUserRecordsWorker, feature_category: :
     end
   end
 
+  context 'when database is unhealthy' do
+    # let(:DatabaseHealthStatusChecker) { Struct.new(:id, :job_class_name) }
+    let(:health_status) { Gitlab::Database::HealthStatus }
+    let(:autovacuum_indicator_class) { health_status::Indicators::AutovacuumActiveOnTable }
+    let(:autovacuum_indicator) { instance_double(autovacuum_indicator_class) }
+    let(:stop_signal) do
+      instance_double(
+        "#{health_status}::Signals::Stop",
+        log_info?: true,
+        stop?: true,
+        indicator_class: autovacuum_indicator_class,
+        short_name: 'Stop',
+        reason: 'Test Exception'
+      )
+    end
+
+    before do
+      allow(autovacuum_indicator_class).to receive(:new).with(anything).and_return(autovacuum_indicator)
+      allow(autovacuum_indicator).to receive(:evaluate).and_return(stop_signal)
+    end
+
+    it 're-enqueues the job' do
+      expect(described_class).to receive(:perform_in).with(1.minute, import_source_user.id, {})
+
+      described_class.new.perform(import_source_user.id)
+    end
+  end
+
   describe '#sidekiq_retries_exhausted' do
     it 'logs the failure and sets the source user status to failed', :aggregate_failures do
       exception = StandardError.new('Some error')

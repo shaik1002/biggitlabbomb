@@ -12,19 +12,25 @@ module Import
     sidekiq_options retry: 5, dead: false
     sidekiq_options max_retries_after_interruption: 20
 
-    # TODO: Remove with https://gitlab.com/gitlab-org/gitlab/-/issues/493977
+    # TODO: Remove with https://gitlab.com/gitlab-org/gitlab/-/issues/504995
     concurrency_limit -> { 4 }
 
     sidekiq_retries_exhausted do |msg, exception|
       new.perform_failure(exception, msg['args'])
     end
 
-    def perform(import_source_user_id, _params = {})
+    def perform(import_source_user_id, params = {})
       @import_source_user = Import::SourceUser.find_by_id(import_source_user_id)
-
       return unless import_source_user_valid?
 
-      Import::ReassignPlaceholderUserRecordsService.new(import_source_user).execute
+      @reassigned_by_user = User.find_by_id(import_source_user.reassigned_by_user_id)
+
+      response = Import::ReassignPlaceholderUserRecordsService.new(import_source_user).execute
+
+      if Feature.enabled?(:reassignment_throttling, reassigned_by_user) && response.http_status == :backoff
+        self.class.perform_in(1.minute, import_source_user.id, params)
+      end
+
       Import::DeletePlaceholderUserWorker.perform_async(import_source_user.id)
     end
 
@@ -36,7 +42,7 @@ module Import
 
     private
 
-    attr_reader :import_source_user
+    attr_reader :import_source_user, :reassigned_by_user
 
     def import_source_user_valid?
       return true if import_source_user && import_source_user.reassignment_in_progress?

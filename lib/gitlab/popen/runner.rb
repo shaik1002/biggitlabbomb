@@ -12,7 +12,7 @@ module Gitlab
       def run(commands, &block)
         commands.each do |cmd|
           # yield doesn't support blocks, so we need to use a block variable
-          block.call(cmd) do
+          block.call(cmd) do # rubocop:disable Performance/RedundantBlockCall
             cmd_result = Gitlab::Popen.popen_with_detail(cmd)
 
             results << cmd_result

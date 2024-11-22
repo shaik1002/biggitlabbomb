@@ -168,7 +168,6 @@ export default {
         :total-lines="chunk.totalLines"
         :starting-from="chunk.startingFrom"
         :blame-path="blob.blamePath"
-        :blob-path="blob.path"
         @appear="() => handleAppear(index)"
       />
     </div>

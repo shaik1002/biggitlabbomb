@@ -120,12 +120,6 @@ RSpec.describe Import::ReassignPlaceholderUserRecordsService, feature_category: 
   end
 
   describe '#execute', :aggregate_failures do
-    before do
-      # Decrease the sleep in this test, so the test suite runs faster.
-      # TODO: Remove with https://gitlab.com/gitlab-org/gitlab/-/issues/493977
-      stub_const("#{described_class}::RELATION_BATCH_SLEEP", 0.01)
-    end
-
     shared_examples 'a successful reassignment' do
       it 'completes the reassignment' do
         service.execute
@@ -151,10 +145,19 @@ RSpec.describe Import::ReassignPlaceholderUserRecordsService, feature_category: 
     context 'when a user can be reassigned without error' do
       it_behaves_like 'a successful reassignment'
 
-      it 'sleeps between processing each model relation batch' do
-        expect(Kernel).to receive(:sleep).with(0.01).exactly(8).times
+      context 'when reassignment throttling is disabled' do
+        before do
+          stub_feature_flags(reassignment_throttling: false)
+          # Decrease the sleep in this test, so the test suite runs faster.
+          # TODO: Remove with https://gitlab.com/gitlab-org/gitlab/-/issues/493977
+          stub_const("#{described_class}::RELATION_BATCH_SLEEP", 0.01)
+        end
 
-        service.execute
+        it 'sleeps between processing each model relation batch' do
+          expect(Kernel).to receive(:sleep).with(0.01).exactly(8).times
+
+          service.execute
+        end
       end
 
       it 'updates actual records from the source user\'s placeholder reference records' do
@@ -194,30 +197,6 @@ RSpec.describe Import::ReassignPlaceholderUserRecordsService, feature_category: 
         )
       end
 
-      it 'calls UserProjectAccessChangedService' do
-        expect_next_instance_of(UserProjectAccessChangedService, reassign_to_user.id) do |service|
-          expect(service).to receive(:execute)
-        end
-
-        service.execute
-      end
-
-      it 'does not call UserProjectAccessChangedService when there are no memberships created' do
-        Import::Placeholders::Membership.delete_all
-
-        expect(UserProjectAccessChangedService).not_to receive(:new)
-
-        expect { service.execute }.not_to change { Member.count }
-      end
-
-      it 'does not call UserProjectAccessChangedService when only group memberships are created' do
-        Import::Placeholders::Membership.where(project: project).delete_all
-
-        expect(UserProjectAccessChangedService).not_to receive(:new)
-
-        expect { service.execute }.to change { GroupMember.count }.by(1)
-      end
-
       it 'deletes reassigned placeholder references and memberships for the source user' do
         expect { service.execute }
           .to change { Import::SourceUserPlaceholderReference.where(source_user: source_user).count }.to(0)
@@ -227,7 +206,6 @@ RSpec.describe Import::ReassignPlaceholderUserRecordsService, feature_category: 
       context 'when reassigned by user no longer exists' do
         before do
           source_user.reassigned_by_user.destroy!
-          source_user.reload
         end
 
         it 'can still create memberships' do
@@ -235,8 +213,7 @@ RSpec.describe Import::ReassignPlaceholderUserRecordsService, feature_category: 
         end
 
         it 'logs a warning' do
-          allow(Import::Framework::Logger).to receive(:warn)
-          expect(Import::Framework::Logger).to receive(:warn).with(
+          expect(::Import::Framework::Logger).to receive(:warn).with(
             hash_including(
               message: 'Reassigned by user was not found, this may affect membership checks',
               source_user_id: source_user.id

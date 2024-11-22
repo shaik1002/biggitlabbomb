@@ -74,7 +74,7 @@ $diff-file-header: 41px;
   }
 
   .diff-content {
-    @apply gl-bg-default gl-text-default;
+    @apply gl-bg-default gl-text-primary;
 
     .unfold {
       cursor: pointer;
@@ -329,7 +329,7 @@ $diff-file-header: 41px;
 
       &.active {
         cursor: default;
-        @apply gl-text-default;
+        @apply gl-text-primary;
 
         &:hover {
           text-decoration: none;

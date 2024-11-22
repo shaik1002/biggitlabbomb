@@ -151,7 +151,9 @@ class Ability
 
       added_keys = keys_after - keys_before
       added_keys.each do |key|
-        ::Gitlab::SafeRequestStore.delete(key) if key.is_a?(String) && key.start_with?('/dp') && key =~ matching
+        if key.is_a?(String) && key.start_with?('/dp') && key =~ matching
+          ::Gitlab::SafeRequestStore.delete(key)
+        end
       end
     end
 

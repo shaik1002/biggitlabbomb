@@ -11,8 +11,6 @@ export default {
   AVATAR_SHAPE_OPTION_RECT,
   organizationsQuery,
   organizationInputId: 'user_organization_id',
-  organizationUserInputId: 'user_organization_users_id',
-  organizationUserInputName: 'user[organization_users][][id]',
   i18n: {
     organizationSelectLabel: s__('Organization|Select an organization'),
   },
@@ -26,12 +24,10 @@ export default {
       type: Object,
       required: true,
     },
-    organizationUser: {
-      type: Object,
+    initialAccessLevel: {
+      type: String,
       required: false,
-      default() {
-        return {};
-      },
+      default: undefined,
     },
     organizationInputName: {
       type: String,
@@ -51,22 +47,12 @@ export default {
         value: this.initialOrganization.id,
       };
     },
-    isOrganizationUserDefined() {
-      return Object.keys(this.organizationUser).length;
-    },
   },
 };
 </script>
 
 <template>
   <div>
-    <input
-      v-if="isOrganizationUserDefined"
-      :id="$options.organizationUserInputId"
-      :name="$options.organizationUserInputName"
-      :value="organizationUser.id"
-      type="hidden"
-    />
     <organization-select
       v-if="hasMultipleOrganizations"
       :query="$options.organizationsQuery"
@@ -100,7 +86,7 @@ export default {
       />
     </div>
     <organization-role-field
-      :initial-access-level="organizationUser.accessLevel"
+      :initial-access-level="initialAccessLevel"
       :input-name="organizationRoleInputName"
     />
   </div>

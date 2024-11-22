@@ -149,17 +149,13 @@ export const isInViewport = (el, offset = {}) => {
   );
 };
 
-export const isModifierKey = (e) => e.metaKey || e.ctrlKey || e.altKey || e.shiftKey;
-
-export const isMetaKey = (e) => e.metaKey || e.ctrlKey;
+export const isMetaKey = (e) => e.metaKey || e.ctrlKey || e.altKey || e.shiftKey;
 
 // Identify following special clicks
 // 1) Cmd + Click on Mac (e.metaKey)
 // 2) Ctrl + Click on PC (e.ctrlKey)
 // 3) Middle-click or Mouse Wheel Click (e.which is 2)
 export const isMetaClick = (e) => e.metaKey || e.ctrlKey || e.which === 2;
-
-export const isMetaEnterKeyPair = (e) => isMetaKey(e) && e.key === 'Enter';
 
 /**
  * Get the current computed outer height for given selector.

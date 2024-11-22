@@ -19,15 +19,15 @@
   display: flex;
 
   &.failed svg {
-    @apply gl-fill-icon-danger;
+    color: var(--red-500, $red-500);
   }
 
   &.success svg {
-    @apply gl-fill-icon-success;
+    color: var(--green-500, $green-500);
   }
 
   &.neutral svg {
-    @apply gl-fill-icon-subtle;
+    color: var(--gray-500, $gray-500);
   }
 
   .ci-status-icon {

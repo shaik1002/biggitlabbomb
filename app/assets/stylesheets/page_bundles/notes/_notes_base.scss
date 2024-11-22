@@ -232,7 +232,7 @@
 .discussion-header,
 .note-header-info {
   a {
-    @apply gl-text-default;
+    color: var(--gl-text-color-default);
 
     &:hover,
     &.hover {
@@ -250,7 +250,7 @@
   }
 
   .author-link {
-    @apply gl-text-default;
+    @apply gl-text-primary;
   }
 
   // Prevent flickering of link when hovering between `author-name-link` and `.author-username-link`
@@ -335,13 +335,11 @@
 }
 
 .note-headline-light,
-.discussion-headline-light,
-.note-timestamp time {
+.discussion-headline-light {
   @apply gl-text-subtle;
 }
 
-.discussion-headline-light a,
-.note-timestamp:hover time {
+.discussion-headline-light a {
   @apply gl-text-link;
 }
 

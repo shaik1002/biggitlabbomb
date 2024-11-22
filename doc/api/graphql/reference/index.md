@@ -4689,28 +4689,6 @@ Input type: `DestroyComplianceFrameworkInput`
 | <a id="mutationdestroycomplianceframeworkclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | <a id="mutationdestroycomplianceframeworkerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
-### `Mutation.destroyComplianceRequirement`
-
-DETAILS:
-**Introduced** in GitLab 17.7.
-**Status**: Experiment.
-
-Input type: `DestroyComplianceRequirementInput`
-
-#### Arguments
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="mutationdestroycompliancerequirementclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
-| <a id="mutationdestroycompliancerequirementid"></a>`id` | [`ComplianceManagementComplianceFrameworkComplianceRequirementID!`](#compliancemanagementcomplianceframeworkcompliancerequirementid) | Global ID of the compliance requirement to destroy. |
-
-#### Fields
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="mutationdestroycompliancerequirementclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
-| <a id="mutationdestroycompliancerequirementerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
-
 ### `Mutation.destroyContainerRepository`
 
 Input type: `DestroyContainerRepositoryInput`
@@ -20981,7 +20959,6 @@ Represents a ComplianceFramework associated with a Project.
 | <a id="complianceframeworkprojects"></a>`projects` | [`ProjectConnection`](#projectconnection) | Projects associated with the compliance framework. (see [Connections](#connections)) |
 | <a id="complianceframeworkscanexecutionpolicies"></a>`scanExecutionPolicies` | [`ScanExecutionPolicyConnection`](#scanexecutionpolicyconnection) | Scan Execution Policies of the compliance framework. (see [Connections](#connections)) |
 | <a id="complianceframeworkscanresultpolicies"></a>`scanResultPolicies` | [`ScanResultPolicyConnection`](#scanresultpolicyconnection) | Scan Result Policies of the compliance framework. (see [Connections](#connections)) |
-| <a id="complianceframeworkvulnerabilitymanagementpolicies"></a>`vulnerabilityManagementPolicies` | [`VulnerabilityManagementPolicyConnection`](#vulnerabilitymanagementpolicyconnection) | Vulnerability Management Policies of the compliance framework. (see [Connections](#connections)) |
 
 ### `ComplianceRequirement`
 
@@ -21163,9 +21140,9 @@ A container repository.
 | <a id="containerrepositoryname"></a>`name` | [`String!`](#string) | Name of the container repository. |
 | <a id="containerrepositorypath"></a>`path` | [`String!`](#string) | Path of the container repository. |
 | <a id="containerrepositoryproject"></a>`project` | [`Project!`](#project) | Project of the container registry. |
-| <a id="containerrepositoryprotectionruleexists"></a>`protectionRuleExists` **{warning-solid}** | [`Boolean!`](#boolean) | **Introduced** in GitLab 17.2. **Status**: Experiment. Whether any matching container protection rule exists for the container. Available only when feature flag `container_registry_protected_containers` is enabled. |
+| <a id="containerrepositoryprotectionruleexists"></a>`protectionRuleExists` **{warning-solid}** | [`Boolean!`](#boolean) | **Introduced** in GitLab 17.2. **Status**: Experiment. Whether any matching container protection rule exists for this container. Available only when feature flag `container_registry_protected_containers` is enabled. |
 | <a id="containerrepositorystatus"></a>`status` | [`ContainerRepositoryStatus`](#containerrepositorystatus) | Status of the container repository. |
-| <a id="containerrepositorytagscount"></a>`tagsCount` | [`Int!`](#int) | Number of tags associated with the image. |
+| <a id="containerrepositorytagscount"></a>`tagsCount` | [`Int!`](#int) | Number of tags associated with this image. |
 | <a id="containerrepositoryupdatedat"></a>`updatedAt` | [`Time!`](#time) | Timestamp when the container repository was updated. |
 | <a id="containerrepositoryuserpermissions"></a>`userPermissions` | [`ContainerRepositoryPermissions!`](#containerrepositorypermissions) | Permissions for the current user on the resource. |
 
@@ -21188,10 +21165,10 @@ Details of a container repository.
 | <a id="containerrepositorydetailsname"></a>`name` | [`String!`](#string) | Name of the container repository. |
 | <a id="containerrepositorydetailspath"></a>`path` | [`String!`](#string) | Path of the container repository. |
 | <a id="containerrepositorydetailsproject"></a>`project` | [`Project!`](#project) | Project of the container registry. |
-| <a id="containerrepositorydetailsprotectionruleexists"></a>`protectionRuleExists` **{warning-solid}** | [`Boolean!`](#boolean) | **Introduced** in GitLab 17.2. **Status**: Experiment. Whether any matching container protection rule exists for the container. Available only when feature flag `container_registry_protected_containers` is enabled. |
+| <a id="containerrepositorydetailsprotectionruleexists"></a>`protectionRuleExists` **{warning-solid}** | [`Boolean!`](#boolean) | **Introduced** in GitLab 17.2. **Status**: Experiment. Whether any matching container protection rule exists for this container. Available only when feature flag `container_registry_protected_containers` is enabled. |
 | <a id="containerrepositorydetailssize"></a>`size` | [`Float`](#float) | Deduplicated size of the image repository in bytes. This is only available on GitLab.com for repositories created after `2021-11-04`. |
 | <a id="containerrepositorydetailsstatus"></a>`status` | [`ContainerRepositoryStatus`](#containerrepositorystatus) | Status of the container repository. |
-| <a id="containerrepositorydetailstagscount"></a>`tagsCount` | [`Int!`](#int) | Number of tags associated with the image. |
+| <a id="containerrepositorydetailstagscount"></a>`tagsCount` | [`Int!`](#int) | Number of tags associated with this image. |
 | <a id="containerrepositorydetailsupdatedat"></a>`updatedAt` | [`Time!`](#time) | Timestamp when the container repository was updated. |
 | <a id="containerrepositorydetailsuserpermissions"></a>`userPermissions` | [`ContainerRepositoryPermissions!`](#containerrepositorypermissions) | Permissions for the current user on the resource. |
 
@@ -21996,7 +21973,6 @@ Represents a CVE's Enrichment (EPSS score).
 | ---- | ---- | ----------- |
 | <a id="cveenrichmenttypecve"></a>`cve` | [`String!`](#string) | CVE identifier of relevant vulnerability. |
 | <a id="cveenrichmenttypeepssscore"></a>`epssScore` | [`Float!`](#float) | EPSS score for the CVE. |
-| <a id="cveenrichmenttypeisknownexploit"></a>`isKnownExploit` | [`Boolean!`](#boolean) | Whether the CVE appears in the CISA KEV catalog. |
 
 ### `CvssType`
 
@@ -25672,27 +25648,6 @@ Returns [`[VulnerableProjectsByGrade!]`](#vulnerableprojectsbygrade).
 | ---- | ---- | ----------- |
 | <a id="groupvulnerabilitygradesincludesubgroups"></a>`includeSubgroups` | [`Boolean`](#boolean) | Include grades belonging to subgroups. |
 | <a id="groupvulnerabilitygradeslettergrade"></a>`letterGrade` | [`VulnerabilityGrade`](#vulnerabilitygrade) | Filter the response by given letter grade. |
-
-##### `Group.vulnerabilityManagementPolicies`
-
-Vulnerability Management Policies of the project.
-
-DETAILS:
-**Introduced** in GitLab 17.7.
-**Status**: Experiment.
-
-Returns [`VulnerabilityManagementPolicyConnection`](#vulnerabilitymanagementpolicyconnection).
-
-This field returns a [connection](#connections). It accepts the
-four standard [pagination arguments](#pagination-arguments):
-`before: String`, `after: String`, `first: Int`, and `last: Int`.
-
-###### Arguments
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="groupvulnerabilitymanagementpoliciesincludeunscoped"></a>`includeUnscoped` | [`Boolean`](#boolean) | Filter policies that are scoped to the project. |
-| <a id="groupvulnerabilitymanagementpoliciesrelationship"></a>`relationship` | [`SecurityPolicyRelationType`](#securitypolicyrelationtype) | Filter policies by the given policy relationship. |
 
 ##### `Group.vulnerabilitySeveritiesCount`
 
@@ -29522,27 +29477,6 @@ four standard [pagination arguments](#pagination-arguments):
 | <a id="namespacescanresultpoliciesincludeunscoped"></a>`includeUnscoped` **{warning-solid}** | [`Boolean`](#boolean) | **Introduced** in GitLab 17.3. **Status**: Experiment. Filter policies that are scoped to the project. |
 | <a id="namespacescanresultpoliciesrelationship"></a>`relationship` | [`SecurityPolicyRelationType`](#securitypolicyrelationtype) | Filter policies by the given policy relationship. |
 
-##### `Namespace.vulnerabilityManagementPolicies`
-
-Vulnerability Management Policies of the project.
-
-DETAILS:
-**Introduced** in GitLab 17.7.
-**Status**: Experiment.
-
-Returns [`VulnerabilityManagementPolicyConnection`](#vulnerabilitymanagementpolicyconnection).
-
-This field returns a [connection](#connections). It accepts the
-four standard [pagination arguments](#pagination-arguments):
-`before: String`, `after: String`, `first: Int`, and `last: Int`.
-
-###### Arguments
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="namespacevulnerabilitymanagementpoliciesincludeunscoped"></a>`includeUnscoped` | [`Boolean`](#boolean) | Filter policies that are scoped to the project. |
-| <a id="namespacevulnerabilitymanagementpoliciesrelationship"></a>`relationship` | [`SecurityPolicyRelationType`](#securitypolicyrelationtype) | Filter policies by the given policy relationship. |
-
 ##### `Namespace.workItem`
 
 Find a work item by IID directly associated with the namespace(project or group).  Returns `null` for group level work items if the `namespace_level_work_items` feature flag is disabled.
@@ -30906,7 +30840,6 @@ Represents generic policy violation information.
 | ---- | ---- | ----------- |
 | <a id="policyviolationinfoname"></a>`name` | [`String!`](#string) | Represents the name of the violated policy. |
 | <a id="policyviolationinforeporttype"></a>`reportType` | [`ApprovalReportType!`](#approvalreporttype) | Represents the report type. |
-| <a id="policyviolationinfostatus"></a>`status` | [`PolicyViolationStatus`](#policyviolationstatus) | Represents the status of the violated policy. |
 
 ### `PreviewBillableUserChange`
 
@@ -32897,22 +32830,6 @@ four standard [pagination arguments](#pagination-arguments):
 | ---- | ---- | ----------- |
 | <a id="projectvulnerabilitiescountbydayenddate"></a>`endDate` | [`ISO8601Date!`](#iso8601date) | Last day for which to fetch vulnerability history. |
 | <a id="projectvulnerabilitiescountbydaystartdate"></a>`startDate` | [`ISO8601Date!`](#iso8601date) | First day for which to fetch vulnerability history. |
-
-##### `Project.vulnerabilityIdentifierSearch`
-
-Search for vulnerabilities by identifier. Feature flag `vulnerability_filtering_by_identifier` has to be enabled for the project.
-
-DETAILS:
-**Introduced** in GitLab 17.7.
-**Status**: Experiment.
-
-Returns [`[String!]`](#string).
-
-###### Arguments
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="projectvulnerabilityidentifiersearchname"></a>`name` | [`String!`](#string) | Search identifier by name. Substring or partial match search is supported and argument should be greater than 3 characters. |
 
 ##### `Project.vulnerabilityManagementPolicies`
 
@@ -35985,7 +35902,7 @@ Represents a vulnerability.
 | <a id="vulnerabilitycommenters"></a>`commenters` | [`UserCoreConnection!`](#usercoreconnection) | All commenters on this noteable. (see [Connections](#connections)) |
 | <a id="vulnerabilityconfirmedat"></a>`confirmedAt` | [`Time`](#time) | Timestamp of when the vulnerability state was changed to confirmed. |
 | <a id="vulnerabilityconfirmedby"></a>`confirmedBy` | [`UserCore`](#usercore) | User that confirmed the vulnerability. |
-| <a id="vulnerabilitycveenrichment"></a>`cveEnrichment` | [`CveEnrichmentType`](#cveenrichmenttype) | Enrichment (EPSS score and KEV) for CVE vulnerabilities. |
+| <a id="vulnerabilitycveenrichment"></a>`cveEnrichment` | [`CveEnrichmentType`](#cveenrichmenttype) | Enrichment (EPSS score) for CVE vulnerabilities. |
 | <a id="vulnerabilitycvss"></a>`cvss` | [`[CvssType!]!`](#cvsstype) | CVSS information for the vulnerability. |
 | <a id="vulnerabilitydescription"></a>`description` | [`String`](#string) | Description of the vulnerability. |
 | <a id="vulnerabilitydescriptionhtml"></a>`descriptionHtml` | [`String`](#string) | GitLab Flavored Markdown rendering of `description`. |
@@ -39234,7 +39151,6 @@ Access level of a group or project member.
 | <a id="memberaccesslevelmaintainer"></a>`MAINTAINER` | The Maintainer role is primarily used for managing code reviews, approvals, and administrative settings for projects. This role can also manage project memberships. |
 | <a id="memberaccesslevelminimal_access"></a>`MINIMAL_ACCESS` | The Minimal Access role is for users who need the least amount of access into groups and projects. You can assign this role as a default, before giving a user another role with more permissions. |
 | <a id="memberaccesslevelowner"></a>`OWNER` | The Owner role is normally assigned to the individual or team responsible for managing and maintaining the group or creating the project. This role has the highest level of administrative control, and can manage all aspects of the group or project, including managing other Owners. |
-| <a id="memberaccesslevelplanner"></a>`PLANNER` | The Planner role is suitable for team members who need to manage projects and track work items but do not need to contribute code. |
 | <a id="memberaccesslevelreporter"></a>`REPORTER` | The Reporter role is suitable for team members who need to stay informed about a project or group but do not actively contribute code. |
 
 ### `MemberAccessLevelName`
@@ -39247,7 +39163,6 @@ Name of access levels of a group or project member.
 | <a id="memberaccesslevelnameguest"></a>`GUEST` | Guest access. |
 | <a id="memberaccesslevelnamemaintainer"></a>`MAINTAINER` | Maintainer access. |
 | <a id="memberaccesslevelnameowner"></a>`OWNER` | Owner access. |
-| <a id="memberaccesslevelnameplanner"></a>`PLANNER` | Planner access. |
 | <a id="memberaccesslevelnamereporter"></a>`REPORTER` | Reporter access. |
 
 ### `MemberApprovalStatusType`
@@ -39912,14 +39827,6 @@ Types of security policy project created status.
 | <a id="policyviolationerrortypeartifacts_missing"></a>`ARTIFACTS_MISSING` | Represents error which occurs when pipeline is misconfigured and does not include necessary artifacts to evaluate a policy. |
 | <a id="policyviolationerrortypescan_removed"></a>`SCAN_REMOVED` | Represents mismatch between the scans of the source and target pipelines. |
 | <a id="policyviolationerrortypeunknown"></a>`UNKNOWN` | Represents unknown error. |
-
-### `PolicyViolationStatus`
-
-| Value | Description |
-| ----- | ----------- |
-| <a id="policyviolationstatusfailed"></a>`FAILED` | Represents a failed policy violation. |
-| <a id="policyviolationstatusrunning"></a>`RUNNING` | Represents a running policy violation. |
-| <a id="policyviolationstatuswarning"></a>`WARNING` | Represents a policy violation warning. |
 
 ### `ProductAnalyticsState`
 
@@ -41281,12 +41188,6 @@ An example `ClustersClusterID` is: `"gid://gitlab/Clusters::Cluster/1"`.
 Color represented as a hex code or named color.
 
 For example: "#fefefe".
-
-### `ComplianceManagementComplianceFrameworkComplianceRequirementID`
-
-A `ComplianceManagementComplianceFrameworkComplianceRequirementID` is a global ID. It is encoded as a string.
-
-An example `ComplianceManagementComplianceFrameworkComplianceRequirementID` is: `"gid://gitlab/ComplianceManagement::ComplianceFramework::ComplianceRequirement/1"`.
 
 ### `ComplianceManagementFrameworkID`
 
