@@ -1215,7 +1215,7 @@ RSpec.describe Project, factory_default: :keep, feature_category: :groups_and_pr
   describe 'delegation' do
     let_it_be(:project) { create(:project) }
 
-    [:add_guest, :add_reporter, :add_developer, :add_maintainer, :add_member, :add_members].each do |method|
+    [:add_guest, :add_planner, :add_reporter, :add_developer, :add_maintainer, :add_member, :add_members].each do |method|
       it { is_expected.to delegate_method(method).to(:team) }
     end
 
@@ -9142,7 +9142,7 @@ RSpec.describe Project, factory_default: :keep, feature_category: :groups_and_pr
       let_it_be(:project) { create(:project, group: group) }
 
       it 'returns group links of group' do
-        expect(group).to receive_message_chain(:shared_with_group_links, :of_ancestors_and_self)
+        expect(group).to receive(:shared_with_group_links_of_ancestors_and_self)
 
         project.group_group_links
       end

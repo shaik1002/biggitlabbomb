@@ -538,7 +538,7 @@ class Project < ApplicationRecord
   with_options to: :team do
     delegate :members, prefix: true
     delegate :add_member, :add_members, :member?
-    delegate :add_guest, :add_reporter, :add_developer, :add_maintainer, :add_owner, :add_role
+    delegate :add_guest, :add_planner, :add_reporter, :add_developer, :add_maintainer, :add_owner, :add_role
     delegate :has_user?
   end
 
@@ -3315,7 +3315,7 @@ class Project < ApplicationRecord
   end
 
   def group_group_links
-    group&.shared_with_group_links&.of_ancestors_and_self || GroupGroupLink.none
+    group&.shared_with_group_links_of_ancestors_and_self || GroupGroupLink.none
   end
 
   def security_training_available?
