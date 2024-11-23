@@ -19,7 +19,8 @@ jest.mock('~/lib/utils/csrf', () => ({ token: 'mock-csrf-token' }));
 
 const initialProps = {
   modalId: 'Delete-blob',
-  deletePath: 'some/path',
+  action: 'delete',
+  actionPath: 'some/path',
   commitMessage: 'Delete File',
   targetBranch: 'some-target-branch',
   originalBranch: 'main',
@@ -35,7 +36,7 @@ describe('CommitChangesModal', () => {
 
   const createComponentFactory =
     (mountFn) =>
-    (props = {}) => {
+    ({ props, slots } = {}) => {
       wrapper = mountFn(CommitChangesModal, {
         propsData: {
           ...initialProps,
@@ -49,6 +50,7 @@ describe('CommitChangesModal', () => {
           GlSprintf,
           GlModal: stubComponent(GlModal, { template: RENDER_ALL_SLOTS_TEMPLATE }),
         },
+        slots,
       });
     };
 
@@ -56,6 +58,7 @@ describe('CommitChangesModal', () => {
   const createFullComponent = createComponentFactory(mount);
 
   const findModal = () => wrapper.findComponent(GlModal);
+  const findSlot = () => wrapper.findByTestId('test-slot');
   const findForm = () => findModal().findComponent(GlForm);
   const findCommitTextarea = () => findForm().findComponent(GlFormTextarea);
   const findFormRadioGroup = () => findForm().findComponent(GlFormRadioGroup);
@@ -65,6 +68,8 @@ describe('CommitChangesModal', () => {
   const findCreateMrCheckbox = () => findForm().findComponent(GlFormCheckbox);
   const findTargetInput = () => findForm().findComponent(GlFormInput);
   const findCommitHint = () => wrapper.find('[data-testid="hint"]');
+  const findBranchInForkMessage = () =>
+    wrapper.findByText('GitLab will create a branch in your fork and start a merge request.');
 
   const fillForm = async (inputValue = {}) => {
     const { targetText, commitText } = inputValue;
@@ -84,7 +89,7 @@ describe('CommitChangesModal', () => {
       linkEnd: '',
     });
 
-    beforeEach(() => createComponent({ isUsingLfs: true }));
+    beforeEach(() => createComponent({ props: { isUsingLfs: true } }));
 
     it('renders a modal containing LFS text', () => {
       expect(findModal().props('title')).toBe(lfsTitleText);
@@ -102,24 +107,36 @@ describe('CommitChangesModal', () => {
     });
   });
 
-  it('renders Modal component', () => {
-    createComponent();
+  describe('renders modal component', () => {
+    it('renders with correct props', () => {
+      createComponent();
 
-    expect(findModal().props()).toMatchObject({
-      size: 'md',
-      actionPrimary: {
-        text: 'Commit changes',
-      },
-      actionCancel: {
-        text: 'Cancel',
-      },
+      expect(findModal().props()).toMatchObject({
+        size: 'md',
+        actionPrimary: {
+          text: 'Commit changes',
+        },
+        actionCancel: {
+          text: 'Cancel',
+        },
+      });
+      expect(findSlot().exists()).toBe(false);
+    });
+
+    it('renders the slot when a slot is provided', () => {
+      createComponent({
+        slots: {
+          default: '<div data-testid="test-slot">test slot</div>',
+        },
+      });
+      expect(findSlot().text()).toBe('test slot');
     });
   });
 
   describe('form', () => {
     it('gets passed the path for action attribute', () => {
       createComponent();
-      expect(findForm().attributes('action')).toBe(initialProps.deletePath);
+      expect(findForm().attributes('action')).toBe(initialProps.actionPath);
     });
 
     it('shows the correct form fields when commit to current branch', () => {
@@ -142,12 +159,42 @@ describe('CommitChangesModal', () => {
     });
 
     it('shows the correct form fields when `canPushToBranch` is `false`', () => {
-      createComponent({ canPushToBranch: false, canPushCode: true });
+      createComponent({ props: { canPushToBranch: false, canPushCode: true } });
       expect(wrapper.vm.$data.form.fields.branch_name.value).toBe('some-target-branch');
       expect(findCommitTextarea().exists()).toBe(true);
       expect(findRadioGroup().exists()).toBe(false);
       expect(findTargetInput().exists()).toBe(true);
       expect(findCreateMrCheckbox().text()).toBe('Create a merge request for this change');
+    });
+
+    describe('when `canPushToCode` is `false`', () => {
+      const commitInBranchMessage = sprintf(
+        'Your changes can be committed to %{branchName} because a merge request is open.',
+        {
+          branchName: 'main',
+        },
+      );
+
+      it('shows the correct form fields when `branchAllowsCollaboration` is `true`', () => {
+        createComponent({ props: { canPushCode: false, branchAllowsCollaboration: true } });
+        expect(findCommitTextarea().exists()).toBe(true);
+        expect(findRadioGroup().exists()).toBe(false);
+        expect(findModal().text()).toContain(commitInBranchMessage);
+        expect(findBranchInForkMessage().exists()).toBe(false);
+      });
+
+      it('shows the correct form fields when `branchAllowsCollaboration` is `false`', () => {
+        createComponent({
+          props: {
+            canPushCode: false,
+            branchAllowsCollaboration: false,
+          },
+        });
+        expect(findCommitTextarea().exists()).toBe(true);
+        expect(findRadioGroup().exists()).toBe(false);
+        expect(findModal().text()).not.toContain(commitInBranchMessage);
+        expect(findBranchInForkMessage().exists()).toBe(true);
+      });
     });
 
     it('clear branch name when new branch option is selected', async () => {
@@ -187,9 +234,11 @@ describe('CommitChangesModal', () => {
       'passes $input as a hidden input with the correct value',
       ({ input, value, emptyRepo, canPushCode, canPushToBranch, exist }) => {
         createComponent({
-          emptyRepo,
-          canPushCode,
-          canPushToBranch,
+          props: {
+            emptyRepo,
+            canPushCode,
+            canPushToBranch,
+          },
         });
 
         const inputMethod = findForm().find(`input[name="${input}"]`);
