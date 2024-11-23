@@ -53,6 +53,3 @@ module MergeRequests
     end
   end
 end
-
-# JH required
-::MergeRequests::Mergeability::CheckCiStatusService.prepend_mod

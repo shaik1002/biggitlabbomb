@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 class Packages::PackageFile < ApplicationRecord
-  include AfterCommitQueue
   include EachBatch
   include UpdateProjectStatistics
   include FileStoreMounter

@@ -1,5 +1,5 @@
 ---
-stage: Software Supply Chain Security
+stage: Govern
 group: Anti-Abuse
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
@@ -74,7 +74,7 @@ DETAILS:
 FLAG:
 The availability of this feature is controlled by a feature flag.
 For more information, see the history.
-This feature is available for testing, but not ready for production use.
+This feature is currently in development and not ready for production use.
 
 Prerequisites:
 

@@ -630,7 +630,7 @@ class ApplicationSetting < ApplicationRecord
       :users_get_by_id_limit
   end
 
-  attribute :resource_usage_limits, ::Gitlab::Database::Type::IndifferentJsonb.new, default: -> { {} }
+  attribute :resource_usage_limits, :ind_jsonb, default: -> { {} }
   validates :resource_usage_limits, json_schema: { filename: 'resource_usage_limits' }
 
   jsonb_accessor :rate_limits,
@@ -814,7 +814,6 @@ class ApplicationSetting < ApplicationRecord
   attr_encrypted :telesign_customer_xid, encryption_options_base_32_aes_256_gcm.merge(encode: false, encode_iv: false)
   attr_encrypted :telesign_api_key, encryption_options_base_32_aes_256_gcm.merge(encode: false, encode_iv: false)
   attr_encrypted :product_analytics_configurator_connection_string, encryption_options_base_32_aes_256_gcm.merge(encode: false, encode_iv: false)
-  attr_encrypted :secret_detection_service_auth_token, encryption_options_base_32_aes_256_gcm.merge(encode: false, encode_iv: false)
 
   # Restricting the validation to `on: :update` only to avoid cyclical dependencies with
   # License <--> ApplicationSetting. This method calls a license check when we create
@@ -851,10 +850,6 @@ class ApplicationSetting < ApplicationRecord
 
   validates :require_admin_two_factor_authentication,
     inclusion: { in: [true, false], message: N_('must be a boolean value') }
-
-  validates :secret_detection_service_url,
-    allow_blank: true,
-    length: { maximum: 255 }
 
   before_validation :ensure_uuid!
   before_validation :coerce_repository_storages_weighted, if: :repository_storages_weighted_changed?

@@ -1,0 +1,10 @@
+query jobTokenPoliciesByCategory {
+  jobTokenPoliciesByCategory {
+    value
+    text
+    policies {
+      value
+      text
+    }
+  }
+}

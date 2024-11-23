@@ -7,7 +7,6 @@ import createMockApollo from 'helpers/mock_apollo_helper';
 import waitForPromises from 'helpers/wait_for_promises';
 import { mountExtended } from 'helpers/vue_test_utils_helper';
 import { useMockInternalEventsTracking } from 'helpers/tracking_internal_events_helper';
-import CrudComponent from '~/vue_shared/components/crud_component.vue';
 import BranchRules from '~/projects/settings/repository/branch_rules/app.vue';
 import BranchRule from '~/projects/settings/repository/branch_rules/components/branch_rule.vue';
 import branchRulesQuery from 'ee_else_ce/projects/settings/repository/branch_rules/graphql/queries/branch_rules.query.graphql';
@@ -85,11 +84,10 @@ describe('Branch rules app', () => {
   const findModal = () => wrapper.findComponent(GlModal);
   const findAddBranchRuleDropdown = () => wrapper.findComponent(GlDisclosureDropdown);
   const findCreateBranchRuleListbox = () => wrapper.findComponent(GlCollapsibleListbox);
-  const findCrudComponent = () => wrapper.findComponent(CrudComponent);
 
-  beforeEach(async () => {
+  beforeEach(() => {
     setWindowLocation(TEST_HOST);
-    await createComponent();
+    createComponent();
   });
 
   it('renders branch rules', async () => {
@@ -111,13 +109,6 @@ describe('Branch rules app', () => {
   it('displays an error if branch rules query fails', async () => {
     await createComponent({ queryHandler: jest.fn().mockRejectedValue() });
     expect(createAlert).toHaveBeenCalledWith({ message: I18N.queryError });
-  });
-
-  it('displays a loading state if branch rules query is pending', async () => {
-    createComponent({ queryHandler: jest.fn() });
-    expect(findCrudComponent().props('isLoading')).toBe(true);
-    await waitForPromises();
-    expect(findCrudComponent().props('isLoading')).toBe(false);
   });
 
   it('displays an empty state if no branch rules are present', async () => {
@@ -166,9 +157,7 @@ describe('Branch rules app', () => {
     });
 
     it('shows alert when mutation fails', async () => {
-      await createComponent({
-        mutationHandler: jest.fn().mockRejectedValue(),
-      });
+      createComponent({ mutationHandler: jest.fn().mockRejectedValue() });
       findCreateBranchRuleListbox().vm.$emit('select', 'main');
       await nextTick();
       findModal().vm.$emit('primary');
@@ -234,10 +223,8 @@ describe('Branch rules app', () => {
   });
 
   describe('Add branch rule when editBranchRules FF disabled', () => {
-    beforeEach(async () => {
-      await createComponent({
-        glFeatures: { editBranchRules: false },
-      });
+    beforeEach(() => {
+      createComponent({ glFeatures: { editBranchRules: false } });
     });
     it('renders an Add branch rule button', () => {
       expect(findAddBranchRuleButton().exists()).toBe(true);

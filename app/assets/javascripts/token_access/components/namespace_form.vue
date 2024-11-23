@@ -1,16 +1,20 @@
 <script>
 import { GlFormGroup, GlButton, GlFormInput } from '@gitlab/ui';
 import { s__ } from '~/locale';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import addNamespaceMutation from '../graphql/mutations/inbound_add_group_or_project_ci_job_token_scope.mutation.graphql';
+import PoliciesSelector from './policies_selector.vue';
 
 export default {
-  components: { GlFormGroup, GlButton, GlFormInput },
+  components: { GlFormGroup, GlButton, GlFormInput, PoliciesSelector },
+  mixins: [glFeatureFlagsMixin()],
   inject: ['fullPath'],
   data() {
     return {
       namespacePath: '',
       errorMessage: '',
       isSaving: false,
+      selectedPolicies: null,
     };
   },
   methods: {
@@ -21,7 +25,11 @@ export default {
 
         const response = await this.$apollo.mutate({
           mutation: addNamespaceMutation,
-          variables: { projectPath: this.fullPath, targetPath: this.namespacePath },
+          variables: {
+            projectPath: this.fullPath,
+            targetPath: this.namespacePath,
+            jobTokenPolicies: this.selectedPolicies,
+          },
         });
 
         const error = response.data.ciJobTokenScopeAddGroupOrProject.errors[0];
@@ -65,6 +73,13 @@ export default {
         @input="errorMessage = ''"
       />
     </gl-form-group>
+
+    <policies-selector
+      v-if="glFeatures.addPoliciesToCiJobToken"
+      v-model="selectedPolicies"
+      :disabled="isSaving"
+      class="gl-mb-6"
+    />
 
     <gl-button
       variant="confirm"

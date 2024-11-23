@@ -11,10 +11,6 @@ class ProjectTeam
     add_member(user, :guest, current_user: current_user)
   end
 
-  def add_planner(user, current_user: nil)
-    add_member(user, :planner, current_user: current_user)
-  end
-
   def add_reporter(user, current_user: nil)
     add_member(user, :reporter, current_user: current_user)
   end
@@ -93,10 +89,6 @@ class ProjectTeam
     @guests ||= fetch_members(Gitlab::Access::GUEST)
   end
 
-  def planners
-    @planners ||= fetch_members(Gitlab::Access::PLANNER)
-  end
-
   def reporters
     @reporters ||= fetch_members(Gitlab::Access::REPORTER)
   end
@@ -158,10 +150,6 @@ class ProjectTeam
 
   def guest?(user)
     max_member_access(user.id) == Gitlab::Access::GUEST
-  end
-
-  def planner?(user)
-    max_member_access(user.id) == Gitlab::Access::PLANNER
   end
 
   def reporter?(user)

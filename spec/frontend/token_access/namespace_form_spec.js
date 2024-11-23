@@ -7,6 +7,7 @@ import NamespaceForm from '~/token_access/components/namespace_form.vue';
 import addNamespaceMutation from '~/token_access/graphql/mutations/inbound_add_group_or_project_ci_job_token_scope.mutation.graphql';
 import { stubComponent } from 'helpers/stub_component';
 import waitForPromises from 'helpers/wait_for_promises';
+import PoliciesSelector from '~/token_access/components/policies_selector.vue';
 import { getAddNamespaceHandler } from './mock_data';
 
 Vue.use(VueApollo);
@@ -16,10 +17,13 @@ describe('Namespace form component', () => {
 
   const defaultAddMutationHandler = getAddNamespaceHandler();
 
-  const createWrapper = ({ addMutationHandler = defaultAddMutationHandler } = {}) => {
+  const createWrapper = ({
+    addMutationHandler = defaultAddMutationHandler,
+    addPoliciesToCiJobToken = true,
+  } = {}) => {
     wrapper = shallowMountExtended(NamespaceForm, {
       apolloProvider: createMockApollo([[addNamespaceMutation, addMutationHandler]]),
-      provide: { fullPath: 'full/path' },
+      provide: { fullPath: 'full/path', glFeatures: { addPoliciesToCiJobToken } },
       stubs: {
         GlFormInput: stubComponent(GlFormInput, {
           props: ['autofocus', 'disabled', 'state', 'placeholder'],
@@ -32,6 +36,7 @@ describe('Namespace form component', () => {
   const findFormInput = () => wrapper.findComponent(GlFormInput);
   const findAddButton = () => wrapper.findByTestId('add-button');
   const findCancelButton = () => wrapper.findByTestId('cancel-button');
+  const findPoliciesSelector = () => wrapper.findComponent(PoliciesSelector);
 
   describe('on page load', () => {
     beforeEach(() => createWrapper());
@@ -53,6 +58,10 @@ describe('Namespace form component', () => {
           'Paste a group or project path to authorize access into this project.',
         );
       });
+    });
+
+    it('shows policies selector', () => {
+      expect(findPoliciesSelector().props()).toMatchObject({ value: null, disabled: false });
     });
 
     describe('Add button', () => {
@@ -98,11 +107,16 @@ describe('Namespace form component', () => {
           expect(defaultAddMutationHandler).toHaveBeenCalledWith({
             projectPath: 'full/path',
             targetPath: 'gitlab',
+            jobTokenPolicies: null,
           });
         });
 
         it('disables form input', () => {
           expect(findFormInput().props('disabled')).toBe(true);
+        });
+
+        it('disables policies selector', () => {
+          expect(findPoliciesSelector().props('disabled')).toBe(true);
         });
 
         it('disables Add button', () => {
@@ -125,6 +139,10 @@ describe('Namespace form component', () => {
             expect(findFormInput().props('disabled')).toBe(false);
           });
 
+          it('enables policies selector', () => {
+            expect(findPoliciesSelector().props('disabled')).toBe(false);
+          });
+
           it('enables Add button', () => {
             expect(findAddButton().props('loading')).toBe(false);
           });
@@ -132,6 +150,18 @@ describe('Namespace form component', () => {
           it('enables Cancel button', () => {
             expect(findCancelButton().props('disabled')).toBe(false);
           });
+        });
+      });
+
+      describe('when policies selector emits a value', () => {
+        it('runs save mutation with the value', () => {
+          const jobTokenPolicies = ['READ_CONTAINERS', 'READ_DEPLOYMENTS'];
+          findPoliciesSelector().vm.$emit('input', jobTokenPolicies);
+          findAddButton().vm.$emit('click');
+
+          expect(defaultAddMutationHandler).toHaveBeenCalledWith(
+            expect.objectContaining({ jobTokenPolicies }),
+          );
         });
       });
     });
@@ -186,6 +216,14 @@ describe('Namespace form component', () => {
       it('clears form input error state', () => {
         expect(findFormInput().props('state')).toBe(true);
       });
+    });
+  });
+
+  describe('when the addPoliciesToCiJobToken feature flag is disabled', () => {
+    beforeEach(() => createWrapper({ addPoliciesToCiJobToken: false }));
+
+    it('does not show permissions selector', () => {
+      expect(findPoliciesSelector().exists()).toBe(false);
     });
   });
 });

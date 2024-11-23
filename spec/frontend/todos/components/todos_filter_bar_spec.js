@@ -2,7 +2,6 @@ import { nextTick } from 'vue';
 import { GlSorting, GlFilteredSearch, GlAlert } from '@gitlab/ui';
 import { cloneDeep } from 'lodash';
 import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
-import setWindowLocation from 'helpers/set_window_location_helper';
 import TodosFilterBar from '~/todos/components/todos_filter_bar.vue';
 import { mockTracking, unmockTracking } from 'helpers/tracking_helper';
 
@@ -351,23 +350,19 @@ describe('TodosFilterBar', () => {
     expect(window.location.search).toBe('?group_id=33&sort=LABEL_PRIORITY_ASC');
   });
 
-  describe('handling of other search params', () => {
-    it('keeps search params that are not controlled by this component', () => {
-      setWindowLocation('?state=done');
-      createComponent();
-
-      findGlFilteredSearch().vm.$emit('input', generateFilterTokens({ groupId: mockGroupId }));
-      findGlFilteredSearch().vm.$emit('submit');
-
-      expect(window.location.search).toBe('?state=done&group_id=33');
-    });
-  });
-
   describe('initializing filter values from the URL search params', () => {
+    beforeEach(() => {
+      Object.defineProperty(window, 'location', {
+        writable: true,
+        value: {
+          hash: '',
+          search: '',
+        },
+      });
+    });
+
     it('initializes the filters from the values passed as search params', () => {
-      setWindowLocation(
-        `?group_id=${mockGroupId}&project_id=${mockProjectId}&author_id=${mockAuthorId}&type=${mockTypeParam.url}&action_id=${mockActionParam.url}&sort=UPDATED_ASC`,
-      );
+      window.location.search = `?group_id=${mockGroupId}&project_id=${mockProjectId}&author_id=${mockAuthorId}&type=${mockTypeParam.url}&action_id=${mockActionParam.url}&sort=UPDATED_ASC`;
       createComponent();
 
       expect(wrapper.emitted('filters-changed')).toEqual([
@@ -385,21 +380,21 @@ describe('TodosFilterBar', () => {
     });
 
     it('defaults to CREATED sort param if an illegal value is provided in the URL', () => {
-      setWindowLocation('?sort=foo_bar');
+      window.location.search = '?sort=foo_bar';
       createComponent();
 
       expect(wrapper.emitted('filters-changed')[0][0].sort).toBe('CREATED_DESC');
     });
 
     it('defaults to descending order if not specified in the URL (eg. supporting the legacy `?sort=label_priority` parameter)', () => {
-      setWindowLocation('?sort=label_priority');
+      window.location.search = '?sort=label_priority';
       createComponent();
 
       expect(wrapper.emitted('filters-changed')[0][0].sort).toBe('LABEL_PRIORITY_DESC');
     });
 
     it('ignores illegal category and reason IDs', () => {
-      setWindowLocation('?type=Foo&action_id=9000');
+      window.location.search = '?type=Foo&action_id=9000';
       createComponent();
 
       expect(wrapper.emitted('filters-changed')).toBeUndefined();

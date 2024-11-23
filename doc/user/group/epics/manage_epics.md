@@ -15,11 +15,9 @@ to them.
 
 ## Create an epic
 
-> - [Changed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/169256) the minimum user role from Reporter to Planner in GitLab 17.7.
-
 Prerequisites:
 
-- You must have at least the Planner role for the epic's group.
+- You must have at least the Reporter role for the epic's group.
 
 To create an epic in the group you're in:
 
@@ -64,8 +62,6 @@ The parent epic's start date then reflects this change and propagates upwards to
 
 ## Edit an epic
 
-> - [Changed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/169256) the minimum user role from Reporter to Planner in GitLab 17.7.
-
 After you create an epic, you can edit the following details:
 
 - Title
@@ -77,7 +73,7 @@ After you create an epic, you can edit the following details:
 
 Prerequisites:
 
-- You must have at least the Planner role for the epic's group.
+- You must have at least the Reporter role for the epic's group.
 
 To edit an epic's title or description:
 
@@ -93,13 +89,12 @@ To edit an epic's start date, due date, or labels:
 ### Reorder list items in the epic description
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/15260) in GitLab 15.1.
-> - [Changed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/169256) the minimum user role from Reporter to Planner in GitLab 17.7.
 
 When you view an epic that has a list in the description, you can also reorder the list items.
 
 Prerequisites:
 
-- You must have at least the Planner role for the project, be the author of the epic, or be
+- You must have at least the Reporter role for the project, be the author of the epic, or be
   assigned to the epic.
 - The epic's description must have an [ordered, unordered](../../markdown.md#lists), or
   [task](../../markdown.md#task-lists) list.
@@ -113,15 +108,13 @@ To reorder list items, when viewing an epic:
 
 ### Bulk edit epics
 
-> - [Changed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/169256) the minimum user role from Reporter to Planner in GitLab 17.7.
-
-Users with at least the Planner role can manage epics.
+Users with at least the Reporter role can manage epics.
 
 When bulk editing epics in a group, you can edit their labels.
 
 Prerequisites:
 
-- You must have at least the Planner role for the parent epic's group.
+- You must have at least the Reporter role for the parent epic's group.
 
 To update multiple epics at the same time:
 
@@ -137,7 +130,7 @@ DETAILS:
 **Offering:** Self-managed
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/464063) in GitLab 17.4 [with a flag](../../../administration/feature_flags.md) named `issues_list_drawer`. Disabled by default.
-> - Feature flag [changed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/170066) from `issues_list_drawer` to `epics_list_drawer` in GitLab 17.6.
+> - Feature flag name was [changed] to `epics_list_drawer` in GitLab 17.6.
 
 FLAG:
 The availability of this feature is controlled by a feature flag.
@@ -162,7 +155,7 @@ DETAILS:
 **Status:** Beta
 **Offering:** GitLab.com, Self-managed
 
-> - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/4231) in GitLab 17.4 [with a flag](../../../administration/feature_flags.md) named `work_items_beta`. Disabled by default. This feature is in [beta](../../../policy/experiment-beta-support.md#beta).
+> - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/4231) in GitLab 17.4 [with a flag](../../../administration/feature_flags.md) named `work_items_beta`. Disabled by default.
 
 FLAG:
 The availability of this feature is controlled by a feature flag.
@@ -184,12 +177,10 @@ If you find a bug, use the
 
 ### Change assignee on an epic
 
-> - [Changed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/169256) the minimum user role from Reporter to Planner in GitLab 17.7.
-
 Prerequisites:
 
 - Your administrator must have [enabled the new look for epics](epic_work_items.md).
-- You must have at least the Planner role for the group.
+- You must have at least the Reporter role for the group.
 
 To change the assignee on an epic:
 
@@ -207,8 +198,13 @@ DETAILS:
 **Tier:** Premium, Ultimate
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/79940) in GitLab 14.9 [with a flag](../../../administration/feature_flags.md) named `epic_color_highlight`. Disabled by default.
-> - [Generally available](https://gitlab.com/gitlab-org/gitlab/-/issues/365336) in GitLab 16.11. Feature flag `epic_color_highlight` removed.
+> - [Enabled](https://gitlab.com/gitlab-org/gitlab/-/issues/365336) on GitLab.com, GitLab Dedicated, and self-managed in GitLab 16.11.
 > - Customizable color [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/394864) in GitLab 17.5.
+
+FLAG:
+The availability of this feature is controlled by a feature flag.
+For more information, see the history.
+This feature is available for testing, but not ready for production use.
 
 You can set a color for an epic to categorize and prioritize tasks visually.
 Use colors to:
@@ -229,11 +225,9 @@ On epic boards, the color shows on the epic's card accent:
 
 ### Change an epic's color
 
-> - [Changed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/169256) the minimum user role from Reporter to Planner in GitLab 17.7.
-
 Prerequisites:
 
-- You must have at least the Planner role for the epic's group.
+- You must have at least the Reporter role for the epic's group.
 
 To change an epic's color:
 
@@ -249,11 +243,10 @@ The epic's color is updated.
 ## Delete an epic
 
 > - [Changed](https://gitlab.com/gitlab-org/gitlab/-/issues/452189) in GitLab 16.11. In GitLab 16.10 and earlier, if you delete an epic, all its child epics and their descendants are deleted as well. If needed, you can [remove child epics](#remove-a-child-epic-from-a-parent-epic) from the parent epic before you delete it.
-> - [Allowed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/169256) Planner role to delete an epic in GitLab 17.7.
 
 Prerequisites:
 
-- You must have the Planner or Owner role for the epic's group.
+- You must have the Owner role for the epic's group.
 
 To delete an epic:
 
@@ -264,11 +257,9 @@ Deleting an epic releases all existing issues from their associated epic in the 
 
 ## Close an epic
 
-> - [Changed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/169256) the minimum user role from Reporter to Planner in GitLab 17.7.
-
 Prerequisites:
 
-- You must have at least the Planner role for the epic's group.
+- You must have at least the Reporter role for the epic's group.
 
 To close an epic:
 
@@ -278,13 +269,11 @@ You can also use the `/close` [quick action](../../project/quick_actions.md).
 
 ## Reopen a closed epic
 
-> - [Changed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/169256) the minimum user role from Reporter to Planner in GitLab 17.7.
-
 You can reopen an epic that was closed.
 
 Prerequisites:
 
-- You must have at least the Planner role for the epic's group.
+- You must have at least the Reporter role for the epic's group.
 
 To do so, either:
 
@@ -321,14 +310,12 @@ To view epics in a group:
 
 ### Who can view an epic
 
-> - [Changed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/169256) the minimum user role from Reporter to Planner in GitLab 17.7.
-
 Whether you can view an epic depends on the [group visibility level](../../public_access.md) and
 the epic's [confidentiality status](#make-an-epic-confidential):
 
 - Public group and a non-confidential epic: Anyone can view the epic.
 - Private group and non-confidential epic: You must have at least the Guest role for the group.
-- Confidential epic (regardless of group visibility): You must have at least the Planner
+- Confidential epic (regardless of group visibility): You must have at least the Reporter
   role for the group.
 
 ### Cached epic count
@@ -401,8 +388,6 @@ or newest items to be shown first.
 
 ## Make an epic confidential
 
-> - [Changed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/169256) the minimum user role from Reporter to Planner in GitLab 17.7.
-
 If you're working on items that contain private information, you can make an epic confidential.
 
 NOTE:
@@ -413,7 +398,7 @@ to learn how to create a confidential merge request.
 
 Prerequisites:
 
-- You must have at least the Planner role for the epic's group.
+- You must have at least the Reporter role for the epic's group.
 
 To make an epic confidential:
 
@@ -507,12 +492,10 @@ To address risks to timely delivery of your planned work, incorporate a review o
 
 #### Change health status of an epic
 
-> - [Changed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/169256) the minimum user role from Reporter to Planner in GitLab 17.7.
-
 Prerequisites:
 
 - Your administrator must have [enabled the new look for epics](epic_work_items.md).
-- You must have at least the Planner role for the group.
+- You must have at least the Reporter role for the group.
 
 To change the health status of an epic:
 

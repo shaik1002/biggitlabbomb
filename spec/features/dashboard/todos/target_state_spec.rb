@@ -10,7 +10,6 @@ RSpec.describe 'Dashboard > Todo target states', feature_category: :team_plannin
   let_it_be(:project) { create(:project, :public, developers: user) }
 
   before do
-    stub_feature_flags(todos_vue_application: false)
     sign_in(user)
   end
 

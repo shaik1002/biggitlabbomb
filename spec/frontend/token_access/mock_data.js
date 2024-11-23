@@ -187,6 +187,44 @@ export const inboundGroupsAndProjectsWithScopeResponse = {
   },
 };
 
+export const inboundGroupsAndProjectsWithScopeResponseWithAddedItem = {
+  data: {
+    project: {
+      ...inboundGroupsAndProjectsWithScopeResponse.data.project,
+      ciJobTokenScope: {
+        inboundAllowlist: {
+          nodes: [
+            ...inboundGroupsAndProjectsWithScopeResponse.data.project.ciJobTokenScope
+              .inboundAllowlist.nodes,
+            {
+              __typename: 'Project',
+              fullPath: 'root/test',
+              id: 'gid://gitlab/Project/25',
+              name: 'test',
+              avatarUrl: '',
+              webUrl: 'http://localhost/root/test',
+            },
+          ],
+        },
+        groupsAllowlist: {
+          nodes: [
+            ...inboundGroupsAndProjectsWithScopeResponse.data.project.ciJobTokenScope
+              .groupsAllowlist.nodes,
+            {
+              __typename: 'Group',
+              fullPath: 'gitlab-org',
+              id: 'gid://gitlab/Group/49',
+              name: 'gitlab-org',
+              avatarUrl: '',
+              webUrl: 'http://localhost/gitlab-org',
+            },
+          ],
+        },
+      },
+    },
+  },
+};
+
 export const getAddNamespaceHandler = (error) =>
   jest.fn().mockResolvedValue({
     data: { ciJobTokenScopeAddGroupOrProject: { errors: error ? [error] : [] } },
@@ -270,3 +308,22 @@ export const mockAuthLogsResponse = (hasNextPage = false) => ({
     },
   },
 });
+
+export const jobTokenPoliciesByCategory = [
+  {
+    value: 'CONTAINERS',
+    text: 'Containers',
+    policies: [
+      { value: 'READ_CONTAINERS', text: 'Read' },
+      { value: 'ADMIN_CONTAINERS', text: 'Read and write' },
+    ],
+  },
+  {
+    value: 'DEPLOYMENTS',
+    text: 'Deployments',
+    policies: [
+      { value: 'READ_DEPLOYMENTS', text: 'Read' },
+      { value: 'ADMIN_DEPLOYMENTS', text: 'Read and write' },
+    ],
+  },
+];
