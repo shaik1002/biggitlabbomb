@@ -45,7 +45,7 @@ module WorkItems
       email_participants: 25
     }
 
-    attribute :widget_options, ::Gitlab::Database::Type::IndifferentJsonb.new
+    attribute :widget_options, :ind_jsonb
 
     def self.available_widgets
       enabled.filter_map(&:widget_class).uniq

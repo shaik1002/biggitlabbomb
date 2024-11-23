@@ -1840,7 +1840,7 @@ class Project < ApplicationRecord
       .available_integration_names(include_instance_specific: false)
       .difference(disabled_integrations)
       .map { find_or_initialize_integration(_1) }
-      .sort_by { |int| int.title.downcase }
+      .sort_by(&:title)
   end
 
   # Returns a list of integration names that should be disabled at the project-level.

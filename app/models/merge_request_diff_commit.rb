@@ -29,7 +29,7 @@ class MergeRequestDiffCommit < ApplicationRecord
 
   sha_attribute :sha
 
-  attribute :trailers, ::Gitlab::Database::Type::IndifferentJsonb.new
+  attribute :trailers, :ind_jsonb
   validates :trailers, json_schema: { filename: 'git_trailers' }
 
   # A list of keys of which their values need to be trimmed before they can be

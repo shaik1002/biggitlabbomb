@@ -3,7 +3,7 @@ import { GlLoadingIcon, GlKeysetPagination } from '@gitlab/ui';
 import projectsEmptyStateSvgPath from '@gitlab/svgs/dist/illustrations/empty-state/empty-projects-md.svg?url';
 import { s__ } from '~/locale';
 import ProjectsList from '~/vue_shared/components/projects_list/projects_list.vue';
-import { formatGraphQLProjects } from '~/vue_shared/components/projects_list/formatter';
+import { formatGraphQLProjects } from '~/vue_shared/components/projects_list/utils';
 import { DEFAULT_PER_PAGE } from '~/api';
 import { createAlert } from '~/alert';
 import { timestampType } from '~/organizations/shared/utils';
@@ -158,7 +158,7 @@ export default {
         startCursor,
       });
     },
-    onRefetch() {
+    onDeleteComplete() {
       this.$apollo.queries.projects.refetch();
     },
   },
@@ -173,7 +173,7 @@ export default {
       show-project-icon
       :list-item-class="listItemClass"
       :timestamp-type="timestampType"
-      @refetch="onRefetch"
+      @delete-complete="onDeleteComplete"
     />
     <div v-if="pageInfo.hasNextPage || pageInfo.hasPreviousPage" class="gl-mt-5 gl-text-center">
       <gl-keyset-pagination v-bind="pageInfo" @prev="onPrev" @next="onNext" />

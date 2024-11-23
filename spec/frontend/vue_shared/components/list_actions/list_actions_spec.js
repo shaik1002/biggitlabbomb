@@ -37,7 +37,6 @@ describe('ListActions', () => {
       {
         text: 'Edit',
         href: '/-/edit',
-        order: 1,
       },
       {
         text: 'Delete',
@@ -45,7 +44,6 @@ describe('ListActions', () => {
           class: '!gl-text-red-500',
         },
         action: expect.any(Function),
-        order: 3,
       },
     ]);
   });
@@ -70,7 +68,6 @@ describe('ListActions', () => {
       {
         text: 'Edit',
         href: '/-/edit',
-        order: 1,
       },
       {
         text: 'Leave project',
@@ -82,7 +79,6 @@ describe('ListActions', () => {
           class: '!gl-text-red-500',
         },
         action: expect.any(Function),
-        order: 3,
       },
     ]);
   });
@@ -98,7 +94,6 @@ describe('ListActions', () => {
       {
         text: 'Edit',
         href: '/-/edit',
-        order: 1,
       },
     ]);
   });
@@ -117,12 +112,10 @@ describe('ListActions', () => {
           class: '!gl-text-red-500',
         },
         action: expect.any(Function),
-        order: 3,
       },
       {
         text: 'Edit',
         href: '/-/edit',
-        order: 1,
       },
     ]);
   });

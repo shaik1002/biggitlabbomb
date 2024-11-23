@@ -14,10 +14,6 @@ module Authn
         @source = source
       end
 
-      def present_with
-        ::API::Entities::DeployToken
-      end
-
       def revoke!(current_user)
         raise ::Authn::AgnosticTokenIdentifier::NotFoundError, 'Not Found' if revocable.blank?
 

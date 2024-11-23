@@ -97,11 +97,7 @@ module API
         if headers['Npm-Command'] == 'deprecate'
           authorize_destroy_package!(project)
 
-          response = ::Packages::Npm::EnqueueDeprecatePackageWorkerService.new(project, nil, declared(params).to_hash).execute
-
-          if response.error? && response.reason == :no_versions_to_deprecate
-            bad_request_missing_attribute!('package versions to deprecate')
-          end
+          ::Packages::Npm::DeprecatePackageService.new(project, declared(params)).execute(async: true)
         else
           authorize_create_package!(project)
 
