@@ -51,6 +51,10 @@ module Gitlab
       end
     end
 
+    def container_repository_tag_name_regex
+      @container_repository_tag_name_regex ||= %r{\A[a-z0-9]+([._-]?[a-z0-9]+)*\z}
+    end
+
     ##
     # We do not use regexp anchors here because these are not allowed when
     # used as a routing constraint.

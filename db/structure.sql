@@ -10329,6 +10329,26 @@ CREATE SEQUENCE container_registry_protection_rules_id_seq
 
 ALTER SEQUENCE container_registry_protection_rules_id_seq OWNED BY container_registry_protection_rules.id;
 
+CREATE TABLE container_registry_tag_protection_rules (
+    id bigint NOT NULL,
+    project_id bigint NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    minimum_access_level_for_push smallint NOT NULL,
+    minimum_access_level_for_delete smallint NOT NULL,
+    tag_name_pattern text NOT NULL,
+    CONSTRAINT check_19a5385daf CHECK ((char_length(tag_name_pattern) <= 255))
+);
+
+CREATE SEQUENCE container_registry_tag_protection_rules_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE container_registry_tag_protection_rules_id_seq OWNED BY container_registry_tag_protection_rules.id;
+
 CREATE TABLE container_repositories (
     id bigint NOT NULL,
     project_id bigint NOT NULL,
@@ -23071,6 +23091,8 @@ ALTER TABLE ONLY compliance_requirements ALTER COLUMN id SET DEFAULT nextval('co
 
 ALTER TABLE ONLY container_registry_protection_rules ALTER COLUMN id SET DEFAULT nextval('container_registry_protection_rules_id_seq'::regclass);
 
+ALTER TABLE ONLY container_registry_tag_protection_rules ALTER COLUMN id SET DEFAULT nextval('container_registry_tag_protection_rules_id_seq'::regclass);
+
 ALTER TABLE ONLY container_repositories ALTER COLUMN id SET DEFAULT nextval('container_repositories_id_seq'::regclass);
 
 ALTER TABLE ONLY content_blocked_states ALTER COLUMN id SET DEFAULT nextval('content_blocked_states_id_seq'::regclass);
@@ -25188,6 +25210,9 @@ ALTER TABLE ONLY container_registry_data_repair_details
 
 ALTER TABLE ONLY container_registry_protection_rules
     ADD CONSTRAINT container_registry_protection_rules_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY container_registry_tag_protection_rules
+    ADD CONSTRAINT container_registry_tag_protection_rules_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY container_repositories
     ADD CONSTRAINT container_repositories_pkey PRIMARY KEY (id);
@@ -33203,6 +33228,8 @@ CREATE UNIQUE INDEX unique_streaming_event_type_filters_destination_id ON audit_
 
 CREATE UNIQUE INDEX unique_streaming_instance_event_type_filters_destination_id ON audit_events_streaming_instance_event_type_filters USING btree (instance_external_audit_event_destination_id, audit_event_type);
 
+CREATE UNIQUE INDEX unique_tag_protection_rules_project_id_and_tag_name_pattern ON container_registry_tag_protection_rules USING btree (project_id, tag_name_pattern);
+
 CREATE UNIQUE INDEX unique_user_id_setting_type_and_settings_context_hash ON vs_code_settings USING btree (user_id, setting_type, settings_context_hash);
 
 CREATE UNIQUE INDEX unique_vuln_merge_request_link_vuln_id_and_mr_id ON vulnerability_merge_request_links USING btree (vulnerability_id, merge_request_id);
@@ -38581,6 +38608,9 @@ ALTER TABLE ONLY pool_repositories
 
 ALTER TABLE ONLY design_management_repository_states
     ADD CONSTRAINT fk_rails_d2a258cc5a FOREIGN KEY (design_management_repository_id) REFERENCES design_management_repositories(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY container_registry_tag_protection_rules
+    ADD CONSTRAINT fk_rails_d3513a90ab FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY web_hooks
     ADD CONSTRAINT fk_rails_d35697648e FOREIGN KEY (group_id) REFERENCES namespaces(id) ON DELETE CASCADE;
