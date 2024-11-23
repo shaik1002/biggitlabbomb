@@ -24,7 +24,12 @@ Vue.use(VueApollo);
 describe('Sidebar Menu', () => {
   let wrapper;
 
-  const successHandler = jest.fn().mockResolvedValue(sidebarDataCountResponse);
+  const successHandler = jest.fn().mockResolvedValue(
+    sidebarDataCountResponse({
+      openIssuesCount: 8,
+      openMergeRequestsCount: 2,
+    }),
+  );
 
   const createWrapper = ({
     handler = successHandler,
@@ -254,6 +259,150 @@ describe('Sidebar Menu', () => {
         await waitForPromises();
 
         expect(successHandler).toHaveBeenCalled();
+      });
+    });
+
+    describe('Child components receive correct asyncCount prop', () => {
+      const emptyDataHandler = jest.fn().mockResolvedValue({
+        data: null,
+      });
+      const emptyNamespaceHandler = jest.fn().mockResolvedValue({
+        data: {
+          namespace: null,
+        },
+      });
+      const emptySidebarHandler = jest.fn().mockResolvedValue({
+        data: {
+          namespace: {
+            id: 'gid://gitlab/Project/11',
+            sidebar: null,
+            __typename: 'Namespace',
+          },
+        },
+      });
+      const errorHandler = jest.fn().mockRejectedValue();
+
+      afterEach(() => {
+        jest.clearAllMocks();
+
+        if (wrapper) {
+          wrapper.destroy();
+        }
+      });
+
+      describe('When the query is successful', () => {
+        it.each`
+          component               | panelType              | property       | handler                  | componentAsyncProp
+          ${'static NavItem'}     | ${PANELS_WITH_PINS[0]} | ${'data'}      | ${emptyDataHandler}      | ${findStaticItems}
+          ${'static NavItem'}     | ${PANELS_WITH_PINS[0]} | ${'namespace'} | ${emptyNamespaceHandler} | ${findStaticItems}
+          ${'static NavItem'}     | ${PANELS_WITH_PINS[0]} | ${'sidebar'}   | ${emptySidebarHandler}   | ${findStaticItems}
+          ${'non-static NavItem'} | ${'explore'}           | ${'data'}      | ${emptyDataHandler}      | ${findNonStaticItems}
+          ${'non-static NavItem'} | ${'explore'}           | ${'namespace'} | ${emptyNamespaceHandler} | ${findNonStaticItems}
+          ${'non-static NavItem'} | ${'explore'}           | ${'sidebar'}   | ${emptySidebarHandler}   | ${findNonStaticItems}
+          ${'MenuSection'}        | ${PANELS_WITH_PINS[0]} | ${'data'}      | ${emptyDataHandler}      | ${findNonStaticSectionItems}
+          ${'MenuSection'}        | ${PANELS_WITH_PINS[0]} | ${'namespace'} | ${emptyNamespaceHandler} | ${findNonStaticSectionItems}
+          ${'MenuSection'}        | ${PANELS_WITH_PINS[0]} | ${'sidebar'}   | ${emptySidebarHandler}   | ${findNonStaticSectionItems}
+          ${'PinnedSection'}      | ${'project'}           | ${'data'}      | ${emptyDataHandler}      | ${''}
+          ${'PinnedSection'}      | ${'project'}           | ${'namespace'} | ${emptyNamespaceHandler} | ${''}
+          ${'PinnedSection'}      | ${'project'}           | ${'sidebar'}   | ${emptySidebarHandler}   | ${''}
+        `(
+          'asyncCount prop returns an empty object when `$property` is undefined for `$component`',
+          async ({ component, handler, panelType, componentAsyncProp }) => {
+            createWrapper({
+              items: menuItems,
+              panelType,
+              handler,
+              provide: {
+                currentPath: 'group',
+              },
+              asyncSidebarCountsFlagEnabled: true,
+            });
+
+            await waitForPromises();
+
+            expect(handler).toHaveBeenCalled();
+
+            if (component === 'PinnedSection') {
+              expect(findPinnedSection().props('asyncCount')).toEqual({});
+            } else {
+              expect(componentAsyncProp().wrappers.map((w) => w.props('asyncCount'))[0]).toEqual(
+                {},
+              );
+            }
+          },
+        );
+
+        it.each`
+          component               | panelType              | componentAsyncProp
+          ${'static NavItem'}     | ${PANELS_WITH_PINS[0]} | ${findStaticItems}
+          ${'non-static NavItem'} | ${'explore'}           | ${findNonStaticItems}
+          ${'MenuSection'}        | ${PANELS_WITH_PINS[0]} | ${findNonStaticSectionItems}
+          ${'PinnedSection'}      | ${'project'}           | ${findPinnedSection}
+        `(
+          'asyncCount prop returns the sidebar object for `$component` when it exists',
+          async ({ component, panelType, componentAsyncProp }) => {
+            const asyncCountData = {
+              openIssuesCount: 8,
+              openMergeRequestsCount: 2,
+              __typename: 'NamespaceSidebar',
+            };
+
+            createWrapper({
+              items: menuItems,
+              panelType,
+              provide: {
+                currentPath: 'group',
+              },
+              asyncSidebarCountsFlagEnabled: true,
+            });
+
+            await waitForPromises();
+
+            expect(successHandler).toHaveBeenCalled();
+
+            if (component === 'PinnedSection') {
+              expect(findPinnedSection().props('asyncCount')).toEqual(asyncCountData);
+            } else {
+              expect(componentAsyncProp().wrappers.map((w) => w.props('asyncCount'))[0]).toEqual(
+                asyncCountData,
+              );
+            }
+          },
+        );
+      });
+
+      describe('When the query is unsuccessful', () => {
+        it.each`
+          component               | panelType              | componentAsyncProp
+          ${'static NavItem'}     | ${PANELS_WITH_PINS[0]} | ${findStaticItems}
+          ${'non-static NavItem'} | ${'explore'}           | ${findNonStaticItems}
+          ${'MenuSection'}        | ${PANELS_WITH_PINS[0]} | ${findNonStaticSectionItems}
+          ${'PinnedSection'}      | ${'project'}           | ${findPinnedSection}
+        `(
+          'asyncCount prop returns an empty object for `$component` when the query fails',
+          async ({ component, panelType, componentAsyncProp }) => {
+            createWrapper({
+              items: menuItems,
+              panelType,
+              handler: errorHandler,
+              provide: {
+                currentPath: 'group',
+              },
+              asyncSidebarCountsFlagEnabled: true,
+            });
+
+            await waitForPromises();
+
+            expect(errorHandler).toHaveBeenCalled();
+            if (component === 'PinnedSection') {
+              expect(findPinnedSection().props('asyncCount')).toEqual({});
+            } else {
+              expect(componentAsyncProp().wrappers.map((w) => w.props('asyncCount'))[0]).toEqual(
+                {},
+              );
+            }
+          },
+        );
       });
     });
   });
