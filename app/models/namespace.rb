@@ -193,6 +193,7 @@ class Namespace < ApplicationRecord
     to: :namespace_settings
   delegate :add_creator, :pending_delete, :pending_delete=, :deleted_at, :deleted_at=,
     to: :namespace_details
+  delegate :pipeline_variables_default_role, to: :namespace_settings, allow_nil: true
 
   before_create :sync_share_with_group_lock_with_parent
   before_update :sync_share_with_group_lock_with_parent, if: :parent_changed?

@@ -838,7 +838,8 @@ use this setting for control over the environment the pipeline runs in.
 
 #### Set a minimum role for pipeline variables
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/440338) in GitLab 17.1
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/440338) in GitLab 17.1.
+> - Setting defaults [updated for new projects](https://gitlab.com/gitlab-org/gitlab/-/issues/502382) in GitLab 17.6 to `enabled` for `restrict_user_defined_variables` and `no_one_allowed` for `ci_pipeline_variables_minimum_override_role`, [with a flag](../../administration/feature_flags.md) named `change_namespace_default_role_for_pipeline_variables`. Disabled by default.
 
 When [pipeline variables are restricted](#restrict-pipeline-variables), you can also
 set a specific minimum [role](../../user/permissions.md#roles) that can run pipelines

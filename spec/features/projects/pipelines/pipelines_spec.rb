@@ -16,6 +16,7 @@ RSpec.describe 'Pipelines', :js, feature_category: :continuous_integration do
     before do
       sign_in(user)
 
+      project.update!(ci_pipeline_variables_minimum_override_role: :developer)
       project.add_developer(user)
       project.update!(auto_devops_attributes: { enabled: false })
     end

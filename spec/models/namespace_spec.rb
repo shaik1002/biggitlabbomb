@@ -661,6 +661,7 @@ RSpec.describe Namespace, feature_category: :groups_and_projects do
     it { is_expected.to delegate_method(:runner_registration_enabled).to(:namespace_settings) }
     it { is_expected.to delegate_method(:runner_registration_enabled?).to(:namespace_settings) }
     it { is_expected.to delegate_method(:default_branch_protection_defaults).to(:namespace_settings) }
+    it { is_expected.to delegate_method(:pipeline_variables_default_role).to(:namespace_settings) }
     it { is_expected.to delegate_method(:allow_runner_registration_token).to(:namespace_settings) }
     it { is_expected.to delegate_method(:maven_package_requests_forwarding).to(:package_settings) }
     it { is_expected.to delegate_method(:pypi_package_requests_forwarding).to(:package_settings) }

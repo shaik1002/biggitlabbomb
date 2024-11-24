@@ -29,7 +29,9 @@ module QA
       end
 
       before do
-        Flow::Login.sign_in
+        Flow::Login.sign_in_as_admin
+
+        project.change_ci_pipeline_variables_minimum_override_role('developer')
 
         project.visit!
         Page::Project::Menu.perform(&:go_to_pipelines)

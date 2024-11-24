@@ -9,9 +9,15 @@ module QA
       let(:upstream_project) { create(:project, group: group, name: 'upstream-project-with-bridge') }
       let(:downstream_project) { create(:project, group: group, name: 'downstream-project-with-bridge') }
       let!(:runner) { create(:group_runner, group: group, name: executor, tags: [executor]) }
+      let(:maintainer_user) do
+        Resource::User.fabricate_or_use(Runtime::Env.gitlab_qa_username_1, Runtime::Env.gitlab_qa_password_1)
+      end
 
       before do
-        Flow::Login.sign_in
+        Flow::Login.sign_in(as: maintainer_user)
+
+        upstream_project.change_ci_pipeline_variables_minimum_override_role('developer')
+        downstream_project.change_ci_pipeline_variables_minimum_override_role('developer')
         add_ci_file(downstream_project, downstream_ci_file)
         add_ci_file(upstream_project, upstream_ci_file)
         upstream_project.visit!

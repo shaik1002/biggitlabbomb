@@ -27,10 +27,11 @@ module QA
         description: 'Project for pipeline with variable defined via UI - Downstream',
         group: group)
     end
+
     let!(:runner) { create(:group_runner, group: group, name: random_string, tags: [random_string]) }
 
     before do
-      Flow::Login.sign_in
+      Flow::Login.sign_in_as_admin
     end
 
     after do
@@ -38,6 +39,10 @@ module QA
     end
 
     def start_pipeline_with_variable
+      upstream_project.change_ci_pipeline_variables_minimum_override_role('developer')
+      downstream1_project.change_ci_pipeline_variables_minimum_override_role('developer')
+      downstream2_project.change_ci_pipeline_variables_minimum_override_role('developer')
+
       upstream_project.visit!
       Flow::Pipeline.wait_for_latest_pipeline
       Page::Project::Pipeline::Index.perform(&:click_run_pipeline_button)

@@ -38,6 +38,7 @@ RSpec.describe API::Ci::Jobs, feature_category: :continuous_integration do
   end
 
   before do
+    project.update!(ci_pipeline_variables_minimum_override_role: :developer)
     project.add_developer(user)
   end
 

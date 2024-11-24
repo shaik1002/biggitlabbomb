@@ -41,6 +41,64 @@ RSpec.describe ProjectCiCdSetting, feature_category: :continuous_integration do
     end
   end
 
+  context 'when a namespace is defined' do
+    let(:namespace_settings) { create(:namespace_settings) }
+    let(:group) { create(:group, namespace_settings: namespace_settings) }
+    let(:project) do
+      create(:project, namespace_id: group.id)
+    end
+
+    it 'is no_one_allowed by default' do
+      expect(project.ci_pipeline_variables_minimum_override_role).to eq('no_one_allowed')
+    end
+
+    context 'when feature flag `change_namespace_default_role_for_pipeline_variables` is disabled' do
+      before do
+        stub_feature_flags(change_namespace_default_role_for_pipeline_variables: false)
+      end
+
+      it 'is developer by default' do
+        expect(project.ci_pipeline_variables_minimum_override_role).to eq('developer')
+      end
+    end
+  end
+
+  describe '#restrict_user_defined_variables' do
+    it 'is true by default' do
+      expect(described_class.new.restrict_user_defined_variables).to be_truthy
+    end
+  end
+
+  context 'when feature flag `change_namespace_default_role_for_pipeline_variables` is disabled' do
+    before do
+      stub_feature_flags(change_namespace_default_role_for_pipeline_variables: false)
+    end
+
+    describe '#pipeline_variables_minimum_override_role' do
+      it 'is maintainer by default' do
+        expect(described_class.new.pipeline_variables_minimum_override_role).to eq('maintainer')
+      end
+    end
+
+    context 'when a namespace is defined' do
+      let(:namespace_settings) { create(:namespace_settings) }
+      let(:group) { create(:group, namespace_settings: namespace_settings) }
+      let(:project) do
+        create(:project, namespace_id: group.id)
+      end
+
+      it 'is developer by default' do
+        expect(project.ci_cd_settings.pipeline_variables_minimum_override_role).to eq('developer')
+      end
+    end
+
+    describe '#restrict_user_defined_variables' do
+      it 'is true by default' do
+        expect(described_class.new.restrict_user_defined_variables).to be_truthy
+      end
+    end
+  end
+
   describe '#id_token_sub_claim_components' do
     it 'is project_path, ref_type, ref by default' do
       expect(described_class.new.id_token_sub_claim_components).to eq(%w[project_path ref_type ref])
@@ -71,15 +129,13 @@ RSpec.describe ProjectCiCdSetting, feature_category: :continuous_integration do
 
   describe '#default_git_depth' do
     let(:default_value) { described_class::DEFAULT_GIT_DEPTH }
+    let_it_be(:project) { create(:project, :with_namespace_settings) }
 
     it 'sets default value for new records' do
-      project = create(:project)
-
       expect(project.ci_cd_settings.default_git_depth).to eq(default_value)
     end
 
     it 'does not set default value if present' do
-      project = build(:project)
       project.build_ci_cd_settings(default_git_depth: 0)
       project.save!
 
