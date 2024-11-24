@@ -449,8 +449,10 @@ DETAILS:
 **Tier:** Premium, Ultimate
 **Offering:** GitLab.com, Self-managed, GitLab Dedicated
 
-> - **New value stream** [changed](https://gitlab.com/gitlab-org/gitlab/-/issues/381002) from a dialog to a page in GitLab 16.10 [with a flag](../../../administration/feature_flags.md) named `vsa_standalone_settings_page`. Disabled by default.
-> - [Generally available](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/171856) in GitLab 17.7. Feature flag `vsa_standalone_settings_page` removed.
+> - **New value stream** feature [changed](https://gitlab.com/gitlab-org/gitlab/-/issues/381002) from a dialog to a page in GitLab 16.11 [with a flag](../../../administration/feature_flags.md) named `vsa_standalone_settings_page`. Disabled by default.
+
+FLAG:
+On self-managed GitLab, by default the **New value stream** feature is not available. To make it available, an administrator can enable the [feature flag](../../../administration/feature_flags.md) named `vsa_standalone_settings_page`. On GitLab.com and GitLab Dedicated, this feature is not available. This feature is not ready for production use.
 
 ### Create a value stream with GitLab default stages
 
@@ -518,8 +520,10 @@ DETAILS:
 **Tier:** Premium, Ultimate
 **Offering:** GitLab.com, Self-managed, GitLab Dedicated
 
-> - **Edit value stream** [changed](https://gitlab.com/gitlab-org/gitlab/-/issues/381002) from a dialog to a page in GitLab 16.10 [with a flag](../../../administration/feature_flags.md) named `vsa_standalone_settings_page`. Disabled by default.
-> - [Generally available](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/171856) in GitLab 17.7. Feature flag `vsa_standalone_settings_page` removed.
+> - **Edit value stream** feature [changed](https://gitlab.com/gitlab-org/gitlab/-/issues/381002) from a dialog to a page in GitLab 16.11 [with a flag](../../../administration/feature_flags.md) named `vsa_standalone_settings_page`. Disabled by default.
+
+FLAG:
+On self-managed GitLab, by default the **Edit value stream** feature is not available. To make it available, an administrator can enable the [feature flag](../../../administration/feature_flags.md) named `vsa_standalone_settings_page`. On GitLab.com and GitLab Dedicated, this feature is not available. This feature is not ready for production use.
 
 After you create a value stream, you can customize it to suit your purposes. To edit a value stream:
 

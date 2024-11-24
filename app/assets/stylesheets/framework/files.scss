@@ -35,7 +35,7 @@
     }
 
     a:not(.btn) {
-      @apply gl-text-default;
+      @apply gl-text-primary;
     }
   }
 
@@ -219,7 +219,7 @@ span.idiff {
   }
 
   a {
-    @apply gl-text-default;
+    @apply gl-text-primary;
   }
 }
 

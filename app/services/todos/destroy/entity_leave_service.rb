@@ -19,10 +19,8 @@ module Todos
       def execute
         return unless entity && user
 
-        # If at least planner, all entities including confidential issues can be accessed. Although PLANNER is not a
-        # linear access level, it can be considered so for the purpose of issuables visibility because the same
-        # permissions apply to all levels higher than Gitlab::Access::PLANNER
-        return if user_has_planner_access?
+        # if at least reporter, all entities including confidential issues can be accessed
+        return if user_has_reporter_access?
 
         remove_confidential_resource_todos
         remove_group_todos
@@ -54,7 +52,7 @@ module Todos
         Todo
           .for_type(Issue.name)
           .for_internal_notes
-          .for_project(non_authorized_planner_projects) # Only Planner+ can read internal notes
+          .for_project(non_authorized_reporter_projects) # Only Reporter+ can read internal notes
           .for_user(user)
           .delete_all
       end
@@ -67,9 +65,9 @@ module Todos
           .for_user(user)
           .delete_all
 
-        # MRs require planner access, so remove those todos that are not authorized
+        # MRs require reporter access, so remove those todos that are not authorized
         Todo
-          .for_project(non_authorized_planner_projects)
+          .for_project(non_authorized_reporter_projects)
           .for_type(MergeRequest.name)
           .for_user(user)
           .delete_all
@@ -89,30 +87,30 @@ module Todos
                     when Project
                       { id: entity.id }
                     when Namespace
-                      { namespace_id: non_authorized_planner_groups }
+                      { namespace_id: non_authorized_reporter_groups }
                     end
 
         Project.where(condition) # rubocop: disable CodeReuse/ActiveRecord
       end
 
-      def authorized_planner_projects
-        user.authorized_projects(Gitlab::Access::PLANNER).select(:id)
+      def authorized_reporter_projects
+        user.authorized_projects(Gitlab::Access::REPORTER).select(:id)
       end
 
       def authorized_guest_projects
         user.authorized_projects(Gitlab::Access::GUEST).select(:id)
       end
 
-      def non_authorized_planner_projects
-        projects.id_not_in(authorized_planner_projects)
+      def non_authorized_reporter_projects
+        projects.id_not_in(authorized_reporter_projects)
       end
 
       def non_authorized_guest_projects
         projects.id_not_in(authorized_guest_projects)
       end
 
-      def authorized_planner_groups
-        GroupsFinder.new(user, min_access_level: Gitlab::Access::PLANNER).execute.select(:id)
+      def authorized_reporter_groups
+        GroupsFinder.new(user, min_access_level: Gitlab::Access::REPORTER).execute.select(:id)
       end
 
       # rubocop: disable CodeReuse/ActiveRecord
@@ -126,15 +124,15 @@ module Todos
       end
       # rubocop: enable CodeReuse/ActiveRecord
 
-      def non_authorized_planner_groups
+      def non_authorized_reporter_groups
         entity.self_and_descendants.select(:id)
-          .id_not_in(authorized_planner_groups)
+          .id_not_in(authorized_reporter_groups)
       end
 
-      def user_has_planner_access?
+      def user_has_reporter_access?
         return unless entity.is_a?(Namespace)
 
-        entity.member?(User.find(user.id), Gitlab::Access::PLANNER)
+        entity.member?(User.find(user.id), Gitlab::Access::REPORTER)
       end
 
       def confidential_issues
@@ -143,7 +141,7 @@ module Todos
         Issue
           .in_projects(projects)
           .confidential_only
-          .not_in_projects(authorized_planner_projects)
+          .not_in_projects(authorized_reporter_projects)
           .not_authored_by(user)
           .id_not_in(assigned_ids)
       end

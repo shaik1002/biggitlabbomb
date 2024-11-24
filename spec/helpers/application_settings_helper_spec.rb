@@ -62,10 +62,6 @@ RSpec.describe ApplicationSettingsHelper do
       expect(helper.visible_attributes).to include(:deactivate_dormant_users_period)
     end
 
-    it 'contains :can_create_organization' do
-      expect(helper.visible_attributes).to include(:can_create_organization)
-    end
-
     it 'contains rate limit parameters' do
       expect(helper.visible_attributes).to include(
         *%i[

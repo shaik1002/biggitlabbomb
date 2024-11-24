@@ -62,7 +62,7 @@ export default {
           <template #author>
             <gl-link
               :href="lastNote.author.path"
-              class="author-link js-user-link gl-text-default"
+              class="author-link js-user-link gl-text-primary"
               :data-user-id="lastNote.author.id"
               :data-username="lastNote.author.username"
             >

@@ -44,11 +44,10 @@ configure iteration cadences to automatically roll over incomplete issues to the
 ### Create an iteration cadence
 
 > - [Changed](https://gitlab.com/gitlab-org/gitlab/-/issues/343889) the minimum user role from Developer to Reporter in GitLab 15.0.
-> - [Changed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/169256) the minimum user role from Reporter to Planner in GitLab 17.7.
 
 Prerequisites:
 
-- You must have at least the Planner role for a group.
+- You must have at least the Reporter role for a group.
 
 To create an iteration cadence:
 
@@ -92,7 +91,7 @@ For example `https://gitlab.com/gitlab-org/sample-data-templates/sample-gitlab-p
 
 Prerequisites:
 
-- You must have at least the Planner role for a group.
+- You must have at least the Reporter role for a group.
 
 To edit an iteration cadence:
 
@@ -152,11 +151,10 @@ to satisfy the requirement that there are at least two upcoming iterations sched
 ### Delete an iteration cadence
 
 > - [Changed](https://gitlab.com/gitlab-org/gitlab/-/issues/343889) the minimum user role from Developer to Reporter in GitLab 15.0.
-> - [Changed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/169256) the minimum user role from Reporter to Planner in GitLab 17.7.
 
 Prerequisites:
 
-- You must have at least the Planner role for a group.
+- You must have at least the Reporter role for a group.
 
 Deleting an iteration cadence also deletes all iterations in that cadence.
 
@@ -182,14 +180,13 @@ On GitLab.com, this is the `automation-bot1` user.
 ## Create an iteration manually
 
 > - [Changed](https://gitlab.com/gitlab-org/gitlab/-/issues/343889) the minimum user role from Developer to Reporter in GitLab 15.0.
-> - [Changed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/169256) the minimum user role from Reporter to Planner in GitLab 17.7.
 
 When an iteration cadence has automatic scheduling enabled, iterations are created on schedule.
 If you disable that option, you can create iterations manually.
 
 Prerequisites:
 
-- You must have at least the Planner role for a group.
+- You must have at least the Reporter role for a group.
 - There must be at least one iteration cadence in the group and
   [automatic scheduling must be disabled](#turn-on-and-off-automatic-scheduling-for-an-iteration-cadence) for the iteration cadence.
 
@@ -205,11 +202,10 @@ To create an iteration:
 ## Edit an iteration
 
 > - [Changed](https://gitlab.com/gitlab-org/gitlab/-/issues/343889) the minimum user role from Developer to Reporter in GitLab 15.0.
-> - [Changed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/169256) the minimum user role from Reporter to Planner in GitLab 17.7.
 
 Prerequisites:
 
-- You must have at least the Planner role for a group.
+- You must have at least the Reporter role for a group.
 
 To edit an iteration:
 
@@ -224,11 +220,10 @@ To edit an iteration:
 ## Delete an iteration
 
 > - [Changed](https://gitlab.com/gitlab-org/gitlab/-/issues/343889) the minimum user role from Developer to Reporter in GitLab 15.0.
-> - [Changed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/169256) the minimum user role from Reporter to Planner in GitLab 17.7.
 
 Prerequisites:
 
-- You must have at least the Planner role for a group.
+- You must have at least the Reporter role for a group.
 - [Automatic scheduling must be disabled](#turn-on-and-off-automatic-scheduling-for-an-iteration-cadence) for the iteration cadence.
 
 To delete an iteration:

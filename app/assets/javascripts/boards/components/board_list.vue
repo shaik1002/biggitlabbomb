@@ -585,13 +585,7 @@ export default {
         await this.$apollo.mutate({
           mutation: listIssuablesQueries[this.issuableType].createMutation,
           variables: {
-            input: this.isEpicBoard
-              ? input
-              : {
-                  ...input,
-                  moveAfterId: this.boardListItems[0]?.id,
-                  iterationId: this.list.iteration?.id,
-                },
+            input: this.isEpicBoard ? input : { ...input, moveAfterId: this.boardListItems[0]?.id },
           },
           update: (cache, { data: { createIssuable } }) => {
             issuable = createIssuable.issuable;

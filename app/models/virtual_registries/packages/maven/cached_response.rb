@@ -24,6 +24,7 @@ module VirtualRegistries
         validates :group, top_level_group: true, presence: true
         validates :relative_path,
           :object_storage_key,
+          :content_type,
           :size,
           :file_sha1,
           presence: true

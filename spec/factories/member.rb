@@ -8,7 +8,6 @@ FactoryBot.define do
     user
 
     trait(:guest) { access_level { Gitlab::Access::GUEST } }
-    trait(:planner) { access_level { Gitlab::Access::PLANNER } }
     trait(:reporter) { access_level { Gitlab::Access::REPORTER } }
     trait(:developer) { access_level { Gitlab::Access::DEVELOPER } }
     trait(:maintainer) { access_level { Gitlab::Access::MAINTAINER } }

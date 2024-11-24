@@ -1669,26 +1669,18 @@ RSpec.describe Ci::Build, feature_category: :continuous_integration, factory_def
     end
 
     context 'hide build token' do
-      let_it_be(:build) { create(:ci_build, pipeline: pipeline) }
+      let_it_be(:build) { FactoryBot.build(:ci_build, pipeline: pipeline) }
 
-      before do
-        stub_feature_flags(ci_job_token_jwt: token == :jwt)
-      end
+      let(:data) { "new #{build.token} data" }
 
-      where(:token) { [:database, :jwt] }
+      it { is_expected.to match(/^new \[MASKED\]x+ data$/) }
 
-      with_them do
-        let(:data) { "new #{build.token} data" }
+      it 'increments trace mutation metric' do
+        build.hide_secrets(data, metrics)
 
-        it { is_expected.to match(/^new \[MASKED\]x+ data$/) }
-
-        it 'increments trace mutation metric' do
-          build.hide_secrets(data, metrics)
-
-          expect(metrics)
-            .to have_received(:increment_trace_operation)
-            .with(operation: :mutated)
-        end
+        expect(metrics)
+          .to have_received(:increment_trace_operation)
+          .with(operation: :mutated)
       end
     end
 
@@ -2398,7 +2390,7 @@ RSpec.describe Ci::Build, feature_category: :continuous_integration, factory_def
 
     context 'when token is set' do
       before do
-        allow(build).to receive(:token).and_return('my-token')
+        build.ensure_token
       end
 
       it { is_expected.to be_a(String) }
@@ -2411,7 +2403,7 @@ RSpec.describe Ci::Build, feature_category: :continuous_integration, factory_def
 
     context 'when token is empty' do
       before do
-        allow(build).to receive(:token).and_return(nil)
+        build.update_columns(token_encrypted: nil)
       end
 
       it { is_expected.to be_nil }
@@ -2621,7 +2613,7 @@ RSpec.describe Ci::Build, feature_category: :continuous_integration, factory_def
       before do
         allow(Gitlab::Ci::Jwt).to receive(:for_build).and_return('ci.job.jwt')
         allow(Gitlab::Ci::JwtV2).to receive(:for_build).and_return('ci.job.jwtv2')
-        allow(build).to receive(:token).and_return('my-token')
+        build.set_token('my-token')
         build.yaml_variables = []
       end
 
@@ -4039,14 +4031,8 @@ RSpec.describe Ci::Build, feature_category: :continuous_integration, factory_def
       build.enqueue
     end
 
-    context 'with a database token' do
-      before do
-        stub_feature_flags(ci_job_token_jwt: false)
-      end
-
-      it 'assigns the token' do
-        expect { build.enqueue }.to change(build, :token).from(nil).to(an_instance_of(String))
-      end
+    it 'assigns the token' do
+      expect { build.enqueue }.to change(build, :token).from(nil).to(an_instance_of(String))
     end
   end
 
@@ -5896,32 +5882,19 @@ RSpec.describe Ci::Build, feature_category: :continuous_integration, factory_def
     let(:new_pipeline) { create(:ci_pipeline, project: project) }
     let(:ci_build) { create(:ci_build, pipeline: new_pipeline) }
 
-    context 'when the token is a JWT' do
-      it 'includes the token prefix' do
-        expect(ci_build.token).to match(/^glcbt-/)
-      end
+    before do
+      stub_current_partition_id(ci_testing_partition_id)
     end
 
-    context 'when the token is a database token' do
-      before do
-        stub_feature_flags(ci_job_token_jwt: false)
-        stub_current_partition_id(ci_testing_partition_id)
-      end
+    it 'includes partition_id in the token prefix' do
+      prefix = ci_build.token.match(/^glcbt-([\h]+)_/)
+      partition_prefix = prefix[1].to_i(16)
 
-      it 'includes partition_id in the token prefix' do
-        prefix = ci_build.token.match(/^glcbt-([\h]+)_/)
-        partition_prefix = prefix[1].to_i(16)
-
-        expect(partition_prefix).to eq(ci_testing_partition_id)
-      end
+      expect(partition_prefix).to eq(ci_testing_partition_id)
     end
   end
 
   describe '#remove_token!' do
-    before do
-      stub_feature_flags(ci_job_token_jwt: false)
-    end
-
     it 'removes the token' do
       expect(build.token).to be_present
 
@@ -6051,10 +6024,6 @@ RSpec.describe Ci::Build, feature_category: :continuous_integration, factory_def
   end
 
   describe 'TokenAuthenticatable' do
-    before do
-      stub_feature_flags(ci_job_token_jwt: false)
-    end
-
     it_behaves_like 'TokenAuthenticatable' do
       let(:token_field) { :token }
     end
@@ -6117,45 +6086,5 @@ RSpec.describe Ci::Build, feature_category: :continuous_integration, factory_def
     end
 
     it { expect(build.tags_ids_relation.pluck(:name)).to match_array(tag_list) }
-  end
-
-  describe '#token' do
-    subject { build.token }
-
-    let(:token) { 'my-token' }
-
-    before do
-      allow_next_instance_of(::Ci::JobToken::Jwt::Encode, build) do |encode|
-        allow(encode).to receive(:jwt).and_return(token)
-      end
-    end
-
-    it { is_expected.to eq(token) }
-
-    context 'when the token is a database token' do
-      before do
-        stub_feature_flags(ci_job_token_jwt: false)
-        build.set_token(token)
-      end
-
-      it { is_expected.to eq(token) }
-    end
-  end
-
-  describe '#valid_token?' do
-    subject { build.valid_token?(token) }
-
-    let_it_be(:build) { create(:ci_build, :running) }
-    let(:token) { build.token }
-
-    it { is_expected.to be(true) }
-
-    context 'when the token is a database token' do
-      before do
-        stub_feature_flags(ci_job_token_jwt: false)
-      end
-
-      it { is_expected.to be(true) }
-    end
   end
 end
