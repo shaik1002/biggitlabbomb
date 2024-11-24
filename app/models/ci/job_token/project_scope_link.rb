@@ -20,6 +20,7 @@ module Ci
       scope :with_access_direction, ->(direction) { where(direction: direction) }
       scope :with_source, ->(project)   { where(source_project: project) }
       scope :with_target, ->(project)   { where(target_project: project) }
+      scope :with_fine_grained_policies, -> { where(default_permissions: false) }
 
       validates :source_project, presence: true
       validates :target_project, presence: true

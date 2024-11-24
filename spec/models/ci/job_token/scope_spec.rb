@@ -229,6 +229,51 @@ RSpec.describe Ci::JobToken::Scope, feature_category: :continuous_integration, f
     end
   end
 
+  describe '#policy_allowed?' do
+    subject { scope.policy_allowed?(accessed_project, policy) }
+
+    let(:scope) { described_class.new(target_project) }
+    let(:target_project) { create(:project) }
+    let(:accessed_project) { accessible_project }
+    let(:accessible_project) { create_inbound_accessible_project(target_project) }
+    let(:policy) { :delete_project }
+    let(:user) { create(:user) }
+
+    it { is_expected.to be(false) }
+
+    context 'when the accessed project does not have ci_inbound_job_token_scope_enabled set to true' do
+      before do
+        accessed_project.ci_inbound_job_token_scope_enabled = false
+      end
+
+      it { is_expected.to be(true) }
+    end
+
+    context 'when the accessed project is equal to the target project' do
+      let(:accessed_project) { target_project }
+
+      it { is_expected.to be(true) }
+    end
+
+    describe 'inbound accessible and policy allowed' do
+      where(:accessed_project, :policy, :result) do
+        ref(:accessible_project)   | ref(:minimum_allowed_policy)  | true
+        ref(:accessible_project)   | ref(:disallowed_policy)       | false
+        ref(:inaccessible_project) | ref(:minimum_allowed_policy)  | false
+        ref(:inaccessible_project) | ref(:disallowed_policy)       | false
+      end
+
+      let(:inaccessible_project) { create(:project) }
+      let(:minimum_allowed_policy) { :read_project }
+      let(:allowed_policy) { :read_build }
+      let(:disallowed_policy) { :delete_project }
+
+      with_them do
+        it { is_expected.to eq(result) }
+      end
+    end
+  end
+
   describe '#self_referential?' do
     subject { scope.self_referential?(access_project) }
 

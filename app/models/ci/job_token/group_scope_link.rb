@@ -19,6 +19,7 @@ module Ci
 
       scope :with_source, ->(project) { where(source_project: project) }
       scope :with_target, ->(group) { where(target_group: group) }
+      scope :with_fine_grained_policies, -> { where(default_permissions: false) }
 
       validates :source_project, presence: true
       validates :target_group, presence: true

@@ -122,6 +122,44 @@ RSpec.describe API::Environments, feature_category: :continuous_delivery do
         expect(response).to have_gitlab_http_status(:not_found)
       end
     end
+
+    context 'when authenticating with a CI Job Token from another project' do
+      let(:target_project) { create(:project, developers: user) }
+      let(:job) { create(:ci_build, :running, project: target_project, user: user) }
+
+      subject(:request) do
+        get api("/projects/#{project.id}/environments"), params: { job_token: job.token }
+      end
+
+      before do
+        create(:ci_job_token_project_scope_link,
+          source_project: project,
+          target_project: target_project,
+          job_token_policies: policies,
+          direction: :inbound,
+          default_permissions: false
+        )
+
+        request
+      end
+
+      context 'when the policy is allowed' do
+        let(:policies) { [:read_environment] }
+
+        it 'authenticates' do
+          expect(response).to have_gitlab_http_status(:ok)
+        end
+      end
+
+      context 'when the policy is not allowed' do
+        let(:policies) { [] }
+
+        it 'does not authenticate' do
+          expect(response).to have_gitlab_http_status(:forbidden)
+          expect(json_response['message']).to eq("403 Forbidden - The read_environment permission on #{project.path} is not authorized for this CI/CD job token.")
+        end
+      end
+    end
   end
 
   describe 'POST /projects/:id/environments' do
