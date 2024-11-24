@@ -27,7 +27,7 @@ RSpec.describe SecretsInitializer do
   describe 'ensure acknowledged secrets in any installations' do
     let(:acknowledged_secrets) do
       %w[secret_key_base otp_key_base db_key_base openid_connect_signing_key encrypted_settings_key_base
-        rotated_encrypted_settings_key_base]
+        rotated_encrypted_settings_key_base ci_job_token_signing_key]
     end
 
     it 'does not allow to add a new secret without a proper handling' do

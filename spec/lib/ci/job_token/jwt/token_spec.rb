@@ -6,7 +6,6 @@ RSpec.describe ::Ci::JobToken::Jwt::Token, feature_category: :continuous_integra
   using RSpec::Parameterized::TableSyntax
 
   let_it_be(:dummy_class) { Class.new { extend ::Ci::JobToken::Jwt::Token } }
-  let_it_be(:key) { OpenSSL::PKey::RSA.generate(2048) }
 
   shared_examples 'tracks an error and returns nil' do |error_type|
     it 'tracks an error and returns nil' do
@@ -26,19 +25,26 @@ RSpec.describe ::Ci::JobToken::Jwt::Token, feature_category: :continuous_integra
 
     before do
       dummy_class.clear_memoization(:key)
-      stub_application_setting(ci_job_token_signing_key: key)
     end
 
     it { is_expected.to be_an_instance_of(OpenSSL::PKey::RSA) }
 
     context 'when signing key is not set' do
-      let_it_be(:key) { nil }
+      before do
+        allow(Rails.application.credentials)
+          .to receive(:ci_job_token_signing_key)
+          .and_return(nil)
+      end
 
       it_behaves_like 'tracks an error and returns nil', OpenSSL::PKey::RSAError
     end
 
     context 'when signing key is not a valid key' do
-      let_it_be(:key) { 'invalid_key' }
+      before do
+        allow(Rails.application.credentials)
+          .to receive(:ci_job_token_signing_key)
+          .and_return('invalid_key')
+      end
 
       it_behaves_like 'tracks an error and returns nil', OpenSSL::PKey::RSAError
     end

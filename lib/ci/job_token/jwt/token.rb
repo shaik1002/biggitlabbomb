@@ -11,7 +11,7 @@ module Ci
         end
 
         def key
-          signing_key = Gitlab::CurrentSettings.ci_job_token_signing_key
+          signing_key = Rails.application.credentials.ci_job_token_signing_key
           OpenSSL::PKey::RSA.new(signing_key.to_s)
         rescue OpenSSL::PKey::RSAError => error
           Gitlab::ErrorTracking.track_exception(error)

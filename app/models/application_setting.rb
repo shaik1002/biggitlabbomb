@@ -19,6 +19,7 @@ class ApplicationSetting < ApplicationRecord
   ], remove_with: '17.5', remove_after: '2024-09-19'
   ignore_columns %i[toggle_security_policy_custom_ci lock_toggle_security_policy_custom_ci], remove_with: '17.6', remove_after: '2024-10-17'
   ignore_column :runners_registration_token, remove_with: '17.7', remove_after: '2024-11-22'
+  ignore_column :ci_job_token_signing_key, remove_with: '17.9', remove_after: '2024-12-22'
 
   INSTANCE_REVIEW_MIN_USERS = 50
   GRAFANA_URL_ERROR_MESSAGE = 'Please check your Grafana URL setting in ' \
@@ -500,9 +501,6 @@ class ApplicationSetting < ApplicationRecord
   validates :ci_jwt_signing_key,
     rsa_key: true, allow_nil: true
 
-  validates :ci_job_token_signing_key,
-    rsa_key: true, allow_nil: true
-
   validates :customers_dot_jwt_signing_key,
     rsa_key: true, allow_nil: true
 
@@ -802,7 +800,6 @@ class ApplicationSetting < ApplicationRecord
   attr_encrypted :slack_app_signing_secret, encryption_options_base_32_aes_256_gcm.merge(encode: false, encode_iv: false)
   attr_encrypted :slack_app_verification_token, encryption_options_base_32_aes_256_gcm
   attr_encrypted :ci_jwt_signing_key, encryption_options_base_32_aes_256_gcm
-  attr_encrypted :ci_job_token_signing_key, encryption_options_base_32_aes_256_gcm.merge(encode: false, encode_iv: false)
   attr_encrypted :customers_dot_jwt_signing_key, encryption_options_base_32_aes_256_gcm
   attr_encrypted :secret_detection_token_revocation_token, encryption_options_base_32_aes_256_gcm
   attr_encrypted :cloud_license_auth_token, encryption_options_base_32_aes_256_gcm
