@@ -246,7 +246,7 @@ export default {
 
 <template>
   <div>
-    <div class="gl-flex gl-justify-between gl-border-b-1 gl-border-gray-100 gl-border-b-solid">
+    <div class="gl-border-b gl-flex gl-justify-between">
       <gl-tabs
         :value="currentTab"
         content-class="gl-p-0"

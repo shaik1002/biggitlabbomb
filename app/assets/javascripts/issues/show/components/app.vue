@@ -294,9 +294,7 @@ export default {
     },
 
     pinnedLinkClasses() {
-      return this.showTitleBorder
-        ? 'gl-border-b-1 gl-border-b-gray-100 gl-border-b-solid gl-mb-6'
-        : '';
+      return this.showTitleBorder ? 'gl-border-b gl-mb-6' : '';
     },
 
     shouldShowStickyHeader() {

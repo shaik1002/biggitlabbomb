@@ -24,8 +24,7 @@ export default Node.create({
     return [
       'div',
       {
-        class:
-          'table-of-contents gl-border-1 gl-border-solid gl-text-center gl-border-gray-100 gl-mb-5',
+        class: 'table-of-contents gl-border gl-text-center gl-mb-5',
       },
       __('Table of contents'),
     ];

@@ -661,9 +661,7 @@ export default {
 
 <template>
   <div>
-    <div
-      class="gl-flex gl-items-center gl-border-0 gl-border-b-1 gl-border-solid gl-border-gray-100"
-    >
+    <div class="gl-border-b gl-flex gl-items-center gl-border-0">
       <h1 class="gl-my-0 gl-flex gl-items-center gl-gap-3 gl-py-4 gl-text-size-h1">
         <img :src="$options.gitlabLogo" class="gl-h-6 gl-w-6" />
         <span>{{ s__('BulkImport|Import groups by direct transfer') }}</span>

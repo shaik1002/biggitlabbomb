@@ -137,9 +137,7 @@ export default {
 <template>
   <div>
     <div class="top-bar-fixed container-fluid" data-testid="top-bar">
-      <div
-        class="top-bar-container gl-flex gl-items-center gl-border-b-1 gl-border-b-gray-100 gl-border-b-solid"
-      >
+      <div class="top-bar-container gl-border-b gl-flex gl-items-center">
         <super-sidebar-toggle
           v-if="showSuperSidebarToggle"
           class="gl-mr-2"

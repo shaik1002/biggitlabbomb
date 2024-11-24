@@ -23,9 +23,7 @@ export default {
 </script>
 
 <template>
-  <div
-    class="gl-flex gl-items-center gl-justify-end gl-border-1 gl-border-gray-100 gl-bg-gray-10 gl-px-5 gl-py-2 gl-border-b-solid"
-  >
+  <div class="gl-border-b gl-flex gl-items-center gl-justify-end gl-bg-gray-10 gl-px-5 gl-py-2">
     <span class="gl-mr-6" data-testid="message">{{ $options.i18n.message }}</span>
 
     <gl-button

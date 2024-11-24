@@ -22,8 +22,7 @@ export default {
     jobsCountErrorMsg: __('There was an error fetching the number of jobs for your project.'),
     loadingAriaLabel: __('Loading'),
   },
-  filterSearchBoxStyles:
-    'gl-my-0 gl-p-5 gl-bg-gray-10 gl-text-gray-900 gl-border-b gl-border-gray-100',
+  filterSearchBoxStyles: 'gl-my-0 gl-p-5 gl-bg-gray-10 gl-text-gray-900 gl-border-b',
   components: {
     GlAlert,
     GlKeysetPagination,

@@ -622,9 +622,7 @@ export default {
 
 <template>
   <div>
-    <div
-      class="project-visibility-setting gl-border-1 gl-border-solid gl-border-gray-100 gl-px-5 gl-py-3"
-    >
+    <div class="project-visibility-setting gl-border gl-px-5 gl-py-3">
       <project-setting-row
         ref="project-visibility-settings"
         :help-path="visibilityHelpPath"
@@ -709,7 +707,7 @@ export default {
       </project-setting-row>
     </div>
     <div
-      class="gl-mb-5 gl-flex gl-flex-col gl-gap-6 gl-border-1 gl-border-t-0 gl-border-solid gl-border-gray-100 gl-bg-gray-10 gl-px-5 gl-py-3"
+      class="gl-border gl-mb-5 gl-flex gl-flex-col gl-gap-6 gl-border-t-0 gl-bg-gray-10 gl-px-5 gl-py-3"
     >
       <project-setting-row
         ref="issues-settings"

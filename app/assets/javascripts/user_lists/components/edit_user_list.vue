@@ -57,10 +57,7 @@ export default {
     <gl-loading-icon v-if="isLoading" size="xl" />
 
     <template v-else-if="hasUserList">
-      <h3
-        data-testid="user-list-title"
-        class="gl-border-1 gl-border-gray-100 gl-pb-5 gl-font-bold gl-border-b-solid"
-      >
+      <h3 data-testid="user-list-title" class="gl-border-b gl-pb-5 gl-font-bold">
         {{ title }}
       </h3>
       <user-list-form

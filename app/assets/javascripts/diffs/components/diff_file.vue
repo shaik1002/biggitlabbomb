@@ -527,7 +527,7 @@ export default {
 
     <div
       v-if="idState.forkMessageVisible"
-      class="js-file-fork-suggestion-section file-fork-suggestion gl-border-1 gl-border-t-0 gl-border-solid gl-border-default"
+      class="js-file-fork-suggestion-section file-fork-suggestion gl-border gl-border-t-0"
     >
       <span v-safe-html="forkMessage" class="file-fork-suggestion-note"></span>
       <gl-button

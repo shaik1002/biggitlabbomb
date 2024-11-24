@@ -150,7 +150,7 @@ export default {
 </script>
 <template>
   <li
-    class="gl-flex gl-items-center gl-border-b-1 gl-border-gray-100 gl-py-3 gl-text-gray-500 gl-border-b-solid"
+    class="gl-border-b gl-flex gl-items-center gl-py-3 gl-text-gray-500"
     data-testid="catalog-resource-item"
   >
     <gl-avatar

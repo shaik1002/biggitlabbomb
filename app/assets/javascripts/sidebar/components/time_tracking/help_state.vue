@@ -39,10 +39,7 @@ export default {
 </script>
 
 <template>
-  <div
-    data-testid="helpPane"
-    class="sidebar-help-state gl-border-1 gl-border-gray-100 gl-bg-white gl-border-b-solid gl-border-t-solid"
-  >
+  <div data-testid="helpPane" class="sidebar-help-state gl-border-t gl-border-b gl-bg-white">
     <div class="time-tracking-info">
       <h4>{{ __('Track time with quick actions') }}</h4>
       <p>{{ __('Quick actions can be used in description and comment boxes.') }}</p>

@@ -12,7 +12,7 @@ import { s__, __ } from '~/locale';
 import { states, ADD_USER_MODAL_ID } from '../constants/show';
 import AddUserModal from './add_user_modal.vue';
 
-const commonTableClasses = ['gl-py-5', 'gl-border-b-1', 'gl-border-b-solid', 'gl-border-gray-100'];
+const commonTableClasses = ['gl-py-5', 'gl-border-b'];
 
 export default {
   components: {
@@ -43,14 +43,7 @@ export default {
     editButtonLabel: s__('UserLists|Edit'),
   },
   classes: {
-    headerClasses: [
-      'gl-flex',
-      'gl-justify-between',
-      'gl-pb-5',
-      'gl-border-b-1',
-      'gl-border-b-solid',
-      'gl-border-gray-100',
-    ].join(' '),
+    headerClasses: ['gl-flex', 'gl-justify-between', 'gl-pb-5', 'gl-border-b'].join(' '),
     tableHeaderClasses: commonTableClasses.join(' '),
     tableRowClasses: [
       ...commonTableClasses,

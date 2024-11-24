@@ -34,8 +34,7 @@ export default {
     loadingAriaLabel: LOADING_ARIA_LABEL,
     cancelableJobsErrorMsg: CANCELABLE_JOBS_ERROR_MSG,
   },
-  filterSearchBoxStyles:
-    'gl-my-0 gl-p-5 gl-bg-gray-10 gl-text-gray-900 gl-border-b gl-border-gray-100',
+  filterSearchBoxStyles: 'gl-my-0 gl-p-5 gl-bg-gray-10 gl-text-gray-900 gl-border-b',
   components: {
     JobsSkeletonLoader,
     JobsTableEmptyState,

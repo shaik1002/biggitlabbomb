@@ -20,7 +20,7 @@ export default {
 </script>
 
 <template>
-  <div class="gl-border-t-1 gl-border-t-gray-100 gl-border-t-solid">
+  <div class="gl-border-t">
     <h3 class="gl-mb-0 gl-mt-5 gl-text-lg">{{ s__('Runners|Assigned Group') }}</h3>
     <template v-if="groups.length">
       <runner-assigned-item

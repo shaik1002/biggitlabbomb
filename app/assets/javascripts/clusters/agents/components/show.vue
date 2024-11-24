@@ -151,16 +151,9 @@ export default {
         </gl-sprintf>
       </p>
 
-      <integration-status
-        :tokens="tokens"
-        class="gl-border-t-1 gl-border-t-gray-100 gl-py-5 gl-border-t-solid"
-      />
+      <integration-status :tokens="tokens" class="gl-border-t gl-py-5" />
 
-      <gl-tabs
-        sync-active-tab-with-query-params
-        lazy
-        class="gl-border-t-1 gl-border-t-gray-100 gl-border-t-solid"
-      >
+      <gl-tabs sync-active-tab-with-query-params lazy class="gl-border-t">
         <gl-tab :title="$options.i18n.activity" query-param-value="activity">
           <activity-events :agent-name="agentName" :project-path="projectPath" />
         </gl-tab>

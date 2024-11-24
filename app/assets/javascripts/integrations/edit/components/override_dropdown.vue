@@ -67,7 +67,7 @@ export default {
 
 <template>
   <div
-    class="gl-mb-6 gl-mt-5 gl-flex gl-items-baseline gl-justify-between gl-border-b-1 gl-border-t-1 gl-border-gray-100 gl-py-4 gl-border-b-solid gl-border-t-solid"
+    class="gl-border-t gl-border-b gl-mb-6 gl-mt-5 gl-flex gl-items-baseline gl-justify-between gl-py-4"
   >
     <span
       >{{ description }}

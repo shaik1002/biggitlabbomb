@@ -229,10 +229,7 @@ export default {
     <gl-alert v-if="errorMessage" variant="danger" :dismissible="false" class="gl-mb-6">
       {{ errorMessage }}
     </gl-alert>
-    <div
-      v-if="isLoading"
-      class="gl-rounded-base gl-border-1 gl-border-solid gl-border-gray-100 gl-bg-white gl-py-6"
-    >
+    <div v-if="isLoading" class="gl-border gl-rounded-base gl-bg-white gl-py-6">
       <gl-skeleton-loader :width="350" :height="44">
         <rect width="200" height="8" x="10" y="0" rx="4" />
         <rect width="300" height="8" x="10" y="15" rx="4" />

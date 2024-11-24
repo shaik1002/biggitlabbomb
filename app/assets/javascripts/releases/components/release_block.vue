@@ -137,10 +137,7 @@ export default {
     </template>
 
     <div class="gl-flex gl-flex-col gl-gap-5">
-      <div
-        v-if="shouldRenderMilestoneInfo"
-        class="gl-border-b-1 gl-border-gray-100 gl-border-b-solid"
-      >
+      <div v-if="shouldRenderMilestoneInfo" class="gl-border-b">
         <!-- TODO: Switch open* links to opened* once fields have been updated in GraphQL -->
         <release-block-milestone-info
           :milestones="milestones"
@@ -156,8 +153,7 @@ export default {
         v-if="shouldRenderAssets"
         :assets="assets"
         :class="{
-          'gl-border-b-1 gl-border-gray-100 gl-pb-5 gl-border-b-solid':
-            hasEvidence || release.descriptionHtml,
+          'gl-border-b gl-pb-5': hasEvidence || release.descriptionHtml,
         }"
       />
       <evidence-block v-if="hasEvidence" :release="release" />

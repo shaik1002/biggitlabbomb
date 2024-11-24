@@ -75,10 +75,7 @@ export default {
 </script>
 
 <template>
-  <div
-    class="alert-status gl-py-5"
-    :class="{ 'gl-border-b-1 gl-border-b-gray-100 gl-border-b-solid': !sidebarCollapsed }"
-  >
+  <div class="alert-status gl-py-5" :class="{ 'gl-border-b': !sidebarCollapsed }">
     <template v-if="sidebarCollapsed">
       <div ref="status" class="gl-ml-6" data-testid="status-icon" @click="$emit('toggle-sidebar')">
         <gl-icon name="status" />

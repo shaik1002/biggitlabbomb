@@ -14,8 +14,7 @@ export const I18N_CREATE_ERROR = s__(
   'Runners|An error occurred while creating the runner. Please try again.',
 );
 
-export const FILTER_CSS_CLASSES =
-  'gl-bg-gray-10 gl-p-5 gl-border-solid gl-border-gray-100 gl-border-0 gl-border-t-1';
+export const FILTER_CSS_CLASSES = 'gl-bg-gray-10 gl-p-5 gl-border-0 gl-border-t';
 
 // Type
 

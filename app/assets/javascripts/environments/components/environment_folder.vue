@@ -102,10 +102,7 @@ export default {
 };
 </script>
 <template>
-  <div
-    :class="{ 'gl-pb-5': !visible }"
-    class="gl-border-1 gl-border-gray-100 gl-pt-3 gl-border-b-solid"
-  >
+  <div :class="{ 'gl-pb-5': !visible }" class="gl-border-b gl-pt-3">
     <div class="gl-flex gl-w-full gl-items-center gl-px-3">
       <gl-button
         class="gl-mr-4"
@@ -127,12 +124,12 @@ export default {
         :key="environment.name"
         :environment="environment"
         :class="{ 'gl-mt-5': isFirstEnvironment(index) }"
-        class="gl-border-1 gl-border-gray-100 gl-pt-3 gl-border-t-solid"
+        class="gl-border-t gl-pt-3"
         in-folder
       />
       <div
         v-if="isMessageShowing"
-        class="gl-border-1 gl-border-gray-100 gl-bg-gray-10 gl-py-5 gl-text-center gl-border-t-solid"
+        class="gl-border-t gl-bg-gray-10 gl-py-5 gl-text-center"
         data-testid="environment-folder-message-element"
       >
         <gl-sprintf :message="$options.i18n.message">

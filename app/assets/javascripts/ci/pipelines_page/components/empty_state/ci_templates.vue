@@ -65,9 +65,7 @@ export default {
 <template>
   <ul class="gl-list-none gl-pl-0">
     <li v-for="template in templates" :key="template.name">
-      <div
-        class="gl-flex gl-items-center gl-justify-between gl-border-b-1 gl-border-b-gray-100 gl-pb-3 gl-pt-3 gl-border-b-solid"
-      >
+      <div class="gl-border-b gl-flex gl-items-center gl-justify-between gl-pb-3 gl-pt-3">
         <div class="gl-flex gl-flex-row gl-items-center">
           <gl-avatar
             :alt="template.name"

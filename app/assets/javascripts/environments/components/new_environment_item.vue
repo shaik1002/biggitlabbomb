@@ -168,22 +168,8 @@ export default {
       this.visible = !this.visible;
     },
   },
-  deploymentClasses: [
-    'gl-border-gray-100',
-    'gl-border-t-solid',
-    'gl-border-1',
-    'gl-py-5',
-    'md:gl-pl-7',
-    'gl-bg-gray-10',
-  ],
-  deployBoardClasses: [
-    'gl-border-gray-100',
-    'gl-border-t-solid',
-    'gl-border-1',
-    'gl-py-4',
-    'md:gl-pl-7',
-    'gl-bg-gray-10',
-  ],
+  deploymentClasses: ['gl-border-t', 'gl-py-5', 'md:gl-pl-7', 'gl-bg-gray-10'],
+  deployBoardClasses: ['gl-border-t', 'gl-py-4', 'md:gl-pl-7', 'gl-bg-gray-10'],
 };
 </script>
 <template>

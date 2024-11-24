@@ -320,7 +320,7 @@ export default {
       <environment-item
         v-for="environment in environments"
         :key="environment.name"
-        class="gl-mb-3 gl-border-1 gl-border-gray-100 gl-border-b-solid"
+        class="gl-border-b gl-mb-3"
         :environment="environment.latest"
         @change="refetchEnvironments"
       />

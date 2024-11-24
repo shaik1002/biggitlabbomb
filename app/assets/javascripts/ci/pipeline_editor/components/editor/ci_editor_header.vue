@@ -60,9 +60,7 @@ export default {
 </script>
 
 <template>
-  <div
-    class="gl-flex gl-flex-col gl-gap-3 gl-border-1 gl-border-solid gl-border-gray-100 gl-p-3 md:gl-flex-row"
-  >
+  <div class="gl-border gl-flex gl-flex-col gl-gap-3 gl-p-3 md:gl-flex-row">
     <slot></slot>
     <gl-button
       :href="ciCatalogPath"
