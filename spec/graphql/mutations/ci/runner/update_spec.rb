@@ -166,7 +166,8 @@ RSpec.describe Mutations::Ci::Runner::Update, feature_category: :runner do
             {
               runner: runner,
               current_user: user,
-              project_ids: new_projects.map(&:id)
+              project_ids: new_projects.map(&:id),
+              caller_info: { caller: 'GraphQL RunnerUpdate mutation' }
             }
           ) do |service|
             expect(service).to receive(:execute).and_call_original

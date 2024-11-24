@@ -973,6 +973,9 @@ RSpec.describe API::Ci::Runners, :aggregate_failures, feature_category: :fleet_v
   describe 'DELETE /runners/:id' do
     let(:runner_id) { runner.id }
     let(:path) { "/runners/#{runner_id}?#{query_path}" }
+    let(:expected_caller_info) do
+      { endpoint: 'DELETE runners / :id', user_agent: nil }
+    end
 
     subject(:perform_request) { delete api(path, current_user) }
 
@@ -987,7 +990,9 @@ RSpec.describe API::Ci::Runners, :aggregate_failures, feature_category: :fleet_v
         let(:runner) { shared_runner }
 
         it 'deletes runner' do
-          expect_next_instance_of(Ci::Runners::UnregisterRunnerService, runner, current_user) do |service|
+          expect_next_instance_of(
+            Ci::Runners::UnregisterRunnerService, runner, current_user, expected_caller_info
+          ) do |service|
             expect(service).to receive(:execute).once.and_call_original
           end
 
@@ -1013,7 +1018,9 @@ RSpec.describe API::Ci::Runners, :aggregate_failures, feature_category: :fleet_v
             let(:scope) { :manage_runner }
 
             it 'deletes runner' do
-              expect_next_instance_of(Ci::Runners::UnregisterRunnerService, runner, pat_user) do |service|
+              expect_next_instance_of(
+                Ci::Runners::UnregisterRunnerService, runner, pat_user, expected_caller_info
+              ) do |service|
                 expect(service).to receive(:execute).once.and_call_original
               end
 
@@ -1031,7 +1038,9 @@ RSpec.describe API::Ci::Runners, :aggregate_failures, feature_category: :fleet_v
         let(:runner) { project_runner }
 
         it 'deletes used project runner' do
-          expect_next_instance_of(Ci::Runners::UnregisterRunnerService, runner, current_user) do |service|
+          expect_next_instance_of(
+            Ci::Runners::UnregisterRunnerService, runner, current_user, expected_caller_info
+          ) do |service|
             expect(service).to receive(:execute).once.and_call_original
           end
 

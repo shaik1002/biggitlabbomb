@@ -93,7 +93,7 @@ RSpec.describe 'RunnerCreate', feature_category: :runner do
 
   shared_examples 'when runner is created successfully' do
     it do
-      expected_args = { user: current_user, params: anything }
+      expected_args = { user: current_user, params: anything, caller_info: { caller: 'GraphQL RunnerCreate mutation' } }
       expect_next_instance_of(::Ci::Runners::CreateRunnerService, expected_args) do |service|
         expect(service).to receive(:execute).and_call_original
       end

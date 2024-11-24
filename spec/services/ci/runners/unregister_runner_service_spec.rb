@@ -3,9 +3,10 @@
 require 'spec_helper'
 
 RSpec.describe ::Ci::Runners::UnregisterRunnerService, '#execute', feature_category: :runner do
-  subject(:execute) { described_class.new(runner, 'some_token').execute }
-
+  let(:caller_info) { { caller: 'spec' } }
   let(:runner) { create(:ci_runner) }
+
+  subject(:execute) { described_class.new(runner, 'some_token', caller_info).execute }
 
   it 'destroys runner' do
     expect(runner).to receive(:destroy).once.and_call_original

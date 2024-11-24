@@ -3,16 +3,20 @@
 require 'spec_helper'
 
 RSpec.describe ::Ci::Runners::SetRunnerAssociatedProjectsService, '#execute', feature_category: :runner do
-  subject(:execute) do
-    described_class.new(runner: runner, current_user: user, project_ids: new_projects.map(&:id)).execute
-  end
-
   let_it_be(:organization1) { create(:organization) }
   let_it_be(:owner_project) { create(:project, organization: organization1) }
   let_it_be(:project2) { create(:project, organization: organization1) }
 
   let(:original_projects) { [owner_project, project2] }
   let(:runner) { create(:ci_runner, :project, projects: original_projects) }
+  let(:caller_info) { { caller: 'spec' } }
+
+  subject(:execute) do
+    described_class.new(
+      runner: runner, current_user: user, project_ids: new_projects.map(&:id),
+      caller_info: caller_info
+    ).execute
+  end
 
   context 'without user' do
     let(:user) { nil }

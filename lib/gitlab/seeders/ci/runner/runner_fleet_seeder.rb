@@ -259,7 +259,8 @@ module Gitlab
 
             executor = ::Ci::RunnerManager::EXECUTOR_NAME_TO_TYPES.keys.sample
             response = ::Ci::Runners::CreateRunnerService.new(
-              user: @user, params: args.merge(additional_runner_args(name, scope, executor))
+              user: @user, params: args.merge(additional_runner_args(name, scope, executor)),
+              caller_info: { caller: "gitlab:seed:runner_fleet rake task" }
             ).execute
             runner = response.payload[:runner]
 
@@ -300,7 +301,9 @@ module Gitlab
           end
 
           def assign_runner(runner, project)
-            result = ::Ci::Runners::AssignRunnerService.new(runner, project, @user).execute
+            result = ::Ci::Runners::AssignRunnerService.new(
+              runner, project, @user, { caller: 'gitlab:seed:runner_fleet rake task' }
+            ).execute
             result.track_and_raise_exception
 
             runner

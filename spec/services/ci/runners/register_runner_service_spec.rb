@@ -5,6 +5,7 @@ require 'spec_helper'
 RSpec.describe ::Ci::Runners::RegisterRunnerService, '#execute', :freeze_time, feature_category: :runner do
   let(:registration_token) { 'abcdefg123456' }
   let(:token) {}
+  let(:caller_info) { { caller: 'spec' } }
   let(:args) { {} }
   let(:runner) { execute.payload[:runner] }
 
@@ -15,7 +16,7 @@ RSpec.describe ::Ci::Runners::RegisterRunnerService, '#execute', :freeze_time, f
     )
   end
 
-  subject(:execute) { described_class.new(token, args).execute }
+  subject(:execute) { described_class.new(token, args, caller_info).execute }
 
   shared_examples 'runner registration is disallowed' do
     it 'returns error response with runner_registration_disallowed reason' do

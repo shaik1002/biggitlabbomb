@@ -3,15 +3,16 @@
 module Ci
   module Runners
     class BulkDeleteRunnersService
-      attr_reader :runners
+      attr_reader :runners, :current_user, :caller_info
 
       RUNNER_LIMIT = 50
 
       # @param runners [Array<Ci::Runner>] the runners to unregister/destroy
       # @param current_user [User] the user performing the operation
-      def initialize(runners:, current_user:)
+      def initialize(runners:, current_user:, caller_info:)
         @runners = runners
         @current_user = current_user
+        @caller_info = caller_info
       end
 
       def execute
@@ -31,7 +32,7 @@ module Ci
         # rubocop:disable CodeReuse/ActiveRecord
         runners_to_be_deleted =
           Ci::Runner
-            .where(id: authorized_runners_ids)
+            .id_in(authorized_runners_ids)
             .preload([:taggings, :runner_namespaces, :runner_projects])
         # rubocop:enable CodeReuse/ActiveRecord
         deleted_ids = runners_to_be_deleted.destroy_all.map(&:id) # rubocop:disable Cop/DestroyAll

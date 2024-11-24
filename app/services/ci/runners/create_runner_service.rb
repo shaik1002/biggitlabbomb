@@ -11,11 +11,12 @@ module Ci
         'project_type' => Ci::Runners::RunnerCreationStrategies::ProjectRunnerStrategy
       }.freeze
 
-      def initialize(user:, params:)
+      def initialize(user:, params:, caller_info:)
         @user = user
         @scope = params[:scope]
         @params = params
         @strategy = RUNNER_CLASS_MAPPING[params[:runner_type]].new(user: user, params: params)
+        @caller_info = caller_info
       end
 
       def execute
@@ -49,7 +50,7 @@ module Ci
 
       private
 
-      attr_reader :user, :params, :strategy
+      attr_reader :user, :params, :strategy, :caller_info
 
       def track_runner_event(runner)
         return if params[:maintenance_note].blank?

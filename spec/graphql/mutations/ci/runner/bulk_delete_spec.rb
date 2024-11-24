@@ -50,7 +50,10 @@ RSpec.describe Mutations::Ci::Runner::BulkDelete, feature_category: :fleet_visib
 
         it 'ignores unknown keys from service response payload', :aggregate_failures do
           expect_next_instance_of(
-            ::Ci::Runners::BulkDeleteRunnersService, { runners: runners, current_user: user }
+            ::Ci::Runners::BulkDeleteRunnersService, {
+              runners: runners, current_user: user,
+              caller_info: { caller: 'GraphQL BulkRunnerDelete mutation' }
+            }
           ) do |service|
             expect(service).to receive(:execute).once.and_return(
               ServiceResponse.success(

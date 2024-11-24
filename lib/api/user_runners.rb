@@ -58,7 +58,13 @@ module API
           attributes[:scope] = ::Project.find_by_id(attributes.delete(:project_id))
         end
 
-        result = ::Ci::Runners::CreateRunnerService.new(user: current_user, params: attributes).execute
+        result = ::Ci::Runners::CreateRunnerService.new(
+          user: current_user, params: attributes,
+          caller_info: {
+            endpoint: "#{options[:method].join(', ')} #{namespace}",
+            user_agent: headers['user-agent']
+          }).execute
+
         if result.error?
           message = result.errors.to_sentence
           forbidden!(message) if result.reason == :forbidden

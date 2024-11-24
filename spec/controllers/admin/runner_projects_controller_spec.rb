@@ -5,9 +5,10 @@ require 'spec_helper'
 RSpec.describe Admin::RunnerProjectsController, feature_category: :fleet_visibility do
   let_it_be(:group) { create(:group) }
   let_it_be(:project) { create(:project, group: group) }
+  let_it_be(:admin) { create(:admin) }
 
   before do
-    sign_in(create(:admin))
+    sign_in(admin)
   end
 
   describe '#create' do
@@ -22,8 +23,19 @@ RSpec.describe Admin::RunnerProjectsController, feature_category: :fleet_visibil
     end
 
     context 'when assigning to another project' do
-      let(:project_runner) { create(:ci_runner, :project, projects: [source_project]) }
       let_it_be(:source_project) { create(:project, organization: project.organization) }
+
+      let(:project_runner) { create(:ci_runner, :project, projects: [source_project]) }
+
+      it 'passes caller info to service' do
+        expect_next_instance_of(::Ci::Runners::AssignRunnerService, project_runner, project, admin, {
+          endpoint: 'create admin/runner_projects', user_agent: nil
+        }) do |service|
+          expect(service).to receive(:execute).and_call_original
+        end
+
+        send_create
+      end
 
       it 'redirects to the admin runner edit page' do
         send_create
@@ -74,6 +86,16 @@ RSpec.describe Admin::RunnerProjectsController, feature_category: :fleet_visibil
 
     context 'when unassigning runner from project' do
       let(:runner_project_id) { project_runner.runner_projects.last.id }
+
+      it 'passes caller info to service' do
+        expect_next_instance_of(::Ci::Runners::UnassignRunnerService, project_runner.runner_projects.last, admin, {
+          endpoint: 'destroy admin/runner_projects', user_agent: nil
+        }) do |service|
+          expect(service).to receive(:execute).and_call_original
+        end
+
+        send_destroy
+      end
 
       it 'redirects to the admin runner edit page' do
         send_destroy

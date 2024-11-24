@@ -111,11 +111,17 @@ RSpec.describe Projects::RunnersController, feature_category: :fleet_visibility 
       project.add_maintainer(user)
     end
 
-    it 'destroys the runner' do
-      expect_next_instance_of(Ci::Runners::UnregisterRunnerService, runner, user) do |service|
-        expect(service).to receive(:execute).once.and_call_original
+    it 'passes caller info to service' do
+      expect_next_instance_of(::Ci::Runners::UnregisterRunnerService, runner, user, {
+        endpoint: 'destroy projects/runners', user_agent: nil
+      }) do |service|
+        expect(service).to receive(:execute).and_call_original
       end
 
+      delete :destroy, params: params
+    end
+
+    it 'destroys the runner' do
       delete :destroy, params: params
 
       expect(response).to have_gitlab_http_status(:found)

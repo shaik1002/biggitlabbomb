@@ -3,6 +3,8 @@
 module API
   module Ci
     class Runners < ::API::Base
+      helpers ::API::Ci::Helpers::RequestHelpers
+
       include APIGuard
       include PaginationParams
 
@@ -232,7 +234,9 @@ module API
 
           authenticate_delete_runner!(runner)
 
-          destroy_conditionally!(runner) { ::Ci::Runners::UnregisterRunnerService.new(runner, current_user).execute }
+          destroy_conditionally!(runner) do
+            ::Ci::Runners::UnregisterRunnerService.new(runner, current_user, get_caller_info).execute
+          end
         end
 
         desc 'List jobs running on a runner' do
@@ -333,7 +337,7 @@ module API
           runner = get_runner(params[:runner_id])
           authenticate_enable_runner!(runner)
 
-          result = ::Ci::Runners::AssignRunnerService.new(runner, user_project, current_user).execute
+          result = ::Ci::Runners::AssignRunnerService.new(runner, user_project, current_user, get_caller_info).execute
           if result.success?
             present runner, with: Entities::Ci::Runner
           else

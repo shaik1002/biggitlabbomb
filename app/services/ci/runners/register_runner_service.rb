@@ -6,9 +6,10 @@ module Ci
       include Gitlab::InternalEventsTracking
       include Gitlab::Utils::StrongMemoize
 
-      def initialize(registration_token, attributes)
+      def initialize(registration_token, attributes, caller_info)
         @registration_token = registration_token
         @attributes = attributes
+        @caller_info = caller_info
       end
 
       def execute
@@ -39,7 +40,7 @@ module Ci
 
       private
 
-      attr_reader :registration_token, :attributes
+      attr_reader :registration_token, :attributes, :caller_info
 
       def attrs_from_token
         if runner_registration_token_valid?(registration_token)
@@ -80,11 +81,12 @@ module Ci
 
       def token_scope
         case attrs_from_token[:runner_type]
+        when :instance_type
+          Gitlab::Audit::InstanceScope.new
         when :project_type
           attrs_from_token[:projects]&.first
         when :group_type
           attrs_from_token[:groups]&.first
-          # No scope for instance type
         end
       end
 

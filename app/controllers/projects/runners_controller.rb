@@ -22,7 +22,7 @@ class Projects::RunnersController < Projects::ApplicationController
   end
 
   def destroy
-    Ci::Runners::UnregisterRunnerService.new(@runner, current_user).execute if @runner.only_for?(project)
+    Ci::Runners::UnregisterRunnerService.new(@runner, current_user, caller_info).execute if @runner.only_for?(project)
 
     redirect_to project_runners_path(@project), status: :found
   end
@@ -70,6 +70,13 @@ class Projects::RunnersController < Projects::ApplicationController
 
   def runner_params
     params.require(:runner).permit(Ci::Runner::FORM_EDITABLE)
+  end
+
+  def caller_info
+    {
+      endpoint: [action_name, controller_path].join(' '),
+      user_agent: headers['User-Agent']
+    }
   end
 end
 

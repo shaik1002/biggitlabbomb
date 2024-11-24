@@ -7,8 +7,9 @@ RSpec.describe ::Ci::Runners::UnassignRunnerService, '#execute', feature_categor
   let_it_be(:runner) { create(:ci_runner, :project, projects: [project]) }
 
   let(:runner_project) { runner.runner_projects.last }
+  let(:caller_info) { { caller: 'spec' } }
 
-  subject(:execute) { described_class.new(runner_project, user).execute }
+  subject(:execute) { described_class.new(runner_project, user, caller_info).execute }
 
   context 'without user' do
     let(:user) { nil }

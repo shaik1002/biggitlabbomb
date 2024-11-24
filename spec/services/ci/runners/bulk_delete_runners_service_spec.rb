@@ -11,7 +11,8 @@ RSpec.describe ::Ci::Runners::BulkDeleteRunnersService, '#execute', feature_cate
   let_it_be(:project) { create(:project, group: group) }
 
   let(:user) {}
-  let(:service_args) { { runners: runners_arg, current_user: user } }
+  let(:caller_info) { { caller: 'spec' } }
+  let(:service_args) { { runners: runners_arg, current_user: user, caller_info: caller_info } }
   let(:runners_arg) {}
 
   context 'with runners specified' do
@@ -119,7 +120,7 @@ RSpec.describe ::Ci::Runners::BulkDeleteRunnersService, '#execute', feature_cate
             create_list(:ci_runner, 1 + additional_runners, :group, groups: [group])
             create_list(:ci_runner, 1 + additional_runners, :project, projects: [project])
 
-            service = described_class.new(runners: runners_arg, current_user: user)
+            service = described_class.new(runners: runners_arg, current_user: user, caller_info: caller_info)
 
             # Base cost per runner is:
             #  - 1 `SELECT * FROM "taggings"` query

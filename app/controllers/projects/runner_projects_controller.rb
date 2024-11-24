@@ -15,7 +15,8 @@ class Projects::RunnerProjectsController < Projects::ApplicationController
 
     path = project_runners_path(project)
 
-    response = ::Ci::Runners::AssignRunnerService.new(@runner, @project, current_user).execute
+    response = ::Ci::Runners::AssignRunnerService.new(@runner, @project, current_user, caller_info).execute
+
     if response.success?
       flash[:success] = s_('Runners|Runner assigned to project.')
       redirect_to path
@@ -30,9 +31,18 @@ class Projects::RunnerProjectsController < Projects::ApplicationController
   def destroy
     runner_project = project.runner_projects.find(params[:id])
 
-    ::Ci::Runners::UnassignRunnerService.new(runner_project, current_user).execute
+    ::Ci::Runners::UnassignRunnerService.new(runner_project, current_user, caller_info).execute
 
     flash[:success] = s_('Runners|Runner unassigned from project.')
     redirect_to project_runners_path(project), status: :found
+  end
+
+  private
+
+  def caller_info
+    {
+      endpoint: [action_name, controller_path].join(' '),
+      user_agent: headers['User-Agent']
+    }
   end
 end

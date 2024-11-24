@@ -56,7 +56,8 @@ module Mutations
           result = ::Ci::Runners::SetRunnerAssociatedProjectsService.new(
             runner: runner,
             current_user: current_user,
-            project_ids: associated_project_ids
+            project_ids: associated_project_ids,
+            caller_info: { caller: "GraphQL #{path} mutation" }
           ).execute
           return if result.success?
 

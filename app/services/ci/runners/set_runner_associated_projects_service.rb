@@ -6,10 +6,12 @@ module Ci
       # @param [Ci::Runner] runner: the project runner to assign/unassign projects from
       # @param [User] current_user: the user performing the operation
       # @param [Array<Integer>] project_ids: the IDs of the associated projects to assign the runner to
-      def initialize(runner:, current_user:, project_ids:)
+      # @param [Hash] caller_info: information about calling API
+      def initialize(runner:, current_user:, project_ids:, caller_info:)
         @runner = runner
         @current_user = current_user
         @project_ids = project_ids
+        @caller_info = caller_info
       end
 
       def execute
@@ -44,7 +46,7 @@ module Ci
         missing_projects = Project.id_in(new_project_ids - current_project_ids)
 
         error_responses = missing_projects.map do |project|
-          Ci::Runners::AssignRunnerService.new(runner, project, current_user, quiet: true)
+          Ci::Runners::AssignRunnerService.new(runner, project, current_user, caller_info, quiet: true)
         end.map(&:execute).select(&:error?)
 
         if error_responses.any?
@@ -72,7 +74,7 @@ module Ci
         ServiceResponse.error(message: _('failed to destroy runner project'), reason: :failed_runner_project_destroy)
       end
 
-      attr_reader :runner, :current_user, :project_ids
+      attr_reader :runner, :current_user, :project_ids, :caller_info
     end
   end
 end

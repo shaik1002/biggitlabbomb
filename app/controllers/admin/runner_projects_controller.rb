@@ -9,7 +9,7 @@ class Admin::RunnerProjectsController < Admin::ApplicationController
   def create
     @runner = Ci::Runner.find(safe_params[:runner_project][:runner_id])
 
-    if ::Ci::Runners::AssignRunnerService.new(@runner, @project, current_user).execute.success?
+    if ::Ci::Runners::AssignRunnerService.new(@runner, @project, current_user, caller_info).execute.success?
       flash[:success] = s_('Runners|Runner assigned to project.')
       redirect_to edit_admin_runner_url(@runner)
     else
@@ -21,7 +21,7 @@ class Admin::RunnerProjectsController < Admin::ApplicationController
     rp = Ci::RunnerProject.find(safe_params[:id])
     runner = rp.runner
 
-    ::Ci::Runners::UnassignRunnerService.new(rp, current_user).execute
+    ::Ci::Runners::UnassignRunnerService.new(rp, current_user, caller_info).execute
 
     flash[:success] = s_('Runners|Runner unassigned from project.')
     redirect_to edit_admin_runner_url(runner), status: :found
@@ -38,5 +38,12 @@ class Admin::RunnerProjectsController < Admin::ApplicationController
 
   def safe_params
     params.permit(:id, :namespace_id, :project_id, runner_project: [:runner_id])
+  end
+
+  def caller_info
+    {
+      endpoint: [action_name, controller_path].join(' '),
+      user_agent: headers['User-Agent']
+    }
   end
 end

@@ -8,12 +8,14 @@ module Ci
       # @param [Ci::Runner] runner: the runner to assign to a project
       # @param [Project] project: the new project to assign the runner to
       # @param [User] user: the user performing the operation
+      # @param [Hash] caller_info: information about calling API
       # @param [Boolean] quiet: true if service should avoid side-effects, such as logging
       #   (e.g. when used by another service)
-      def initialize(runner, project, user, quiet: false)
+      def initialize(runner, project, user, caller_info, quiet: false)
         @runner = runner
         @project = project
         @user = user
+        @caller_info = caller_info
         @quiet = quiet
       end
 
@@ -32,7 +34,7 @@ module Ci
 
       private
 
-      attr_reader :runner, :project, :user, :quiet
+      attr_reader :runner, :project, :user, :caller_info, :quiet
 
       def validate
         unless @user.present? && @user.can?(:assign_runner, @runner)

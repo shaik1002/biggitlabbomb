@@ -50,7 +50,9 @@ module Mutations
           end
 
           response = { runner: nil, errors: [] }
-          result = ::Ci::Runners::CreateRunnerService.new(user: current_user, params: args).execute
+          result = ::Ci::Runners::CreateRunnerService.new(
+            user: current_user, params: args, caller_info: { caller: "GraphQL #{path} mutation" }
+          ).execute
 
           if result.success?
             response[:runner] = result.payload[:runner]

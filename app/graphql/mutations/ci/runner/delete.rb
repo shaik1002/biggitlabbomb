@@ -17,7 +17,9 @@ module Mutations
         def resolve(id:, **runner_attrs)
           runner = authorized_find!(id: id)
 
-          ::Ci::Runners::UnregisterRunnerService.new(runner, current_user).execute
+          ::Ci::Runners::UnregisterRunnerService.new(
+            runner, current_user, { caller: "GraphQL #{path} mutation" }
+          ).execute
 
           { errors: runner.errors.full_messages }
         end

@@ -29,7 +29,10 @@ module Mutations
             runner_ids = model_ids_of(ids)
             runners = find_all_runners_by_ids(runner_ids)
 
-            result = ::Ci::Runners::BulkDeleteRunnersService.new(runners: runners, current_user: current_user).execute
+            result = ::Ci::Runners::BulkDeleteRunnersService.new(
+              runners: runners, current_user: current_user,
+              caller_info: { caller: "GraphQL #{path} mutation" }
+            ).execute
             result.payload.slice(:deleted_count, :deleted_ids, :errors)
           else
             { errors: [] }

@@ -25,9 +25,21 @@ RSpec.describe Projects::RunnerProjectsController, feature_category: :fleet_visi
     context 'when assigning runner to another project' do
       let(:project_runner) { create(:ci_runner, :project, projects: [source_project]) }
 
-      it 'redirects to the project runners page' do
+      before do
         source_project.add_maintainer(user)
+      end
 
+      it 'passes caller info to service' do
+        expect_next_instance_of(::Ci::Runners::AssignRunnerService, project_runner, project, user, {
+          endpoint: 'create projects/runner_projects', user_agent: nil
+        }) do |service|
+          expect(service).to receive(:execute).and_call_original
+        end
+
+        send_create
+      end
+
+      it 'redirects to the project runners page' do
         send_create
 
         expect(flash[:success]).to be_present
@@ -49,6 +61,16 @@ RSpec.describe Projects::RunnerProjectsController, feature_category: :fleet_visi
     context 'when unassigning runner from project' do
       let(:project_runner) { create(:ci_runner, :project, projects: [project]) }
       let(:runner_project_id) { project_runner.runner_projects.last.id }
+
+      it 'passes caller info to service' do
+        expect_next_instance_of(::Ci::Runners::UnassignRunnerService, project_runner.runner_projects.last, user, {
+          endpoint: 'destroy projects/runner_projects', user_agent: nil
+        }) do |service|
+          expect(service).to receive(:execute).and_call_original
+        end
+
+        send_destroy
+      end
 
       it 'redirects to the project runners page' do
         send_destroy

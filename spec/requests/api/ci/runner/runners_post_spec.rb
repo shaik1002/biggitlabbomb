@@ -5,6 +5,10 @@ require 'spec_helper'
 RSpec.describe API::Ci::Runner, :clean_gitlab_redis_shared_state, feature_category: :fleet_visibility do
   describe '/api/v4/runners' do
     describe 'POST /api/v4/runners' do
+      let(:caller_info) do
+        { endpoint: "POST runners / /", user_agent: nil }
+      end
+
       it_behaves_like 'runner migrations backoff' do
         let(:request) { post api('/runners') }
       end
@@ -58,7 +62,8 @@ RSpec.describe API::Ci::Runner, :clean_gitlab_redis_shared_state, feature_catego
           allow_next_instance_of(
             ::Ci::Runners::RegisterRunnerService,
             'valid token',
-            a_hash_including(expected_params)
+            a_hash_including(expected_params),
+            caller_info
           ) do |service|
             expect(service).to receive(:execute)
               .once
@@ -71,7 +76,7 @@ RSpec.describe API::Ci::Runner, :clean_gitlab_redis_shared_state, feature_catego
             request
 
             expect(response).to have_gitlab_http_status(:created)
-            expect(json_response).to eq({ 'id' => new_runner.id, 'token' => new_runner.token, 'token_expires_at' => nil })
+            expect(json_response).to eq('id' => new_runner.id, 'token' => new_runner.token, 'token_expires_at' => nil)
           end
         end
 
@@ -84,7 +89,9 @@ RSpec.describe API::Ci::Runner, :clean_gitlab_redis_shared_state, feature_catego
             request
 
             expect(response).to have_gitlab_http_status(:created)
-            expect(json_response).to eq({ 'id' => new_runner.id, 'token' => new_runner.token, 'token_expires_at' => '2022-01-11T14:39:24.000Z' })
+            expect(json_response).to eq(
+              'id' => new_runner.id, 'token' => new_runner.token, 'token_expires_at' => '2022-01-11T14:39:24.000Z'
+            )
           end
         end
 
@@ -116,7 +123,8 @@ RSpec.describe API::Ci::Runner, :clean_gitlab_redis_shared_state, feature_catego
             ::Ci::Runners::RegisterRunnerService,
             'valid token',
             a_hash_including('maintenance_note' => 'Some maintainer notes')
-              .and(excluding('maintainter_note' => anything))
+              .and(excluding('maintainter_note' => anything)),
+            caller_info
           ) do |service|
             expect(service).to receive(:execute)
               .once
@@ -143,7 +151,8 @@ RSpec.describe API::Ci::Runner, :clean_gitlab_redis_shared_state, feature_catego
           expect_next_instance_of(
             ::Ci::Runners::RegisterRunnerService,
             'valid token',
-            a_hash_including({ active: false }.stringify_keys)
+            a_hash_including('active' => false),
+            caller_info
           ) do |service|
             expect(service).to receive(:execute)
               .once
@@ -182,7 +191,8 @@ RSpec.describe API::Ci::Runner, :clean_gitlab_redis_shared_state, feature_catego
               expect_next_instance_of(
                 ::Ci::Runners::RegisterRunnerService,
                 registration_token,
-                a_hash_including({ tag_list: tag_list }.stringify_keys)
+                a_hash_including('tag_list' => tag_list),
+                caller_info
               ) do |service|
                 expect(service).to receive(:execute)
                   .once
@@ -203,7 +213,8 @@ RSpec.describe API::Ci::Runner, :clean_gitlab_redis_shared_state, feature_catego
               expect_next_instance_of(
                 ::Ci::Runners::RegisterRunnerService,
                 registration_token,
-                a_hash_including({ tag_list: tag_list }.stringify_keys)
+                a_hash_including('tag_list' => tag_list),
+                caller_info
               ) do |service|
                 expect(service).to receive(:execute)
                   .once

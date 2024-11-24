@@ -3,6 +3,7 @@
 module API
   module Ci
     class Runner < ::API::Base
+      helpers ::API::Ci::Helpers::RequestHelpers
       helpers ::API::Ci::Helpers::Runner
 
       content_type :txt, 'text/plain'
@@ -53,7 +54,7 @@ module API
           attributes[:maintenance_note] ||= deprecated_note if deprecated_note
           attributes[:active] = !attributes.delete(:paused) if attributes.include?(:paused)
 
-          result = ::Ci::Runners::RegisterRunnerService.new(params[:token], attributes).execute
+          result = ::Ci::Runners::RegisterRunnerService.new(params[:token], attributes, get_caller_info).execute
 
           if result.error?
             case result.reason
@@ -83,7 +84,7 @@ module API
           authenticate_runner!(ensure_runner_manager: false, update_contacted_at: false)
 
           destroy_conditionally!(current_runner) do
-            ::Ci::Runners::UnregisterRunnerService.new(current_runner, params[:token]).execute
+            ::Ci::Runners::UnregisterRunnerService.new(current_runner, params[:token], get_caller_info).execute
           end
         end
 

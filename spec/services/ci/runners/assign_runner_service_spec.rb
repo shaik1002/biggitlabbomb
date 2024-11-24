@@ -8,7 +8,8 @@ RSpec.describe ::Ci::Runners::AssignRunnerService, '#execute', feature_category:
   let_it_be(:owner_project) { create(:project, group: owner_group, organization: organization1) }
   let_it_be(:new_project) { create(:project, organization: organization1) }
 
-  let(:service) { described_class.new(runner, new_project, user) }
+  let(:caller_info) { { caller: 'spec' } }
+  let(:service) { described_class.new(runner, new_project, user, caller_info) }
   let(:runner) { create(:ci_runner, :project, projects: [owner_project]) }
 
   subject(:execute) { service.execute }

@@ -5,11 +5,13 @@ module Ci
     class UnassignRunnerService
       # @param [Ci::RunnerProject] runner_project the runner/project association to destroy
       # @param [User] user the user performing the operation
-      def initialize(runner_project, user)
+      # @param [Hash] caller_info: information about calling API
+      def initialize(runner_project, user, caller_info)
         @runner_project = runner_project
         @runner = runner_project.runner
         @project = runner_project.project
         @user = user
+        @caller_info = caller_info
       end
 
       def execute
@@ -26,7 +28,7 @@ module Ci
 
       private
 
-      attr_reader :runner, :project, :user
+      attr_reader :runner, :project, :user, :caller_info
     end
   end
 end
