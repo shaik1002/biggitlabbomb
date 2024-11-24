@@ -24,6 +24,6 @@ RSpec.describe WorkItems::Widgets::LinkedItems, feature_category: :portfolio_man
   end
 
   describe '.quick_action_commands' do
-    it { expect(described_class.quick_action_commands).to match_array([:blocks, :blocked_by]) }
+    it { expect(described_class.quick_action_commands).to match_array([:blocks, :blocked_by, :unlink]) }
   end
 end

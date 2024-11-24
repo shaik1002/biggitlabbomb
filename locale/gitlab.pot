@@ -45811,7 +45811,7 @@ msgstr ""
 msgid "Remove link"
 msgstr ""
 
-msgid "Remove link with another issue"
+msgid "Remove linked item"
 msgstr ""
 
 msgid "Remove list"
@@ -45907,7 +45907,7 @@ msgstr ""
 msgid "Removed an issue from an epic."
 msgstr ""
 
-msgid "Removed link with %{issue_ref}."
+msgid "Removed link item %{issue_ref}."
 msgstr ""
 
 msgid "Removed members no longer have access to this top-level group, its sub-groups, and their projects."
@@ -45966,7 +45966,7 @@ msgstr ""
 msgid "Removes email participants."
 msgstr ""
 
-msgid "Removes link with %{issue_ref}."
+msgid "Removes link item %{issue_ref}."
 msgstr ""
 
 msgid "Removes parent epic %{epic_ref}."

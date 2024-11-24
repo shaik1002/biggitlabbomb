@@ -22,12 +22,12 @@ module Gitlab
           create_links(target_issues)
         end
 
-        desc { _("Remove link with another issue") }
+        desc { _("Remove linked item") }
         explanation do |issue|
-          _('Removes link with %{issue_ref}.') % { issue_ref: issue.to_reference(quick_action_target) }
+          _('Removes link item %{issue_ref}.') % { issue_ref: issue.to_reference(quick_action_target) }
         end
         execution_message do |issue|
-          _('Removed link with %{issue_ref}.') % { issue_ref: issue.to_reference(quick_action_target) }
+          _('Removed link item %{issue_ref}.') % { issue_ref: issue.to_reference(quick_action_target) }
         end
         params '<#issue | group/project#issue | issue URL>'
         types Issue
