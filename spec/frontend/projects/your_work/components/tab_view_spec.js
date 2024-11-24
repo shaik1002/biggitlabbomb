@@ -10,7 +10,7 @@ import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
 import TabView from '~/projects/your_work/components/tab_view.vue';
 import ProjectsList from '~/vue_shared/components/projects_list/projects_list.vue';
 import ProjectsListEmptyState from '~/vue_shared/components/projects_list/projects_list_empty_state.vue';
-import { formatGraphQLProjects } from '~/vue_shared/components/projects_list/formatter';
+import { formatGraphQLProjects } from '~/vue_shared/components/projects_list/utils';
 import { DEFAULT_PER_PAGE } from '~/api';
 import { createAlert } from '~/alert';
 import {
@@ -110,9 +110,9 @@ describe('TabView', () => {
           );
         });
 
-        describe('when list emits refetch', () => {
+        describe('when project delete is complete', () => {
           beforeEach(() => {
-            findProjectsList().vm.$emit('refetch');
+            findProjectsList().vm.$emit('delete-complete');
           });
 
           it('refetches list', () => {

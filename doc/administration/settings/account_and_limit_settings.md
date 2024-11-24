@@ -245,10 +245,13 @@ When you require expiration dates for new access tokens:
 
 DETAILS:
 **Tier:** Premium, Ultimate
-**Offering:** Self-managed, GitLab Dedicated
+**Offering:** Self-managed
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/163726) in GitLab 17.5 [with a feature flag](../feature_flags.md) named `allow_top_level_group_owners_to_create_service_accounts` for GitLab self-managed. Disabled by default.
-> - [Generally available](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/172502) in GitLab 17.6. Feature flag `allow_top_level_group_owners_to_create_service_accounts` removed.
+> - [Generally available](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/125835) in GitLab 17.6. Feature flag `allow_top_level_group_owners_to_create_service_accounts` removed.
+
+FLAG:
+On GitLab self-managed, by default this feature is not available. To make it available, an administrator can [enable the feature flag](../feature_flags.md) named `allow_top_level_group_owners_to_create_service_accounts`. On GitLab.com, this feature is available.
 
 By default, in GitLab self-managed, top-level group Owners can not create service accounts. GitLab administrators can allow top-level group Owners to create service accounts.
 
@@ -415,10 +418,10 @@ By default, users can create organizations. GitLab administrators can prevent us
 
 By default, new users can create top-level groups. GitLab administrators can prevent new users from creating top-level groups:
 
-- In GitLab 15.5 and later, use either:
-  - The GitLab UI with the steps in this section.
-  - The [Application settings API](../../api/settings.md#change-application-settings).
-- In GitLab 15.4 and earlier, modify a [configuration file](../../administration/user_settings.md#prevent-users-from-creating-top-level-groups).
+- In GitLab 15.5 and later, using either:
+  - The GitLab UI using the steps in this section.
+  - The [application setting API](../../api/settings.md#change-application-settings).
+- In GitLab 15.4 and earlier, a [configuration file](../../administration/user_settings.md#use-configuration-files-to-prevent-new-users-from-creating-top-level-groups).
 
 1. On the left sidebar, at the bottom, select **Admin**.
 1. Select **Settings > General**.

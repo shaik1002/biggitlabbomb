@@ -6904,8 +6904,6 @@ CREATE TABLE application_settings (
     encrypted_secret_detection_service_auth_token_iv bytea,
     resource_usage_limits jsonb DEFAULT '{}'::jsonb NOT NULL,
     show_migrate_from_jenkins_banner boolean DEFAULT true NOT NULL,
-    encrypted_ci_job_token_signing_key bytea,
-    encrypted_ci_job_token_signing_key_iv bytea,
     CONSTRAINT app_settings_container_reg_cleanup_tags_max_list_size_positive CHECK ((container_registry_cleanup_tags_service_max_list_size >= 0)),
     CONSTRAINT app_settings_dep_proxy_ttl_policies_worker_capacity_positive CHECK ((dependency_proxy_ttl_group_policy_worker_capacity >= 0)),
     CONSTRAINT app_settings_ext_pipeline_validation_service_url_text_limit CHECK ((char_length(external_pipeline_validation_service_url) <= 255)),
@@ -17460,18 +17458,6 @@ CREATE VIEW postgres_sequences AS
      LEFT JOIN pg_class dep_pg_class ON ((pg_depend.refobjid = dep_pg_class.oid)))
      LEFT JOIN pg_attribute ON (((dep_pg_class.oid = pg_attribute.attrelid) AND (pg_depend.refobjsubid = pg_attribute.attnum))))
   WHERE (seq_pg_class.relkind = 'S'::"char");
-
-CREATE VIEW postgres_table_sizes AS
- SELECT (((pg_stat_user_tables.schemaname)::text || '.'::text) || (pg_stat_user_tables.relname)::text) AS identifier,
-    pg_stat_user_tables.schemaname AS schema_name,
-    pg_stat_user_tables.relname AS table_name,
-    pg_size_pretty(pg_total_relation_size((((quote_ident((pg_stat_user_tables.schemaname)::text) || '.'::text) || quote_ident((pg_stat_user_tables.relname)::text)))::regclass)) AS total_size,
-    pg_size_pretty(pg_relation_size((((quote_ident((pg_stat_user_tables.schemaname)::text) || '.'::text) || quote_ident((pg_stat_user_tables.relname)::text)))::regclass)) AS table_size,
-    pg_size_pretty((pg_total_relation_size((((quote_ident((pg_stat_user_tables.schemaname)::text) || '.'::text) || quote_ident((pg_stat_user_tables.relname)::text)))::regclass) - pg_relation_size((((quote_ident((pg_stat_user_tables.schemaname)::text) || '.'::text) || quote_ident((pg_stat_user_tables.relname)::text)))::regclass))) AS index_size,
-    pg_total_relation_size((((quote_ident((pg_stat_user_tables.schemaname)::text) || '.'::text) || quote_ident((pg_stat_user_tables.relname)::text)))::regclass) AS size_in_bytes
-   FROM pg_stat_user_tables
-  WHERE (pg_total_relation_size((((quote_ident((pg_stat_user_tables.schemaname)::text) || '.'::text) || quote_ident((pg_stat_user_tables.relname)::text)))::regclass) IS NOT NULL)
-  ORDER BY (pg_total_relation_size((((quote_ident((pg_stat_user_tables.schemaname)::text) || '.'::text) || quote_ident((pg_stat_user_tables.relname)::text)))::regclass)) DESC;
 
 CREATE TABLE programming_languages (
     id bigint NOT NULL,
@@ -35332,6 +35318,8 @@ CREATE TRIGGER trigger_update_vulnerability_reads_on_vulnerability_update AFTER 
 CREATE TRIGGER users_loose_fk_trigger AFTER DELETE ON users REFERENCING OLD TABLE AS old_table FOR EACH STATEMENT EXECUTE FUNCTION insert_into_loose_foreign_keys_deleted_records();
 
 CREATE TRIGGER virtual_registries_packages_maven_upstreams_loose_fk_trigger AFTER DELETE ON virtual_registries_packages_maven_upstreams REFERENCING OLD TABLE AS old_table FOR EACH STATEMENT EXECUTE FUNCTION insert_into_loose_foreign_keys_deleted_records();
+
+CREATE TRIGGER vulnerabilities_loose_fk_trigger AFTER DELETE ON vulnerabilities REFERENCING OLD TABLE AS old_table FOR EACH STATEMENT EXECUTE FUNCTION insert_into_loose_foreign_keys_deleted_records();
 
 ALTER TABLE ONLY deployments
     ADD CONSTRAINT fk_009fd21147 FOREIGN KEY (environment_id) REFERENCES environments(id) ON DELETE CASCADE;

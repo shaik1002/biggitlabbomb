@@ -57,7 +57,9 @@ module SortingHelper
       sort_value_stars_desc => sort_title_most_stars
     }
 
-    options[sort_value_largest_repo] = sort_title_largest_repo if current_controller?('admin/projects')
+    if current_controller?('admin/projects')
+      options[sort_value_largest_repo] = sort_title_largest_repo
+    end
 
     options
   end

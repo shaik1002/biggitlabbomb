@@ -2,7 +2,6 @@ import { shallowMount } from '@vue/test-utils';
 import { GlIcon } from '@gitlab/ui';
 import IssueDueDate from '~/boards/components/issue_due_date.vue';
 import { localeDateFormat, toISODateFormat } from '~/lib/utils/datetime_utility';
-import WorkItemAttribute from '~/vue_shared/components/work_item_attribute.vue';
 
 const createComponent = (dueDate = new Date(), closed = false) =>
   shallowMount(IssueDueDate, {
@@ -10,7 +9,6 @@ const createComponent = (dueDate = new Date(), closed = false) =>
       closed,
       date: toISODateFormat(dueDate),
     },
-    stubs: { WorkItemAttribute },
   });
 
 const findTime = (wrapper) => wrapper.find('time');

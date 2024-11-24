@@ -757,12 +757,7 @@ module Ci
     end
 
     def valid_token?(token)
-      job_token = ::Ci::JobToken::Jwt::Decode.new(token)
-      if job_token.jwt?
-        job_token.job == self
-      else
-        self.token && token.present? && ActiveSupport::SecurityUtils.secure_compare(token, self.token)
-      end
+      self.token && token.present? && ActiveSupport::SecurityUtils.secure_compare(token, self.token)
     end
 
     def remove_token!
@@ -1198,12 +1193,6 @@ module Ci
       'jobs/job'
     end
 
-    def token
-      return super unless Feature.enabled?(:ci_job_token_jwt, user)
-
-      jwt
-    end
-
     protected
 
     def run_status_commit_hooks!
@@ -1213,11 +1202,6 @@ module Ci
     end
 
     private
-
-    def jwt
-      ::Ci::JobToken::Jwt::Encode.new(self).jwt
-    end
-    strong_memoize_attr :jwt
 
     def matrix_build?
       options.dig(:parallel, :matrix).present?

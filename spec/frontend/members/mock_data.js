@@ -53,7 +53,6 @@ export const member = {
   validRoles: {
     'Minimal Access': 5,
     Guest: 10,
-    Planner: 15,
     Reporter: 20,
     Developer: 30,
     Maintainer: 40,

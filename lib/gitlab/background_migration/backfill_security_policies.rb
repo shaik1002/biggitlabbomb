@@ -10,4 +10,4 @@ module Gitlab
   end
 end
 
-Gitlab::BackgroundMigration::BackfillSecurityPolicies.prepend_mod
+Gitlab::BackgroundMigration::BackfillSecurityPolicies.prepend_mod_with('Gitlab::BackgroundMigration::BackfillSecurityPolicies') # rubocop:disable Layout/LineLength -- ignore

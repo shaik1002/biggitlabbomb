@@ -209,7 +209,9 @@ module Emails
       @target_url = Gitlab::Routing.url_helpers.project_merge_request_url(@project, @merge_request)
       @recipient = User.find(recipient_id)
 
-      @mr_presenter = @merge_request.present(current_user: @recipient) if present
+      if present
+        @mr_presenter = @merge_request.present(current_user: @recipient)
+      end
 
       @sent_notification = SentNotification.record(@merge_request, recipient_id, reply_key)
     end

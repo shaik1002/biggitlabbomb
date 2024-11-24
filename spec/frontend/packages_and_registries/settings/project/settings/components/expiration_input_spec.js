@@ -1,7 +1,7 @@
-import { GlSprintf, GlFormInputGroup, GlInputGroupText, GlLink } from '@gitlab/ui';
-import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
+import { GlSprintf, GlFormInput, GlLink } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import { GlFormGroup } from 'jest/packages_and_registries/shared/stubs';
-import ExpirationInput from '~/packages_and_registries/settings/project/components/expiration_input.vue';
+import component from '~/packages_and_registries/settings/project/components/expiration_input.vue';
 import { NAME_REGEX_LENGTH } from '~/packages_and_registries/settings/project/constants';
 
 describe('ExpirationInput', () => {
@@ -16,17 +16,14 @@ describe('ExpirationInput', () => {
 
   const tagsRegexHelpPagePath = 'fooPath';
 
-  const findInputGroup = () => wrapper.findComponent(GlFormInputGroup);
+  const findInput = () => wrapper.findComponent(GlFormInput);
   const findFormGroup = () => wrapper.findComponent(GlFormGroup);
-  const findLabel = () => wrapper.findByTestId('label');
-  const findDescription = () => wrapper.findByTestId('description');
-  const findScreenReaderOnlyDescription = () => wrapper.findByTestId('regex-anchors-help-text');
+  const findLabel = () => wrapper.find('[data-testid="label"]');
+  const findDescription = () => wrapper.find('[data-testid="description"]');
   const findDescriptionLink = () => wrapper.findComponent(GlLink);
-  const findPrependGroupText = () => wrapper.findAllComponents(GlInputGroupText).at(0);
-  const findAppendGroupText = () => wrapper.findAllComponents(GlInputGroupText).at(1);
 
   const mountComponent = (props) => {
-    wrapper = shallowMountExtended(ExpirationInput, {
+    wrapper = shallowMount(component, {
       stubs: {
         GlSprintf,
         GlFormGroup,
@@ -42,42 +39,27 @@ describe('ExpirationInput', () => {
   };
 
   describe('structure', () => {
-    beforeEach(() => {
-      mountComponent();
-    });
-
     it('has a label', () => {
+      mountComponent();
+
       expect(findLabel().text()).toBe(defaultProps.label);
     });
 
-    it('renders input group component', () => {
-      expect(findInputGroup().exists()).toBe(true);
-      expect(findInputGroup().attributes('aria-describedby')).toBe('regex-anchors-help-text');
-    });
+    it('has a textarea component', () => {
+      mountComponent();
 
-    it('renders aria-hidden prepend component', () => {
-      expect(findPrependGroupText().text()).toBe('\\A');
-      expect(findPrependGroupText().attributes('aria-hidden')).toBe('true');
-    });
-
-    it('renders aria-hidden append component', () => {
-      expect(findAppendGroupText().text()).toBe('\\z');
-      expect(findAppendGroupText().attributes('aria-hidden')).toBe('true');
+      expect(findInput().exists()).toBe(true);
     });
 
     it('has a description', () => {
+      mountComponent();
+
       expect(findDescription().text()).toMatchInterpolatedText(defaultProps.description);
     });
 
-    it('has description for screenreader', () => {
-      expect(findScreenReaderOnlyDescription().attributes('id')).toBe('regex-anchors-help-text');
-      expect(findScreenReaderOnlyDescription().attributes('class')).toBe('gl-sr-only');
-      expect(findScreenReaderOnlyDescription().text()).toBe(
-        'Regular expression without the \\A and \\z anchors.',
-      );
-    });
-
     it('has a description link', () => {
+      mountComponent();
+
       const link = findDescriptionLink();
       expect(link.exists()).toBe(true);
       expect(link.attributes('href')).toBe(tagsRegexHelpPagePath);
@@ -85,13 +67,13 @@ describe('ExpirationInput', () => {
   });
 
   describe('model', () => {
-    it('assigns the right props to the input group component', () => {
+    it('assigns the right props to the textarea component', () => {
       const value = 'foobar';
       const disabled = true;
 
       mountComponent({ value, disabled });
 
-      expect(findInputGroup().attributes()).toMatchObject({
+      expect(findInput().attributes()).toMatchObject({
         id: defaultProps.name,
         value,
         placeholder: defaultProps.placeholder,
@@ -100,17 +82,17 @@ describe('ExpirationInput', () => {
       });
     });
 
-    it('emits input event when input emits input', () => {
+    it('emits input event when textarea emits input', () => {
       const emittedValue = 'barfoo';
 
       mountComponent();
 
-      findInputGroup().vm.$emit('input', emittedValue);
+      findInput().vm.$emit('input', emittedValue);
       expect(wrapper.emitted('input')).toEqual([[emittedValue]]);
     });
   });
 
-  describe('regex input validation', () => {
+  describe('regex textarea validation', () => {
     const invalidString = new Array(NAME_REGEX_LENGTH + 2).join(',');
 
     describe('when error contains an error message', () => {
@@ -154,12 +136,12 @@ describe('ExpirationInput', () => {
             // since the component has no state we both emit the event and set the prop
             mountComponent({ value: invalidString });
 
-            findInputGroup().vm.$emit('input', invalidString);
+            findInput().vm.$emit('input', invalidString);
           });
 
-          it('input group validation state is false', () => {
+          it('textAreaValidation state is false', () => {
             expect(findFormGroup().props('state')).toBe(false);
-            expect(findInputGroup().attributes('state')).toBeUndefined();
+            expect(findInput().attributes('state')).toBeUndefined();
           });
 
           it('emits the @validation event with false payload', () => {
@@ -170,10 +152,10 @@ describe('ExpirationInput', () => {
         it(`when user input is less than ${NAME_REGEX_LENGTH} state is "true"`, () => {
           mountComponent();
 
-          findInputGroup().vm.$emit('input', 'foo');
+          findInput().vm.$emit('input', 'foo');
 
           expect(findFormGroup().props('state')).toBe(true);
-          expect(findInputGroup().attributes('state')).toBe('true');
+          expect(findInput().attributes('state')).toBe('true');
           expect(wrapper.emitted('validation')).toEqual([[true]]);
         });
       });
