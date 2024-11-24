@@ -123,13 +123,12 @@ The sidebar on the milestone view shows the following:
 ## Create a milestone
 
 > - [Changed](https://gitlab.com/gitlab-org/gitlab/-/issues/343889) the minimum user role from Developer to Reporter in GitLab 15.0.
-> - [Changed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/169256) the minimum user role from Reporter to Planner in GitLab 17.7.
 
 You can create a milestone either in a project or a group.
 
 Prerequisites:
 
-- You must have at least the Planner role for the project or group the milestone belongs to.
+- You must have at least the Reporter role for the project or group the milestone belongs to.
 
 To create a milestone:
 
@@ -145,11 +144,10 @@ To create a milestone:
 ## Edit a milestone
 
 > - [Changed](https://gitlab.com/gitlab-org/gitlab/-/issues/343889) the minimum user role from Developer to Reporter in GitLab 15.0.
-> - [Changed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/169256) the minimum user role from Reporter to Planner in GitLab 17.7.
 
 Prerequisites:
 
-- You must have at least the Planner role for the project or group the milestone belongs to.
+- You must have at least the Reporter role for the project or group the milestone belongs to.
 
 To edit a milestone:
 
@@ -163,11 +161,10 @@ To edit a milestone:
 ## Close a milestone
 
 > - [Changed](https://gitlab.com/gitlab-org/gitlab/-/issues/343889) the minimum user role from Developer to Reporter in GitLab 15.0.
-> - [Changed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/169256) the minimum user role from Reporter to Planner in GitLab 17.7.
 
 Prerequisites:
 
-- You must have at least the Planner role for the project or group the milestone belongs to.
+- You must have at least the Reporter role for the project or group the milestone belongs to.
 
 To close a milestone:
 
@@ -180,11 +177,10 @@ To close a milestone:
 ## Delete a milestone
 
 > - [Changed](https://gitlab.com/gitlab-org/gitlab/-/issues/343889) the minimum user role from Developer to Reporter in GitLab 15.0.
-> - [Changed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/169256) the minimum user role from Reporter to Planner in GitLab 17.7.
 
 Prerequisites:
 
-- You must have at least the Planner role for the project or group the milestone belongs to.
+- You must have at least the Reporter role for the project or group the milestone belongs to.
 
 To delete a milestone:
 
@@ -196,8 +192,6 @@ To delete a milestone:
 1. Select **Delete milestone**.
 
 ## Promote a project milestone to a group milestone
-
-> - [Changed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/169256) the minimum user role from Reporter to Planner in GitLab 17.7.
 
 If you are expanding the number of projects in a group, you might want to share the same milestones
 among this group's projects.
@@ -214,7 +208,7 @@ This action cannot be reversed and the changes are permanent.
 
 Prerequisites:
 
-- You must have at least the Planner role for the group.
+- You must have at least the Reporter role for the group.
 
 To promote a project milestone:
 

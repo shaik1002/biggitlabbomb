@@ -8,6 +8,39 @@ RSpec.describe 'doorkeeper access', feature_category: :system_access do
   let!(:application) { Doorkeeper::Application.create!(name: "MyApp", redirect_uri: "https://app.com", owner: user) }
   let!(:token) { Doorkeeper::AccessToken.create! application_id: application.id, resource_owner_id: user.id, scopes: "api", organization_id: organization.id }
 
+  describe 'access token with composite identity', :request_store do
+    let!(:user) { create(:user, name: 'gitlab-duo') }
+
+    context 'when user one is scoped to user two' do
+      let(:scope_user) { create(:user) }
+      let(:project) { create(:project, :private) }
+
+      before do
+        allow_any_instance_of(token.class).to receive(:scope_user).and_return(scope_user) # rubocop:disable RSpec/AnyInstanceOf -- TODO
+
+        project.add_developer(user) # shadow user doesn't have access
+      end
+
+      it 'restricts user access permissions' do
+        get api("/projects/#{project.id}"), params: { access_token: token.plaintext_token }
+
+        expect(response).to have_gitlab_http_status(:not_found)
+      end
+
+      context 'when both users have access to a resource' do
+        before do
+          project.add_developer(scope_user)
+        end
+
+        it 'allows access' do
+          get api("/projects/#{project.id}"), params: { access_token: token.plaintext_token }
+
+          expect(response).to have_gitlab_http_status(:ok)
+        end
+      end
+    end
+  end
+
   describe "unauthenticated" do
     it "returns authentication success" do
       get api("/user"), params: { access_token: token.plaintext_token }

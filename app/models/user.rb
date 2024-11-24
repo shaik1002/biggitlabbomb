@@ -2499,6 +2499,10 @@ class User < ApplicationRecord
     true
   end
 
+  def has_composite_identity?
+    name == 'gitlab-duo' # TODO
+  end
+
   protected
 
   # override, from Devise::Validatable

@@ -72,6 +72,7 @@ module Gitlab
         # Size limiter should be placed at the bottom, but before the metrics middleware
         chain.add ::Gitlab::SidekiqMiddleware::SizeLimiter::Client
         chain.add ::Gitlab::SidekiqMiddleware::ClientMetrics
+        chain.add ::Gitlab::SidekiqMiddleware::Identity::Passthrough
       end
     end
   end

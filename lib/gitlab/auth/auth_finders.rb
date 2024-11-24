@@ -71,8 +71,7 @@ module Gitlab
       end
 
       def find_user_from_bearer_token
-        find_user_from_job_bearer_token ||
-          find_user_from_access_token
+        find_user_from_job_bearer_token || find_user_from_access_token
       end
 
       def find_user_from_job_token
@@ -293,6 +292,10 @@ module Gitlab
         raise UnauthorizedError unless oauth_token
 
         oauth_token.revoke_previous_refresh_token!
+
+        ::Gitlab::Auth::Identity
+          .build_from_oauth_token(oauth_token)
+
         oauth_token
       end
 
