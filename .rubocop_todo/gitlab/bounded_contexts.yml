@@ -3791,6 +3791,7 @@ Gitlab/BoundedContexts:
     - 'lib/bulk_imports/common/pipelines/members_pipeline.rb'
     - 'lib/bulk_imports/common/pipelines/milestones_pipeline.rb'
     - 'lib/bulk_imports/common/pipelines/uploads_pipeline.rb'
+    - 'lib/bulk_imports/common/pipelines/vulnerabilities_pipeline.rb'
     - 'lib/bulk_imports/common/pipelines/wiki_pipeline.rb'
     - 'lib/bulk_imports/common/rest/get_badges_query.rb'
     - 'lib/bulk_imports/common/transformers/member_attributes_transformer.rb'

@@ -574,7 +574,7 @@ included_attributes:
   builds: *statuses_definition
   generic_commit_statuses: *statuses_definition
   bridges: *statuses_definition
-  ci_pipelines:
+  ci_pipelines: &ci_pipelines_definition
     - :ref
     - :sha
     - :before_sha
@@ -1224,6 +1224,12 @@ ee:
       - approval_rules:
         - :approval_project_rules_protected_branches
         - :approval_project_rules_users
+      - vulnerabilities:
+        - vulnerability_finding: &vulnerability_finding_tree_definition
+          - :scanner
+          - :primary_identifier
+          - :initial_finding_pipeline
+          - :latest_finding_pipeline
 
   included_attributes:
     issuable_sla:
@@ -1299,6 +1305,49 @@ ee:
       - :protected_branch
     approval_project_rules_users:
       - :user_id
+    vulnerabilities:
+      - :project_id
+      - :author_id
+      - :title
+      - :description
+      - :severity
+      - :report_type
+      - :findings
+    findings:
+      - :project_fingerprint
+      - :project_id
+      - :location_fingerprint
+      - :name
+      - :report_type
+      - :severity
+      - :detection_method
+      - :metadata_version
+      - :raw_metadata
+    scanner: &scanner_definition
+      - :project_id
+      - :name
+      - :vendor
+      - :external_id
+    primary_identifier: &primary_identifier_definition
+      - :project_id
+      - :external_type
+      - :external_id
+      - :fingerprint
+      - :name
+      - :url
+    vulnerability_finding: &vulnerabilities_finding_definition
+      - :uuid
+      - :project_fingerprint
+      - :project_id
+      - :location_fingerprint
+      - :name
+      - :report_type
+      - :severity
+      - :detection_method
+      - :metadata_version
+      - :raw_metadata
+    initial_finding_pipeline: *ci_pipelines_definition
+    latest_finding_pipeline: *ci_pipelines_definition
   excluded_attributes:
     project:
       - :vulnerability_hooks_integrations

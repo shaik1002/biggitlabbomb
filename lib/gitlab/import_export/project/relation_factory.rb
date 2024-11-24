@@ -65,6 +65,7 @@ module Gitlab
           ProjectCiCdSetting
           container_expiration_policy
           Ci::ExternalPullRequest
+          Ci::Pipeline
           DesignManagement::Design
           MergeRequest::DiffCommitUser
           MergeRequestDiffCommit

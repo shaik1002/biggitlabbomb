@@ -32,7 +32,7 @@ module Gitlab
 
         TOKEN_RESET_MODELS = %i[Project Namespace Group Ci::Trigger Ci::Build Ci::Runner ProjectHook ErrorTracking::ProjectErrorTrackingSetting].freeze
 
-        attr_reader :relation_name, :importable
+        attr_reader :relation_name, :relation_hash, :importable
 
         def self.create(*args, **kwargs)
           new(*args, **kwargs).create
