@@ -65,7 +65,8 @@ class SecretsInitializer
       secret_key_base: generate_new_secure_token,
       otp_key_base: generate_new_secure_token,
       db_key_base: generate_new_secure_token,
-      openid_connect_signing_key: generate_new_rsa_private_key
+      openid_connect_signing_key: generate_new_rsa_private_key,
+      ci_job_token_signing_key: generate_new_rsa_private_key
     }
 
     # encrypted_settings_key_base is optional for now
