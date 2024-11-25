@@ -882,6 +882,9 @@ Gitlab.ee do
   Settings.cron_jobs['app_sec_dast_profile_schedule_worker'] ||= {}
   Settings.cron_jobs['app_sec_dast_profile_schedule_worker']['cron'] ||= '7-59/15 * * * *'
   Settings.cron_jobs['app_sec_dast_profile_schedule_worker']['job_class'] = 'AppSec::Dast::ProfileScheduleWorker'
+  Settings.cron_jobs['send_recurring_notifications_worker'] ||= {}
+  Settings.cron_jobs['send_recurring_notifications_worker']['cron'] ||= '0 7 * * *'
+  Settings.cron_jobs['send_recurring_notifications_worker']['job_class'] = 'ComplianceManagement::Pipl::SendRecurringNotificationsWorker'
   Settings.cron_jobs['ci_namespace_mirrors_consistency_check_worker'] ||= {}
   Settings.cron_jobs['ci_namespace_mirrors_consistency_check_worker']['cron'] ||= '*/4 * * * *'
   Settings.cron_jobs['ci_namespace_mirrors_consistency_check_worker']['job_class'] = 'Database::CiNamespaceMirrorsConsistencyCheckWorker'
