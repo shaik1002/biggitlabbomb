@@ -7,6 +7,10 @@ module Gitlab
       module InstrumentationTracer
         MUTATION_REGEXP = /^mutation/
 
+        IGNORED_ERRORS = [
+          ::Subscriptions::BaseSubscription::UNAUTHORIZED_ERROR_MESSAGE
+        ].freeze
+
         # All queries pass through a multiplex, even if only one query is executed
         # https://github.com/rmosolgo/graphql-ruby/blob/43e377b5b743a9102381d6ad3adaaed13ff5b6dd/lib/graphql/schema.rb#L1303
         #
@@ -31,12 +35,20 @@ module Gitlab
 
         def export_query_info(query:, duration_s:, exception:)
           operation = ::Gitlab::Graphql::KnownOperations.default.from_query(query)
-          has_errors = exception || query.result['errors'].present?
+          has_errors = has_errors?(query: query, exception: exception)
 
           ::Gitlab::ApplicationContext.with_context(caller_id: operation.to_caller_id) do
             log_execute_query(query: query, duration_s: duration_s, exception: exception)
             increment_query_sli(operation: operation, duration_s: duration_s, has_errors: has_errors)
           end
+        end
+
+        def has_errors?(query:, exception:)
+          return true if exception
+
+          errors = query.result['errors']&.pluck('message')
+
+          errors && (errors - IGNORED_ERRORS).present?
         end
 
         def increment_query_sli(operation:, duration_s:, has_errors:)

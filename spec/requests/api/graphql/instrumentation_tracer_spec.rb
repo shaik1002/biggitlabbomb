@@ -119,7 +119,7 @@ RSpec.describe 'Gitlab::Graphql::Tracers::Instrumentation integration test', :ag
 
       expect(Gitlab::Metrics::RailsSlis.graphql_query_error_rate).to receive(:increment).with({
         labels: unknown_query_labels,
-        error: false
+        error: be_falsey
       })
 
       post_graphql(graphql_query_for('echo', { 'text' => 'test' }, []))
@@ -140,7 +140,7 @@ RSpec.describe 'Gitlab::Graphql::Tracers::Instrumentation integration test', :ag
 
       expect(Gitlab::Metrics::RailsSlis.graphql_query_error_rate).to receive(:increment).with({
         labels: unknown_query_labels,
-        error: false
+        error: be_falsey
       })
 
       expect(Gitlab::Metrics::RailsSlis.graphql_query_error_rate).to receive(:increment).with({
