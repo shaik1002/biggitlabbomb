@@ -7,6 +7,14 @@
     count: @project.pages_domains.size + (pages_url ? 1 : 0),
     options: { class: 'gl-mt-5', data: { testid: 'access-page-container' } },
     footer_options: { class: 'gl-bg-red-50' }) do |c|
+    - if @project.project_setting.pages_unique_domain_enabled?
+      - c.with_actions do
+        = render Pajamas::ButtonComponent.new(href: regenerate_unique_domain_project_pages_path(@project),
+          method: :post,
+          size: :small,
+          button_options: { data: { confirm: s_('GitLabPages|Are you sure you want to regenerate the unique domain? The previous URL will stop working.'), 'confirm-btn-variant': 'danger' },
+          "aria-label": s_('GitLabPages|Regenerate unique domain') }) do
+          = s_('GitLabPages|Regenerate unique domain')
     - c.with_body do
       %ul.content-list
         %li

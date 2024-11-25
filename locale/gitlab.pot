@@ -23170,6 +23170,9 @@ msgstr ""
 msgid "Failed to publish issue on status page."
 msgstr ""
 
+msgid "Failed to regenerate unique domain"
+msgstr ""
+
 msgid "Failed to remove a Zoom meeting"
 msgstr ""
 
@@ -25028,6 +25031,9 @@ msgstr ""
 msgid "GitLabPages|Access pages"
 msgstr ""
 
+msgid "GitLabPages|Are you sure you want to regenerate the unique domain? The previous URL will stop working."
+msgstr ""
+
 msgid "GitLabPages|Are you sure?"
 msgstr ""
 
@@ -25068,6 +25074,9 @@ msgid "GitLabPages|Only project maintainers can remove pages"
 msgstr ""
 
 msgid "GitLabPages|Pages"
+msgstr ""
+
+msgid "GitLabPages|Regenerate unique domain"
 msgstr ""
 
 msgid "GitLabPages|Remove certificate"
@@ -54089,6 +54098,9 @@ msgid "Successfully deleted WebAuthn device."
 msgstr ""
 
 msgid "Successfully linked ID(s): %{item_ids}."
+msgstr ""
+
+msgid "Successfully regenerated unique domain"
 msgstr ""
 
 msgid "Successfully removed email."
