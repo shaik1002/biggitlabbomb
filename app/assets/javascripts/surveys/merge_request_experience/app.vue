@@ -146,14 +146,14 @@ export default {
           />
           <div
             v-if="stepIndex === 0"
-            class="mr-experience-survey-legal gl-border-t gl-mt-5 gl-pt-3 gl-text-sm gl-text-subtle"
+            class="mr-experience-survey-legal gl-border-t gl-mt-5 gl-pt-3 gl-text-sm gl-text-gray-500"
             role="note"
           >
             <p class="gl-m-0">
               <gl-sprintf :message="$options.i18n.legal">
                 <template #link="{ content }">
                   <a
-                    class="gl-text-subtle gl-underline"
+                    class="gl-text-gray-500 gl-underline"
                     :href="$options.privacyLink"
                     target="_blank"
                     rel="noreferrer nofollow"

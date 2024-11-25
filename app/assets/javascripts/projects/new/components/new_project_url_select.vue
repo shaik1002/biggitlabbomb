@@ -116,7 +116,7 @@ export default {
       return [];
     },
     dropdownPlaceholderClass() {
-      return this.selectedNamespace.id ? '' : '!gl-text-subtle';
+      return this.selectedNamespace.id ? '' : '!gl-text-gray-500';
     },
     dropdownText() {
       if (this.selectedNamespace && this.selectedNamespace?.fullPath) {

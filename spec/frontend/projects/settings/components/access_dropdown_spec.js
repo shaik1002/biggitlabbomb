@@ -56,7 +56,7 @@ describe('Access Level Dropdown', () => {
   });
 
   let wrapper;
-  const defaultToggleClass = '!gl-text-subtle';
+  const defaultToggleClass = '!gl-text-gray-500';
   const mockAccessLevelsData = [
     {
       id: 1,

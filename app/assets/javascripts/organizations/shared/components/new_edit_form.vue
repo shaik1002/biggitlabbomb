@@ -176,7 +176,7 @@ export default {
 
       if (remainingCharacters >= 0) {
         return {
-          class: 'gl-text-subtle',
+          class: 'gl-text-gray-500',
           text: this.$options.i18n.charactersRemaining(remainingCharacters),
         };
       }

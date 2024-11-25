@@ -97,7 +97,7 @@ export default {
       <gl-avatar-link
         :href="author.webUrl"
         :title="author.name"
-        class="js-user-link !gl-text-subtle"
+        class="js-user-link !gl-text-gray-500"
       >
         <gl-avatar :src="author.avatarUrl" :size="16" :entity-name="author.name" class="mr-2" />
         {{ author.name }}
