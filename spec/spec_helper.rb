@@ -90,6 +90,10 @@ RSpec.configure do |config|
 
   config.infer_spec_type_from_file_location!
 
+  config.define_derived_metadata(file_path: %r{(ee)?/spec/presenters/(ee)?}) do |metadata|
+    metadata[:type] = :presenter
+  end
+
   # Add :full_backtrace tag to an example if full_backtrace output is desired
   config.before(:each, :full_backtrace) do |example|
     config.full_backtrace = true
@@ -356,10 +360,6 @@ RSpec.configure do |config|
       # Our test suite is setup to test plain text editor by default with separate tests just
       # for the rich text editor. Switch the flag off to continue testing the same way as before
       stub_feature_flags(rich_text_editor_as_default: false)
-
-      # TODO: temporary measure to unblock master
-      # issue: https://gitlab.com/gitlab-org/quality/engineering-productivity/master-broken-incidents/-/issues/9437
-      stub_feature_flags(ci_job_token_jwt: false)
     else
       unstub_all_feature_flags
     end

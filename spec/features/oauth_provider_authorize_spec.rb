@@ -2,9 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe 'OAuth Provider', :with_current_organization, feature_category: :system_access do
-  let_it_be(:user) { create(:admin, organizations: [current_organization]) }
-
+RSpec.describe 'OAuth Provider', feature_category: :system_access do
   def visit_oauth_authorization_path
     visit oauth_authorization_path(
       client_id: application.uid,
@@ -46,8 +44,9 @@ RSpec.describe 'OAuth Provider', :with_current_organization, feature_category: :
   end
 
   context 'when the OAuth application has HTML in the name' do
-    let_it_be(:client_name) { '<img src=x onerror=alert(1)>' }
-    let_it_be(:application) { create(:oauth_application, name: client_name, scopes: 'read_user') }
+    let(:client_name) { '<img src=x onerror=alert(1)>' }
+    let(:application) { create(:oauth_application, name: client_name, scopes: 'read_user') }
+    let(:user) { create(:admin) }
 
     before do
       visit_oauth_authorization_path
@@ -85,6 +84,7 @@ RSpec.describe 'OAuth Provider', :with_current_organization, feature_category: :
 
   context 'when brand title has HTML' do
     let(:application) { create(:oauth_application, scopes: 'read_user') }
+    let(:user) { create(:user) }
     let!(:appearance) { create(:appearance, title: '<img src=x onerror=alert(1)>') }
 
     before do

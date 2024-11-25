@@ -67,7 +67,6 @@ describe('SentryConfig', () => {
             allowUrls: [mockGitlabUrl, 'webpack-internal://'],
             environment: mockEnvironment,
             autoSessionTracking: true,
-            ignoreErrors: [/Network Error/i, /NetworkError/i],
             enableTracing: true,
             tracePropagationTargets: [/^\//],
             tracesSampleRate: mockSentryClientsideTracesSampleRate,

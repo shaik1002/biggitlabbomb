@@ -37,14 +37,12 @@ module Groups
     end
 
     def public_only?
-      # Although PLANNER is not a linear access level, it can be considered so for the purpose of issues visibility
-      # because the same permissions apply to all levels higher than Gitlab::Access::PLANNER
-      !user_is_at_least_planner?
+      !user_is_at_least_reporter?
     end
 
-    def user_is_at_least_planner?
-      strong_memoize(:user_is_at_least_planner) do
-        group.member?(user, Gitlab::Access::PLANNER)
+    def user_is_at_least_reporter?
+      strong_memoize(:user_is_at_least_reporter) do
+        group.member?(user, Gitlab::Access::REPORTER)
       end
     end
 

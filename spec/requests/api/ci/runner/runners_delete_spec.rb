@@ -102,67 +102,75 @@ RSpec.describe API::Ci::Runner, :clean_gitlab_redis_shared_state, feature_catego
 
       context 'with created runner' do
         let!(:runner) { create(:ci_runner, :with_runner_manager, registration_type: :authenticated_user) }
-        let(:delete_params) do
-          { token: runner.token, system_id: runner.runner_managers.first.system_xid }
-        end
 
-        it 'deletes runner manager' do
-          expect do
-            delete_request
+        context 'with matching system_id' do
+          context 'when no token is provided' do
+            let(:delete_params) { { system_id: runner.runner_managers.first.system_xid } }
 
-            expect(response).to have_gitlab_http_status(:no_content)
-          end.to change { runner.runner_managers.count }.from(1).to(0)
-            .and not_change { ::Ci::Runner.count }.from(1)
-        end
+            it 'returns 400 error' do
+              delete_request
 
-        it_behaves_like '412 response' do
-          let(:request) { api('/runners/managers') }
-          let(:params) { delete_params }
-        end
+              expect(response).to have_gitlab_http_status(:bad_request)
+            end
+          end
 
-        it_behaves_like 'storing arguments in the application context for the API' do
-          let(:expected_params) { { client_id: "runner/#{runner.id}" } }
-        end
+          context 'when invalid token is provided' do
+            let(:delete_params) { { token: 'invalid', system_id: runner.runner_managers.first.system_xid } }
 
-        context 'with unknown system_id' do
-          let(:delete_params) { { token: runner.token, system_id: 'unknown_system_id' } }
+            it 'returns 403 error' do
+              delete_request
 
-          it 'returns 404 error' do
-            delete_request
-
-            expect(response).to have_gitlab_http_status(:not_found)
-            expect(response.body).to include('Runner manager not found')
-            expect(::Ci::Runner.count).to eq(1)
+              expect(response).to have_gitlab_http_status(:forbidden)
+            end
           end
         end
+      end
 
-        context 'without system_id' do
-          let(:delete_params) { { token: runner.token } }
+      context 'when valid token is provided' do
+        context 'with created runner' do
+          let!(:runner) { create(:ci_runner, :with_runner_manager, registration_type: :authenticated_user) }
 
-          it 'does not delete runner manager nor runner' do
-            delete_request
+          context 'with matching system_id' do
+            let(:delete_params) { { token: runner.token, system_id: runner.runner_managers.first.system_xid } }
 
-            expect(response).to have_gitlab_http_status(:bad_request)
+            it 'deletes runner manager' do
+              expect do
+                delete_request
+
+                expect(response).to have_gitlab_http_status(:no_content)
+              end.to change { runner.runner_managers.count }.from(1).to(0)
+
+              expect(::Ci::Runner.count).to eq(1)
+            end
+
+            it_behaves_like '412 response' do
+              let(:request) { api('/runners/managers') }
+              let(:params) { delete_params }
+            end
+
+            it_behaves_like 'storing arguments in the application context for the API' do
+              let(:expected_params) { { client_id: "runner/#{runner.id}" } }
+            end
           end
-        end
 
-        context 'when no token is provided' do
-          let(:delete_params) { { system_id: runner.runner_managers.first.system_xid } }
+          context 'with unknown system_id' do
+            let(:delete_params) { { token: runner.token, system_id: 'unknown_system_id' } }
 
-          it 'returns 400 error' do
-            delete_request
+            it 'returns 404 error' do
+              delete_request
 
-            expect(response).to have_gitlab_http_status(:bad_request)
+              expect(response).to have_gitlab_http_status(:not_found)
+            end
           end
-        end
 
-        context 'when invalid token is provided' do
-          let(:delete_params) { { token: 'invalid', system_id: runner.runner_managers.first.system_xid } }
+          context 'without system_id' do
+            let(:delete_params) { { token: runner.token } }
 
-          it 'returns 403 error' do
-            delete_request
+            it 'does not delete runner manager nor runner' do
+              delete_request
 
-            expect(response).to have_gitlab_http_status(:forbidden)
+              expect(response).to have_gitlab_http_status(:bad_request)
+            end
           end
         end
       end

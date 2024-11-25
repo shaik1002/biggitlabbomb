@@ -10,28 +10,21 @@ DETAILS:
 **Tier:** Free, Premium, Ultimate
 **Offering:** Self-managed
 
-You can modify settings for every user in your GitLab instance.
+GitLab administrators can modify user settings for the entire GitLab instance.
 
-## Prerequisites
+## Use configuration files to prevent new users from creating top-level groups
 
-- You must be an administrator of a self-managed GitLab instance.
+By default, new users can create top-level groups. To disable new users'
+ability to create top-level groups (does not affect existing users' setting), GitLab administrators can modify this setting:
 
-## Prevent users from creating top-level groups
-
-By default, new users can create top-level groups. How you prevent users from creating top-level groups differs between new and existing users.
-
-### For new users
-
-To prevent new users from creating top-level groups:
-
-- In GitLab 15.5 and later, use either:
+- In GitLab 15.5 and later, using either:
   - The [GitLab UI](../administration/settings/account_and_limit_settings.md#prevent-new-users-from-creating-top-level-groups).
-  - The [Application settings API](../api/settings.md#change-application-settings).
-- In GitLab 15.4 and earlier, modify a configuration file:
+  - The [application setting API](../api/settings.md#change-application-settings).
+- In GitLab 15.4 and earlier, in a configuration file by following the steps in this section.
 
-::Tabs
+To disable new users' ability to create top-level groups using the configuration file.
 
-:::TabTitle Linux package (Omnibus)
+For Linux package installations:
 
 1. Edit `/etc/gitlab/gitlab.rb` and add the following line:
 
@@ -41,7 +34,7 @@ To prevent new users from creating top-level groups:
 
 1. [Reconfigure and restart GitLab](restart_gitlab.md#reconfigure-a-linux-package-installation).
 
-:::TabTitle Self-compiled (source)
+For self-compiled installations:
 
 1. Edit `config/gitlab.yml` and uncomment the following line:
 
@@ -51,22 +44,19 @@ To prevent new users from creating top-level groups:
 
 1. [Restart GitLab](restart_gitlab.md#self-compiled-installations).
 
-::EndTabs
+### Prevent existing users from creating top-level groups
 
-### For existing users
+Administrators can:
 
-To prevent existing users from creating top-level groups, use either:
-
-- The [GitLab UI](../administration/admin_area.md#prevent-a-user-from-creating-top-level-groups).
-- The [User API](../api/users.md#modify-a-user) to modify the `can_create_group` setting.
+- Use the **Admin** area to [prevent an existing user from creating top-level groups](../administration/admin_area.md#prevent-a-user-from-creating-top-level-groups).
+- Use the [modify an existing user API endpoint](../api/users.md#modify-a-user) to change the `can_create_group` setting.
 
 ## Prevent users from changing their usernames
 
-By default, users can change their usernames. To prevent users from changing their usernames:
+By default, new users can change their usernames. To disable your users'
+ability to change their usernames.
 
-::Tabs
-
-:::TabTitle Linux package (Omnibus)
+For Linux package installations:
 
 1. Edit `/etc/gitlab/gitlab.rb` and add the following line:
 
@@ -76,7 +66,7 @@ By default, users can change their usernames. To prevent users from changing the
 
 1. [Reconfigure and restart GitLab](restart_gitlab.md#reconfigure-a-linux-package-installation).
 
-:::TabTitle Self-compiled (source)
+For self-compiled installations:
 
 1. Edit `config/gitlab.yml` and uncomment the following line:
 
@@ -85,8 +75,6 @@ By default, users can change their usernames. To prevent users from changing the
    ```
 
 1. [Restart GitLab](restart_gitlab.md#self-compiled-installations).
-
-::EndTabs
 
 ## Prevent Guest users from promoting to a higher role
 

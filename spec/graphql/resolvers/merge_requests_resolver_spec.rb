@@ -96,9 +96,8 @@ RSpec.describe Resolvers::MergeRequestsResolver, feature_category: :code_review_
       end
 
       it 'can batch-resolve merge requests from different projects', :request_store do
-        # 2 queries for organization_users, 2 for project_authorizations, and 2 for merge_requests
-        extra_auth_queries = 2
-        results = batch_sync(max_queries: (queries_per_project + extra_auth_queries) * 2) do
+        # 2 queries for project_authorizations, and 2 for merge_requests
+        results = batch_sync(max_queries: queries_per_project * 2) do
           a = resolve_mr(project, iids: [iid_1])
           b = resolve_mr(project, iids: [iid_2])
           c = resolve_mr(other_project, iids: [other_iid])
@@ -523,18 +522,6 @@ RSpec.describe Resolvers::MergeRequestsResolver, feature_category: :code_review_
 
         expect(result).to be_empty
       end
-    end
-
-    it_behaves_like 'graphql query for searching issuables' do
-      let_it_be(:parent) { project }
-      let_it_be(:issuable1) { create(:merge_request, :unique_branches, title: 'Fixed a bug', **common_attrs) }
-      let_it_be(:issuable1) { create(:merge_request, :unique_branches, title: 'first created', **common_attrs) }
-      let_it_be(:issuable2) { create(:merge_request, :unique_branches, title: 'second created', description: 'text 1', **common_attrs) }
-      let_it_be(:issuable3) { create(:merge_request, :unique_branches, title: 'third', description: 'text 2', **common_attrs) }
-      let_it_be(:issuable4) { create(:merge_request, :unique_branches, **common_attrs) }
-
-      let_it_be(:finder_class) { MergeRequestsFinder }
-      let_it_be(:optimization_param) { :attempt_project_search_optimizations }
     end
 
     context 'with negated milestone argument' do

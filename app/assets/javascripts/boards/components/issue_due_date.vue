@@ -1,5 +1,5 @@
 <script>
-import { GlIcon } from '@gitlab/ui';
+import { GlTooltip, GlIcon } from '@gitlab/ui';
 import dateFormat from '~/lib/dateformat';
 import {
   getDayDifference,
@@ -8,12 +8,11 @@ import {
   newDate,
 } from '~/lib/utils/datetime_utility';
 import { __ } from '~/locale';
-import WorkItemAttribute from '~/vue_shared/components/work_item_attribute.vue';
 
 export default {
   components: {
-    WorkItemAttribute,
     GlIcon,
+    GlTooltip,
   },
   props: {
     closed: {
@@ -91,26 +90,24 @@ export default {
 </script>
 
 <template>
-  <work-item-attribute
-    anchor-id="board-card-due-date"
-    wrapper-component="span"
-    :wrapper-component-class="`${cssClass} board-card-info gl-mr-3 gl-cursor-help gl-text-secondary`"
-  >
-    <template #icon>
+  <span>
+    <span
+      ref="issueDueDate"
+      :class="cssClass"
+      class="board-card-info gl-mr-3 gl-cursor-help gl-text-secondary"
+    >
       <gl-icon
         :variant="isOverdue ? 'danger' : 'current'"
         class="board-card-info-icon gl-mr-2"
         :name="iconName"
       />
-    </template>
-    <template #title>
       <time datetime="date" class="board-card-info-text gl-text-sm">{{ body }}</time>
-    </template>
-    <template #tooltip-text>
+    </span>
+    <gl-tooltip :target="() => $refs.issueDueDate" :placement="tooltipPlacement">
       <span class="gl-font-bold">{{ __('Due date') }}</span>
       <br />
       <span>{{ title }}</span>
       <div v-if="isOverdue">({{ __('overdue') }})</div>
-    </template>
-  </work-item-attribute>
+    </gl-tooltip>
+  </span>
 </template>

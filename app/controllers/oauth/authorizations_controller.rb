@@ -5,8 +5,6 @@ class Oauth::AuthorizationsController < Doorkeeper::AuthorizationsController
   include InitializesCurrentUserMode
   include Gitlab::Utils::StrongMemoize
 
-  prepend_before_action :set_current_organization
-
   before_action :add_gon_variables
   before_action :verify_confirmed_email!, :verify_admin_allowed!
 
@@ -51,8 +49,6 @@ class Oauth::AuthorizationsController < Doorkeeper::AuthorizationsController
   def pre_auth_params
     # Cannot be achieved with a before_action hook, due to the execution order.
     downgrade_scopes! if action_name == 'new'
-
-    params[:organization_id] = ::Current.organization_id
 
     super
   end
@@ -120,10 +116,6 @@ class Oauth::AuthorizationsController < Doorkeeper::AuthorizationsController
       *::Gitlab::Auth::ADMIN_SCOPES, *::Gitlab::Auth::REPOSITORY_SCOPES,
       *::Gitlab::Auth::REGISTRY_SCOPES
     ) && !doorkeeper_application&.trusted?
-  end
-
-  def set_current_organization
-    ::Current.organization = Gitlab::Current::Organization.new(user: current_user).organization
   end
 end
 

@@ -18,7 +18,7 @@ module QA
 
           repository.act do
             init_repository
-            use_default_identity
+            configure_identity('GitLab QA', 'root@gitlab.com')
 
             commit_file(filename, 'Test file content', default_branch_commit_message)
             push_changes
