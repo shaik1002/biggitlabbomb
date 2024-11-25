@@ -23,6 +23,14 @@ module Gitlab
         super && ctx[:remove_deprecated] == true ? deprecation.nil? : true
       end
 
+      def deprecated?
+        deprecation.present? && !deprecation.experiment?
+      end
+
+      def experiment?
+        deprecation.present? && deprecation.experiment?
+      end
+
       private
 
       # Set deprecation, mutate the arguments

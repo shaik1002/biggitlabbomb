@@ -39,7 +39,11 @@ which already has a set of Kibana fields selected. Some relevant Kibana fields i
 | `json.meta.caller_id` | Appears as `graphql:<operation_name>` for queries that came from the GitLab frontend, otherwise as `graphql:unknown`. Can be used to identify internal versus external queries. |
 | `json.query_string` | The query string itself. |
 | `json.is_mutation` | `true` when a mutation, `false` when not. |
-| `json.query_analysis.used_fields` | List of GraphQL fields selected by the query. |
+| `json.query_analysis.used_arguments` | List of GraphQL arguments selected by the query. |
+| `json.query_analysis.used_fields` | List of GraphQL fields selected by the query. Excludes `pageInfo`... |
+| `json.query_analysis.used_alpha_arguments` | List of alpha GraphQL arguments selected by the query. |
+| `json.query_analysis.used_alpha_fields` | List of alpha GraphQL fields selected by the query. |
+| `json.query_analysis.used_deprecated_arguments` | List of deprecated GraphQL arguments selected by the query. |
 | `json.query_analysis.used_deprecated_fields` | List of deprecated GraphQL fields selected by the query. |
 | `json.query_analysis.duration_s` | Duration of query execution in seconds. |
 | `json.query_analysis.complexity` | The [complexity](../api_graphql_styleguide.md#max-complexity) score of the query. |
@@ -59,10 +63,34 @@ Filter logs by queries that used a particular field:
       appears in [our GraphQL API resources documentation](../../api/graphql/reference/index.md).
 1. Select **Refresh**.
 
+#### Queries that used a particular argument
+
+Filter logs of queries that used a particular deprecated field by following the
+[steps above](#queries-that-used-a-particular-field) but use the `json.graphql.used_arguments`
+filter instead.
+
 #### Queries that used a deprecated field
 
 Filter logs of queries that used a particular deprecated field by following the
 [steps above](#queries-that-used-a-particular-field) but use the `json.graphql.used_deprecated_fields`
+filter instead.
+
+#### Queries that used a deprecated argument
+
+Filter logs of queries that used a particular deprecated field by following the
+[steps above](#queries-that-used-a-particular-field) but use the `json.graphql.used_deprecated_arguments`
+filter instead.
+
+#### Queries that came from our frontend
+
+Filter logs of queries that used a particular deprecated field by following the
+[steps above](#queries-that-used-a-particular-field) but use the `json.graphql.used_deprecated_arguments`
+filter instead.
+
+#### Queries that came did not come from our frontend
+
+Filter logs of queries that used a particular deprecated field by following the
+[steps above](#queries-that-used-a-particular-field) but use the `json.graphql.used_deprecated_arguments`
 filter instead.
 
 ## Logs of the full request

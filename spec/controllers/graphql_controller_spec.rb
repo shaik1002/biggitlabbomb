@@ -338,6 +338,7 @@ RSpec.describe GraphqlController, feature_category: :integrations do
 
           expect(app_context['meta.auth_fail_reason']).to eq('token_expired')
           expect(app_context['meta.auth_fail_token_id']).to eq("PersonalAccessToken/#{token.id}")
+          expect(app_context['meta.auth_fail_requested_scopes']).to include('api read_api')
         end
       end
 
@@ -351,6 +352,7 @@ RSpec.describe GraphqlController, feature_category: :integrations do
 
           expect(app_context['meta.auth_fail_reason']).to eq('token_revoked')
           expect(app_context['meta.auth_fail_token_id']).to eq("PersonalAccessToken/#{token.id}")
+          expect(app_context['meta.auth_fail_requested_scopes']).to include('api read_api')
         end
       end
 
@@ -462,7 +464,9 @@ RSpec.describe GraphqlController, feature_category: :integrations do
         subject
 
         expect(app_context).to include('meta.user' => user.username)
-        expect(app_context.keys).not_to include('meta.auth_fail_reason', 'meta.auth_fail_token_id')
+        expect(app_context.keys).not_to include('meta.auth_fail_reason',
+          'meta.auth_fail_token_id',
+          'meta.auth_fail_requested_scopes')
       end
 
       it 'calls the track api when trackable method' do
@@ -543,7 +547,9 @@ RSpec.describe GraphqlController, feature_category: :integrations do
         subject
 
         expect(app_context.key?('meta.user')).to be false
-        expect(app_context.keys).not_to include('meta.auth_fail_reason', 'meta.auth_fail_token_id')
+        expect(app_context.keys).not_to include('meta.auth_fail_reason',
+          'meta.auth_fail_token_id',
+          'meta.auth_fail_requested_scopes')
       end
     end
 
@@ -766,8 +772,11 @@ RSpec.describe GraphqlController, feature_category: :integrations do
           operation_name: 'getProject_1',
           complexity: 3,
           depth: 2,
+          used_alpha_arguments: [],
+          used_alpha_fields: [],
           used_deprecated_arguments: [],
           used_deprecated_fields: [],
+          used_arguments: ['Project.fullPath'],
           used_fields: ['Project.id', 'Project.name', 'Query.project'],
           variables: '{}'
         },
@@ -775,8 +784,11 @@ RSpec.describe GraphqlController, feature_category: :integrations do
           operation_name: 'getProject_2',
           complexity: 2,
           depth: 2,
+          used_alpha_arguments: [],
+          used_alpha_fields: [],
           used_deprecated_arguments: [],
           used_deprecated_fields: [],
+          used_arguments: ['Project.fullPath'],
           used_fields: ['Project.id', 'Query.project'],
           variables: '{}'
         }

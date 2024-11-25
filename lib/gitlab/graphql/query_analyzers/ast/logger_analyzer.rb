@@ -7,8 +7,7 @@ module Gitlab
         class LoggerAnalyzer < GraphQL::Analysis::AST::Analyzer
           COMPLEXITY_ANALYZER = GraphQL::Analysis::AST::QueryComplexity
           DEPTH_ANALYZER = GraphQL::Analysis::AST::QueryDepth
-          FIELD_USAGE_ANALYZER = GraphQL::Analysis::AST::FieldUsage
-          ALL_ANALYZERS = [COMPLEXITY_ANALYZER, DEPTH_ANALYZER, FIELD_USAGE_ANALYZER].freeze
+          ALL_ANALYZERS = [COMPLEXITY_ANALYZER, DEPTH_ANALYZER].freeze
           FILTER_PARAMETERS = (::Rails.application.config.filter_parameters + [/password/i]).freeze
 
           def initialize(query)
@@ -38,7 +37,7 @@ module Gitlab
             # there are always three valid results, one error, no results at all
             # (we probably always have results, but we might as well be robust
             # to that case).
-            complexity_or_error, depth, field_usages =
+            complexity_or_error, depth =
               GraphQL::Analysis::AST.analyze_query(@subject, ALL_ANALYZERS, multiplex_analyzers: [])
 
             case complexity_or_error
@@ -48,15 +47,13 @@ module Gitlab
               results[:analysis_error] = complexity_or_error.message
             end
 
-            field_usages ||= {} # in the zero or one result case, field_usages needs a sensible default
-
             results[:depth] = depth
             # This duration is not the execution time of the
             # query but the execution time of the analyzer.
             results[:duration_s] = duration(results[:time_started])
-            results[:used_fields] = field_usages[:used_fields]
-            results[:used_deprecated_fields] = field_usages[:used_deprecated_fields]
-            results[:used_deprecated_arguments] = field_usages[:used_deprecated_arguments]
+
+            # TODO Should we use SafeRequestStore below instead of RequestStore?
+            results.merge!(Gitlab::Graphql::QueryAnalyzers::SchemaUsageAnalyzer.result)
 
             push_to_request_store(results)
 

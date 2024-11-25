@@ -189,7 +189,7 @@ RSpec.describe 'GitlabSchema configurations', feature_category: :integrations do
   context 'logging' do
     let(:query) { CachedIntrospectionQuery.query_string }
 
-    it 'logs the query complexity and depth' do
+    it 'logs the query complexity, depth, and used fields and arguments' do
       expect_any_instance_of(Gitlab::Graphql::QueryAnalyzers::AST::LoggerAnalyzer).to receive(:duration).and_return(7)
 
       expect(Gitlab::GraphqlLogger).to receive(:info).with(
@@ -198,9 +198,12 @@ RSpec.describe 'GitlabSchema configurations', feature_category: :integrations do
           "query_analysis.duration_s" => 7,
           "query_analysis.complexity" => an_instance_of(Integer),
           "query_analysis.depth" => an_instance_of(Integer),
+          "query_analysis.used_alpha_fields" => an_instance_of(Array),
+          "query_analysis.used_alpha_arguments" => an_instance_of(Array),
           "query_analysis.used_deprecated_fields" => an_instance_of(Array),
           "query_analysis.used_deprecated_arguments" => an_instance_of(Array),
-          "query_analysis.used_fields" => an_instance_of(Array)
+          "query_analysis.used_fields" => an_instance_of(Array),
+          "query_analysis.used_arguments" => an_instance_of(Array)
         )
       )
 

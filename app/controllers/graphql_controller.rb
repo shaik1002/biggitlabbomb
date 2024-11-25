@@ -50,6 +50,8 @@ class GraphqlController < ApplicationController
   # callback execution order here
   around_action :sessionless_bypass_admin_mode!, if: :sessionless_user?
 
+  after_action :set_deprecation_headers
+
   # The default feature category is overridden to read from request
   feature_category :not_owned # rubocop:todo Gitlab/AvoidFeatureCategoryNotOwned
 
@@ -343,6 +345,10 @@ class GraphqlController < ApplicationController
   def graphql_query_object
     @graphql_query_object ||= GraphQL::Query.new(GitlabSchema, query: query,
       variables: build_variables(permitted_params[:variables]))
+  end
+
+  def set_deprecation_headers
+    Gitlab::Graphql::Deprecations::Headers.set(response)
   end
 end
 
