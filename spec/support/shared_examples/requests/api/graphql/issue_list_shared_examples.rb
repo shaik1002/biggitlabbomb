@@ -277,6 +277,27 @@ RSpec.shared_examples 'graphql issue list request spec' do
         end
       end
     end
+
+    # Querying Service Desk issues uses `support-bot` `author_username`.
+    # This is a workaround that selects both legacy Service Desk issues and ticket work items
+    # until we migrated Service Desk issues to work items of type ticket.
+    # Will be removed with https://gitlab.com/gitlab-org/gitlab/-/issues/505024
+    context 'when filtering by Service Desk issues/tickets' do
+      # Use items only for this context because it's temporary. This way we don't need to modify other examples.
+      let!(:service_desk_issue) { create(:issue, project: project, author: ::Users::Internal.support_bot) }
+      # don't use support bot because this isn't a req for ticket WIT
+      let!(:ticket) { create(:work_item, :ticket, project: project, author: current_user) }
+
+      let(:issue_filter_params) { { author_username: 'support-bot' } }
+      # Get work item as issue because this query only returns issues.
+      let(:service_desk_items) { [service_desk_issue, Issue.find(ticket.id)] }
+
+      it 'returns Service Desk issue and ticket work item' do
+        post_query
+
+        expect(issue_ids).to match_array(to_gid_list(service_desk_items))
+      end
+    end
   end
 
   describe 'sorting and pagination' do

@@ -48,10 +48,12 @@ class IssuesFinder < IssuableFinder
   private
 
   def filter_items(items)
-    issues = super
+    issues = by_service_desk(items) # Call before super because we remove params
+    issues = super(issues)
     issues = by_due_date(issues)
     issues = by_due_after_or_before(issues)
     issues = by_confidential(issues)
+    issues = by_service_desk(issues)
     by_issue_types(issues)
   end
 
@@ -117,6 +119,18 @@ class IssuesFinder < IssuableFinder
     return klass.none unless (WorkItems::Type.base_types.keys & issue_type_params).sort == issue_type_params.sort
 
     items.with_issue_type(params[:issue_types])
+  end
+
+  def by_service_desk(items)
+    return items unless params[:author_username] == "support-bot"
+
+    # Delete param so we don't additionally filter by author username
+    params.delete(:author_username)
+    # Also delete from here because we pass original_params to
+    # Issuables::AuthorFilter in IssuableFinder
+    original_params.delete(:author_username)
+
+    items.service_desk
   end
 
   def by_negated_issue_types(items)

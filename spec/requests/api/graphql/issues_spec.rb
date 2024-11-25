@@ -164,6 +164,7 @@ RSpec.describe 'getting an issue list at root level', feature_category: :team_pl
     let_it_be(:another_user) { reporter }
 
     let(:public_projects) { [project_a, project_c] }
+    let(:project) { project_a } # Used for Service Desk issues creation in shared example
 
     let(:issue_nodes_path) { %w[issues nodes] }
 
