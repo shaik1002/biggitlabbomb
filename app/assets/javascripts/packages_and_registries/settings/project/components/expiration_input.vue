@@ -125,7 +125,7 @@ export default {
       {{ s__('ContainerRegistry|Regular expression without the \\A and \\z anchors.') }}
     </p>
     <template #description>
-      <span data-testid="description" class="gl-text-subtle">
+      <span data-testid="description" class="gl-text-gray-500">
         <gl-sprintf :message="description">
           <template #link="{ content }">
             <gl-link :href="tagsRegexHelpPagePath">{{ content }}</gl-link>

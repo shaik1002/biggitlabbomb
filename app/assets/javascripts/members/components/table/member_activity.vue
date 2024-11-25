@@ -33,7 +33,7 @@ export default {
       <gl-icon
         ref="userCreated"
         v-gl-tooltip.${userCreated}
-        class="-gl-mr-2 gl-ml-2 gl-text-subtle"
+        class="-gl-mr-2 gl-ml-2 gl-text-gray-500"
         name="assignee"
         :title="s__('Members|User created')"
       />
@@ -43,7 +43,7 @@ export default {
       <gl-icon
         ref="memberCreatedAt"
         v-gl-tooltip.${memberCreatedAt}
-        class="gl-text-subtle"
+        class="gl-text-gray-500"
         name="check"
         :title="s__('Members|Access granted')"
       />
@@ -53,7 +53,7 @@ export default {
       <gl-icon
         ref="lastActivity"
         v-gl-tooltip.${lastActivity}
-        class="gl-text-subtle"
+        class="gl-text-gray-500"
         name="hourglass"
         :title="s__('Members|Last activity')"
       />

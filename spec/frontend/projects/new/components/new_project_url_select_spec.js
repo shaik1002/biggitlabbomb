@@ -67,7 +67,7 @@ describe('NewProjectUrlSelect component', () => {
     inputName: 'input_name',
   };
 
-  const dropdownPlaceholderClass = '!gl-text-subtle';
+  const dropdownPlaceholderClass = '!gl-text-gray-500';
 
   let mockQueryResponse;
   let focusInputSpy;

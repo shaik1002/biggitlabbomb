@@ -89,7 +89,7 @@ export default {
       v-if="failedDelete && calculatedTimeTilNextRun"
       :id="iconId"
       :size="16"
-      class="gl-text-subtle"
+      class="gl-text-gray-500"
       data-testid="extra-info"
       name="information-o"
     />

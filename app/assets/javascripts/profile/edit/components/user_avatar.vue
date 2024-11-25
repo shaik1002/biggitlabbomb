@@ -109,7 +109,7 @@ export default {
             name="user[avatar]"
           />
         </div>
-        <p class="gl-mb-0 gl-text-subtle">
+        <p class="gl-mb-0 gl-text-gray-500">
           {{ $options.i18n.imageDimensions }}
           {{ $options.i18n.maximumFileSize }}
         </p>

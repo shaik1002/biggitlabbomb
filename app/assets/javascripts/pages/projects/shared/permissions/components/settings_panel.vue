@@ -660,12 +660,16 @@ export default {
             </option>
           </gl-form-select>
         </div>
-        <span v-if="!visibilityAllowed(visibilityLevel)" class="gl-mt-2 gl-block gl-text-subtle">{{
-          s__(
-            'ProjectSettings|Visibility options for this fork are limited by the current visibility of the source project.',
-          )
-        }}</span>
-        <span class="gl-mt-2 gl-block gl-text-subtle">
+        <span
+          v-if="!visibilityAllowed(visibilityLevel)"
+          class="gl-mt-2 gl-block gl-text-gray-500"
+          >{{
+            s__(
+              'ProjectSettings|Visibility options for this fork are limited by the current visibility of the source project.',
+            )
+          }}</span
+        >
+        <span class="gl-mt-2 gl-block gl-text-gray-500">
           <gl-sprintf :message="visibilityLevelDescription">
             <template #membersPageLink="{ content }">
               <gl-link class="gl-link" :href="membersPagePath">{{ content }}</gl-link>
@@ -697,7 +701,7 @@ export default {
             />
             <input v-model="enforceAuthChecksOnUploads" type="checkbox" />
             {{ s__('ProjectSettings|Require authentication to view media files') }}
-            <span class="-gl-mt-3 gl-ml-5 gl-block gl-text-subtle">{{
+            <span class="-gl-mt-3 gl-ml-5 gl-block gl-text-gray-500">{{
               s__('ProjectSettings|Prevents direct linking to potentially sensitive media files')
             }}</span>
           </label>

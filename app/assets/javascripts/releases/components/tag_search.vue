@@ -91,7 +91,7 @@ export default {
           {{ tag.name }}
         </gl-dropdown-item>
       </div>
-      <div v-else class="gl-my-5 gl-flex gl-justify-center gl-text-base gl-text-subtle">
+      <div v-else class="gl-my-5 gl-flex gl-justify-center gl-text-base gl-text-gray-500">
         {{ $options.i18n.noResults }}
       </div>
     </div>
