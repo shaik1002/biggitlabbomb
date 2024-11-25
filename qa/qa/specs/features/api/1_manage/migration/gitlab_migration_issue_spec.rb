@@ -61,7 +61,7 @@ module QA
         end
 
         it(
-          'preserves related merge request',
+          'preserves related merge request', :blocking,
           testcase: 'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/386305'
         ) do
           expect_project_import_finished_successfully
@@ -82,7 +82,7 @@ module QA
         end
 
         it(
-          'successfully imports design',
+          'successfully imports design', :blocking,
           testcase: 'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/366449'
         ) do
           expect_project_import_finished_successfully
