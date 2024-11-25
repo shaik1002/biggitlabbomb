@@ -55,3 +55,6 @@ export const filterParams = (state) => {
     ...dateRangeParams(state),
   };
 };
+
+export const isProjectNamespace = ({ namespace }) =>
+  Boolean(namespace.type?.toLowerCase() === 'project');

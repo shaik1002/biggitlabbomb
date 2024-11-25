@@ -122,6 +122,7 @@ module Gitlab
             attrs[:can_edit] = 'false'
             attrs[:enable_projects_filter] = 'false'
             attrs[:enable_vsd_link] = 'false'
+            attrs[:is_licensed] = 'false'
             attrs[:default_stages] = Gitlab::Analytics::CycleAnalytics::DefaultStages.all.map do |stage_params|
               ::Analytics::CycleAnalytics::StagePresenter.new(stage_params)
             end.to_json
@@ -175,7 +176,8 @@ module Gitlab
           {
             name: project.name,
             full_path: project.full_path,
-            type: namespace.type
+            type: namespace.type,
+            path: project.full_path
           }
         end
 

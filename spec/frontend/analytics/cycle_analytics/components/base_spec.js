@@ -4,7 +4,7 @@ import Vue from 'vue';
 // eslint-disable-next-line no-restricted-imports
 import Vuex from 'vuex';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
-import LegacyValueStreamMetrics from '~/analytics/shared/components/legacy_value_stream_metrics.vue';
+import ValueStreamMetrics from '~/analytics/shared/components/value_stream_metrics.vue';
 import BaseComponent from '~/analytics/cycle_analytics/components/base.vue';
 import PathNavigation from '~/analytics/cycle_analytics/components/path_navigation.vue';
 import StageTable from '~/analytics/cycle_analytics/components/stage_table.vue';
@@ -56,6 +56,7 @@ function createStore({ initialState = {}, initialGetters = {} }) {
         created_after: createdAfter,
         created_before: createdBefore,
       }),
+      isProjectNamespace: () => false,
       ...initialGetters,
     },
   });
@@ -79,17 +80,11 @@ function createComponent({ initialState, initialGetters } = {}) {
 const findLoadingIcon = () => wrapper.findComponent(GlLoadingIcon);
 const findPathNavigation = () => wrapper.findComponent(PathNavigation);
 const findFilters = () => wrapper.findComponent(ValueStreamFilters);
-const findOverviewMetrics = () => wrapper.findComponent(LegacyValueStreamMetrics);
+const findOverviewMetrics = () => wrapper.findComponent(ValueStreamMetrics);
 const findStageTable = () => wrapper.findComponent(StageTable);
 const findStageEvents = () => findStageTable().props('stageEvents');
 const findEmptyStageTitle = () => wrapper.findComponent(GlEmptyState).props('title');
 const findPagination = () => wrapper.findByTestId('vsa-stage-pagination');
-
-const hasMetricsRequests = (reqs) => {
-  const foundReqs = findOverviewMetrics().props('requests');
-  expect(foundReqs.length).toEqual(reqs.length);
-  expect(foundReqs.map(({ name }) => name)).toEqual(reqs);
-};
 
 describe('Value stream analytics component', () => {
   beforeEach(() => {
@@ -109,7 +104,8 @@ describe('Value stream analytics component', () => {
   });
 
   it('passes requests prop to the metrics component', () => {
-    hasMetricsRequests(['recent activity']);
+    expect(findOverviewMetrics().props('isLicensed')).toBe(false);
+    expect(findOverviewMetrics().props('isProjectNamespace')).toBe(false);
   });
 
   it('renders the stage table', () => {
@@ -161,13 +157,18 @@ describe('Value stream analytics component', () => {
     expect(findOverviewMetrics().props('dashboardsPath')).toBeNull();
   });
 
-  describe('with `cycleAnalyticsForGroups=true` license', () => {
+  describe('with a project namespace', () => {
     beforeEach(() => {
-      wrapper = createComponent({ initialState: { features: { cycleAnalyticsForGroups: true } } });
+      wrapper = createComponent({
+        initialGetters: {
+          isProjectNamespace: () => true,
+        },
+      });
     });
 
     it('passes requests prop to the metrics component', () => {
-      hasMetricsRequests(['time summary', 'recent activity']);
+      expect(findOverviewMetrics().props('isLicensed')).toBe(false);
+      expect(findOverviewMetrics().props('isProjectNamespace')).toBe(true);
     });
   });
 

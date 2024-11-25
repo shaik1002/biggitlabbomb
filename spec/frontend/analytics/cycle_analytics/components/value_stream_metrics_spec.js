@@ -6,19 +6,22 @@ import createMockApollo from 'helpers/mock_apollo_helper';
 import waitForPromises from 'helpers/wait_for_promises';
 import ValueStreamMetrics from '~/analytics/shared/components/value_stream_metrics.vue';
 import FlowMetricsQuery from '~/analytics/shared/graphql/flow_metrics.query.graphql';
+import FOSSFlowMetricsQuery from '~/analytics/shared/graphql/foss.flow_metrics.query.graphql';
 import DoraMetricsQuery from '~/analytics/shared/graphql/dora_metrics.query.graphql';
 import { FLOW_METRICS, DORA_METRICS, VSA_METRICS_GROUPS } from '~/analytics/shared/constants';
 import MetricTile from '~/analytics/shared/components/metric_tile.vue';
 import ValueStreamsDashboardLink from '~/analytics/shared/components/value_streams_dashboard_link.vue';
 import { createAlert } from '~/alert';
-import { group } from '../mock_data';
+import { createdAfter as mockStartDate, createdBefore as mockEndDate, group } from '../mock_data';
 import {
   mockGraphqlFlowMetricsResponse,
   mockGraphqlDoraMetricsResponse,
+  mockGraphqlProjectFlowMetricsResponse,
 } from '../../shared/helpers';
 import {
   mockDoraMetricsResponseData,
   mockFlowMetricsResponseData,
+  mockFOSSFlowMetricsResponseData,
   mockMetricTilesData,
 } from '../../shared/mock_data';
 
@@ -35,6 +38,7 @@ describe('ValueStreamMetrics', () => {
   let mockApolloProvider;
   let mockFilterFn;
   let flowMetricsRequestHandler = null;
+  let fossFlowMetricsRequestHandler = null;
   let doraMetricsRequestHandler = null;
 
   const setGraphqlQueryHandlerResponses = ({
@@ -45,13 +49,23 @@ describe('ValueStreamMetrics', () => {
     doraMetricsRequestHandler = mockGraphqlDoraMetricsResponse(doraMetricsResponse);
   };
 
+  const setFOSSGraphqlQueryHandlerResponses = ({
+    fossFlowMetricsResponse = mockFOSSFlowMetricsResponseData,
+  } = {}) => {
+    fossFlowMetricsRequestHandler = mockGraphqlProjectFlowMetricsResponse(fossFlowMetricsResponse);
+    flowMetricsRequestHandler = mockGraphqlFlowMetricsResponse({});
+    doraMetricsRequestHandler = mockGraphqlDoraMetricsResponse({});
+  };
+
   const createMockApolloProvider = ({
     flowMetricsRequest = flowMetricsRequestHandler,
     doraMetricsRequest = doraMetricsRequestHandler,
+    fossFlowMetricsRequest = fossFlowMetricsRequestHandler,
   } = {}) => {
     return createMockApollo(
       [
         [FlowMetricsQuery, flowMetricsRequest],
+        [FOSSFlowMetricsQuery, fossFlowMetricsRequest],
         [DoraMetricsQuery, doraMetricsRequest],
       ],
       {},
@@ -68,7 +82,11 @@ describe('ValueStreamMetrics', () => {
       apolloProvider,
       propsData: {
         requestPath,
-        requestParams: {},
+        requestParams: {
+          created_after: mockStartDate,
+          created_before: mockEndDate,
+        },
+        isLicensed: true,
         ...props,
       },
     });
@@ -80,7 +98,11 @@ describe('ValueStreamMetrics', () => {
   const findMetrics = () => wrapper.findAllComponents(MetricTile);
   const findMetricsGroups = () => wrapper.findAllByTestId('vsa-metrics-group');
 
-  const expectDoraMetricsRequests = ({ fullPath = requestPath, startDate, endDate } = {}) =>
+  const expectDoraMetricsRequests = ({
+    fullPath = requestPath,
+    startDate = mockStartDate,
+    endDate = mockEndDate,
+  } = {}) =>
     expect(doraMetricsRequestHandler).toHaveBeenCalledWith({
       fullPath,
       startDate,
@@ -91,8 +113,8 @@ describe('ValueStreamMetrics', () => {
   const expectFlowMetricsRequests = ({
     fullPath = requestPath,
     labelNames,
-    startDate,
-    endDate,
+    startDate = mockStartDate,
+    endDate = mockEndDate,
   } = {}) =>
     expect(flowMetricsRequestHandler).toHaveBeenCalledWith({
       fullPath,
@@ -303,6 +325,63 @@ describe('ValueStreamMetrics', () => {
       it('should render an error message', () => {
         expect(createAlert).toHaveBeenCalledWith({
           message: 'There was an error while fetching flow metrics data.',
+        });
+      });
+    });
+  });
+
+  describe('FOSS', () => {
+    const defaultFossProps = { isLicensed: false, isProjectNamespace: true };
+
+    describe('loading requests', () => {
+      beforeEach(() => {
+        setFOSSGraphqlQueryHandlerResponses();
+
+        createComponent({ apolloProvider: createMockApolloProvider(), props: defaultFossProps });
+      });
+
+      it('will display a loader with pending requests', () => {
+        expect(wrapper.findComponent(GlSkeletonLoader).exists()).toBe(true);
+      });
+    });
+
+    describe('default', () => {
+      beforeEach(async () => {
+        setFOSSGraphqlQueryHandlerResponses();
+        mockApolloProvider = createMockApolloProvider();
+
+        await createComponent({ apolloProvider: mockApolloProvider, props: defaultFossProps });
+      });
+
+      it('fetches FOSS flow metrics data', () => {
+        expect(fossFlowMetricsRequestHandler).toHaveBeenCalledWith({
+          fullPath: requestPath,
+          startDate: mockStartDate,
+          endDate: mockEndDate,
+        });
+      });
+
+      it('does not fetch dora metrics data', () => {
+        expect(doraMetricsRequestHandler).not.toHaveBeenCalled();
+      });
+
+      it('does not fetch flow metrics data', () => {
+        expect(flowMetricsRequestHandler).not.toHaveBeenCalled();
+      });
+
+      it('will not display a loading icon', () => {
+        expect(wrapper.findComponent(GlSkeletonLoader).exists()).toBe(false);
+      });
+
+      describe.each`
+        index | identifier              | value  | label
+        ${0}  | ${FLOW_METRICS.ISSUES}  | ${10}  | ${'New issues'}
+        ${1}  | ${FLOW_METRICS.DEPLOYS} | ${751} | ${'Deploys'}
+      `('metric tiles', ({ identifier, index, value, label }) => {
+        it(`renders a metric tile component for "${label}"`, () => {
+          const metric = findMetrics().at(index);
+          expect(metric.props('metric')).toMatchObject({ identifier, value, label });
+          expect(metric.isVisible()).toBe(true);
         });
       });
     });

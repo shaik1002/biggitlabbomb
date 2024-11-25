@@ -14,6 +14,7 @@ RSpec.describe 'Value Stream Analytics', :js, feature_category: :value_stream_ma
   let_it_be(:stage_table_pagination_selector) { '[data-testid="vsa-stage-pagination"]' }
   let_it_be(:stage_table_duration_column_header_selector) { '[data-testid="vsa-stage-header-duration"]' }
   let_it_be(:metrics_selector) { "[data-testid='vsa-metrics']" }
+  let_it_be(:metric_tile_selector) { "[data-testid='metric-tile']" }
   let_it_be(:metric_value_selector) { "[data-testid='displayValue']" }
   let_it_be(:predefined_date_ranges_dropdown_selector) { '[data-testid="vsa-predefined-date-ranges-dropdown"]' }
   let_it_be(:project) { create(:project, :repository, maintainers: user) }
@@ -82,7 +83,7 @@ RSpec.describe 'Value Stream Analytics', :js, feature_category: :value_stream_ma
       end
 
       before_all do
-        travel_to(5.days.ago.beginning_of_day) do
+        travel_to(6.days.ago.beginning_of_day) do
           create_cycle(user, project, issue, mr, milestone, pipeline)
           create_list(:issue, max_items_per_page, project: project, created_at: 2.weeks.ago, milestone: milestone)
           deploy_master(user, project)
@@ -228,6 +229,13 @@ RSpec.describe 'Value Stream Analytics', :js, feature_category: :value_stream_ma
 
     it 'does not show the commit stats', :sidekiq_inline do
       expect(page.find(metrics_selector)).not_to have_selector("#commits")
+    end
+
+    it 'only returns New issue and Deploy counts', :sidekiq_inline do
+      expect(page.all(metric_tile_selector).length).to eq 2
+
+      expect(page.find(metrics_selector)).to have_selector("#issues")
+      expect(page.find(metrics_selector)).to have_selector("#deploys")
     end
 
     it 'does not show restricted stages', :aggregate_failures, :sidekiq_inline do

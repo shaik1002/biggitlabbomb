@@ -4,6 +4,9 @@ query flowMetricsQuery($fullPath: ID!, $startDate: Time!, $endDate: Time!, $labe
   project(fullPath: $fullPath) {
     id
     flowMetrics {
+      # TODO: include/exclude fields based on permissions
+      # TODO: Extend the valuestreamsmetrics component in EE to avoid permissions?
+      # TODO: Use the returned metadata for all the flowmetrics, override built in 
       issues: issueCount(from: $startDate, to: $endDate, labelNames: $labelNames) {
         ...FlowMetricItem
       }

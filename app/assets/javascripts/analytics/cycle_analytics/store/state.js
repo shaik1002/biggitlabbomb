@@ -10,6 +10,7 @@ export default () => ({
   namespace: {
     name: null,
     fullPath: null,
+    path: null,
   },
   createdAfter: null,
   createdBefore: null,

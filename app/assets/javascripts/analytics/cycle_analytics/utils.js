@@ -78,6 +78,8 @@ export const buildCycleAnalyticsInitialData = ({
   createdBefore,
   namespaceName,
   namespaceFullPath,
+  namespaceType,
+  namespacePath,
 } = {}) => {
   return {
     projectId: parseInt(projectId, 10),
@@ -85,6 +87,8 @@ export const buildCycleAnalyticsInitialData = ({
     namespace: {
       name: namespaceName,
       fullPath: namespaceFullPath,
+      type: namespaceType,
+      path: namespacePath,
     },
     createdAfter: newDate(createdAfter),
     createdBefore: newDate(createdBefore),
