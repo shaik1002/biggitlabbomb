@@ -48,6 +48,26 @@ RSpec.describe Upload do
       end
     end
 
+    context 'before_save' do
+      it 'sets sharding key id on create' do
+        project = build_stubbed(:project)
+        upload = build(:upload, model: project)
+
+        expect { upload.save! }
+          .to change { upload.sharding_key_id }.from(nil).to(project.uploads_sharding_key_id)
+      end
+
+      it 'sets sharding key id on update' do
+        project = build_stubbed(:project)
+        upload = create(:upload, model: project)
+        other_project = build_stubbed(:project)
+        # upload.update_column(:sharding_key_id, nil)
+
+        expect { upload.update!(model: other_project) }
+          .to change { upload.sharding_key_id }.from(project.uploads_sharding_key_id).to(other_project.uploads_sharding_key_id)
+      end
+    end
+
     describe 'after_destroy' do
       context 'uploader is FileUploader-based' do
         subject { create(:upload, :issuable_upload) }

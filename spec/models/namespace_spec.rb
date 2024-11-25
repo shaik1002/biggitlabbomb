@@ -2749,4 +2749,13 @@ RSpec.describe Namespace, feature_category: :groups_and_projects do
       it { expect(nested_group.web_url).to include("groups/#{nested_group.full_path}") }
     end
   end
+
+  describe '#uploads_sharding_key_id' do
+    it 'returns organization_id' do
+      organization = build_stubbed(:organization)
+      namespace = build_stubbed(:namespace, organization: organization)
+
+      expect(namespace.uploads_sharding_key_id).to eq(organization.id)
+    end
+  end
 end

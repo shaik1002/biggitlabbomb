@@ -166,4 +166,12 @@ RSpec.describe Appearance do
       end
     end
   end
+
+  describe '#uploads_sharding_key_id' do
+    it 'returns nil' do
+      appearance = build_stubbed(:appearance)
+
+      expect(appearance.uploads_sharding_key_id).to be_nil
+    end
+  end
 end

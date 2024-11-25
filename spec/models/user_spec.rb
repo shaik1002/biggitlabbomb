@@ -9086,4 +9086,12 @@ RSpec.describe User, feature_category: :user_profile do
       end
     end
   end
+
+  describe '#uploads_sharding_key_id' do
+    it 'returns nil' do
+      user = build_stubbed(:user)
+
+      expect(user.uploads_sharding_key_id).to be_nil
+    end
+  end
 end

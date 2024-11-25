@@ -173,6 +173,10 @@ class AbuseReport < ApplicationRecord
     nil
   end
 
+  def uploads_sharding_key_id
+    nil
+  end
+
   private
 
   def reported_project

@@ -20474,6 +20474,7 @@ CREATE TABLE uploads (
     secret character varying,
     version integer DEFAULT 1 NOT NULL,
     uploaded_by_user_id bigint,
+    sharding_key_id bigint,
     CONSTRAINT check_5e9547379c CHECK ((store IS NOT NULL))
 );
 

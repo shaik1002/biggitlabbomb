@@ -32,4 +32,12 @@ RSpec.describe Organizations::OrganizationDetail, type: :model, feature_category
       let(:uploader_class) { AttachmentUploader }
     end
   end
+
+  describe '#uploads_sharding_key_id' do
+    it 'returns nil' do
+      organization_detail = build_stubbed(:organization_detail)
+
+      expect(organization_detail.uploads_sharding_key_id).to be_nil
+    end
+  end
 end

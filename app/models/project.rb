@@ -3424,6 +3424,10 @@ class Project < ApplicationRecord
     )
   end
 
+  def uploads_sharding_key_id
+    namespace_id
+  end
+
   def pages_url
     Gitlab::Pages::UrlBuilder.new(self).pages_url
   end

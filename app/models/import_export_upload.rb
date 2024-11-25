@@ -44,6 +44,10 @@ class ImportExportUpload < ApplicationRecord
     false
   end
 
+  def uploads_sharding_key_id
+    project_id || group_id
+  end
+
   private
 
   def carrierwave_export_file

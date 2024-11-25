@@ -22,5 +22,11 @@ module BulkImports
     def retrieve_upload(_identifier, paths)
       Upload.find_by(model: self, path: paths)
     end
+
+    def uploads_sharding_key_id
+      return unless export
+
+      export.project_id || export.group_id
+    end
   end
 end

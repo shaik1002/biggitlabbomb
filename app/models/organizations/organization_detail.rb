@@ -12,5 +12,9 @@ module Organizations
 
     validates :organization, presence: true
     validates :description, length: { maximum: 1024 }
+
+    def uploads_sharding_key_id
+      nil
+    end
   end
 end

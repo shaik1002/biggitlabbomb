@@ -23,6 +23,7 @@ class Upload < ApplicationRecord
   scope :preload_uploaded_by_user, -> { preload(:uploaded_by_user) }
 
   before_save :calculate_checksum!, if: :foreground_checksummable?
+  before_save :ensure_sharding_key_id
   # as the FileUploader is not mounted, the default CarrierWave ActiveRecord
   # hooks are not executed and the file will not be deleted
   after_destroy :delete_file!, if: -> { uploader_class <= FileUploader }
@@ -181,6 +182,15 @@ class Upload < ApplicationRecord
 
   def update_project_statistics
     ProjectCacheWorker.perform_async(model_id, [], %w[uploads_size])
+  end
+
+  def ensure_sharding_key_id
+    # This is workaround for some migrations that rely on application code to use
+    # bot users, and creating these fail in tests if the column is not preset yet.
+    return unless respond_to?(:sharding_key_id=)
+    return unless model
+
+    self.sharding_key_id = model.uploads_sharding_key_id
   end
 end
 

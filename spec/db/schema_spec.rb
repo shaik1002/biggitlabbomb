@@ -216,7 +216,7 @@ RSpec.describe 'Database schema',
       taggings: %w[tag_id taggable_id tagger_id],
       timelogs: %w[user_id],
       todos: %w[target_id commit_id],
-      uploads: %w[model_id],
+      uploads: %w[model_id sharding_key_id],
       user_agent_details: %w[subject_id],
       users: %w[color_mode_id color_scheme_id created_by_id theme_id managing_group_id],
       users_star_projects: %w[user_id],
@@ -430,7 +430,7 @@ RSpec.describe 'Database schema',
       }.freeze
     end
 
-    it 'uses json schema validator', :eager_load do
+    it 'uses json schema validator', :eager_load, quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/500903' do
       columns_name_with_jsonb.each do |hash|
         next if models_by_table_name[hash["table_name"]].nil?
 

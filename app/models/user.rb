@@ -2499,6 +2499,10 @@ class User < ApplicationRecord
     true
   end
 
+  def uploads_sharding_key_id
+    nil
+  end
+
   protected
 
   # override, from Devise::Validatable
