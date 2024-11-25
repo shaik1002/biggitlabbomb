@@ -12,7 +12,7 @@ export const i18n = {
 
 const variantCssColorMap = {
   success: 'gl-text-green-500',
-  danger: 'gl-text-red-500',
+  danger: 'gl-text-danger',
 };
 
 export default {
@@ -129,7 +129,7 @@ export default {
                   >
                   <span class="gl-ml-auto gl-whitespace-nowrap" aria-hidden="true">
                     <span class="gl-text-green-600">+{{ item.added }}</span>
-                    <span class="gl-text-red-500">-{{ item.removed }}</span>
+                    <span class="gl-text-danger">-{{ item.removed }}</span>
                   </span>
                   <span class="gl-sr-only"
                     >{{ additionsText(item.added) }}, {{ deletionsText(item.removed) }}</span
@@ -153,7 +153,7 @@ export default {
           <span class="gl-font-bold gl-text-green-600">{{ additionsText() }}</span>
         </template>
         <template #deletions>
-          <span class="gl-font-bold gl-text-red-500">{{ deletionsText() }}</span>
+          <span class="gl-font-bold gl-text-danger">{{ deletionsText() }}</span>
         </template>
       </gl-sprintf>
     </span>

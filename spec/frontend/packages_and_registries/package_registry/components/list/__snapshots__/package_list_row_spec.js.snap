@@ -101,7 +101,7 @@ exports[`packages_list_row renders 1`] = `
           data-testid="action-delete"
         >
           <span
-            class="gl-text-red-500"
+            class="gl-text-danger"
           >
             Delete package
           </span>

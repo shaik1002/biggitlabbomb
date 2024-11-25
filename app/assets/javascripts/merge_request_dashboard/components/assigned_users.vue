@@ -13,7 +13,7 @@ const REVIEW_STATE_ICONS = {
   },
   REQUESTED_CHANGES: {
     name: 'error',
-    class: 'gl-bg-red-100 gl-text-red-500',
+    class: 'gl-bg-red-100 gl-text-danger',
   },
   REVIEWED: {
     name: 'comment-lines',

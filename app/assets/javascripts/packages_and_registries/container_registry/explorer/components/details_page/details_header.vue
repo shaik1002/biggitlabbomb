@@ -234,7 +234,7 @@ export default {
       >
         <gl-disclosure-dropdown-item @action="$emit('delete')">
           <template #list-item>
-            <span class="gl-text-red-500">
+            <span class="gl-text-danger">
               {{ $options.i18n.DELETE_IMAGE_TEXT }}
             </span>
           </template>

@@ -46,7 +46,7 @@ export default {
           action: () => this.$refs['delete-modal'].show(),
           extraAttrs: {
             'data-testid': 'comment-template-delete-btn',
-            class: '!gl-text-red-500',
+            class: '!gl-text-danger',
           },
         },
       ];

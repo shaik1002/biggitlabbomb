@@ -84,7 +84,7 @@ export default {
         <gl-loading-icon class="gl-mr-3" />
         {{ $options.i18n.loading }}
       </div>
-      <span v-else class="gl-text-red-500">
+      <span v-else class="gl-text-danger">
         <slot></slot>
       </span>
     </template>

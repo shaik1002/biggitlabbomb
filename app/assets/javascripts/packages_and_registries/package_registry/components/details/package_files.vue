@@ -469,7 +469,7 @@ export default {
               @action="handleFileDelete([item])"
             >
               <template #list-item>
-                <span class="gl-text-red-500">{{ $options.i18n.deleteFile }}</span>
+                <span class="gl-text-danger">{{ $options.i18n.deleteFile }}</span>
               </template>
             </gl-disclosure-dropdown-item>
           </gl-disclosure-dropdown>

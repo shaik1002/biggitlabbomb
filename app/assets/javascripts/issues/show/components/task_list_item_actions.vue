@@ -62,7 +62,7 @@ export default {
     </gl-disclosure-dropdown-item>
     <gl-disclosure-dropdown-item class="!gl-ml-2" data-testid="delete" @action="deleteTaskListItem">
       <template #list-item>
-        <span class="gl-text-red-500">{{ __('Delete') }}</span>
+        <span class="gl-text-danger">{{ __('Delete') }}</span>
       </template>
     </gl-disclosure-dropdown-item>
   </gl-disclosure-dropdown>

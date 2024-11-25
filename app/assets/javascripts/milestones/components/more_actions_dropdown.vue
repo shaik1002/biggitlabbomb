@@ -103,7 +103,7 @@ export default {
       return {
         text: this.$options.i18n.delete,
         extraAttrs: {
-          class: '!gl-text-red-500',
+          class: '!gl-text-danger',
           'data-testid': 'milestone-delete-item',
         },
       };

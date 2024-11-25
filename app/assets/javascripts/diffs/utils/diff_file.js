@@ -136,7 +136,7 @@ export function stats(file) {
     if (diff > 0) {
       classes = 'gl-text-green-600';
     } else if (diff < 0) {
-      classes = 'gl-text-red-500';
+      classes = 'gl-text-danger';
     }
   }
 

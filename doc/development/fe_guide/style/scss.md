@@ -91,7 +91,7 @@ Color CSS utility classes (e.g. `color` and `background-color`) use colors defin
 [src/tokens/build/tailwind/tokens.cjs](https://gitlab.com/gitlab-org/gitlab-ui/-/blob/7c0fb4b07a0f0d0a58dd0137831412dbf53ea498/src/tokens/build/tailwind/tokens.cjs).
 See [https://gitlab-org.gitlab.io/frontend/tailwind-documentation/text-color](https://gitlab-org.gitlab.io/frontend/tailwind-documentation/text-color) for available CSS utility classes.
 
-**Example:** `gl-text-red-500` is `color: var(--red-500, #dd2b0e);`
+**Example:** `gl-text-danger` is `color: var(--gl-text-color-danger, var(--gl-color-red-600, #c91c00));`
 
 #### Building the Tailwind CSS bundle
 

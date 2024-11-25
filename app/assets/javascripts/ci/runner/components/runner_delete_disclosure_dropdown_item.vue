@@ -30,7 +30,7 @@ export default {
     <template #default="{ onClick }">
       <gl-disclosure-dropdown-item @action="onClick">
         <template #list-item>
-          <span class="gl-text-red-500">{{ $options.I18N_DELETE }}</span>
+          <span class="gl-text-danger">{{ $options.I18N_DELETE }}</span>
         </template>
       </gl-disclosure-dropdown-item>
     </template>

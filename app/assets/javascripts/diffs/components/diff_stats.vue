@@ -73,7 +73,7 @@ export default {
         <span data-testid="js-file-addition-line">{{ addedLines }}</span>
       </div>
       <div
-        class="diff-stats-group gl-flex gl-items-center gl-text-red-500"
+        class="diff-stats-group gl-flex gl-items-center gl-text-danger"
         :class="{ 'gl-font-bold': isCompareVersionsHeader }"
       >
         <span>−</span>

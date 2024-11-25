@@ -77,7 +77,7 @@ export default {
         variant="danger"
       >
         <template #list-item>
-          <span class="gl-text-red-500">
+          <span class="gl-text-danger">
             {{ actionPrimaryText }}
           </span>
         </template>

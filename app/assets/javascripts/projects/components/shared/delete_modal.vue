@@ -106,7 +106,7 @@ export default {
     :visible="visible"
     :modal-id="modalId"
     footer-class="gl-bg-gray-10 gl-p-5"
-    title-class="gl-text-red-500"
+    title-class="gl-text-danger"
     :action-primary="modalActionProps.primary"
     :action-cancel="modalActionProps.cancel"
     @primary.prevent="$emit('primary')"

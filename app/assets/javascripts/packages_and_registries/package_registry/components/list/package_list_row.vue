@@ -99,7 +99,7 @@ export default {
     },
     errorPackageStyle() {
       return {
-        'gl-text-red-500': this.errorStatusRow,
+        'gl-text-danger': this.errorStatusRow,
         'gl-font-normal': this.errorStatusRow,
       };
     },
@@ -172,7 +172,7 @@ export default {
         />
         <span class="gl-ml-2" data-testid="package-type">&middot; {{ packageType }}</span>
       </div>
-      <div v-else class="gl-text-red-500">
+      <div v-else class="gl-text-danger">
         <gl-icon name="warning" :aria-label="$options.i18n.warning" data-testid="warning-icon" />
         <span data-testid="error-message"
           >{{ $options.i18n.errorPublishing }} &middot; {{ errorStatusMessage }}</span
@@ -204,7 +204,7 @@ export default {
       >
         <gl-disclosure-dropdown-item data-testid="action-delete" @action="$emit('delete')">
           <template #list-item>
-            <span class="gl-text-red-500">
+            <span class="gl-text-danger">
               {{ $options.i18n.deletePackage }}
             </span>
           </template>

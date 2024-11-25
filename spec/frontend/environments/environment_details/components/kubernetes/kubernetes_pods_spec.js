@@ -109,7 +109,7 @@ describe('~/environments/environment_details/components/kubernetes/kubernetes_po
           text: 'Delete pod',
           icon: 'remove',
           variant: 'danger',
-          class: '!gl-text-red-500',
+          class: '!gl-text-danger',
         },
       ];
       const items = findWorkloadTable().props('items');

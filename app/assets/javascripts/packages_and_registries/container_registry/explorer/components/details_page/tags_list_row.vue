@@ -96,7 +96,7 @@ export default {
         {
           text: this.$options.i18n.REMOVE_TAG_BUTTON_TITLE,
           extraAttrs: {
-            class: '!gl-text-red-500',
+            class: '!gl-text-danger',
             'data-testid': 'single-delete-button',
           },
           action: () => {

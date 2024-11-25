@@ -122,7 +122,7 @@ export default {
           <span>+</span>
           <span>{{ mergeRequest.diffStatsSummary.additions }}</span>
         </div>
-        <div class="gl-flex gl-items-center gl-font-bold gl-text-red-500">
+        <div class="gl-flex gl-items-center gl-font-bold gl-text-danger">
           <span>−</span>
           <span>{{ mergeRequest.diffStatsSummary.deletions }}</span>
         </div>

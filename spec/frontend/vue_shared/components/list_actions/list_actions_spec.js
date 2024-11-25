@@ -42,7 +42,7 @@ describe('ListActions', () => {
       {
         text: 'Delete',
         extraAttrs: {
-          class: '!gl-text-red-500',
+          class: '!gl-text-danger',
         },
         action: expect.any(Function),
         order: 3,
@@ -79,7 +79,7 @@ describe('ListActions', () => {
       {
         text: 'Delete',
         extraAttrs: {
-          class: '!gl-text-red-500',
+          class: '!gl-text-danger',
         },
         action: expect.any(Function),
         order: 3,
@@ -114,7 +114,7 @@ describe('ListActions', () => {
       {
         text: 'Delete',
         extraAttrs: {
-          class: '!gl-text-red-500',
+          class: '!gl-text-danger',
         },
         action: expect.any(Function),
         order: 3,

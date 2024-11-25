@@ -81,7 +81,7 @@ export default {
     @action="showRemoveMemberModal(modalData)"
   >
     <template #list-item>
-      <span class="gl-text-red-500">
+      <span class="gl-text-danger">
         <slot></slot>
       </span>
     </template>

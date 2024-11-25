@@ -474,7 +474,7 @@ export default {
       </div>
       <div
         v-if="!areWorkItemsToAddWithinLimit"
-        class="gl-mb-2 gl-text-red-500"
+        class="gl-mb-2 gl-text-danger"
         data-testid="work-items-limit-error"
       >
         {{ $options.i18n.maxItemsErrorMessage }}

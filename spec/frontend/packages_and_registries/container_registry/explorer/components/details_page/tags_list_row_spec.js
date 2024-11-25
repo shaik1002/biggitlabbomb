@@ -332,7 +332,7 @@ describe('tags list row', () => {
 
         expect(findDeleteButton().exists()).toBe(true);
         expect(findDeleteButton().props('item').extraAttrs).toMatchObject({
-          class: '!gl-text-red-500',
+          class: '!gl-text-danger',
           'data-testid': 'single-delete-button',
         });
 

@@ -202,7 +202,7 @@ export const TREE_ITEM_KIND_ICONS = {
 const RUNNING_STATUS_ICON = { icon: 'status-running', class: 'gl-text-blue-500' };
 const SUCCESS_STATUS_ICON = { icon: 'status-success', class: 'gl-text-green-500' };
 const WAITING_STATUS_ICON = { icon: 'status-waiting', class: 'gl-text-subtle' };
-const FAILED_STATUS_ICON = { icon: 'status-failed', class: 'gl-text-red-500' };
+const FAILED_STATUS_ICON = { icon: 'status-failed', class: 'gl-text-danger' };
 const PAUSED_STATUS_ICON = { icon: 'status-paused', class: 'gl-text-orange-500' };
 
 export const TREE_ITEM_STATUS_ICONS = {
@@ -223,7 +223,7 @@ export const DELETE_POD_ACTION = {
   text: s__('KubernetesDashboard|Delete pod'),
   icon: 'remove',
   variant: 'danger',
-  class: '!gl-text-red-500',
+  class: '!gl-text-danger',
 };
 
 export const FLUX_RECONCILE_ACTION = {
